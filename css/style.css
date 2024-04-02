@@ -1057,6 +1057,11 @@ span.choose {
     width: 100%
   }
 
+  .content .mainButtons *
+  {
+    font-size: 23px;
+  }
+
   .content .editorPanel
   {
     width: 100%;
@@ -1091,7 +1096,6 @@ span.choose {
   {
     margin-left: 5px;
     margin-right: 15px;
-
   }
 
 
