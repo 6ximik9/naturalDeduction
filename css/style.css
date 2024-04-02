@@ -1059,7 +1059,29 @@ span.choose {
 
   .content .mainButtons *
   {
-    font-size: 23px;
+    /*font-size: 23px;*/
+  }
+
+  .content #helpBtn
+  {
+    position: fixed;
+    /*bottom: 1%; !* Відступ знизу *!*/
+    top: 2%;
+    right: 2%; /* Відступ справа */
+    background-color: white; /* Колір фону */
+    border: none;
+    cursor: pointer;
+    z-index: 9999; /* Забезпечує, що кнопка буде поверх інших елементів */
+    /*font-size: 18px;*/
+    padding: 11px 11px;
+    /*justify-content: center;*/
+    display: flex;
+    border-radius: 5px;
+    align-items: center;
+    color: rgb(33, 33, 33);
+    box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+    outline: none;
+    font-size: 28px;
   }
 
   .content .editorPanel
