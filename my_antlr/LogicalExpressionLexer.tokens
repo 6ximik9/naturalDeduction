@@ -1,0 +1,11 @@
+T__0=1
+T__1=2
+AND=3
+OR=4
+IMPLIES=5
+NOT=6
+SINGLE_CHAR=7
+WS=8
+'('=1
+')'=2
+'⇒'=5

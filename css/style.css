@@ -1,0 +1,1152 @@
+
+body {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  /*height: 100vh;*/
+  font-family: Arial, sans-serif;
+  /*%width: 80%;*/
+  margin: auto;
+  /*zoom: 120%;*/
+}
+
+header {
+  margin-top: 0.3%;
+  /*max-height: 90px;*/
+  width: 80%;
+  /*background-color: rgba(0, 70, 114, 0.66);*/
+  display: flex;
+  /*border-radius: 30px;*/
+  align-content: center;
+  justify-content: center;
+}
+
+h3 {
+  color: white; /* Колір тексту */
+  font-family: 'Arial', sans-serif; /* Тип шрифту */
+  font-size: 50px; /* Розмір шрифту */
+  font-weight: bold; /* Товщина шрифту */
+  text-align: center; /* Вирівнювання тексту по центру */
+  /*margin-left: 10px;*/
+  margin-top: 1.8%;
+  text-transform: uppercase; /* Перетворення тексту в верхній регістр */
+  /*border-bottom: 2px solid #00b3ff; !* Додавання лінії знизу як роздільник *!*/
+
+}
+
+.content{
+  margin-top: 5%;
+}
+
+#inputText {
+  font-family: 'Times New Roman', sans-serif;
+  width: 50%;
+  min-width: 60%;
+  height: auto;
+  font-size: 45px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  /*margin-bottom: 20px;*/
+  margin-top: 1%;
+  min-height: 3%;
+  text-align: center;
+  user-select: none;
+  margin-bottom: 1%;
+}
+
+.buttonsSym {
+  display: flex;
+  align-content: center;
+  justify-content: center;
+}
+
+.buttonsSym button {
+  margin-right: 1%;
+  margin-bottom: 2%;
+  font-size: 30px;
+  width: 55px;
+  height: 50px;
+  background-color: rgba(0, 97, 161, 0.66);
+  border-radius: 5px;
+  border: rgba(0, 97, 161, 0.66);
+  color: white;
+  font-family: 'Times New Roman', sans-serif;
+}
+
+.buttonsSym button:hover {
+  transform: translate(0,-3px);
+}
+
+#proof {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  margin-top: 1%;
+
+}
+
+.proof-element_level-0 {
+  width: 100%; /* Заповнює всю ширину контейнера */
+}
+
+
+
+[class^="proof-element_level-"], #proofText {
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-width: 100px;
+  display: flex;
+  text-align: center;
+  /*border-bottom: black;*/
+  font-size: 52px;
+  margin-bottom: -2px;
+  height: auto;
+  position: relative;
+}
+
+[class^="divItem-"]:hover {
+  cursor: pointer;
+}
+
+label:hover
+{
+  cursor: pointer;
+}
+
+
+
+.formulaType{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: auto;
+  font-family: Arial, sans-serif;
+  width: 80%;
+
+}
+
+.proof-menu{
+  margin-top: 1%;
+  width: 80%;
+  height: auto;
+  min-width: 25%;
+  display: inline-block;
+  justify-content: center; /* Горизонтальне центрування */
+  align-items: center; /* Вертикальне центрування */
+  text-align: center;
+}
+
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: auto;
+}
+
+
+.button-container button {
+  flex: 0 0 calc(33.33% - 20px); /* Розмір кнопки. Мінус 20px - це місце для відступів */
+  /*margin: 30px;*/
+  margin-left: 10px;
+  background-color: white;
+  border: none;
+  font-size: 32px;
+  box-sizing: border-box;
+  max-width: 380px;
+  border-radius: 50px;
+  padding: 10px 10px; /* ваші бажані відступи всередині кнопки */
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/*.container :only-child,*/
+/*.container :only-child + .button,*/
+/*.container :first-child:last-child {*/
+/*  margin: 0 auto;*/
+/*}*/
+
+.button-container button:hover
+{
+  background-color: rgba(241, 241, 241, 0.85);
+  /*zoom: 110%;*/
+}
+
+/*@media screen and (max-width: 750px) {*/
+/*  .button-container {*/
+/*    width: 400px; !* зменшуємо ширину контейнера для маленьких екранів *!*/
+/*    grid-template-columns: repeat(2, 1fr);*/
+/*    !*border-radius: 10px;*!*/
+/*  }*/
+
+/*  .button-container button {*/
+/*    font-size: 28px; !* зменшуємо розмір шрифту для маленьких екранів *!*/
+/*    !*max-width: 120px; !* зменшуємо максимальну ширину кнопки для маленьких екранів *!*!*/
+/*    padding: 40px 40px 40px 40px;*/
+/*  }*/
+/*  .button-container button:hover*/
+/*  {*/
+/*    background-color: white;*/
+/*    zoom: 100%;*/
+/*  }*/
+/*}*/
+
+
+
+.text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.text-field {
+  width: 35%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.hidden {
+  display: none;
+}
+
+
+.keyboard {
+
+}
+
+.btn {
+  display: flex;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  margin-top: 1%; /* Додайте відступ зверху, якщо потрібно */
+  margin-bottom: 1%; /* Додайте відступ зверху, якщо потрібно */
+  align-content: center; /* Додано цей рядок */
+  justify-content: center; /* Змінено цей рядок */
+}
+
+.btn button {
+  margin-right: 1%;
+  margin-bottom: 2%;
+  font-size: 30px;
+  /*width: 100px;*/
+  height: 50px;
+  background-color: rgba(0, 97, 161, 0.66);
+  border-radius: 5px;
+  border: rgba(0, 97, 161, 0.66);
+  color: white;
+  font-family: 'Times New Roman', sans-serif;
+}
+
+.btn button:hover {
+  transform: translate(0,-3px);
+  /*box-shadow: 0 20px 40px 0 rgb(208, 0, 255);*/
+}
+
+.preview{
+  /*align-items: center;*/
+  display: flex;
+  cursor: text;
+}
+
+#hypotheses-container {
+  margin-top: 2%;
+  margin-left: 2%;
+  font-family: 'Times New Roman', sans-serif;
+  font-size: 38px;
+  display: none;
+}
+
+
+#currentHypotheses{
+  /*justify-content: center;*/
+  text-align: center;
+  display: block;
+}
+
+#allHypotheses{
+  text-align: center;
+}
+
+.hypotheses-block {
+  flex: 1; /* Забезпечуємо, що обидва блоки займають однакову ширину в контейнері */
+  padding: 10px; /* Додаємо відступи для візуального розділення блоків */
+  text-align: center;
+}
+
+.leftBorder {
+  /*border-left: 2px solid #000; !* Додаємо ліву межу до другого блоку для візуального розділення *!*/
+  padding-left: 10px; /* Додаємо відступ зліва від межі */
+}
+#currentLabelHypotheses
+{
+  margin-left: 10px;
+  white-space: nowrap;
+}
+
+#labelHypotheses
+{
+  white-space: nowrap;
+}
+
+
+
+.custom-tooltip {
+  position: absolute;
+  padding: 8px;
+  border-radius: 5px;
+  color: #fff;
+  background: rgba(255, 0, 0, 0.5);
+  display: none;
+}
+
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25%, 75% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+#keyProof .buttonsSym
+{
+  margin-bottom: -1.5%;
+}
+
+.closed{
+  background-color: rgba(0, 255, 0, 0.55);
+}
+
+#saveBtn
+{
+  max-width: 25%;
+  min-width: 25%;
+}
+
+.editorPanel {
+  margin-top: 20px; /* Встановлюємо зовнішній відступ зверху */
+  width: 800px;
+  height: 500px;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  display: flex;
+  position: relative;
+}
+
+#editorComponent{
+  width: 100%;
+  height: 100%;
+}
+
+#editor{
+  width: 100%;
+  height: 100%;
+  /*min-height: 200px;*/
+  border-radius: 0;
+  position: relative;
+  border: none;
+}
+
+.editorResize {
+  position: absolute;
+  width: 100%;
+  height: 10px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  cursor: n-resize;
+}
+
+.horizontalLine {
+  position: absolute;
+  width: 120px;
+  height: 2px;
+  max-width: 90%;
+  bottom: 4px;
+  left: 50%;
+  transform: translate(-50%);
+  z-index: 100;
+}
+
+.divider {
+  position: absolute;
+  z-index: 100;
+  height: 100%;
+  background-color: #ececec;
+  width: 15px;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%);
+  cursor: col-resize;
+  border-radius: 9px;
+
+}
+
+.dots {
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 101;
+  position: absolute;
+}
+
+.dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  background-color: #616161;
+  margin-bottom: 5px;
+  border-radius: 100%;
+}
+
+.allBtn{
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.mainButtons {
+  /*width: auto;*/
+  display: flex;
+  /*flex-wrap: wrap;*/
+  /*margin-bottom: 16px;*/
+  margin-top: 10px;
+}
+
+
+
+.buttonMain {
+  font-size: 26px;
+  background: rgb(255, 255, 255);
+  cursor: pointer;
+  padding: 11px 16px;
+  display: flex;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  border: none;
+  outline: none;
+}
+
+.monaco-editor {
+  position: relative;
+  overflow: visible;
+  -webkit-text-size-adjust: 100%;
+}
+
+#enter
+{
+  background-color: rgba(253, 81, 81, 0.73);
+}
+
+#values
+{
+  font-size: 24px;
+}
+
+
+.undoRedo
+{
+    display: none;
+    justify-content: space-between;
+
+}
+
+#latex
+{
+  margin-left: 50px;
+  margin-right: 60px;
+}
+
+.undoRedo button{
+  font-size: 26px;
+  background: rgb(255, 255, 255);
+  cursor: pointer;
+  padding: 11px 16px;
+  display: flex;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  border: none;
+  outline: none;
+}
+
+
+span.msg,
+span.choose {
+  color: #555;
+  padding: 5px 0 10px;
+  display: inherit
+}
+.container {
+  width: 500px;
+  margin: 50px auto 0;
+  text-align: center
+}
+
+
+
+.dropdown {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.dropdown-btn {
+  font-family: 'Times New Roman', sans-serif;
+  font-size: 26px;
+  background: rgb(255, 255, 255);
+  cursor: pointer;
+  padding: 11px 16px;
+  display: flex;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  border: none;
+  outline: none;
+}
+
+
+.arrow {
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 11px solid black;
+  transition: transform ease-in-out 0.3s;
+  margin-left: 5%;
+}
+
+.dropdown-content {
+  font-family: 'Times New Roman', sans-serif;
+  margin-top: 0.3%;
+  padding: 0;
+  position: absolute;
+  z-index: 1000;
+  list-style: none;
+  top: auto;
+  width: auto;
+  visibility: hidden;
+  transform: translateY(-1em);
+  transition: transform ease 0.3s;
+}
+
+.dropdown input[type="checkbox"]:checked ~ .dropdown-content {
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-content li {
+  width: auto;
+  font-size: 32px;
+  background-color: rgba(0, 97, 161, 0.66);
+  border-radius: 0.5em;
+  display: block;
+  padding: 0.7em 0.5em;
+  color: white;
+  margin: 0.5em 0;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+}
+
+.dropdown input[type="checkbox"]:checked + label > .arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown input[type="checkbox"] {
+  opacity: 0;
+  position: absolute;
+}
+
+.dropdown input[type="checkbox"]:focus + label {
+  box-shadow: 0 0 20px rgb(83, 83, 83);
+}
+
+.dropdown-content li:hover {
+  background-color: rgba(0, 97, 161, 1);
+}
+
+/*.dropdown-content li a {*/
+/*  display: block;*/
+/*  padding: 0.7em 0.5em;*/
+/*  color: #fff;*/
+/*  margin: 0.1em 0;*/
+/*  text-decoration: none;*/
+/*}*/
+
+
+.dropdownFont {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.dropdown-btnFont {
+  font-family: 'Times New Roman', sans-serif;
+  font-size: 26px;
+  background: rgb(255, 255, 255);
+  cursor: pointer;
+  padding: 11px 16px;
+  display: flex;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  border: none;
+  outline: none;
+}
+
+.arrowFont {
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 11px solid black;
+  transition: transform ease-in-out 0.3s;
+  margin-left: 5%;
+}
+
+.dropdown-contentFont {
+  font-family: 'Times New Roman', sans-serif;
+  margin-top: 0;
+  margin-left: 0.7%;
+  padding: 0;
+  position: absolute;
+  z-index: 1000;
+  list-style: none;
+  top: auto;
+  visibility: hidden;
+  transform: translateY(-1em);
+  transition: transform ease 0.3s;
+}
+
+.dropdownFont input[type="checkbox"]:checked ~ .dropdown-contentFont {
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-contentFont li {
+  width: 100%;
+  font-size: 32px;
+  background-color: rgba(0, 97, 161, 0.66);
+  /*border-radius: 0.5em;*/
+  display: block;
+  padding: 0.7em 0.5em;
+  color: white;
+  /*margin: 0.5em 0;*/
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+}
+
+.dropdownFont input[type="checkbox"]:checked + label > .arrowFont {
+  transform: rotate(180deg);
+}
+
+.dropdownFont input[type="checkbox"] {
+  opacity: 0;
+  position: absolute;
+}
+
+.dropdownFont input[type="checkbox"]:focus + label {
+  box-shadow: 0 0 20px rgb(83, 83, 83);
+}
+
+.dropdown-contentFont li:hover {
+  background-color: rgba(0, 97, 161, 1);
+}
+
+
+
+*{
+  font-family: 'Times New Roman', sans-serif;
+}
+
+
+
+
+.helpModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Затемнений задній фон */
+  z-index: 9999;
+  justify-content: center;
+  /*align-items: center;*/
+}
+
+
+.help {
+  width: 100%;
+  height: 60%;
+  max-width: 1000px;
+  position: relative;
+  padding: 16px;
+  border-radius: 5px;
+  margin-top: 8%;
+  overflow-y: auto;
+}
+
+.helpNavbar {
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.helpNavbarItem {
+  padding: 8px;
+  font-size: 32px;
+  font-family: 'Times New Roman', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.closeHelp {
+  position: absolute;
+  top: 8px;
+  right: 22px;
+  padding: 0;
+  line-height: 0;
+  border: none;
+  outline: none;
+  background: none;
+  cursor: pointer;
+}
+
+.closeLatex {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 0;
+  line-height: 0;
+  border: none;
+  outline: none;
+  background: none;
+  cursor: pointer;
+}
+
+.helpItem {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 16px;
+  padding: 0 8px 16px;
+}
+
+.helpItemExample {
+  min-width: 40%;
+  margin-right: 8px;
+}
+
+.helpItemDivider {
+  padding: 0 16px;
+  text-align: center;
+  font-size: 24px;
+  line-height: 20px;
+}
+
+.helpDescription {
+  font-family: 'Times New Roman', sans-serif;
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: .5px;
+}
+
+.helpItemExample {
+  min-width: 40%;
+  margin-right: 8px;
+}
+
+.helpItemExampleName {
+  font-family: 'Times New Roman', sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+}
+
+.helpItemExampleComponent {
+  margin-top: 16px;
+}
+
+.buttonWithIcon {
+  cursor: pointer;
+  padding: 11px 16px;
+  display: flex;
+  border-radius: 5px;
+  font-size: 14px;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  outline: none;
+}
+
+.tableInfo
+{
+  width: 100%;
+  font-family: monospace,monospace;
+  /*text-align: center;*/
+}
+
+.wikitable {
+  width: 100%;
+  font-size: 32px;
+}
+
+.wikitable td, .wikitable th {
+  border-bottom: 1px solid #d0d5dd;
+  padding: 6.25px 0;
+  /*max-width: 50px;*/
+}
+
+
+
+.shake {
+  animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.container {
+  position: relative;
+  height: auto; /* Задайте висоту або встановіть значення, що підходить */
+  width: auto; /* Встановіть ширину, яка підходить для вашого вмісту */
+  border-bottom: black 2px solid;
+}
+
+.nameRule {
+  font-size: 32px;
+  position: absolute;
+  bottom: -15px;
+  left: calc(100% + 10px);
+  width: 100px;
+}
+
+
+.containerTabs {
+  width: 65%;
+  margin: 30px auto;
+  font-size: 24px;
+}
+
+.box {
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  background-color: #fff;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.tab-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  position: relative;
+}
+
+/* tab list 會動的底線 */
+.tab-list::before {
+  content: '';
+  display: block;
+  height: 2px;
+  width: 33.33%;
+  position: absolute;
+  bottom: 0;
+  background-color: rgba(0, 97, 161, 1);
+  transition: .3s;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  transition: .3s;
+  opacity: 0.5;
+}
+
+.tab-toggle {
+  display: none;
+
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-toggle:nth-child(1):checked ~ .tab-list .tab-item:nth-child(1),
+.tab-toggle:nth-child(2):checked ~ .tab-list .tab-item:nth-child(2),
+.tab-toggle:nth-child(3):checked ~ .tab-list .tab-item:nth-child(3) {
+  opacity: 1;
+}
+
+/* tab bar 底線位移控制 */
+.tab-toggle:nth-child(2):checked ~ .tab-list::before {
+  transform: translateX(100%);
+}
+
+.tab-toggle:nth-child(3):checked ~ .tab-list::before {
+  transform: translateX(200%);
+}
+
+.tab-toggle:nth-child(1):checked ~ .tab-container .tab-content:nth-child(1),
+.tab-toggle:nth-child(2):checked ~ .tab-container .tab-content:nth-child(1),
+.tab-toggle:nth-child(3):checked ~ .tab-container .tab-content:nth-child(1){
+  display: block;
+}
+
+.tab-trigger {
+  display: block;
+  padding: 10px 0;
+}
+
+.tab-container {
+  padding: 15px 30px;
+}
+
+
+
+.link {
+  fill: none;
+  stroke: #262626;
+  stroke-width: 2px;
+}
+
+.node circle {
+  fill: white;
+  /*stroke: steelblue;*/
+  /*stroke-width: 3px;*/
+}
+
+.node text {
+  font-family: 'Times New Roman', sans-serif;
+  font-size: 30px;
+  fill: #262626;
+  pointer-events: none; /* Забезпечує, що текст не впливає на взаємодію з курсором */
+}
+
+#parentheses
+{
+  display: flex;
+  justify-content: center;
+}
+#parentheses button{
+  font-size: 26px;
+  background: rgb(255, 255, 255);
+  cursor: pointer;
+  padding: 11px 16px;
+  display: flex;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  border: none;
+  outline: none;
+}
+
+
+#latexCode{
+  font-family: 'Times New Roman', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+#latexInfo {
+  white-space: pre-line;
+  font-size: 35px;
+  overflow-y: scroll;
+  width: 95%;
+  height: 65%;
+  margin-left: 3%;
+}
+#latexModal .helpNavbarItem
+{
+  font-size: 48px;
+}
+#copyLatexCode{
+  margin-top: 2%;
+  font-size: 48px;
+  background: rgb(255, 255, 255);
+  cursor: pointer;
+  padding: 11px 16px;
+  display: flex;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  border: none;
+  outline: none;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+#copyLatexCode:hover {
+  background-color: rgba(241, 241, 241, 0.85);
+  animation: none; /* Скасовуємо анімацію при наведенні, щоб не перервати анімацію кнопки */
+}
+
+@keyframes changeIcon {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+
+#copyLatexCode .buttonIcon img {
+  transition: transform 0.3s ease;
+}
+
+
+.corner-button {
+  /*width: auto;*/
+  position: fixed;
+  bottom: 10%; /* Відступ знизу */
+  right: 5%; /* Відступ справа */
+  background-color: white; /* Колір фону */
+  border: none;
+  cursor: pointer;
+  z-index: 9999; /* Забезпечує, що кнопка буде поверх інших елементів */
+  font-size: 26px;
+  padding: 1px 12px;
+  /*justify-content: center;*/
+  display: flex;
+  border-radius: 5px;
+  align-items: center;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  outline: none;
+}
+
+
+@media (max-width: 600px) {
+
+  body{
+    zoom: 69%;
+  }
+
+  .content{
+    margin-top: 15%;
+    width: 100%
+  }
+
+  .content .editorPanel
+  {
+    width: 100%;
+    height: 700px;
+    font-size: 24px;
+  }
+
+  .containerTabs {
+    width: 100%;
+    margin: 30px auto;
+    font-size: 24px;
+  }
+
+
+  .undoRedo button{
+    font-size: 22px;
+    background: rgb(255, 255, 255);
+    cursor: pointer;
+    padding: 1px 5px;
+    display: flex;
+    border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    color: rgb(33, 33, 33);
+    box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+    border: none;
+    outline: none;
+  }
+
+  .undoRedo #latex
+  {
+    margin-left: 5px;
+    margin-right: 15px;
+
+  }
+
+
+  #proof{
+    margin-top: 5%;
+    margin-bottom: 5%;
+  }
+
+  #proof label{
+    font-size: 40px;
+  }
+
+
+
+  #parentheses button{
+    font-size: 20px;
+    background: rgb(255, 255, 255);
+    cursor: pointer;
+    padding: 1px 8px;
+    display: flex;
+    border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    color: rgb(33, 33, 33);
+    box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+    border: none;
+    outline: none;
+  }
+
+  .corner-button {
+    /*width: auto;*/
+    position: fixed;
+    bottom: 1%; /* Відступ знизу */
+    right: 2%; /* Відступ справа */
+    background-color: white; /* Колір фону */
+    border: none;
+    cursor: pointer;
+    z-index: 9999; /* Забезпечує, що кнопка буде поверх інших елементів */
+    font-size: 18px;
+    padding: 0px 11px;
+    /*justify-content: center;*/
+    display: flex;
+    border-radius: 5px;
+    align-items: center;
+    color: rgb(33, 33, 33);
+    box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+    outline: none;
+  }
+
+
+  #helpModal *{
+    font-size: 24px;
+  }
+
+}
+
+
