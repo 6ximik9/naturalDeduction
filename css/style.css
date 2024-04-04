@@ -12,16 +12,6 @@ body {
   /*zoom: 120%;*/
 }
 
-header {
-  margin-top: 0.3%;
-  /*max-height: 90px;*/
-  width: 80%;
-  /*background-color: rgba(0, 70, 114, 0.66);*/
-  display: flex;
-  /*border-radius: 30px;*/
-  align-content: center;
-  justify-content: center;
-}
 
 h3 {
   color: white; /* Колір тексту */
@@ -40,22 +30,22 @@ h3 {
   margin-top: 5%;
 }
 
-#inputText {
-  font-family: 'Times New Roman', sans-serif;
-  width: 50%;
-  min-width: 60%;
-  height: auto;
-  font-size: 45px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  padding: 5px;
-  /*margin-bottom: 20px;*/
-  margin-top: 1%;
-  min-height: 3%;
-  text-align: center;
-  user-select: none;
-  margin-bottom: 1%;
-}
+/*#inputText {*/
+/*  font-family: 'Times New Roman', sans-serif;*/
+/*  width: 50%;*/
+/*  min-width: 60%;*/
+/*  height: auto;*/
+/*  font-size: 45px;*/
+/*  border-radius: 10px;*/
+/*  border: 1px solid #ccc;*/
+/*  padding: 5px;*/
+/*  !*margin-bottom: 20px;*!*/
+/*  margin-top: 1%;*/
+/*  min-height: 3%;*/
+/*  text-align: center;*/
+/*  user-select: none;*/
+/*  margin-bottom: 1%;*/
+/*}*/
 
 .buttonsSym {
   display: flex;
@@ -81,30 +71,31 @@ h3 {
 }
 
 #proof {
-  display: flex;
-  flex-direction: column;
+  /*display: flex;*/
+  /*flex-direction: column;*/
   align-items: center;
   align-content: center;
+  text-align: center;
   margin-top: 1%;
-
+  width: 80%;
+  min-width: 80%;
+  overflow: scroll;
 }
 
 .proof-element_level-0 {
-  width: 100%; /* Заповнює всю ширину контейнера */
+   /*width: 100%;*/
+  /*min-width: 10000px;*/
+  /*width: 1850px;*/
 }
-
-
 
 [class^="proof-element_level-"], #proofText {
   justify-content: center;
   align-items: center;
-  width: 100%;
   min-width: 100px;
   display: flex;
   text-align: center;
-  /*border-bottom: black;*/
   font-size: 52px;
-  margin-bottom: -2px;
+  margin-bottom: 0px;
   height: auto;
   position: relative;
 }
@@ -1046,10 +1037,10 @@ span.choose {
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
 
-  body{
-    zoom: 69%;
+  #proof{
+    padding: 2%;
   }
 
   .content{
@@ -1057,10 +1048,18 @@ span.choose {
     width: 100%
   }
 
-  .content .mainButtons *
-  {
-    font-size: 23px;
-  }
+ .allBtn
+ {
+   display: inline;
+ }
+
+ .row{
+   justify-content: center;
+   align-content: center;
+   text-align: center;
+   display: flex;
+   margin-left: 2%;
+ }
 
 
   .content .editorPanel
