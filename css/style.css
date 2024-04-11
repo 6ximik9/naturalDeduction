@@ -30,23 +30,6 @@ h3 {
   margin-top: 5%;
 }
 
-/*#inputText {*/
-/*  font-family: 'Times New Roman', sans-serif;*/
-/*  width: 50%;*/
-/*  min-width: 60%;*/
-/*  height: auto;*/
-/*  font-size: 45px;*/
-/*  border-radius: 10px;*/
-/*  border: 1px solid #ccc;*/
-/*  padding: 5px;*/
-/*  !*margin-bottom: 20px;*!*/
-/*  margin-top: 1%;*/
-/*  min-height: 3%;*/
-/*  text-align: center;*/
-/*  user-select: none;*/
-/*  margin-bottom: 1%;*/
-/*}*/
-
 .buttonsSym {
   display: flex;
   align-content: center;
@@ -71,8 +54,8 @@ h3 {
 }
 
 #proof {
-  /*display: flex;*/
-  /*flex-direction: column;*/
+  display: flex;
+  flex-direction: column;
   align-items: center;
   align-content: center;
   text-align: center;
@@ -83,21 +66,23 @@ h3 {
 }
 
 .proof-element_level-0 {
-   /*width: 100%;*/
-  /*min-width: 10000px;*/
-  /*width: 1850px;*/
+  align-items: center;
+  align-content: center;
+  text-align: center;
 }
+
 
 [class^="proof-element_level-"], #proofText {
   justify-content: center;
   align-items: center;
+  text-align: center;
   min-width: 100px;
   display: flex;
-  text-align: center;
   font-size: 52px;
   margin-bottom: 0px;
   height: auto;
   position: relative;
+
 }
 
 [class^="divItem-"]:hover {
@@ -1156,12 +1141,6 @@ span.choose {
     zoom: 80%;
   }
 
-  html, body {
-    touch-action: none; /* Вимикає можливість зумування на сенсорних пристроях */
-    overflow: hidden; /* Вимикає прокрутку */
-    position: fixed; /* Фіксує сторінку, щоб вона не змінювала розмір */
-    width: 100%; /* Забезпечує ширину вікна перегляду */
-  }
 }
 
 
