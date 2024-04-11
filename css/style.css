@@ -1064,7 +1064,7 @@ span.choose {
 
   .content .editorPanel
   {
-    width: 100%;
+    width: 110%;
     height: 700px;
     font-size: 24px;
   }
@@ -1155,10 +1155,6 @@ span.choose {
     zoom: 98%;
   }
 
-
-  .divider .editorResize{
-    display: none;
-  }
 }
 
 
