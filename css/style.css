@@ -1065,7 +1065,7 @@ span.choose {
   .content .editorPanel
   {
     width: 110%;
-    height: 700px;
+    height: 550px;
     font-size: 24px;
   }
 
@@ -1159,7 +1159,7 @@ span.choose {
     touch-action: none; /* Вимикає можливість зумування на сенсорних пристроях */
     overflow: hidden; /* Вимикає прокрутку */
     position: fixed; /* Фіксує сторінку, щоб вона не змінювала розмір */
-    width: 100%; /* Забезпечує ширину вікна перегляду */
+    width: 98%; /* Забезпечує ширину вікна перегляду */
   }
 
 }
