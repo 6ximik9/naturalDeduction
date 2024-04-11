@@ -1064,7 +1064,7 @@ span.choose {
 
   .content .editorPanel
   {
-    width: 98%;
+    width: 110%;
     height: 550px;
     font-size: 24px;
   }
@@ -1155,12 +1155,6 @@ span.choose {
     zoom: 98%;
   }
 
-  /*html, body {*/
-  /*  touch-action: none; !* Вимикає можливість зумування на сенсорних пристроях *!*/
-  /*  overflow: hidden; !* Вимикає прокрутку *!*/
-  /*  position: fixed; !* Фіксує сторінку, щоб вона не змінювала розмір *!*/
-  /*  width: 98%; !* Забезпечує ширину вікна перегляду *!*/
-  /*}*/
 
 }
 
