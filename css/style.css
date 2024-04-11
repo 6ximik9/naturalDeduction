@@ -1064,7 +1064,7 @@ span.choose {
 
   .content .editorPanel
   {
-    width: 100%;
+    width: 120%;
     height: 700px;
     font-size: 24px;
   }
@@ -1149,6 +1149,10 @@ span.choose {
 
   #helpModal *{
     font-size: 24px;
+  }
+
+  *{
+    zoom: 97%;
   }
 
 }
