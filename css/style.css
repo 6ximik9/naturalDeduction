@@ -1151,6 +1151,10 @@ span.choose {
     font-size: 24px;
   }
 
+  .allBtn *
+  {
+    zoom: 95%;
+  }
 
 }
 
