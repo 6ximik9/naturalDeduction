@@ -14,6 +14,15 @@ export default class GrammarListener extends antlr4.tree.ParseTreeListener {
 	}
 
 
+	// Enter a parse tree produced by GrammarParser#atomList.
+	enterAtomList(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#atomList.
+	exitAtomList(ctx) {
+	}
+
+
 	// Enter a parse tree produced by GrammarParser#implication.
 	enterImplication(ctx) {
 	}
