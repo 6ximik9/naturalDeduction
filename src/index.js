@@ -878,4 +878,21 @@ document.getElementById('returnUserInput').addEventListener('click', function ()
 });
 
 
+document.getElementById('uploadBtn').addEventListener('click', function() {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.addEventListener('change', function(event) {
+    const file = event.target.files[0]; // Отримуємо файл з об'єкта події
+    if (file) {
+      const reader = new FileReader(); // Створюємо об'єкт для читання файлу
+      reader.onload = function(e) {
+        const fileContents = e.target.result; // Отримуємо вміст файлу
+        editorMonaco.editor.setValue(fileContents.toString());
+      };
+      reader.readAsText(file); // Читаємо файл як текст
+    }
+  });
+  fileInput.click(); // Спрацьовуємо клік на прихованому input для вибору файлу
+});
+
 

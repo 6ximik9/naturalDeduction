@@ -516,6 +516,7 @@ span.choose {
 .dropdown-content {
   font-family: 'Times New Roman', sans-serif;
   margin-top: 0.3%;
+  margin-left: -3.5%;
   padding: 0;
   position: absolute;
   z-index: 1000;
