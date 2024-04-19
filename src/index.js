@@ -879,7 +879,3 @@ document.getElementById('returnUserInput').addEventListener('click', function ()
 
 
 
-
-
-
-

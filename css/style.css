@@ -394,13 +394,12 @@ label:hover
   display: flex;
   justify-content: space-between;
   box-sizing: border-box;
+  width: 90%;
+  margin-left: 7%;
 }
 
 .mainButtons {
-  /*width: auto;*/
   display: flex;
-  /*flex-wrap: wrap;*/
-  /*margin-bottom: 16px;*/
   margin-top: 10px;
 }
 
@@ -415,7 +414,7 @@ label:hover
   border-radius: 5px;
   justify-content: center;
   align-items: center;
-  margin-right: 10px;
+  /*margin-right: 10px;*/
   color: rgb(33, 33, 33);
   box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
   border: none;
@@ -484,7 +483,6 @@ span.choose {
 
 
 .dropdown {
-  width: 100%;
   white-space: nowrap;
 }
 
@@ -498,11 +496,12 @@ span.choose {
   border-radius: 5px;
   justify-content: center;
   align-items: center;
-  margin-right: 10px;
+  /*margin-right: 10px;*/
   color: rgb(33, 33, 33);
   box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
   border: none;
   outline: none;
+  margin-right: 3%;
 }
 
 
@@ -537,11 +536,11 @@ span.choose {
   width: auto;
   font-size: 32px;
   background-color: rgba(0, 97, 161, 0.66);
-  border-radius: 0.5em;
+  /*border-radius: 0.5em;*/
   display: block;
   padding: 0.7em 0.5em;
   color: white;
-  margin: 0.5em 0;
+  /*margin: 0.5em 0;*/
   text-decoration: none;
   cursor: pointer;
   text-align: center;
@@ -599,7 +598,7 @@ span.choose {
 .dropdown-contentFont {
   font-family: 'Times New Roman', sans-serif;
   margin-top: 0;
-  margin-left: 0.7%;
+  /*margin-left: 0.7%;*/
   padding: 0;
   position: absolute;
   z-index: 1000;
@@ -1015,7 +1014,7 @@ span.choose {
 }
 
 
-@media (max-width: 900px) {
+@media (max-width: 700px) {
 
   #proof{
     padding: 2%;
@@ -1026,10 +1025,6 @@ span.choose {
     width: 100%
   }
 
- .allBtn
- {
-   display: inline;
- }
 
  .row{
    justify-content: center;
@@ -1128,11 +1123,70 @@ span.choose {
     font-size: 24px;
   }
 
-  .allBtn
-  {
-    zoom: 80%;
-  }
+
+}
+
+#menu {
+  margin-left: 2%;
+  width: 100%;
+  min-width: 300px;
+  text-align: center; /* Центруємо вміст кнопки */
+  background: rgb(255, 255, 255);
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  border: none;
+  outline: none;
+}
+
+#dropdown-btnMenu {
+  display: none; /* Приховати чекбокс */
+}
+
+#showMenu {
+
+  display: flex; /* Зробити етикетку блоковою */
+  width: 100%; /* Займає всю доступну ширину */
+  font-size: 32px;
+  background: rgb(255, 255, 255);
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  color: rgb(33, 33, 33);
+  /*box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;*/
+  border: none;
+  outline: none;
+}
+
+#menuItems {
+  width: 100%;
+  display: flex; /* Використовуємо Flexbox */
+  flex-wrap: wrap; /* Дозволяємо елементам переноситися на новий рядок */
+  align-items: center; /* Центруємо елементи по вертикалі */
+  max-height: 0; /* Початково приховати меню */
+  overflow: hidden; /* Приховати зайві елементи, які виходять за межі контейнера */
+  transition: max-height 0.3s ease; /* Додати плавну анімацію */
+  text-align: center;
+  justify-content: center;
+  align-content: center;
+}
+
+#menuItems > * {
+  /*flex: 1; !* Розподілити простір рівномірно між елементами *!*/
 }
 
 
+#dropdown-btnMenu:checked ~ #menuItems {
+  max-height: 200px; /* Показати меню при виборі чекбоксу */
+  margin-top: 1%;
+  margin-bottom: 2%;
+  padding-bottom: 1%;
+}
 
+
+#uploadBtn
+{
+  margin-right: 1%;
+}

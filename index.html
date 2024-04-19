@@ -13,6 +13,7 @@
 
 <body>
 
+
 <button id="redirectButton" class="corner-button">
   Feedback
   <div class="buttonIcon" style="margin: 12px 0px 0px 12px; height: 100%; width: 50px;">
@@ -20,10 +21,25 @@
   </div>
 </button>
 
+
 <div class="content" id="enterFormula">
-  <div class="allBtn">
-    <div class="row">
-    <div class="mainButtons" id="left">
+  <div id="menu">
+    <input type="checkbox" id="dropdown-btnMenu">
+    <label id="showMenu" for="dropdown-btnMenu">
+      <span>Menu</span>
+      <span>
+        <div class="buttonIcon" style="margin: 5px 0px 0px 10px; height: 100%; width: 24px;">
+          <img src="img/menu.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
+        </div>
+      </span>
+    </label>
+    <div id="menuItems">
+      <button class="buttonMain" id="uploadBtn">
+        Upload
+        <div class="buttonIcon" style="margin: 5px 0px 0px 10px; height: 100%; width: 24px;">
+          <img src="img/upload.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
+        </div>
+      </button>
       <div class="dropdown">
         <input type="checkbox" id="dropdown"/>
         <label for="dropdown" class="dropdown-btn">
@@ -44,37 +60,45 @@
           </li>
         </ul>
       </div>
-      <div class="dropdownFont">
-        <input type="checkbox" id="dropdownFont"/>
-        <label for="dropdownFont" class="dropdown-btnFont">
-          <span>Font size</span>
-          <span class="arrowFont"></span>
-        </label>
-
-        <ul class="dropdown-contentFont" role="menu">
-          <li data-value="32">32</li>
-          <li data-value="38">38</li>
-          <li data-value="44">44</li>
-          <li data-value="50">50</li>
-        </ul>
-      </div>
       <button class="buttonMain" id="helpBtn">
         Help
         <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
           <img src="img/help.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
         </div>
       </button>
-    </div>
-    </div>
-    <div class="row">
-    <div class="mainButtons" id="right">
-      <button class="buttonMain" id="enter">
-        Proof
-        <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
-          <img src="img/play.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-        </div>
       </button>
     </div>
+  </div>
+  <div class="allBtn">
+    <div class="row">
+      <div class="mainButtons" id="left">
+
+        <div class="dropdownFont">
+          <input type="checkbox" id="dropdownFont"/>
+          <label for="dropdownFont" class="dropdown-btnFont">
+            <span>Font size</span>
+            <span class="arrowFont"></span>
+          </label>
+
+          <ul class="dropdown-contentFont" role="menu">
+            <li data-value="32">32</li>
+            <li data-value="38">38</li>
+            <li data-value="44">44</li>
+            <li data-value="50">50</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+    <div class="row">
+      <div class="mainButtons" id="right">
+        <button class="buttonMain" id="enter">
+          Proof
+          <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
+            <img src="img/play.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
+          </div>
+        </button>
+      </div>
     </div>
   </div>
 
