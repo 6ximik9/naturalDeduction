@@ -10,8 +10,8 @@ const serializedATN = [4,1,10,75,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,
 71,8,6,1,7,1,7,1,7,0,0,8,0,2,4,6,8,10,12,14,0,0,74,0,19,1,0,0,0,2,24,1,0,
 0,0,4,32,1,0,0,0,6,40,1,0,0,0,8,48,1,0,0,0,10,63,1,0,0,0,12,70,1,0,0,0,14,
 72,1,0,0,0,16,17,3,2,1,0,17,18,5,1,0,0,18,20,1,0,0,0,19,16,1,0,0,0,19,20,
-1,0,0,0,20,21,1,0,0,0,21,22,3,4,2,0,22,23,5,0,0,1,23,1,1,0,0,0,24,29,3,14,
-7,0,25,26,5,2,0,0,26,28,3,14,7,0,27,25,1,0,0,0,28,31,1,0,0,0,29,27,1,0,0,
+1,0,0,0,20,21,1,0,0,0,21,22,3,4,2,0,22,23,5,0,0,1,23,1,1,0,0,0,24,29,3,4,
+2,0,25,26,5,2,0,0,26,28,3,4,2,0,27,25,1,0,0,0,28,31,1,0,0,0,29,27,1,0,0,
 0,29,30,1,0,0,0,30,3,1,0,0,0,31,29,1,0,0,0,32,37,3,6,3,0,33,34,5,6,0,0,34,
 36,3,6,3,0,35,33,1,0,0,0,36,39,1,0,0,0,37,35,1,0,0,0,37,38,1,0,0,0,38,5,
 1,0,0,0,39,37,1,0,0,0,40,45,3,8,4,0,41,42,5,7,0,0,42,44,3,8,4,0,43,41,1,
@@ -92,7 +92,7 @@ export default class GrammarParser extends antlr4.Parser {
 	    try {
 	        this.enterOuterAlt(localctx, 1);
 	        this.state = 24;
-	        this.atom();
+	        this.implication();
 	        this.state = 29;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
@@ -100,7 +100,7 @@ export default class GrammarParser extends antlr4.Parser {
 	            this.state = 25;
 	            this.match(GrammarParser.T__1);
 	            this.state = 26;
-	            this.atom();
+	            this.implication();
 	            this.state = 31;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
@@ -419,14 +419,14 @@ class AtomListContext extends antlr4.ParserRuleContext {
         this.ruleIndex = GrammarParser.RULE_atomList;
     }
 
-	atom = function(i) {
+	implication = function(i) {
 	    if(i===undefined) {
 	        i = null;
 	    }
 	    if(i===null) {
-	        return this.getTypedRuleContexts(AtomContext);
+	        return this.getTypedRuleContexts(ImplicationContext);
 	    } else {
-	        return this.getTypedRuleContext(AtomContext,i);
+	        return this.getTypedRuleContext(ImplicationContext,i);
 	    }
 	};
 

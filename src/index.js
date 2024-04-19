@@ -8,6 +8,7 @@ import * as controlState from './states';
 import * as rules from './rules';
 import * as help from './help';
 import * as latex from './latexGen';
+import {getProof} from "./deductiveEngine";
 
 
 
@@ -360,10 +361,8 @@ function buttonClicked(buttonText) {
   let lastParentheses = deductive.extractTextBetweenParentheses(buttonText.toString());
   nameRule = lastParentheses;
   const allButtons = document.querySelectorAll('#button-container button');
-  // let canUseRule = JSON.parse(lastSide.className.replace('divItem-', ""));
-  console.log(lastSide.querySelector('#proofText').textContent);
   let canUseRule = deductive.checkWithAntlr(lastSide.querySelector('#proofText').textContent);
-  console.log(lastParentheses);
+  canUseRule = getProof(canUseRule);
   switch (lastParentheses) {
     case "\\bot E1":
       if (canUseRule.type !== 'negation' && canUseRule.value !== '⊤' && canUseRule.value !== '⊥') {

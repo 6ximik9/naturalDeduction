@@ -1147,7 +1147,6 @@ span.choose {
 }
 
 #showMenu {
-
   display: flex; /* Зробити етикетку блоковою */
   width: 100%; /* Займає всю доступну ширину */
   font-size: 32px;
@@ -1163,6 +1162,7 @@ span.choose {
 
 #menuItems {
   width: 100%;
+  visibility: hidden;
   display: flex; /* Використовуємо Flexbox */
   flex-wrap: wrap; /* Дозволяємо елементам переноситися на новий рядок */
   align-items: center; /* Центруємо елементи по вертикалі */
@@ -1181,6 +1181,7 @@ span.choose {
 
 #dropdown-btnMenu:checked ~ #menuItems {
   max-height: 200px; /* Показати меню при виборі чекбоксу */
+  visibility: visible;
   margin-top: 1%;
   margin-bottom: 2%;
   padding-bottom: 1%;
