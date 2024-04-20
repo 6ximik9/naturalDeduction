@@ -667,8 +667,6 @@ function createProofTree(conclusions, container) {
     if (lvl.childElementCount === 0) {
       lvl.style.borderTop = '2px solid #000000';
     }
-    // container.insertBefore(deductive.createLineLevel(), container.firstChild);
-    // levelDiv.appendChild(deductive.createLineLevel("E1"));
     levelDiv.appendChild(deductive.createLineLevel(nameRule));
     levelDiv.style.borderBottom = '2px solid #000000';
   }
@@ -676,9 +674,7 @@ function createProofTree(conclusions, container) {
   if (Array.isArray(conclusions.proof)) {
     conclusions.proof.forEach((proofElement, index) => {
       const proofDiv = document.createElement(`div`);
-
-      // const result = deductive.addRedundantParentheses(proofElement);
-      let result = deductive.convertToLogicalExpression(proofElement);
+      const result = deductive.addRedundantParentheses(proofElement);
       let text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
       proofDiv.id = 'divId-' + container.id;
       proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
@@ -699,17 +695,16 @@ function createProofTree(conclusions, container) {
     });
   } else {
     const proofDiv = document.createElement(`div`);
-    // Обробка conclusions.proof як одного об'єкта
-    // const result = deductive.addRedundantParentheses(conclusions.proof);
-    // console.log(result);
     let text = " ";
     if(currentLevel!==3)
     {
-      const result = deductive.convertToLogicalExpression(conclusions.proof);
-      // let text = `${deductive.convertToLogicalExpression(deductive.getProof(deductive.checkWithAntlr(result)))}`;
+      let result = deductive.convertToLogicalExpression(conclusions.proof);
+      if(level !== 1)
+      {
+        result = deductive.addRedundantParentheses(conclusions.proof);
+      }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
     }
-    // proofDiv.className = `divItem-${JSON.stringify(deductive.getProof(deductive.checkWithAntlr(result)))}`;
 
     proofDiv.id = 'divId-' + container.id;
     proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
@@ -760,6 +755,8 @@ function createProofTree(conclusions, container) {
   if (conclusions.level !== 0) {
     deductive.editPadding();
   }
+
+  oldUserInput = "";
 }
 
 
@@ -844,7 +841,9 @@ function handleClick() {
   if (!side.querySelector('.preview')) {
     // let className = side.className;
     try {
-      oldUserInput = side.querySelector('#proofText').textContent;
+      if(oldUserInput==="") {
+        oldUserInput = side.querySelector('#proofText').textContent;
+      }
       // processExpression(JSON.parse(className.replace('divItem-', "")), 1);
       processExpression(deductive.checkWithAntlr(side.querySelector('#proofText').textContent), 1);
       showAllHyp();

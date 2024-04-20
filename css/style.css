@@ -1121,9 +1121,14 @@ span.choose {
   }
 
   #helpModal *{
-    font-size: 24px;
+    font-size: 15px;
   }
 
+   body {
+    overflow-x: hidden; /* Відключаємо горизонтальну прокрутку */
+    overflow-y: auto; /* Залишаємо вертикальну прокрутку */
+    /*width: 50%;*/
+  }
 
 }
 

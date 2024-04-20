@@ -3,6 +3,22 @@ import {side} from './index';
 import {processExpression} from './index';
 import {checkWithAntlr} from './deductiveEngine';
 
+
+let fontSize = 32;
+function isAppOpen() {
+  // Перевіряємо, чи браузер має можливість визначення активних вікон
+  if (typeof window !== 'undefined' && typeof window.document !== 'undefined') {
+    // Перевіряємо, чи є активні вікна відкритого браузера
+    if (window.document.hidden || window.document.visibilityState !== 'visible') {
+      // return false; // Якщо вікна не видимі, то застосунок не відкритий
+    }
+    // return true; // Якщо вікна видимі, то застосунок відкритий
+  }
+  fontSize = 20; // Якщо оточення виконання не є браузером, повертаємо null
+}
+
+isAppOpen();
+
 // Знаходимо кнопку, яка відкриває модальне вікно
 var modalButton = document.getElementById('helpBtn');
 // Знаходимо модальне вікно
@@ -96,7 +112,8 @@ function createHelpItem(title, buttonText, description, svgPath) {
   titleElement.classList.add('helpItemExampleName');
   titleElement.style.color = 'rgb(33, 33, 33)';
   titleElement.textContent = title;
-  titleElement.style.fontSize = '32px';
+  titleElement.style.whiteSpace = "nowrap";
+  titleElement.style.fontSize = fontSize + 'px';
 
   // Створюємо кнопку
   var button = document.createElement('button');
@@ -104,7 +121,7 @@ function createHelpItem(title, buttonText, description, svgPath) {
   button.style.background = 'rgb(255, 255, 255)';
   button.style.color = 'rgb(33, 33, 33)';
   button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
-  button.style.fontSize = '32px';
+  button.style.fontSize = fontSize + 'px';
   button.innerHTML = `
     <span class="buttonText">${buttonText}</span>
     <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
@@ -124,7 +141,7 @@ function createHelpItem(title, buttonText, description, svgPath) {
   descriptionElement.classList.add('helpDescription');
   descriptionElement.style.color = 'rgb(33, 33, 33)';
   descriptionElement.textContent = description;
-  descriptionElement.style.fontSize = '28px';
+  descriptionElement.style.fontSize = fontSize + 'px';
 
   // Створюємо контейнер для всіх елементів
   var helpItem = document.createElement('div');
@@ -229,7 +246,7 @@ function createMathTable() {
   const greekLettersHeader = document.createElement('div');
   greekLettersHeader.textContent = 'Greek letters';
   greekLettersHeader.id = 'greekLettersHeader';
-  greekLettersHeader.style.fontSize = '32px';
+  greekLettersHeader.style.fontSize = fontSize + 'px';
   greekLettersHeader.style.fontWeight = 'bold';
   greekLettersHeader.style.marginBottom = '10px';
 
@@ -279,7 +296,7 @@ function createMathTable() {
   const operationHeader = document.createElement('div');
   operationHeader.textContent = 'Operations';
   operationHeader.id = 'operationHeader';
-  operationHeader.style.fontSize = '32px';
+  operationHeader.style.fontSize = fontSize + 'px';
   operationHeader.style.fontWeight = 'bold';
   operationHeader.style.marginBottom = '10px';
   operationHeader.style.marginTop = '26px';
