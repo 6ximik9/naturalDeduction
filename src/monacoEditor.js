@@ -136,14 +136,6 @@ editor.getModel().onDidChangeContent(function (event) {
   });
 });
 
-// monaco.editor.onDidChangeMarkers(([uri]) => {
-//   const markers = monaco.editor.getModelMarkers({resource: uri})
-//   console.log('markers:', markers.map(
-//     ({ message, startLineNumber, startColumn, endLineNumber, endColumn }) =>
-//       `${message} [${startLineNumber}:${startColumn}-${endLineNumber}:${endColumn}]`,
-//   ))
-// })
-
 
 
 
@@ -212,11 +204,10 @@ divider.addEventListener('mousedown', function (event) {
     // Розрахунок нової ширини
     const newWidth = startWidth + event.clientX - startX;
 
-    console.log(newWidth);
-    if(newWidth>600) {
+    // if(newWidth>600) {
       // Встановлюємо новий розмір для editorPanel, editorComponent та overflowGuard
       editorPanel.style.width = newWidth + 'px';
-    }
+    // }
   }
 
   // Обробник відпускання кнопки миші

@@ -1,3 +1,7 @@
+import {typeProof} from "./index";
+import {clearItems} from "./FitchProof";
+
+
 function getLate(element) {
   let results = [];
 
@@ -60,24 +64,93 @@ function getLate(element) {
 var latexModal = document.getElementById('latexModal');
 var info = document.getElementById('latexInfo');
 
-document.getElementById('latex').addEventListener('click', function () {
 
-  var allProofLabels = document.querySelectorAll('label#proofText');
-  var previousLabels = document.querySelectorAll('label.previous');
+export function latexGentzen() {
+  document.getElementById('latex').addEventListener('click', function () {
 
-  if (allProofLabels.length !== previousLabels.length) {
-    var result = window.confirm("Not all branches complete. Latex code generated may be incorrect. Continue?");
-    if (!result) {
-      return;
+    var allProofLabels = document.querySelectorAll('label#proofText');
+    var previousLabels = document.querySelectorAll('label.previous');
+
+    if (allProofLabels.length !== previousLabels.length) {
+      var result = window.confirm("Not all branches complete. Latex code generated may be incorrect. Continue?");
+      if (!result) {
+        return;
+      }
     }
+    const proofContainer = document.querySelector('.proof-element_level-0');
+    const proofTexts = getLate(proofContainer).reverse();
+    // console.log(proofTexts.join('\n'));
+    info.textContent = transformArray(proofTexts).join('\n');
+    latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
+    document.querySelector('#latexCode').style.height = '600px';
+  });
+}
+
+export function latexFitch() {
+  document.getElementById('latex').addEventListener('click', function () {
+
+    const fitchBranchElements = document.querySelectorAll('.fitch_branch:not(.finished)');
+    if (fitchBranchElements.length > 0) {
+      let result = window.confirm("The proof is not finished, do you want to continue?");
+      if (!result) {
+        return;
+      }
+    }
+
+    clearItems();
+
+    const branch = document.querySelectorAll('.fitch_branch');
+    outputArray.push("\\begin{fitch}");
+    printElementAndChildren(branch[0]);
+    outputArray.push("\\end{fitch}");
+
+    info.textContent = outputArray.join('\n');
+    latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
+    document.querySelector('#latexCode').style.height = '600px';
+
+    indexTest = 0;
+    level = "";
+    outputArray = [];
+  });
+}
+
+let level = ""
+let indexTest = 0;
+let outputArray = [];
+function printElementAndChildren(element) {
+  if(indexTest!==0)
+  {
+    level += "\\fa"
   }
-  const proofContainer = document.querySelector('.proof-element_level-0');
-  const proofTexts = getLate(proofContainer).reverse();
-  // console.log(proofTexts.join('\n'));
-  info.textContent = transformArray(proofTexts).join('\n');
-  latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
-  document.querySelector('#latexCode').style.height = '600px';
-});
+  var outJustDiv = document.getElementById('out_just').children;
+
+  const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
+
+  const children = Array.from(element.children);
+  children.forEach((child, index) => {
+    if (child.classList.contains('fitch_branch')) {
+      indexTest++;
+      printElementAndChildren(child); // Recursively handle nested fitch_branch
+    } else {
+      let output;
+      let rule;
+      if (child.style.borderBottom === '1px solid black') {
+        const elementIndex = allFitchFormulas.indexOf(child);
+          rule = outJustDiv[elementIndex].textContent;
+        output = level + "\\fj $$" + latexEdit(child.textContent.replaceAll("", " "), 0) + "$$";
+      }
+      else{
+        const elementIndex = allFitchFormulas.indexOf(child);
+        rule = outJustDiv[elementIndex].textContent;
+        output =level + "\\fa $$" + latexEdit(child.textContent.replaceAll("", " "), 0)+ "$$";
+      }
+      outputArray.push(output + " & $" + latexEdit(rule.replace(" ", " \\quad "),1) + "$\\\\");
+    }
+  });
+
+  level = level.replace("\\fa", "")
+}
+
 
 
 document.querySelector('.closeLatex').addEventListener('click', function () {
@@ -116,8 +189,6 @@ document.getElementById('copyLatexCode').addEventListener('click', function () {
     buttonIcon.style.transform = "rotate(0deg)"; // Повертаємо іконку в початкове положення
   }, 2000); // 3000 мілісекунд (3 секунди)
 
-  // Оповіщення користувача, що текст скопійовано
-  // alert('Текст скопійовано в буфер обміну!');
 });
 
 

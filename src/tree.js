@@ -1,46 +1,7 @@
 import * as d3 from 'd3';
-import {processExpression, side} from "./index";
+import {processExpression, side} from "./GentzenProof";
 import {checkWithAntlr} from "./deductiveEngine";
-document.addEventListener('DOMContentLoaded', function () {
-  const tabTriggers = document.querySelectorAll('.tab-trigger');
-
-  tabTriggers.forEach(function (trigger) {
-    trigger.addEventListener('click', function () {
-      const tabId = this.getAttribute('for');
-      if (!side) {
-        return;
-      }
-      if (tabId === 'tab1') {
-        processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 1);
-      } else if (tabId === 'tab2') {
-        processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 0);
-      } else {
-        const buttonContainer = document.getElementById('button-container');
-        buttonContainer.innerHTML = '';
-
-        let svgContainer = document.createElement("div");
-        svgContainer.style.width = "100%"; // Або використовуйте фіксовану ширину, наприклад "1000px"
-        svgContainer.style.maxWidth = "1000px";
-        svgContainer.style.overflow = "auto"; // Дозволяє прокрутку, якщо вміст більше контейнера
-        svgContainer.style.height = "auto"; // Висота адаптується до вмісту
-
-        let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgElement.setAttribute("width", "1000");
-        svgElement.setAttribute("height", "1000"); // Початкова висота, може бути змінена динамічно
-
-        svgContainer.appendChild(svgElement);
-
-        buttonContainer.appendChild(svgContainer);
-
-        let size = createTreeD3(checkWithAntlr(side.querySelector('#proofText').textContent));
-
-        svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
-        svgElement.setAttribute("height", (size[1] + 100).toString());
-      }
-    });
-  });
-});
-
+import {typeProof} from './index';
 
 
 function getMaxDepth(node) {

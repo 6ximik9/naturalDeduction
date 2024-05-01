@@ -2,7 +2,8 @@ import {CharStreams, CommonTokenStream, ParseTreeWalker} from "antlr4";
 import GrammarLexer from "../my_antlr/GrammarLexer";
 import GrammarParser from "../my_antlr/GrammarParser";
 import MyGrammarListener from "../my_antlr/MyGrammarListener";
-import {currentLevel} from "./index";
+// import {currentLevel} from "./index";
+import {currentLevel} from "./GentzenProof";
 
 export function removeRedundantParentheses(expression, parentType = null, isLeftChild = false) {
   // Функція для перевірки, чи дужки навколо виразу непотрібні
@@ -242,9 +243,6 @@ export function getHypotheses(lines) {
 export function editPadding() {
   var mainElement = document.querySelector('.proof-element_level-0');
 
-  // if(mainElement.of)
-// Знаходимо елемент <label> всередині контейнера
-//   var labelElement = document.querySelector('.proof-element_level-0 > label');
   var allLabels = document.querySelectorAll('.proof-element_level-0 label');
 
 // Отримуємо його ширину в пікселях
@@ -252,4 +250,32 @@ export function editPadding() {
 
 
   mainElement.style.width = widthInPixels + 'px';
+}
+
+
+export function compareExpressions(expr1, expr2) {
+  expr1 = getProof(expr1);
+  expr2 = getProof(expr2);
+  // Перевірка, що типи обох виразів однакові
+  if (expr1.type !== expr2.type) return false;
+
+  // Обробка комутативних операцій: кон'юнкції і дизюнкції
+  // A AND B = B AND A і A OR B = B OR A.
+  if (expr1.type === 'conjunction' || expr1.type === 'disjunction') {
+    return (compareExpressions(expr1.left, expr2.left) && compareExpressions(expr1.right, expr2.right)) ||
+      (compareExpressions(expr1.left, expr2.right) && compareExpressions(expr1.right, expr2.left));
+  }
+
+  // Обробка негації та імплікації без комутативності
+  if (expr1.type === 'negation' || expr1.type === 'implication') {
+    return compareExpressions(expr1.left, expr2.left) && compareExpressions(expr1.right, expr2.right);
+  }
+
+  // Обробка атомарних значень
+  if (expr1.type === 'atom') {
+    return expr1.value === expr2.value;
+  }
+
+  // Повертаємо false для невідомих типів
+  return false;
 }

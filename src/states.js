@@ -1,16 +1,25 @@
-import {side} from "./index";
-import {currentLevel} from "./index";
-import {state} from "./index";
-import {deductionContext} from "./index";
-import {level} from "./index";
-import {userHypotheses} from "./index";
-import {lastSide} from "./index";
-import {setState} from "./index";
-import {setLevel} from "./index";
-import {setSide} from "./index";
-import {setCurrentLevel} from "./index";
-import {setUserHypotheses} from "./index";
-import {setLastSide} from "./index";
+import {side} from "./GentzenProof";
+import {currentLevel} from "./GentzenProof";
+import {state} from "./GentzenProof";
+import {deductionContext} from "./GentzenProof";
+import {level} from "./GentzenProof";
+import {userHypotheses} from "./GentzenProof";
+import {lastSide} from "./GentzenProof";
+import {setState} from "./GentzenProof";
+import {setLevel} from "./GentzenProof";
+import {setSide} from "./GentzenProof";
+import {setCurrentLevel} from "./GentzenProof";
+import {setUserHypotheses} from "./GentzenProof";
+import {setLastSide} from "./GentzenProof";
+import {
+  branchIndex, clearItems,
+  clickedBranch,
+  clickedProofs,
+  fitchStates, setBranchIndex, setClickedBranch, setClickedProofs,
+  setStateFitch,
+  setUserHypothesesFitch
+} from "./FitchProof";
+
 
 let backwardButton = document.getElementById('backwardButton');
 let forwardButton = document.getElementById('forwardButton');
@@ -18,45 +27,141 @@ let allProof = document.getElementById('proof');
 
 let elementsAndVariablesArray = [];
 
+
+
 // Додаємо обробник події "клік" для кнопок
-backwardButton.addEventListener('click', function () {
-  if (currentLevel === 5 || currentLevel === 11 || currentLevel === 13 || currentLevel === 7 || currentLevel === 8) {
-    const divToRemove = document.getElementById("preview");
-    if (divToRemove) {
-      divToRemove.remove();
-      document.getElementById('keyProof').className = 'hidden';
+export function addNextLastButtonClickGentzen()
+{
+  backwardButton.addEventListener('click', function () {
+    if (currentLevel === 5 || currentLevel === 11 || currentLevel === 13 || currentLevel === 7 || currentLevel === 8) {
+      const divToRemove = document.getElementById("preview");
+      if (divToRemove) {
+        divToRemove.remove();
+        document.getElementById('keyProof').className = 'hidden';
+        return;
+      }
+    }
+
+    if (!elementsAndVariablesArray[state]) {
+      setState(state-1);
+    }
+    setState(state-1);
+    if (state < 0) {
+      location.reload(true);
       return;
     }
-  }
+    getState(state);
 
-  if (!elementsAndVariablesArray[state]) {
-    setState(state-1);
-  }
-  setState(state-1);
-  if (state < 0) {
-    location.reload(true);
-    // alert("start");
-    // state = 0;
-    return;
-  }
-  getState(state);
-
-  if (state === 0) {
-    backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
-  }
-});
+    if (state === 0) {
+      backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
+    }
+  });
 
 
-forwardButton.addEventListener('click', function () {
-  setState(state+1);
-  if (!elementsAndVariablesArray[state]) {
-    setState(state-1);
-    return;
-  }
-  getState(state);
-  backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+  forwardButton.addEventListener('click', function () {
+    setState(state+1);
+    if (!elementsAndVariablesArray[state]) {
+      setState(state-1);
+      return;
+    }
+    getState(state);
+    backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
 
-});
+  });
+}
+
+
+export function addNextLastButtonClickFitch()
+{
+  backwardButton.addEventListener('click', function () {
+    // if (currentLevel === 5 || currentLevel === 11 || currentLevel === 13 || currentLevel === 7 || currentLevel === 8) {
+    //   const divToRemove = document.getElementById("preview");
+    //   if (divToRemove) {
+    //     divToRemove.remove();
+    //     document.getElementById('keyProof').className = 'hidden';
+    //     return;
+    //   }
+    // }
+
+    if (!elementsAndVariablesArray[fitchStates]) {
+      setStateFitch(fitchStates-1);
+    }
+
+    setStateFitch(fitchStates-1);
+    if (fitchStates < 0) {
+      location.reload(true);
+      return;
+    }
+    getStateFitch(fitchStates);
+
+    if (fitchStates === 0) {
+      backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
+    }
+  });
+
+
+  forwardButton.addEventListener('click', function () {
+    setStateFitch(fitchStates+1);
+    if (!elementsAndVariablesArray[fitchStates]) {
+      setStateFitch(fitchStates-1);
+      return;
+    }
+    getStateFitch(fitchStates);
+    backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+
+  });
+}
+
+export function saveStateFitch() {
+
+  // Отримуємо елемент "proof"
+  var proofDiv = document.getElementById('proof').cloneNode(true);
+
+  // Отримуємо всі дочірні елементи елемента "proof" та створюємо копію
+  var childElements = Array.from(proofDiv.children).map(function (element) {
+    return element.cloneNode(true);
+  });
+
+  // Створюємо об'єкт з даними елемента та його змінними
+  var elementData = {
+    element: childElements, variables: {
+      clickedProofs: JSON.parse(JSON.stringify(clickedProofs)),
+      clickedBranch: JSON.parse(JSON.stringify(clickedBranch)),
+      branchIndex: branchIndex
+    }
+  };
+
+  // Додаємо цей об'єкт до масиву
+  setStateFitch(elementsAndVariablesArray.length);
+  if (fitchStates > 0) {
+    backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+  }
+  addElementWithIndex(elementData, fitchStates);
+}
+
+
+function getStateFitch(id) {
+  document.getElementById('proof-menu').className = 'hidden';
+  document.getElementById('hypotheses-container').style.display = "none";
+
+  // Отримуємо останній елемент масиву
+  var lastElementData = elementsAndVariablesArray[id].data;
+
+  // Очищаємо div з id "proof"
+  allProof.innerHTML = '';
+
+  // Додаємо кожен елемент з останнього об'єкта масиву до div з id "proof"
+  lastElementData.element.forEach(function (childElement) {
+    allProof.appendChild(childElement.cloneNode(true));
+  });
+
+  // Оновлюємо значення змінних з останнього об'єкта
+  var variables = lastElementData.variables;
+  setClickedProofs(JSON.parse(JSON.stringify(variables.clickedProofs)));
+  setClickedBranch(JSON.parse(JSON.stringify(variables.clickedBranch)));
+  setBranchIndex(variables.branchIndex);
+  clearItems();
+}
 
 function getState(id) {
   document.getElementById('proof-menu').className = 'hidden';
@@ -75,14 +180,8 @@ function getState(id) {
 
   // Оновлюємо значення змінних з останнього об'єкта
   var variables = lastElementData.variables;
-  // deductionContext = JSON.parse(JSON.stringify(variables.deductionContext));
   deductionContext.hypotheses = JSON.parse(JSON.stringify(variables.deductionContext)).hypotheses;
   deductionContext.conclusions = JSON.parse(JSON.stringify(variables.deductionContext)).conclusions;
-  // level = variables.level;
-  // currentLevel = variables.currentLevel;
-  // userHypotheses = variables.userHypotheses;
-  // side = variables.side;
-  // lastSide = variables.lastSide;
   setLevel(variables.level);
   setCurrentLevel(variables.currentLevel);
   setUserHypotheses(variables.userHypotheses);
