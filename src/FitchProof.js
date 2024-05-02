@@ -94,13 +94,23 @@ export function processExpression(expression, countRules) {
     return;
   }
 
-  if (clickedProofs.length === 1) {
+  if (clickedProofs.length === 1 && clickedBranch.length===0) {
     generateButtons(4, [buttons[2], buttons[3], buttons[11], buttons[12]]);
-  } else if (clickedProofs.length === 2) {
+  } else if (clickedProofs.length === 2 && clickedBranch.length===0) {
     generateButtons(3, [buttons[1], buttons[6], buttons[8]]);
-  } else if (clickedProofs.length === 0) {
+  } else if (clickedProofs.length === 0 && clickedBranch.length===0) {
     generateButtons(0, buttons);
   }
+  else if(clickedProofs.length === 1 && clickedBranch.length===2)
+  {
+    generateButtons(1, [buttons[4]]);
+  }
+  else if(clickedBranch.length===1 && clickedProofs.length===0)
+  {
+    generateButtons(3, [buttons[5], buttons[7], buttons[10]]);
+  }
+
+
 
 }
 
@@ -159,108 +169,113 @@ function buttonClicked(buttonText, button) {
   console.log(lastParentheses);
   switch (lastParentheses) {
     case "\\land I, m, n":
-      if (clickedProofs.length !== 2) {
+      if (rulesFitch.firstRule(clickedProofs, clickedBranch) === -1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.firstRule(clickedProofs);
       clearItems();
       saveStateFitch();
       break;
     case "\\land E, n":
-      if (clickedProofs.length !== 1) {
-        shakeButton(button);
-        return;
-      }
-      let check = checkWithAntlr(clickedProofs[0].element.textContent.split(" ")[0].replaceAll(" ", ""))
-      if (check.type !== "conjunction") {
+      if (rulesFitch.secondRule(clickedProofs, clickedBranch) === -1) {
+        clearItems();
         shakeButton(button);
         return;
       }
       document.getElementById('proof-menu').className = 'proof-menu hidden';
-      rulesFitch.secondRule(clickedProofs);
+      // rulesFitch.secondRule(clickedProofs);
       break;
     case "\\lor I, n":
-      if (clickedProofs.length !== 1) {
+      if (rulesFitch.thirdRule(clickedProofs, clickedBranch) === -1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.thirdRule(clickedProofs);
       clearItems();
       saveStateFitch();
       break;
     case "\\lor E, m, n, p":
-      if (clickedProofs.length !== 1 || clickedBranch.length!==2) {
+      if (rulesFitch.fourthRule(clickedProofs, clickedBranch)===-1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.fourthRule(clickedProofs, clickedBranch);
       clearItems();
       saveStateFitch();
       break;
     case "\\Rightarrow I, n, m":
-      if(clickedBranch.length!==1)
-      {
+      if (rulesFitch.fifthRule(clickedProofs,clickedBranch) !== 1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.fifthRule(clickedBranch);
       clearItems();
       saveStateFitch();
       break;
     case "\\Rightarrow E,m,n":
-      if (clickedProofs.length !== 2) {
+      if (rulesFitch.sixthRule(clickedProofs, clickedBranch) === -1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.sixthRule(clickedProofs);
       clearItems();
       saveStateFitch();
       break;
     case "\\neg I, m, n":
-      if (clickedBranch.length !== 1) {
+      if (rulesFitch.seventhRule(clickedProofs, clickedBranch)===-1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.seventhRule(clickedBranch);
       clearItems();
       saveStateFitch();
       break;
     case "\\neg E, n, m":
-      if (clickedProofs.length !== 2) {
+      if (rulesFitch.eighthRule(clickedProofs, clickedBranch)===-1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.eighthRule(clickedProofs);
       clearItems();
       saveStateFitch();
       break;
     case "\\perp E1,n":
-      if (clickedProofs.length !== 1) {
+      if (rulesFitch.ninthRule(clickedProofs, clickedBranch) === -1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.ninthRule(clickedProofs);
+      clearItems();
+      saveStateFitch();
       break;
     case "C, m,n":
-      if (clickedBranch.length !== 1) {
+      if (rulesFitch.tenthRule(clickedProofs,clickedBranch)===-1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.tenthRule(clickedBranch);
       clearItems();
       saveStateFitch();
       break;
     case "\\neg\\neg E,n":
-      if (clickedProofs.length !== 1) {
+      if (rulesFitch.eleventhRule(clickedProofs, clickedBranch)===-1) {
+        clearItems();
         shakeButton(button);
         return;
       }
-      rulesFitch.eleventhRule(clickedProofs);
       clearItems();
       saveStateFitch();
       break;
     case "R,n":
+      if(rulesFitch.twelfthRule(clickedProofs, clickedBranch)===-1)
+      {
+        clearItems();
+        shakeButton(button);
+        return;
+      }
+      clearItems();
+      saveStateFitch();
       break;
   }
   clearItems();
@@ -446,13 +461,11 @@ export function addNumberedDivs() {
 
 document.getElementById('proof').addEventListener('click', function (event) {
   let clickedElement = event.target;
-  if(!clickedElement)
-  {
+  if (!clickedElement) {
     return;
   }
 
-  if(document.querySelector('div.fitch_formula[style="background: rgba(0, 255, 0, 0.55);"]'))
-  {
+  if (document.querySelector('div.fitch_formula[style="background: rgba(0, 255, 0, 0.55);"]')) {
     return;
   }
 
@@ -535,7 +548,7 @@ export function addRowToBranch(formula, title) {
   div.className = 'fitch_formula';
   div.textContent = removeRedundantParentheses(getProof(checkWithAntlr(formula)));
   const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
-  let par = fitchBranches[fitchBranches.length-1];
+  let par = fitchBranches[fitchBranches.length - 1];
 
   par.appendChild(div);
 
@@ -546,12 +559,11 @@ export function addRowToBranch(formula, title) {
   addNumberedDivs();
 
   let mainBranch = document.querySelectorAll('.fitch_branch')[0];
-  let lastElement = mainBranch.children[mainBranch.children.length-1];
+  let lastElement = mainBranch.children[mainBranch.children.length - 1];
   let lastFormula = addRedundantParentheses(getProof(checkWithAntlr(lastElement.textContent)));
   let startFormula = addRedundantParentheses(getProof(checkWithAntlr(document.getElementById('userText').textContent)));
 
-  if(deductive.compareExpressions(getProof(checkWithAntlr(lastFormula)), getProof(checkWithAntlr(startFormula))))
-  {
+  if (deductive.compareExpressions(getProof(checkWithAntlr(lastFormula)), getProof(checkWithAntlr(startFormula)))) {
     document.getElementById('proof-menu').className = 'proof-menu hidden';
     lastElement.style.background = 'rgba(0, 255, 0, 0.55)';
     mainBranch.className += " finished";
@@ -564,7 +576,7 @@ export function addRowToBranch(formula, title) {
 
 export function clearItems() {
 
-  clickedProofs.forEach(function(item) {
+  clickedProofs.forEach(function (item) {
     item.element.style.backgroundColor = '';
     const spanElement = item.element.querySelector('span.indexC');
 
@@ -574,7 +586,7 @@ export function clearItems() {
   });
   clickedProofs = [];
 
-  clickedBranch.forEach(function(item) {
+  clickedBranch.forEach(function (item) {
     item.element.style.backgroundColor = '';
     const spanElement = item.element.querySelector('span.indexC');
 

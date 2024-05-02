@@ -75,52 +75,62 @@ export function addHypotheses(data) {
 
 // Додаємо обробник події кліку до body (можна вибрати інший контейнер)
 document.getElementById('proof').addEventListener('click', function (event) {
-  if(typeProof===1)
-  {
+  if (typeProof === 1) {
     return;
   }
 
   const clickedElement = event.target;
-  if (clickedElement.tagName === 'DIV') {
-    if (clickedElement.className !== "previous") {
-      const container = document.getElementById('proof');
-      const labels = container.querySelectorAll('label');
-      labels.forEach(label => {
-        label.style.background = '';
-      });
-      side = clickedElement;
-      side.querySelector('label').style.background = 'rgba(72, 187, 244, 0.78)';
-      let elements = document.getElementsByClassName("preview");
 
-      if (elements.length <= 0) {
-        setTimeout(() => {
-          handleClick();
-        }, 100);
-      }
+  const container = document.getElementById('proof');
+  const labels = container.querySelectorAll('label');
+  labels.forEach(label => {
+    label.style.background = '';
+  });
+
+  if (clickedElement.tagName === 'DIV') {
+    side = clickedElement;
+    side.querySelector('label').style.background = 'rgba(136,190,213,0.78)';
+  } else if (clickedElement.tagName === 'LABEL')
+  {
+    if (clickedElement.className === "previous") {
+      console.log("asdasd");
+      return;
     }
+    side = clickedElement.parentNode;
+    clickedElement.style.background = 'rgba(136,190,213,0.78)';
   }
 
-  if (clickedElement.tagName === 'LABEL') {
-    if (clickedElement.className !== "previous") {
-      const container = document.getElementById('proof');
-      const labels = container.querySelectorAll('label');
-      labels.forEach(label => {
-        label.style.background = '';
-      });
-      side = clickedElement.parentNode;
-      clickedElement.style.background = 'rgba(72, 187, 244, 0.78)';
-      let elements = document.getElementsByClassName("preview");
-
-      if (elements.length <= 0) {
-        setTimeout(() => {
-          handleClick();
-        }, 100);
-      }
-    }
+  console.log("тут");
+  let elements = document.getElementsByClassName("preview");
+  if (elements.length <= 0) {
+    setTimeout(() => {
+      handleClick();
+    }, 100);
   }
 
 });
 
+
+
+function handleClick() {
+  if (!side) {
+    return;
+  }
+
+  if (!side.querySelector('.preview') && side.className!=="closed") {
+    // oldUserInput = "";
+     try {
+    //   if(oldUserInput==="") {
+        oldUserInput = side.querySelector('#proofText').textContent;
+      // }
+      processExpression(deductive.checkWithAntlr(side.querySelector('#proofText').textContent), 1);
+      showAllHyp();
+    } catch (error) {
+      console.error('Close or previous');
+    }
+  }
+
+}
 
 export function parseExpression(text) {
   if (hasError || text === null || text.length === 0) {
@@ -306,7 +316,6 @@ function buttonClicked(buttonText) {
       }
       break;
     case "\\neg I":
-      console.log(canUseRule);
       if (canUseRule.type === 'negation') {
         rules.fourthRule();
         createProofTree(deductionContext.conclusions[size + 1], side);
@@ -432,7 +441,7 @@ export function saveTree() {
   let er = 0;
   // const parentDiv = document.getElementById('preview');
   // Отримуємо всі дочірні елементи з класом "innerDiv"
-  console.log(deductive.checkCorrect(deductive.checkWithAntlr(editorMonaco.editor.getValue(), er)));
+  // console.log(deductive.checkCorrect(deductive.checkWithAntlr(editorMonaco.editor.getValue(), er)));
   if (deductive.checkCorrect(deductive.checkWithAntlr(editorMonaco.editor.getValue(), er)) === 1 && currentLevel !== 5) {
     if (currentLevel === 7 || currentLevel === 8) {
       alert("Missing conjunction, please correct your input");
@@ -591,7 +600,7 @@ function createProofTree(conclusions, container) {
     conclusions.proof.forEach((proofElement, index) => {
       const proofDiv = document.createElement(`div`);
       const result = deductive.addRedundantParentheses(proofElement);
-      let text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
+      let text = `${deductive.convertToLogicalExpression(getProof(deductive.checkWithAntlr(result)))}`;
       proofDiv.id = 'divId-' + container.id;
       proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
       proofDiv.style.alignSelf = 'flex-end';
@@ -617,7 +626,7 @@ function createProofTree(conclusions, container) {
       let result = deductive.convertToLogicalExpression(conclusions.proof);
       if(level !== 1)
       {
-        result = deductive.addRedundantParentheses(conclusions.proof);
+        result = deductive.addRedundantParentheses(getProof(conclusions.proof));
       }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
     }
@@ -633,12 +642,12 @@ function createProofTree(conclusions, container) {
 
   //11 правило гіпотези
   if (conclusions.proof.length === 3 && currentLevel === 11) {
-    console.log(conclusions.proof[0].left);
-    console.log(conclusions.proof[0].right);
+    // console.log(conclusions.proof[0].left);
+    // console.log(conclusions.proof[0].right);
     // let childElements = levelDiv.querySelectorAll('[class^="divItem-{\\"type\\":\\"atom\\""]');
     let childElements = levelDiv.children;
 
-    console.log(childElements);
+    // console.log(childElements);
 
     childElements[2].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].left);
     childElements[3].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].right);
@@ -687,12 +696,10 @@ function showAllHyp() {
     return false;
   });
 
-
   document.getElementById('hypotheses-container').style.display = "flex";
   if (hypothesesAll.length !== 0) {
     let allHypotheses = document.getElementById('allHypotheses');
     allHypotheses.innerHTML = '';
-    console.log(hypothesesAll);
     for (let i = 0; i < hypothesesAll.length; i++) {
       let index = String.fromCharCode(97 + i); // 97 відповідає коду символа 'a'
       let text1 = deductive.convertToLogicalExpression(hypothesesAll[i].hyp);
@@ -735,7 +742,7 @@ function addUserHyp(conclusions, proofDiv) {
     for (let h = 0; h < userHypotheses.length; h++) {
       let err = 0;
       let data = deductive.getProof(deductive.checkWithAntlr(deductive.addRedundantParentheses(deductive.checkWithAntlr(userHypotheses[h], err))));
-      console.log(data);
+      // console.log(data);
       let test = {
         level: level,  // Додаємо поле level
         hyp: data
@@ -749,31 +756,11 @@ function addUserHyp(conclusions, proofDiv) {
 }
 
 
-function handleClick() {
-  if (!side) {
-    return;
-  }
-
-  if (!side.querySelector('.preview')) {
-    // let className = side.className;
-    try {
-      if(oldUserInput==="") {
-        oldUserInput = side.querySelector('#proofText').textContent;
-      }
-      // processExpression(JSON.parse(className.replace('divItem-', "")), 1);
-      processExpression(deductive.checkWithAntlr(side.querySelector('#proofText').textContent), 1);
-      showAllHyp();
-    } catch (error) {
-      console.error('Close or previous');
-    }
-  }
-
-}
 
 
 document.getElementById('addParentheses').addEventListener('click', function () {
   let inProof = deductive.checkWithAntlr(deductive.addRedundantParentheses(deductive.checkWithAntlr(side.querySelector('#proofText').textContent)));
-  console.log(inProof);
+  // console.log(inProof);
   side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.deleteHeadBack(inProof));
 });
 
@@ -821,13 +808,11 @@ function addClickGentzenRules() {
       }
       if (tabId === 'tab1') {
         if (typeProof === 1) {
-          console.log("1");
           return;
         }
         processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 1);
       } else if (tabId === 'tab2') {
         if (typeProof === 1) {
-          console.log("1");
           return;
         }
         processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 0);

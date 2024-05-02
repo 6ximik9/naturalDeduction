@@ -2,7 +2,7 @@ import * as deductive from "./deductiveEngine";
 import * as fitchMain from "./FitchProof";
 import {checkRule, shakeElement} from "./index";
 import * as editorMonaco from "./monacoEditor";
-import {addNumberedDivs} from "./FitchProof";
+import {addNumberedDivs, clearItems, clickedBranch, clickedProofs} from "./FitchProof";
 import {
   addRedundantParentheses,
   checkWithAntlr,
@@ -13,31 +13,48 @@ import {
 import {saveStateFitch} from "./states";
 
 
-export function firstRule(rules) {
-  rules[0].element.querySelector('span.indexC').remove();
-  rules[1].element.querySelector('span.indexC').remove();
-  let firstPart = rules[0].element.textContent.replaceAll(" ", "");
-  let secondPart = rules[1].element.textContent.replaceAll(" ", "");
+export function firstRule(proofs, branches) {
+  if (proofs.length !== 2 || branches.length > 0) {
+    return -1;
+  }
+  proofs[0].element.querySelector('span.indexC').remove();
+  proofs[1].element.querySelector('span.indexC').remove();
+  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
+  let secondPart = proofs[1].element.textContent.replaceAll(" ", "");
 
-  let nameRule = '∧I ' + (rules[0].index + 1) + ',' + (rules[1].index + 1);
+  let nameRule = '∧I ' + (proofs[0].index + 1) + ',' + (proofs[1].index + 1);
   let proof =
     {
-      formula: '('+ firstPart+')' + '∧' + '(' + secondPart +')',
+      formula: '(' + firstPart + ')' + '∧' + '(' + secondPart + ')',
       title: nameRule,
       branchIndex: fitchMain.branchIndex
     }
   fitchMain.addNewProof(proof);
 
   fitchMain.addRowToBranch(proof.formula, nameRule);
+
+  return 0;
 }
 
-export function secondRule(rules) {
-  rules[0].element.querySelector('span.indexC').remove();
-  let rule = rules[0].element.textContent.replaceAll(" ", "");
+export function secondRule(proofs, branches) {
+
+  if (proofs.length !== 1 || branches.length > 0) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+
+  let rule = proofs[0].element.textContent.replaceAll(" ", "");
+
+  if (checkWithAntlr(rule).type !== "conjunction") {
+    alert("Missing conjunction, please change the selected rows");
+    clearItems();
+    return -1;
+  }
+
+
   let parts = rule.split("∧");
 
-  // const fitchBranch = document.createElement('div');
-  // fitchBranch.className = 'fitch_branch';
   const div = document.createElement('div');
   div.className = 'userChoice';
 
@@ -51,7 +68,7 @@ export function secondRule(rules) {
 
   const outJust = document.getElementById('out_just');
   const titleDiv = document.createElement('div');
-  titleDiv.textContent = "∧E, " + (rules[0].index + 1); // Використання однієї і тієї ж назви для кожної формули
+  titleDiv.textContent = "∧E, " + (proofs[0].index + 1); // Використання однієї і тієї ж назви для кожної формули
   outJust.appendChild(titleDiv);
   // div.style.borderBottom = '1px solid black';x
 
@@ -63,6 +80,8 @@ export function secondRule(rules) {
   // lastFitchBranch.appendChild(fitchBranch);
 
   fitchMain.addNumberedDivs();
+
+  return 0;
 }
 
 function createButton(text, id) {
@@ -110,9 +129,14 @@ editorMonaco.editor.onKeyDown(function (e) {
   }
 });
 
-export function thirdRule(rules) {
-  rules[0].element.querySelector('span.indexC').remove();
-  let rule = rules[0].element.textContent.replaceAll(" ", "");
+export function thirdRule(proofs, branches) {
+  if (proofs.length !== 1 || branches.length > 0) {
+    clearItems();
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+  let rule = proofs[0].element.textContent.replaceAll(" ", "");
 
   const div = document.createElement('div');
   div.className = 'userFormula';
@@ -160,6 +184,7 @@ export function thirdRule(rules) {
       par.style.display = 'flex';
       par.textContent = removeRedundantParentheses(ruleUser);
       fitchMain.processExpression("AllRules", 1);
+      return 0;
     } else {
       alert("Please correct your input")
     }
@@ -170,7 +195,7 @@ export function thirdRule(rules) {
 
   const outJust = document.getElementById('out_just');
   const titleDiv = document.createElement('div');
-  titleDiv.textContent = "∨I, " + (rules[0].index + 1); // Використання однієї і тієї ж назви для кожної формули
+  titleDiv.textContent = "∨I, " + (proofs[0].index + 1); // Використання однієї і тієї ж назви для кожної формули
   outJust.appendChild(titleDiv);
 
   const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
@@ -182,40 +207,52 @@ export function thirdRule(rules) {
 
   fitchMain.addNumberedDivs();
 
+  return 0;
 }
 
-export function fourthRule(rulesRow, rulesBranch) {
-  rulesRow[0].element.querySelector('span.indexC').remove();
+export function fourthRule(proofs, branches) {
 
-  let firstPart = rulesRow[0].element.textContent.replaceAll(" ", "");
+  if (proofs.length !== 1 || branches.length !== 2) {
+    return -1;
+  }
 
-  let branch1 = rulesBranch[0].element.querySelectorAll('.fitch_formula');
-  let branch2 = rulesBranch[1].element.querySelectorAll('.fitch_formula');
+  proofs[0].element.querySelector('span.indexC').remove();
+
+  if (checkWithAntlr(proofs[0].element.textContent.replaceAll(" ", "")).type !== "disjunction") {
+    alert("Missing disjunction, please change the selected rows");
+    clearItems();
+    return -1;
+  }
+
+
+  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
+
+  let branch1 = branches[0].element.querySelectorAll('.fitch_formula');
+  let branch2 = branches[1].element.querySelectorAll('.fitch_formula');
 
   let firstPartLeft = deductive.removeRedundantParentheses(getProof(checkWithAntlr(firstPart).left));
   let firstPartRight = deductive.removeRedundantParentheses(getProof(checkWithAntlr(firstPart).right));
   let firstBranch1 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch1[0].textContent)));
-  let lastBranch1 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch1[branch1.length-1].textContent)));
+  let lastBranch1 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch1[branch1.length - 1].textContent)));
 
   let firstBranch2 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch2[0].textContent)));
-  let lastBranch2 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch2[branch1.length-1].textContent)));
+  let lastBranch2 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch2[branch1.length - 1].textContent)));
 
 
   if ((firstPartLeft === firstBranch1 && firstPartRight === firstBranch2) ||
     (firstPartLeft === firstBranch2 && firstPartRight === firstBranch1)) {
 
 
-    if(lastBranch1!==lastBranch2)
-    {
+    if (lastBranch1 !== lastBranch2) {
       return;
     }
 
     const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
     // Знаходимо індекс клікнутого елемента в масиві allFitchFormulas
     let indexStart1 = allFitchFormulas.indexOf(branch1[0]) + 1;
-    let indexFinish1 = allFitchFormulas.indexOf(branch1[branch1.length-1]) + 1;
+    let indexFinish1 = allFitchFormulas.indexOf(branch1[branch1.length - 1]) + 1;
     let indexStart2 = allFitchFormulas.indexOf(branch2[0]) + 1;
-    let indexFinish2 = allFitchFormulas.indexOf(branch2[branch2.length-1]) + 1;
+    let indexFinish2 = allFitchFormulas.indexOf(branch2[branch2.length - 1]) + 1;
 
     let tempStartMin = Math.min(indexStart1, indexStart2);
     let tempFinishMin = Math.min(indexFinish1, indexFinish2);
@@ -228,19 +265,22 @@ export function fourthRule(rulesRow, rulesBranch) {
     indexFinish2 = tempFinishMax;
 
     fitchMain.addRowToBranch(lastBranch1,
-      "∨E " + (rulesRow[0].index + 1)  + ", " + (indexStart1) + "-" + (indexFinish1)
+      "∨E " + (proofs[0].index + 1) + ", " + (indexStart1) + "-" + (indexFinish1)
       + ", " + (indexStart2) + "-" + (indexFinish2));
 
   }
 
-
-
+  return 0;
 
 
 }
 
-export function fifthRule(rules) {
-  let allFormula = rules[0].element.querySelectorAll('.fitch_formula');
+export function fifthRule(rules, branches) {
+  if (branches.length !== 1 || rules.length > 0) {
+    return -1;
+  }
+
+  let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
 
   let newRule = allFormula[0].textContent + "⇒" + allFormula[allFormula.length - 1].textContent;
 
@@ -254,19 +294,25 @@ export function fifthRule(rules) {
 
   fitchMain.addRowToBranch(newRule, "⇒I " + (indexStart + 1) + "-" + (indexFinish + 1));
 
+  return 0;
 }
 
-export function sixthRule(rules) {
-  rules[0].element.querySelector('span.indexC').remove();
-  rules[1].element.querySelector('span.indexC').remove();
-  let firstPart = rules[0].element.textContent.replaceAll(" ", "");
-  let secondPart = rules[1].element.textContent.replaceAll(" ", "");
-  let nameRule = '⇒E ' + (rules[0].index + 1) + ',' + (rules[1].index + 1);
+export function sixthRule(proofs, branches) {
+  if (proofs.length !== 2 || branches.length > 0) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+  proofs[1].element.querySelector('span.indexC').remove();
+  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
+  let secondPart = proofs[1].element.textContent.replaceAll(" ", "");
+  let nameRule = '⇒E ' + (proofs[0].index + 1) + ',' + (proofs[1].index + 1);
 
 
   if (getProof(checkWithAntlr(firstPart)).type !== "implication" && getProof(checkWithAntlr(secondPart)).type !== "implication") {
     alert("Missing implication, please change the selected rows");
-    return;
+    clearItems();
+    return -1;
   }
 
   //Де саме імплікація
@@ -279,16 +325,23 @@ export function sixthRule(rules) {
 
   if (JSON.stringify(implication.left) === JSON.stringify(notImplication)) {
     fitchMain.addRowToBranch(deductive.convertToLogicalExpression(implication.right), nameRule);
+    return 0;
+  } else {
+    return -1;
   }
 }
 
-export function seventhRule(rules) {
-  let allFormula = rules[0].element.querySelectorAll('.fitch_formula');
+export function seventhRule(rules, branches) {
 
-  if(allFormula[allFormula.length - 1].textContent !== "⊥")
-  {
+  if (branches.length !== 1 || rules.length > 0) {
+    return -1;
+  }
+
+  let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
+
+  if (allFormula[allFormula.length - 1].textContent !== "⊥") {
     alert("Missing absurdum, branch must end with an absurdum mark");
-    return;
+    return -1;
   }
 
   let newRule = "~" + "(" + allFormula[0].textContent + ")";
@@ -302,18 +355,25 @@ export function seventhRule(rules) {
 
 
   fitchMain.addRowToBranch(newRule, "¬I " + (indexStart + 1) + "-" + (indexFinish + 1));
+
+  return 0;
 }
 
-export function eighthRule(rules) {
-  rules[0].element.querySelector('span.indexC').remove();
-  rules[1].element.querySelector('span.indexC').remove();
+export function eighthRule(proofs, branches) {
 
-  let firstPart = rules[0].element.textContent.replaceAll(" ", "");
-  let secondPart = rules[1].element.textContent.replaceAll(" ", "");
+  if (proofs.length !== 2 || branches.length > 0) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+  proofs[1].element.querySelector('span.indexC').remove();
+
+  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
+  let secondPart = proofs[1].element.textContent.replaceAll(" ", "");
 
   if (getProof(checkWithAntlr(firstPart)).type !== "negation" && getProof(checkWithAntlr(secondPart)).type !== "negation") {
     alert("Missing negation, please change the selected rows");
-    return;
+    return -1;
   }
 
   let negation = getProof(checkWithAntlr(firstPart));
@@ -323,22 +383,27 @@ export function eighthRule(rules) {
     notNegation = getProof(checkWithAntlr(firstPart));
   }
 
-  console.log(negation);
-  console.log(notNegation);
 
   if (JSON.stringify(negation.value) === JSON.stringify(notNegation)) {
-    fitchMain.addRowToBranch('⊥', "¬E " + (rules[0].index + 1) + ',' + (rules[1].index + 1));
+    fitchMain.addRowToBranch('⊥', "¬E " + (proofs[0].index + 1) + ',' + (proofs[1].index + 1));
+    return 0;
+  } else {
+    return -1;
   }
 
 
 }
 
-export function ninthRule(rules) {
-  rules[0].element.querySelector('span.indexC').remove();
-  let rule = rules[0].element.textContent.replaceAll(" ", "");
+export function ninthRule(proofs, branches) {
+  if (proofs.length !== 1 || branches.length > 0) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+  let rule = proofs[0].element.textContent.replaceAll(" ", "");
   if (rule !== "⊥") {
     alert("Missing absurdum, please change the selected rows");
-    return;
+    return -1;
   }
 
   const div = document.createElement('div');
@@ -388,7 +453,7 @@ export function ninthRule(rules) {
 
   const outJust = document.getElementById('out_just');
   const titleDiv = document.createElement('div');
-  titleDiv.textContent = "∨I, " + (rules[0].index + 1); // Використання однієї і тієї ж назви для кожної формули
+  titleDiv.textContent = "∨I, " + (proofs[0].index + 1); // Використання однієї і тієї ж назви для кожної формули
   outJust.appendChild(titleDiv);
 
   const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
@@ -399,22 +464,27 @@ export function ninthRule(rules) {
   // lastFitchBranch.appendChild(fitchBranch);
 
   fitchMain.addNumberedDivs();
+
+  return 0;
 }
 
-export function tenthRule(rules) {
-  let allFormula = rules[0].element.querySelectorAll('.fitch_formula');
+export function tenthRule(rules, branches) {
 
-  if(allFormula[allFormula.length - 1].textContent !== "⊥")
-  {
+  if (branches.length !== 1 || rules.length > 0) {
+    return -1;
+  }
+
+  let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
+
+  if (allFormula[allFormula.length - 1].textContent !== "⊥") {
     alert("Missing absurdum, branch must end with an absurdum mark");
-    return;
+    return -1;
   }
 
   let check = getProof(checkWithAntlr(allFormula[0].textContent));
-  if(check.type !== "negation")
-  {
-      alert("Missing negation, please change the selected branch");
-      return;
+  if (check.type !== "negation") {
+    alert("Missing negation, please change the selected branch");
+    return -1;
   }
 
   let newRule = convertToLogicalExpression(check.value);
@@ -428,21 +498,39 @@ export function tenthRule(rules) {
 
 
   fitchMain.addRowToBranch(newRule, "C " + (indexStart + 1) + "-" + (indexFinish + 1));
+  return 0;
 }
 
-export function eleventhRule(rules) {
-  rules[0].element.querySelector('span.indexC').remove();
-  let rule = rules[0].element.textContent.replaceAll(" ", "");
+export function eleventhRule(proofs, branches) {
+
+  if (proofs.length !== 1 || branches.length>0) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+  let rule = proofs[0].element.textContent.replaceAll(" ", "");
 
   let check = checkWithAntlr(rule);
-  console.log(check);
+  // console.log(check);
 
   if (check.type === "negation" && check.value && check.value.type === "negation") {
     let value = deductive.convertToLogicalExpression(check.value.value);
-    fitchMain.addRowToBranch(value, '¬ ¬E ' + (rules[0].index + 1));
+    fitchMain.addRowToBranch(value, '¬ ¬E ' + (proofs[0].index + 1));
+    return 0;
+  } else {
+    return -1;
   }
 }
 
 
-export function twelfthRule() {
+export function twelfthRule(proofs, branches) {
+  if (proofs.length !== 1 || branches.length>0) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+
+  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
+
+  fitchMain.addRowToBranch(firstPart, 'R ' + (proofs[0].index + 1));
 }

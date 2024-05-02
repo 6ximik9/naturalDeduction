@@ -192,6 +192,13 @@ function getState(id) {
 
 
 export function saveState() {
+
+  const container = document.getElementById('proof');
+  const labels = container.querySelectorAll('label');
+  labels.forEach(label => {
+    label.style.background = '';
+  });
+
   // Отримуємо елемент "proof"
   var proofDiv = document.getElementById('proof').cloneNode(true);
 

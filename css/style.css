@@ -1133,6 +1133,13 @@ span.choose {
     /*width: 50%;*/
   }
 
+  .allBtn {
+    display: flex;        /* Establishes a flex container */
+    flex-wrap: wrap;      /* Allows wrapping of child elements to new lines */
+    justify-content: space-around; /* Centers buttons and provides space around them */
+  }
+
+
 }
 
 #menu {
@@ -1213,6 +1220,7 @@ span.choose {
   flex-wrap: wrap;
   margin-top: 0.5rem;
   justify-content: center;
+  min-width: 200px;
 }
 
 .mydict input[type="radio"] {
