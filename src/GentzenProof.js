@@ -81,6 +81,10 @@ document.getElementById('proof').addEventListener('click', function (event) {
 
   const clickedElement = event.target;
 
+  if (clickedElement.className === "previous") {
+    return;
+  }
+
   const container = document.getElementById('proof');
   const labels = container.querySelectorAll('label');
   labels.forEach(label => {
@@ -90,17 +94,13 @@ document.getElementById('proof').addEventListener('click', function (event) {
   if (clickedElement.tagName === 'DIV') {
     side = clickedElement;
     side.querySelector('label').style.background = 'rgba(136,190,213,0.78)';
-  } else if (clickedElement.tagName === 'LABEL')
-  {
-    if (clickedElement.className === "previous") {
-      console.log("asdasd");
-      return;
-    }
+  } else if (clickedElement.tagName === 'LABEL') {
+
     side = clickedElement.parentNode;
     clickedElement.style.background = 'rgba(136,190,213,0.78)';
   }
 
-  console.log("тут");
+
   let elements = document.getElementsByClassName("preview");
   if (elements.length <= 0) {
     setTimeout(() => {
@@ -108,8 +108,11 @@ document.getElementById('proof').addEventListener('click', function (event) {
     }, 100);
   }
 
-});
+  const radioInput = document.getElementById('tab1');
+  radioInput.checked = true;
 
+
+});
 
 
 function handleClick() {
@@ -117,11 +120,11 @@ function handleClick() {
     return;
   }
 
-  if (!side.querySelector('.preview') && side.className!=="closed") {
+  if (!side.querySelector('.preview') && side.className !== "closed") {
     // oldUserInput = "";
-     try {
-    //   if(oldUserInput==="") {
-        oldUserInput = side.querySelector('#proofText').textContent;
+    try {
+      //   if(oldUserInput==="") {
+      oldUserInput = side.querySelector('#proofText').textContent;
       // }
       processExpression(deductive.checkWithAntlr(side.querySelector('#proofText').textContent), 1);
       showAllHyp();
@@ -142,6 +145,7 @@ export function parseExpression(text) {
   addClickGentzenRules();
   addNextLastButtonClickGentzen();
   latexGentzen();
+  addOrRemoveParenthesesGentzen();
   let chars = CharStreams.fromString(text);
   let lexer = new GrammarLexer(chars);
   let tokens = new CommonTokenStream(lexer);
@@ -621,18 +625,26 @@ function createProofTree(conclusions, container) {
   } else {
     const proofDiv = document.createElement(`div`);
     let text = " ";
-    if(currentLevel!==3)
-    {
+    if (currentLevel !== 3) {
       let result = deductive.convertToLogicalExpression(conclusions.proof);
-      if(level !== 1)
-      {
+      if (level !== 1) {
         result = deductive.addRedundantParentheses(getProof(conclusions.proof));
       }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
     }
 
+
     proofDiv.id = 'divId-' + container.id;
-    proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
+    if (text !== " ") {
+      proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
+    } else {
+      proofDiv.innerHTML = '<label class="previous" id="proofText">' + text + '</label>';
+      proofDiv.style.paddingTop = "25px";
+      proofDiv.style.background = "white";
+      proofDiv.className = 'closed';
+      closeSide(side);
+      console.log(side);
+    }
     proofDiv.style.fontFamily = "'Times New Roman', sans-serif";
     addUserHyp(conclusions, proofDiv);
     levelDiv.appendChild(proofDiv);
@@ -661,11 +673,10 @@ function createProofTree(conclusions, container) {
   showAllHyp();
 
 
-  if (container.id !== 'proof') {
+  if (container.id !== 'proof' && container.className !== 'closed') {
     container.className = 'previous';
     container.querySelector('#proofText').className = 'previous';
   }
-
 
   // Вставити на початок контейнера
   if (container.firstChild) {
@@ -756,45 +767,29 @@ function addUserHyp(conclusions, proofDiv) {
 }
 
 
+function addOrRemoveParenthesesGentzen() {
 
+  document.getElementById('addParentheses').addEventListener('click', function () {
+    let inProof = deductive.checkWithAntlr(deductive.addRedundantParentheses(deductive.checkWithAntlr(side.querySelector('#proofText').textContent)));
+    // console.log(inProof);
+    side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.deleteHeadBack(inProof));
+  });
 
-document.getElementById('addParentheses').addEventListener('click', function () {
-  let inProof = deductive.checkWithAntlr(deductive.addRedundantParentheses(deductive.checkWithAntlr(side.querySelector('#proofText').textContent)));
-  // console.log(inProof);
-  side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.deleteHeadBack(inProof));
-});
+  document.getElementById('deleteParentheses').addEventListener('click', function () {
+    const expression = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
+    side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.getProof(deductive.checkWithAntlr(deductive.removeRedundantParentheses(expression))));
 
-document.getElementById('deleteParentheses').addEventListener('click', function () {
-  const expression = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
-  side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.getProof(deductive.checkWithAntlr(deductive.removeRedundantParentheses(expression))));
+  });
 
-});
-
-document.getElementById('returnUserInput').addEventListener('click', function () {
-  if (oldUserInput !== "") {
-    side.querySelector('#proofText').textContent = oldUserInput;
-  } else {
-    shakeButton(document.getElementById('returnUserInput'));
-  }
-});
-
-
-document.getElementById('uploadBtn').addEventListener('click', function() {
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.addEventListener('change', function(event) {
-    const file = event.target.files[0]; // Отримуємо файл з об'єкта події
-    if (file) {
-      const reader = new FileReader(); // Створюємо об'єкт для читання файлу
-      reader.onload = function(e) {
-        const fileContents = e.target.result; // Отримуємо вміст файлу
-        editorMonaco.editor.setValue(fileContents.toString());
-      };
-      reader.readAsText(file); // Читаємо файл як текст
+  document.getElementById('returnUserInput').addEventListener('click', function () {
+    if (oldUserInput !== "") {
+      side.querySelector('#proofText').textContent = oldUserInput;
+    } else {
+      shakeButton(document.getElementById('returnUserInput'));
     }
   });
-  fileInput.click(); // Спрацьовуємо клік на прихованому input для вибору файлу
-});
+
+}
 
 
 function addClickGentzenRules() {

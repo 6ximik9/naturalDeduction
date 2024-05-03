@@ -65,6 +65,27 @@ var latexModal = document.getElementById('latexModal');
 var info = document.getElementById('latexInfo');
 
 
+function setProofDef()
+{
+  const container = document.querySelector('#latexModal');
+  const items = container.querySelectorAll('.helpNavbarItem');
+
+  let documentItem = null;
+  let proofItem = null;
+
+// Перебір усіх елементів для знаходження відповідних "Document" та "Proof"
+  items.forEach(item => {
+    if (item.textContent.trim() === "Document") {
+      documentItem = item;
+    } else if (item.textContent.trim() === "Proof") {
+      proofItem = item;
+    }
+  });
+
+  documentItem.style.color = ''; // Видалення кольору елемента "Document"
+  proofItem.style.color = 'rgba(0, 97, 161, 0.66)'; // Задання кольору елемента "Proof"
+}
+
 export function latexGentzen() {
   document.getElementById('latex').addEventListener('click', function () {
 
@@ -77,6 +98,10 @@ export function latexGentzen() {
         return;
       }
     }
+
+
+    setProofDef();
+
     const proofContainer = document.querySelector('.proof-element_level-0');
     const proofTexts = getLate(proofContainer).reverse();
     // console.log(proofTexts.join('\n'));
@@ -97,6 +122,7 @@ export function latexFitch() {
       }
     }
 
+    setProofDef();
     clearItems();
 
     const branch = document.querySelectorAll('.fitch_branch');
@@ -117,9 +143,9 @@ export function latexFitch() {
 let level = ""
 let indexTest = 0;
 let outputArray = [];
+
 function printElementAndChildren(element) {
-  if(indexTest!==0)
-  {
+  if (indexTest !== 0) {
     level += "\\fa"
   }
   var outJustDiv = document.getElementById('out_just').children;
@@ -136,21 +162,19 @@ function printElementAndChildren(element) {
       let rule;
       if (child.style.borderBottom === '1px solid black') {
         const elementIndex = allFitchFormulas.indexOf(child);
-          rule = outJustDiv[elementIndex].textContent;
+        rule = outJustDiv[elementIndex].textContent;
         output = level + "\\fj $$" + latexEdit(child.textContent.replaceAll("", " "), 0) + "$$";
-      }
-      else{
+      } else {
         const elementIndex = allFitchFormulas.indexOf(child);
         rule = outJustDiv[elementIndex].textContent;
-        output =level + "\\fa $$" + latexEdit(child.textContent.replaceAll("", " "), 0)+ "$$";
+        output = level + "\\fa $$" + latexEdit(child.textContent.replaceAll("", " "), 0) + "$$";
       }
-      outputArray.push(output + " & $" + latexEdit(rule.replace(" ", " \\quad "),1) + "$\\\\");
+      outputArray.push(output + " & $" + latexEdit(rule.replace(" ", " \\quad "), 1) + "$\\\\");
     }
   });
 
   level = level.replace("\\fa", "")
 }
-
 
 
 document.querySelector('.closeLatex').addEventListener('click', function () {
@@ -166,7 +190,7 @@ latexModal.addEventListener('click', function (event) {
 
 document.getElementById('copyLatexCode').addEventListener('click', function () {
 
-  var textToCopy = document.getElementById('latexInfo').innerText;
+  var textToCopy = document.getElementById('latexInfo').textContent;
 
   var textarea = document.createElement("textarea");
   textarea.textContent = textToCopy;
@@ -259,4 +283,79 @@ function latexEdit(str, mode) {
 
   return str;
 }
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Отримуємо всі елементи з класом 'helpNavbarItem'
+  const container = document.querySelector('#latexModal');
+  const items = container.querySelectorAll('.helpNavbarItem');
+
+  // Додаємо обробник кліків для кожного елемента
+  items.forEach(function (item) {
+    item.addEventListener('click', function () {
+      // Виводимо в консоль текст елемента, по якому було зроблено клік
+      if (this.innerText === "Proof") {
+        if (typeProof === 0) {
+          const proofContainer = document.querySelector('.proof-element_level-0');
+          const proofTexts = getLate(proofContainer).reverse();
+          // console.log(proofTexts.join('\n'));
+          info.textContent = transformArray(proofTexts).join('\n');
+          latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
+          document.querySelector('#latexCode').style.height = '600px';
+        } else {
+          clearItems();
+
+          const branch = document.querySelectorAll('.fitch_branch');
+          outputArray.push("\\begin{fitch}");
+          printElementAndChildren(branch[0]);
+          outputArray.push("\\end{fitch}");
+
+          info.textContent = outputArray.join('\n');
+          latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
+          document.querySelector('#latexCode').style.height = '600px';
+
+          indexTest = 0;
+          level = "";
+          outputArray = [];
+        }
+      } else if (this.innerText === "Document") {
+        if (typeProof === 0) {
+          info.textContent = "";
+          const startDoc = "\\documentclass{article}\n" +
+            "\\usepackage{bussproofs} %https://ctan.org/pkg/bussproofs \n\n" +
+            "\\begin{document}\n";
+
+          const proofContainer = document.querySelector('.proof-element_level-0');
+          const proofTexts = getLate(proofContainer).reverse();
+          // console.log(proofTexts.join('\n'));
+          info.textContent = startDoc + "\n" + transformArray(proofTexts).join('\n') + "\n\n\\end{document}";
+          latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
+          document.querySelector('#latexCode').style.height = '600px';
+        } else {
+          info.textContent = "";
+          const startDoc = "\\documentclass{article}\n" +
+            "\\usepackage{fitch} %http://www.actual.world/resources/tex/sty/kluwer/edited/fitch.sty \n\n" +
+            "\\begin{document}\n";
+
+          clearItems();
+          const branch = document.querySelectorAll('.fitch_branch');
+          outputArray.push("\\begin{fitch}");
+          printElementAndChildren(branch[0]);
+          outputArray.push("\\end{fitch}");
+
+          info.textContent = startDoc + "\n" + outputArray.join('\n') + "\n\n\\end{document}";
+          latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
+          document.querySelector('#latexCode').style.height = '600px';
+
+          indexTest = 0;
+          level = "";
+          outputArray = [];
+        }
+      }
+
+    });
+  });
+});
+
+
 

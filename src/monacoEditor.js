@@ -18,23 +18,27 @@ monaco.languages.registerCompletionItemProvider('proofLanguage', {
       endColumn: position.column
     });
 
-    // Перевіряємо, чи попередній символ - '/'
-    var prevChar = lineContent.trim().slice(-1);
-    if (prevChar !== '\\') {
-      return {suggestions: []}; // Якщо попередній символ не '/', повертаємо порожній список підказок
+    // Перевіряємо, чи містить рядок знак '\'
+    if (!lineContent.includes('\\')) {
+      return {suggestions: []}; // Якщо рядок не містить '\', повертаємо порожній список підказок
+      // return suggestions(position, ''); // Викликаємо функцію suggestions для отримання підсказок
     }
 
-    var word = model.getWordUntilPosition(position);
+    // Визначаємо діапазон, де буде вставлено підсказку
     var range = {
       startLineNumber: position.lineNumber,
       endLineNumber: position.lineNumber,
-      startColumn: word.startColumn - 1,
-      endColumn: word.endColumn
+      startColumn: lineContent.lastIndexOf('\\')+1,
+      endColumn: position.column
     };
 
-    return suggestions(position, range);
+    return suggestions(position, range); // Викликаємо функцію suggestions для отримання підсказок
   }
 });
+
+
+
+
 
 
 function suggestions(position, range) {
@@ -92,9 +96,13 @@ function suggestions(position, range) {
     {label: '\\Rightarrow', insertText: '⇒', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\lor', insertText: '∨', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\land', insertText: '∧', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\vee', insertText: '∨', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\wedge', insertText: '∧', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\neg', insertText: '¬', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\verum', insertText: '⊤', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\absurdum', insertText: '⊥', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\top', insertText: '⊤', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\bot', insertText: '⊥', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\-', insertText: '————————————————\n', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\proves', insertText: '⊢', range: range, kind: monaco.languages.CompletionItemKind.Text}
   ];
@@ -119,6 +127,19 @@ export let editor = monaco.editor.create(document.getElementById('editor'), {
   },
   wordBasedSuggestions: false
 });
+
+
+
+// Викликає підсказки автоматично під час зміни курсора
+editor.onDidChangeCursorPosition((e) => {
+  editor.trigger('anyString', 'editor.action.triggerSuggest');
+});
+
+// Викликає підсказки автоматично під час зміни вмісту моделі
+editor.onDidChangeModelContent((e) => {
+  editor.trigger('anyString', 'editor.action.triggerSuggest');
+});
+
 
 editor.getModel().onDidChangeContent(function (event) {
   var model = editor.getModel();

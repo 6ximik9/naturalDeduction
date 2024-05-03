@@ -59,12 +59,14 @@ export function fitchStart(formula) {
   document.getElementById('enterFormula').className = 'hidden';
   document.getElementById('undo_redo').style.display = 'flex';
   document.getElementById('inputFitch').style.display = 'flex';
+  document.getElementById('returnUserInput').remove();
   document.getElementById('userText').textContent = convertToLogicalExpression(getProof(checkWithAntlr(formula)));
   addClickFitchRules();
   addNextLastButtonClickFitch();
   processExpression(checkWithAntlr(formula), 1);
   createDivs();
   latexFitch();
+  addOrRemoveParenthesesFitch();
   userHypothesesFitch = [...new Set(userHypothesesFitch)];
   addBranch(userHypothesesFitch, 'Premise');
   console.log(fitchProof);
@@ -94,22 +96,17 @@ export function processExpression(expression, countRules) {
     return;
   }
 
-  if (clickedProofs.length === 1 && clickedBranch.length===0) {
+  if (clickedProofs.length === 1 && clickedBranch.length === 0) {
     generateButtons(4, [buttons[2], buttons[3], buttons[11], buttons[12]]);
-  } else if (clickedProofs.length === 2 && clickedBranch.length===0) {
+  } else if (clickedProofs.length === 2 && clickedBranch.length === 0) {
     generateButtons(3, [buttons[1], buttons[6], buttons[8]]);
-  } else if (clickedProofs.length === 0 && clickedBranch.length===0) {
+  } else if (clickedProofs.length === 0 && clickedBranch.length === 0) {
     generateButtons(0, buttons);
-  }
-  else if(clickedProofs.length === 1 && clickedBranch.length===2)
-  {
+  } else if (clickedProofs.length === 1 && clickedBranch.length === 2) {
     generateButtons(1, [buttons[4]]);
-  }
-  else if(clickedBranch.length===1 && clickedProofs.length===0)
-  {
+  } else if (clickedBranch.length === 1 && clickedProofs.length === 0) {
     generateButtons(3, [buttons[5], buttons[7], buttons[10]]);
   }
-
 
 
 }
@@ -196,7 +193,7 @@ function buttonClicked(buttonText, button) {
       saveStateFitch();
       break;
     case "\\lor E, m, n, p":
-      if (rulesFitch.fourthRule(clickedProofs, clickedBranch)===-1) {
+      if (rulesFitch.fourthRule(clickedProofs, clickedBranch) === -1) {
         clearItems();
         shakeButton(button);
         return;
@@ -205,7 +202,7 @@ function buttonClicked(buttonText, button) {
       saveStateFitch();
       break;
     case "\\Rightarrow I, n, m":
-      if (rulesFitch.fifthRule(clickedProofs,clickedBranch) !== 1) {
+      if (rulesFitch.fifthRule(clickedProofs, clickedBranch) !== 1) {
         clearItems();
         shakeButton(button);
         return;
@@ -223,7 +220,7 @@ function buttonClicked(buttonText, button) {
       saveStateFitch();
       break;
     case "\\neg I, m, n":
-      if (rulesFitch.seventhRule(clickedProofs, clickedBranch)===-1) {
+      if (rulesFitch.seventhRule(clickedProofs, clickedBranch) === -1) {
         clearItems();
         shakeButton(button);
         return;
@@ -232,7 +229,7 @@ function buttonClicked(buttonText, button) {
       saveStateFitch();
       break;
     case "\\neg E, n, m":
-      if (rulesFitch.eighthRule(clickedProofs, clickedBranch)===-1) {
+      if (rulesFitch.eighthRule(clickedProofs, clickedBranch) === -1) {
         clearItems();
         shakeButton(button);
         return;
@@ -250,7 +247,7 @@ function buttonClicked(buttonText, button) {
       saveStateFitch();
       break;
     case "C, m,n":
-      if (rulesFitch.tenthRule(clickedProofs,clickedBranch)===-1) {
+      if (rulesFitch.tenthRule(clickedProofs, clickedBranch) === -1) {
         clearItems();
         shakeButton(button);
         return;
@@ -259,7 +256,7 @@ function buttonClicked(buttonText, button) {
       saveStateFitch();
       break;
     case "\\neg\\neg E,n":
-      if (rulesFitch.eleventhRule(clickedProofs, clickedBranch)===-1) {
+      if (rulesFitch.eleventhRule(clickedProofs, clickedBranch) === -1) {
         clearItems();
         shakeButton(button);
         return;
@@ -268,8 +265,7 @@ function buttonClicked(buttonText, button) {
       saveStateFitch();
       break;
     case "R,n":
-      if(rulesFitch.twelfthRule(clickedProofs, clickedBranch)===-1)
-      {
+      if (rulesFitch.twelfthRule(clickedProofs, clickedBranch) === -1) {
         clearItems();
         shakeButton(button);
         return;
@@ -518,7 +514,6 @@ document.getElementById('proof').addEventListener('click', function (event) {
       }
     }
 
-    console.log(clickedProofs);
 
     const radioInput = document.getElementById('tab1');
     radioInput.checked = true;
@@ -575,7 +570,6 @@ export function addRowToBranch(formula, title) {
 
 
 export function clearItems() {
-
   clickedProofs.forEach(function (item) {
     item.element.style.backgroundColor = '';
     const spanElement = item.element.querySelector('span.indexC');
@@ -599,6 +593,52 @@ export function clearItems() {
 }
 
 
+let clonedArray = [];
+
+function addOrRemoveParenthesesFitch() {
+  document.getElementById('addParentheses').addEventListener('click', function () {
+    clickedProofs.forEach(function (item) {
+      const spanElement = item.element.querySelector('span.indexC');
+      item.element.querySelector('span.indexC').remove();
+      if(clonedArray.length!==2) {
+        clonedArray.push(item.element.textContent);
+      }
+      item.element.textContent = deductive.addRedundantParentheses(getProof(checkWithAntlr(item.element.textContent))).replaceAll(" ", "");
+
+      item.element.appendChild(spanElement);
+    });
+  });
+
+  document.getElementById('deleteParentheses').addEventListener('click', function () {
+    clickedProofs.forEach(function (item) {
+
+      const spanElement = item.element.querySelector('span.indexC');
+      item.element.querySelector('span.indexC').remove();
+
+      if(clonedArray.length!==2) {
+        clonedArray.push(item.element.textContent);
+      }
+      item.element.textContent = deductive.removeRedundantParentheses(getProof(checkWithAntlr(item.element.textContent))).replaceAll(" ", "");
+
+      item.element.appendChild(spanElement);
+    });
+    console.log(clonedArray);
+  });
+
+  // document.getElementById('returnUserInput').addEventListener('click', function () {
+  //   if (clonedArray.length === 0) {
+  //     return;
+  //   }
+  //   clickedProofs.forEach(function (item, index) {
+  //     const spanElement = item.element.querySelector('span.indexC');
+  //     item.element.querySelector('span.indexC').remove();
+  //
+  //     item.element.textContent = clonedArray[index];
+  //     item.element.appendChild(spanElement);
+  //   });
+  // });
+
+}
 
 
 
