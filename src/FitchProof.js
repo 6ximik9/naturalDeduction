@@ -321,14 +321,9 @@ function createDivs() {
   proofDiv.appendChild(outFitch);
 }
 
+
 let enterText = document.getElementById('editorPanel');
-editorMonaco.editor.onKeyDown(function (e) {
-  // Перевіряємо, чи натиснута клавіша Enter
-  if (e.keyCode === monaco.KeyCode.Enter && document.getElementById('preview')) {
-    // Скасовуємо стандартну дію (перехід на новий рядок)
-    e.preventDefault();
-  }
-});
+
 
 function addBranch(formulas, title) {
   if (title !== "Assumption") {
@@ -419,6 +414,13 @@ function addBranch(formulas, title) {
   addNumberedDivs();
 }
 
+editorMonaco.editor.onKeyDown(function (e) {
+  // Перевіряємо, чи натиснута клавіша Enter
+  if (e.keyCode === monaco.KeyCode.Enter && document.getElementsByClassName('userFormula')) {
+    // Скасовуємо стандартну дію (перехід на новий рядок)
+    e.preventDefault();
+  }
+});
 
 function saveAsp() {
   if (checkRule(0, editorMonaco.editor.getValue()) === 1) {
