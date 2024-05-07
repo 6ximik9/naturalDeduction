@@ -129,7 +129,7 @@ function handleClick() {
       processExpression(deductive.checkWithAntlr(side.querySelector('#proofText').textContent), 1);
       showAllHyp();
     } catch (error) {
-      console.error('Close or previous');
+      // console.error('Close or previous');
     }
   }
 
@@ -232,15 +232,6 @@ function generateButtons(buttonCount, buttonTexts) {
   const buttonContainer = document.getElementById('button-container');
   buttonContainer.innerHTML = '';
 
-  for (let i = 0; i < buttonCount; i++) {
-    let button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i]));
-    buttonContainer.appendChild(button);
-  }
-
-  MathJax.typesetPromise().then(() => {
-    // Код тут виконається після того, як MathJax закінчить форматування формул
-  }).catch((err) => console.log('Помилка MathJax:', err));
-
   let hypothesesAll = deductive.getAllHypotheses(side);
   let find = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
 
@@ -256,6 +247,16 @@ function generateButtons(buttonCount, buttonTexts) {
     btn.style.minHeight = '80px';
     buttonContainer.appendChild(btn);
   }
+
+  for (let i = 0; i < buttonCount; i++) {
+    let button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i]));
+    buttonContainer.appendChild(button);
+  }
+
+  MathJax.typesetPromise().then(() => {
+    // Код тут виконається після того, як MathJax закінчить форматування формул
+  }).catch((err) => console.log('Помилка MathJax:', err));
+
 
 }
 
@@ -545,11 +546,16 @@ export function createTestProof(conclusions) {
   button.addEventListener('click', saveTree);
 
   button.innerHTML = `
-    <span class="buttonText">Save</span>
-    <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
-    <img src="../img/play.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-  </div>
-`;
+  <span class="buttonText">Save</span>
+  <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
+    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#0061a1">
+      <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.24000000000000005"/>
+      <g id="SVGRepo_iconCarrier">
+        <path d="M3 12L3 18.9671C3 21.2763 5.53435 22.736 7.59662 21.6145L10.7996 19.8727M3 8L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L14.0026 18.131" stroke="#0061a1" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>`;
 
 
   proofPreview.appendChild(enterText);
@@ -643,7 +649,7 @@ function createProofTree(conclusions, container) {
       proofDiv.style.background = "white";
       proofDiv.className = 'closed';
       closeSide(side);
-      console.log(side);
+      // console.log(side);
     }
     proofDiv.style.fontFamily = "'Times New Roman', sans-serif";
     addUserHyp(conclusions, proofDiv);

@@ -28,10 +28,8 @@ let allProof = document.getElementById('proof');
 let elementsAndVariablesArray = [];
 
 
-
 // Додаємо обробник події "клік" для кнопок
-export function addNextLastButtonClickGentzen()
-{
+export function addNextLastButtonClickGentzen() {
   backwardButton.addEventListener('click', function () {
     if (currentLevel === 5 || currentLevel === 11 || currentLevel === 13 || currentLevel === 7 || currentLevel === 8) {
       const divToRemove = document.getElementById("preview");
@@ -43,9 +41,9 @@ export function addNextLastButtonClickGentzen()
     }
 
     if (!elementsAndVariablesArray[state]) {
-      setState(state-1);
+      setState(state - 1);
     }
-    setState(state-1);
+    setState(state - 1);
     if (state < 0) {
       location.reload(true);
       return;
@@ -54,40 +52,32 @@ export function addNextLastButtonClickGentzen()
 
     if (state === 0) {
       backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
+      homeButton.parentElement.style.display = 'none';
     }
   });
 
 
   forwardButton.addEventListener('click', function () {
-    setState(state+1);
+    setState(state + 1);
     if (!elementsAndVariablesArray[state]) {
-      setState(state-1);
+      setState(state - 1);
       return;
     }
     getState(state);
     backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
-
+    homeButton.parentElement.style.display = 'flex';
   });
 }
 
 
-export function addNextLastButtonClickFitch()
-{
+export function addNextLastButtonClickFitch() {
   backwardButton.addEventListener('click', function () {
-    // if (currentLevel === 5 || currentLevel === 11 || currentLevel === 13 || currentLevel === 7 || currentLevel === 8) {
-    //   const divToRemove = document.getElementById("preview");
-    //   if (divToRemove) {
-    //     divToRemove.remove();
-    //     document.getElementById('keyProof').className = 'hidden';
-    //     return;
-    //   }
-    // }
 
     if (!elementsAndVariablesArray[fitchStates]) {
-      setStateFitch(fitchStates-1);
+      setStateFitch(fitchStates - 1);
     }
 
-    setStateFitch(fitchStates-1);
+    setStateFitch(fitchStates - 1);
     if (fitchStates < 0) {
       location.reload(true);
       return;
@@ -96,19 +86,20 @@ export function addNextLastButtonClickFitch()
 
     if (fitchStates === 0) {
       backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
+      homeButton.parentElement.style.display = 'none';
     }
   });
 
 
   forwardButton.addEventListener('click', function () {
-    setStateFitch(fitchStates+1);
+    setStateFitch(fitchStates + 1);
     if (!elementsAndVariablesArray[fitchStates]) {
-      setStateFitch(fitchStates-1);
+      setStateFitch(fitchStates - 1);
       return;
     }
     getStateFitch(fitchStates);
     backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
-
+    homeButton.parentElement.style.display = 'flex';
   });
 }
 
@@ -135,6 +126,7 @@ export function saveStateFitch() {
   setStateFitch(elementsAndVariablesArray.length);
   if (fitchStates > 0) {
     backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+    homeButton.parentElement.style.display = 'flex';
   }
   addElementWithIndex(elementData, fitchStates);
 }
@@ -224,6 +216,7 @@ export function saveState() {
   setState(elementsAndVariablesArray.length);
   if (state > 0) {
     backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+    homeButton.parentElement.style.display = 'flex';
   }
   addElementWithIndex(elementData, state);
 }
@@ -233,5 +226,13 @@ function addElementWithIndex(elementData, index) {
   let elementWithIndex = {data: elementData, index: index};
   // Додаємо об'єкт до масиву
   elementsAndVariablesArray.push(elementWithIndex);
-  setState(state+1);
+  setState(state + 1);
 }
+
+var homeButton = document.getElementById("home");
+homeButton.addEventListener("click", function () {
+  var confirmation = confirm("Are you sure you want to go to the main page?");
+  if (confirmation) {
+    location.reload(true);
+  }
+});

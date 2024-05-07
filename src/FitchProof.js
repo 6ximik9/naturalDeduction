@@ -52,10 +52,16 @@ export function setBranchIndex(newIndex) {
 
 export function addNewProof(proof) {
   fitchProof.push(proof);
-  console.log(fitchProof);
+  // console.log(fitchProof);
 }
 
 export function fitchStart(formula) {
+  let filteredArray = userHypothesesFitch.filter(item => item.trim().length > 0);
+  if(filteredArray.length===0)
+  {
+    alert("Please enter the assumptions.")
+    return;
+  }
   document.getElementById('enterFormula').className = 'hidden';
   document.getElementById('undo_redo').style.display = 'flex';
   document.getElementById('inputFitch').style.display = 'flex';
@@ -69,7 +75,6 @@ export function fitchStart(formula) {
   addOrRemoveParenthesesFitch();
   userHypothesesFitch = [...new Set(userHypothesesFitch)];
   addBranch(userHypothesesFitch, 'Premise');
-  console.log(fitchProof);
   saveStateFitch();
 }
 
@@ -163,7 +168,7 @@ function buttonClicked(buttonText, button) {
   }
 
   const lastParentheses = deductive.extractTextBetweenParentheses(buttonText.toString());
-  console.log(lastParentheses);
+  // console.log(lastParentheses);
   switch (lastParentheses) {
     case "\\land I, m, n":
       if (rulesFitch.firstRule(clickedProofs, clickedBranch) === -1) {
@@ -532,7 +537,36 @@ function addClickFitchRules() {
       } else if (tabId === 'tab2') {
         processExpression("RecommendedRules", 0);
       } else {
+        if (clickedProofs.length !== 1) {
+          alert("Please select one line with the formula");
+          const radioInput = document.getElementById('tab1');
+          radioInput.checked = true;
+          return;
+        }
+        const buttonContainer = document.getElementById('button-container');
+        buttonContainer.innerHTML = '';
 
+        let svgContainer = document.createElement("div");
+        svgContainer.style.width = "100%"; // Або використовуйте фіксовану ширину, наприклад "1000px"
+        svgContainer.style.maxWidth = "1000px";
+        svgContainer.style.overflow = "auto"; // Дозволяє прокрутку, якщо вміст більше контейнера
+        svgContainer.style.height = "auto"; // Висота адаптується до вмісту
+
+        let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svgElement.setAttribute("width", "1000");
+        svgElement.setAttribute("height", "1000"); // Початкова висота, може бути змінена динамічно
+
+        svgContainer.appendChild(svgElement);
+
+        buttonContainer.appendChild(svgContainer);
+
+        const spanElement = clickedProofs[0].element.querySelector('span.indexC');
+        clickedProofs[0].element.querySelector('span.indexC').remove();
+        let size = createTreeD3(getProof(checkWithAntlr(clickedProofs[0].element.textContent)));
+        clickedProofs[0].element.appendChild(spanElement);
+
+        svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
+        svgElement.setAttribute("height", (size[1] + 100).toString());
       }
     });
   });
@@ -600,7 +634,7 @@ function addOrRemoveParenthesesFitch() {
     clickedProofs.forEach(function (item) {
       const spanElement = item.element.querySelector('span.indexC');
       item.element.querySelector('span.indexC').remove();
-      if(clonedArray.length!==2) {
+      if (clonedArray.length !== 2) {
         clonedArray.push(item.element.textContent);
       }
       item.element.textContent = deductive.addRedundantParentheses(getProof(checkWithAntlr(item.element.textContent))).replaceAll(" ", "");
@@ -615,14 +649,14 @@ function addOrRemoveParenthesesFitch() {
       const spanElement = item.element.querySelector('span.indexC');
       item.element.querySelector('span.indexC').remove();
 
-      if(clonedArray.length!==2) {
+      if (clonedArray.length !== 2) {
         clonedArray.push(item.element.textContent);
       }
       item.element.textContent = deductive.removeRedundantParentheses(getProof(checkWithAntlr(item.element.textContent))).replaceAll(" ", "");
 
       item.element.appendChild(spanElement);
     });
-    console.log(clonedArray);
+    // console.log(clonedArray);
   });
 
   // document.getElementById('returnUserInput').addEventListener('click', function () {

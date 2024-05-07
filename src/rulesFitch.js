@@ -146,7 +146,7 @@ export function thirdRule(proofs, branches) {
   checkRule(1, editorMonaco.editor.getValue());
   editorMonaco.editor.updateOptions({fontSize: 28})
 
-  enterText.style.width = '300px';
+  enterText.style.width = '500px';
   enterText.style.height = '50px';
 
   // Створюємо кнопку
@@ -161,7 +161,17 @@ export function thirdRule(proofs, branches) {
   button.style.height = '50px';
   button.id = 'saveBtn';
 
-  button.innerHTML = `<span class="buttonText">Save</span>`;
+  button.innerHTML = `
+  <span class="buttonText">Save</span>
+  <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
+    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#0061a1">
+      <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.24000000000000005"/>
+      <g id="SVGRepo_iconCarrier">
+        <path d="M3 12L3 18.9671C3 21.2763 5.53435 22.736 7.59662 21.6145L10.7996 19.8727M3 8L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L14.0026 18.131" stroke="#0061a1" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>`;
 
   button.addEventListener('click', function () {
     let ruleUser = getProof(checkWithAntlr(editorMonaco.editor.getValue()));
@@ -414,7 +424,7 @@ export function ninthRule(proofs, branches) {
   checkRule(1, editorMonaco.editor.getValue());
   editorMonaco.editor.updateOptions({fontSize: 28})
 
-  enterText.style.width = '300px';
+  enterText.style.width = '500px';
   enterText.style.height = '50px';
 
   // Створюємо кнопку
@@ -429,7 +439,17 @@ export function ninthRule(proofs, branches) {
   button.style.height = '50px';
   button.id = 'saveBtn';
 
-  button.innerHTML = `<span class="buttonText">Save</span>`;
+  button.innerHTML = `
+  <span class="buttonText">Save</span>
+  <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
+    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#0061a1">
+      <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.24000000000000005"/>
+      <g id="SVGRepo_iconCarrier">
+        <path d="M3 12L3 18.9671C3 21.2763 5.53435 22.736 7.59662 21.6145L10.7996 19.8727M3 8L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L14.0026 18.131" stroke="#0061a1" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>`;
 
   button.addEventListener('click', function () {
     if (checkRule(0, editorMonaco.editor.getValue()) === 1) {

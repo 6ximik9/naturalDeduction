@@ -9,7 +9,7 @@ import * as help from './help';
 import * as latex from './latexGen';
 import {getProof} from "./deductiveEngine";
 import * as fitch from "./FitchProof";
-import {fitchStart, setUserHypothesesFitch} from "./FitchProof";
+import {fitchStart, setUserHypothesesFitch, userHypothesesFitch} from "./FitchProof";
 
 let hasError = false;
 let inputText = "";
@@ -48,7 +48,7 @@ export function checkRule(index, text) {
   lexer.addErrorListener({
     syntaxError: function (recognizer, offendingSymbol, line, column, msg, e) {
       hasError = true;
-      console.error(`Error on a line ${line}:${column} ${msg.replaceAll("\u22A2", '⊢')}`);
+      // console.error(`Error on a line ${line}:${column} ${msg.replaceAll("\u22A2", '⊢')}`);
       msg = msg.replaceAll("\\u22A2", '⊢');
       editorMonaco.setEditorError(index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
       enterButton.style.backgroundColor = 'rgba(253, 81, 81, 0.73)';
@@ -66,7 +66,7 @@ export function checkRule(index, text) {
   parser.removeErrorListeners(); // Видаляємо стандартних слухачів
   parser.addErrorListener({
     syntaxError: function (recognizer, offendingSymbol, line, column, msg, e) {
-      console.error(`Error on a line ${line}:${column} ${msg.replaceAll("\\u22A2", '⊢')}`);
+      // console.error(`Error on a line ${line}:${column} ${msg.replaceAll("\\u22A2", '⊢')}`);
       msg = msg.replaceAll("\\u22A2", '⊢');
       editorMonaco.setEditorError(index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
       enterButton.style.backgroundColor = 'rgba(253, 81, 81, 0.73)';
@@ -133,7 +133,11 @@ function gentzenProof()
     gentzen.setUserHypotheses(deductive.getHypotheses(userText));
     let lineArray = userText.split('\n');
     lineArray = lineArray.filter(line => line.trim() !== '');
-
+    let filteredArray = deductive.getHypotheses(userText).filter(item => item.trim().length > 0);
+    if(filteredArray.length===0)
+    {
+      return;
+    }
     gentzen.parseExpression(lineArray[lineArray.length - 1]);
 
   }
@@ -143,6 +147,11 @@ function gentzenProof()
     const lineArray = userText.split('⊢');
     // gentzen.setUserHypotheses(deductive.getHypotheses(lineArray[0]));
     gentzen.setUserHypotheses(lineArray[0].split(","));
+    let filteredArray = lineArray[0].split(",").filter(item => item.trim().length > 0);
+    if(filteredArray.length===0)
+    {
+      return;
+    }
     gentzen.parseExpression(lineArray[1]);
   }
   else {
@@ -153,7 +162,7 @@ function gentzenProof()
 export function shakeElement(elementId, times) {
   let element = document.getElementById(elementId);
   if (!element) {
-    console.error("Елемент з ідентифікатором " + elementId + " не знайдено.");
+    // console.error("Елемент з ідентифікатором " + elementId + " не знайдено.");
     return;
   }
 

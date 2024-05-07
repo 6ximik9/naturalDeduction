@@ -5,6 +5,7 @@ import {checkWithAntlr} from './deductiveEngine';
 
 
 let fontSize = 32;
+
 function isAppOpen() {
   // Перевіряємо, чи браузер має можливість визначення активних вікон
   if (typeof window !== 'undefined' && typeof window.document !== 'undefined') {
@@ -77,12 +78,11 @@ navbarItems.forEach(function (item) {
 
     if (clickedItem.textContent === 'General') {
       setGeneral();
-    } else if(clickedItem.textContent === 'Syntax') {
+    } else if (clickedItem.textContent === 'Syntax') {
       info.innerHTML = '';
       helpDiv.style.height = '900px';
       info.appendChild(createMathTable());
-    }
-    else {
+    } else {
       info.innerHTML = '';
       helpDiv.style.height = '600px';
       helpInput();
@@ -96,7 +96,11 @@ navbarItems.forEach(function (item) {
 function setGeneral() {
   helpDiv.style.height = '600px';
   info.innerHTML = '';
-  var run = createHelpItem('Proof by deduction', 'Proof', 'Click to start the proof by natural deduction', '../img/play.svg');
+  // var run = createHelpItem('Proof by deduction', 'Proof', 'Click to start the proof by natural deduction', '../img/play.svg');
+  // var paste = createHelpItem('Example', 'Paste example', 'Click to insert an example or sample. This helps you add an example faster and demonstrate an idea or problem.', '');
+  // var font = createHelpItem('Setting font size', 'Font size', 'Tap to change the font size. This will allow you to adjust the font to the right size to make it easier to enter information.', '');
+
+  var run = createHelpItem('Proof by deduction', 'Proof', 'Click to start the proof by natural deduction', 'play');
   var paste = createHelpItem('Example', 'Paste example', 'Click to insert an example or sample. This helps you add an example faster and demonstrate an idea or problem.', '');
   var font = createHelpItem('Setting font size', 'Font size', 'Tap to change the font size. This will allow you to adjust the font to the right size to make it easier to enter information.', '');
 
@@ -122,12 +126,26 @@ function createHelpItem(title, buttonText, description, svgPath) {
   button.style.color = 'rgb(33, 33, 33)';
   button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
   button.style.fontSize = fontSize + 'px';
-  button.innerHTML = `
+  if (svgPath === 'play') {
+    button.innerHTML = `
+  <span class="buttonText">${buttonText}</span>
+  <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
+    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#0061a1">
+      <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.24000000000000005"/>
+      <g id="SVGRepo_iconCarrier">
+        <path d="M3 12L3 18.9671C3 21.2763 5.53435 22.736 7.59662 21.6145L10.7996 19.8727M3 8L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L14.0026 18.131" stroke="#0061a1" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>`;
+  } else {
+    button.innerHTML = `
     <span class="buttonText">${buttonText}</span>
     <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
     <img src="${svgPath}" alt="SVG Icon" style="height: 100%; width: 100%;">
   </div>
 `;
+  }
 
   if (svgPath === '') {
     button.innerHTML = `
@@ -178,18 +196,18 @@ function createHelpItem(title, buttonText, description, svgPath) {
 function createMathTable() {
 // Define the symbols and their corresponding codes
   const symbols = [
-    { symbol1: 'αΑ', code1: '\\alpha \\Alpha', symbol2: 'βΒ', code2: '\\beta \\Beta' },
-    { symbol1: 'γΓ', code1: '\\gamma \\Gamma', symbol2: 'δΔ', code2: '\\delta \\Delta' },
-    { symbol1: 'ϵΕ', code1: '\\epsilon \\Epsilon', symbol2: 'ζΖ', code2: '\\zeta \\Zeta' },
-    { symbol1: 'ηΗ', code1: '\\eta \\Eta', symbol2: 'θΘ', code2: '\\theta \\Theta' },
-    { symbol1: 'ιΙ', code1: '\\iota \\Iota', symbol2: 'κΚ', code2: '\\kappa \\Kappa' },
-    { symbol1: 'λΛ', code1: '\\lambda \\Lambda', symbol2: 'μΜ', code2: '\\mu \\Mu' },
-    { symbol1: 'νΝ', code1: '\\nu \\Nu', symbol2: 'ξΞ', code2: '\\xi \\Xi' },
-    { symbol1: 'οΟ', code1: '\\omicron \\Omicron', symbol2: 'πΠ', code2: '\\pi \\Pi' },
-    { symbol1: 'ρΡ', code1: '\\rho \\Rho', symbol2: 'σΣ', code2: '\\sigma \\Sigma' },
-    { symbol1: 'τΤ', code1: '\\tau \\Tau', symbol2: 'υΥ', code2: '\\upsilon \\Upsilon' },
-    { symbol1: 'ϕΦ', code1: '\\phi \\Phi', symbol2: 'χΧ', code2: '\\chi \\Chi' },
-    { symbol1: 'ψΨ', code1: '\\psi \\Psi', symbol2: 'ωΩ', code2: '\\omega \\Omega' }
+    {symbol1: 'αΑ', code1: '\\alpha \\Alpha', symbol2: 'βΒ', code2: '\\beta \\Beta'},
+    {symbol1: 'γΓ', code1: '\\gamma \\Gamma', symbol2: 'δΔ', code2: '\\delta \\Delta'},
+    {symbol1: 'ϵΕ', code1: '\\epsilon \\Epsilon', symbol2: 'ζΖ', code2: '\\zeta \\Zeta'},
+    {symbol1: 'ηΗ', code1: '\\eta \\Eta', symbol2: 'θΘ', code2: '\\theta \\Theta'},
+    {symbol1: 'ιΙ', code1: '\\iota \\Iota', symbol2: 'κΚ', code2: '\\kappa \\Kappa'},
+    {symbol1: 'λΛ', code1: '\\lambda \\Lambda', symbol2: 'μΜ', code2: '\\mu \\Mu'},
+    {symbol1: 'νΝ', code1: '\\nu \\Nu', symbol2: 'ξΞ', code2: '\\xi \\Xi'},
+    {symbol1: 'οΟ', code1: '\\omicron \\Omicron', symbol2: 'πΠ', code2: '\\pi \\Pi'},
+    {symbol1: 'ρΡ', code1: '\\rho \\Rho', symbol2: 'σΣ', code2: '\\sigma \\Sigma'},
+    {symbol1: 'τΤ', code1: '\\tau \\Tau', symbol2: 'υΥ', code2: '\\upsilon \\Upsilon'},
+    {symbol1: 'ϕΦ', code1: '\\phi \\Phi', symbol2: 'χΧ', code2: '\\chi \\Chi'},
+    {symbol1: 'ψΨ', code1: '\\psi \\Psi', symbol2: 'ωΩ', code2: '\\omega \\Omega'}
   ];
 
 
@@ -251,18 +269,16 @@ function createMathTable() {
   greekLettersHeader.style.marginBottom = '10px';
 
 
-
   const logicalSymbols = [
-    { symbol: '⇒', code: '\\Rightarrow' },
-    { symbol: '∨', code: '\\lor' },
-    { symbol: '∧', code: '\\land' },
-    { symbol: '¬', code: '\\neg' },
-    { symbol: '⊤', code: '\\verum' },
-    { symbol: '⊥', code: '\\absurdum' },
-    { symbol: '——————', code: '\\-' },
-    { symbol: '⊢', code: '\\proves' }
+    {symbol: '⇒', code: '\\Rightarrow'},
+    {symbol: '∨', code: '\\lor'},
+    {symbol: '∧', code: '\\land'},
+    {symbol: '¬', code: '\\neg'},
+    {symbol: '⊤', code: '\\verum'},
+    {symbol: '⊥', code: '\\absurdum'},
+    {symbol: '——————', code: '\\-'},
+    {symbol: '⊢', code: '\\proves'}
   ];
-
 
 
   const tableLogic = document.createElement('table');
@@ -314,8 +330,7 @@ function createMathTable() {
   return container;
 }
 
-function helpInput()
-{
+function helpInput() {
   var inline = createHelpItem('Inline', '(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)', 'The user can enter logical formulas in a single line. The program will automatically identify the formula and allow you to make operations on it.', '');
   var multiline = createHelpItem('Multiline', 'φ⇒ψ<br>ψ⇒θ<br>θ<br>————————<br>(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)',
     'In this mode, the user can enter logical formulas one per line. All hypotheses are entered above the line, and the result or proven statement is entered below the line', '');
@@ -329,14 +344,12 @@ function helpInput()
 }
 
 
-
 var button = document.getElementById('redirectButton');
-console.log(button);
 // Додаємо обробник події 'click', який виконається при натисканні на кнопку
-button.addEventListener('click', function() {
+button.addEventListener('click', function () {
   // Виконуємо редірект
   console.log("123123");
-  window.open('https://forms.gle/sL82sU9THCbXxebJ7', '_blank');
+  window.open('https://forms.gle/k3v3sXibjAMzaqQ1A', '_blank');
 });
 
 
