@@ -77,6 +77,11 @@ h3 {
   width: 80%;
   min-width: 80%;
   overflow: scroll;
+  scrollbar-width: none; /* для Firefox */
+}
+
+#proof::-webkit-scrollbar {
+  display: none; /* приховуємо скрол */
 }
 
 #proof label
@@ -982,7 +987,14 @@ span.choose {
   width: 95%;
   height: 65%;
   margin-left: 3%;
+  scrollbar-width: none; /* для Firefox */
 }
+
+#latexInfo::-webkit-scrollbar {
+  display: none; /* приховуємо скрол */
+}
+
+
 #latexModal .helpNavbarItem
 {
   font-size: 32px;
