@@ -415,9 +415,8 @@ function addBranch(formulas, title) {
 }
 
 editorMonaco.editor.onKeyDown(function (e) {
-  // Перевіряємо, чи натиснута клавіша Enter
-  if (e.keyCode === monaco.KeyCode.Enter && document.getElementsByClassName('userFormula')) {
-    // Скасовуємо стандартну дію (перехід на новий рядок)
+  console.log(document.getElementsByClassName('userFormula'));
+  if (e.keyCode === monaco.KeyCode.Enter && document.getElementsByClassName('userFormula').length>0) {
     e.preventDefault();
   }
 });
