@@ -1105,6 +1105,12 @@ span.choose {
     font-size: 18px;
   }
 
+  .dropdown-contentFont li {
+    font-size: 22px !important;
+  }
+  .dropdown-content li {
+    font-size: 22px !important;
+  }
 
   #menu {
     margin-left: 14% !important;
