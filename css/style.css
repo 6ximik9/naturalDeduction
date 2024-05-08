@@ -871,6 +871,7 @@ span.choose {
   list-style: none;
   display: flex;
   position: relative;
+
 }
 
 /* tab list 會動的底線 */
@@ -1058,6 +1059,7 @@ span.choose {
 
   #proof{
     padding: 2%;
+    margin-top: 5%;
   }
 
   .content{
@@ -1065,6 +1067,39 @@ span.choose {
     width: 100%
   }
 
+  #hypotheses-container *
+  {
+    font-size: 25px !important;
+  }
+
+  .returnMain
+  {
+    margin-bottom: 1.5%;
+    display: none;
+    width: 65%;
+    margin-left: -10px;
+  }
+
+
+  .button-container button {
+    flex: 0 0 calc(33.33% - 200px); /* Розмір кнопки. Мінус 20px - це місце для відступів */
+    /*margin: 30px;*/
+    margin-left: 10px;
+    background-color: white;
+    border: none;
+    font-size: 20px;
+    box-sizing: border-box;
+    max-width: 380px;
+    border-radius: 50px;
+    padding: 10px 10px; /* ваші бажані відступи всередині кнопки */
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+
+  .tab-list {
+    font-size: 18px;
+  }
 
  .row{
    justify-content: center;
@@ -1112,15 +1147,10 @@ span.choose {
   }
 
 
-  #proof{
-    margin-top: 5%;
-    margin-bottom: 5%;
-  }
 
   #proof label{
-    font-size: 40px;
+    font-size: 25px;
   }
-
 
 
   #parentheses button{

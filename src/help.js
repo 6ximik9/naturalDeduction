@@ -13,9 +13,9 @@ function isAppOpen() {
     if (window.document.hidden || window.document.visibilityState !== 'visible') {
       // return false; // Якщо вікна не видимі, то застосунок не відкритий
     }
-    // return true; // Якщо вікна видимі, то застосунок відкритий
+    fontSize = 20;
   }
-  fontSize = 20; // Якщо оточення виконання не є браузером, повертаємо null
+   // Якщо оточення виконання не є браузером, повертаємо null
 }
 
 isAppOpen();
@@ -80,7 +80,7 @@ navbarItems.forEach(function (item) {
       setGeneral();
     } else if (clickedItem.textContent === 'Syntax') {
       info.innerHTML = '';
-      helpDiv.style.height = '900px';
+      helpDiv.style.height = '600px';
       info.appendChild(createMathTable());
     } else {
       info.innerHTML = '';
