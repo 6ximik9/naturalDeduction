@@ -1064,7 +1064,11 @@ span.choose {
 
   .content{
     margin-top: 15%;
-    width: 100%
+    width: 125%
+  }
+
+  .editorPanel{
+    width: 110%!important;
   }
 
   #hypotheses-container *
@@ -1099,6 +1103,21 @@ span.choose {
 
   .tab-list {
     font-size: 18px;
+  }
+
+
+  #menu {
+    margin-left: 14% !important;
+    width: 100% !important;
+    text-align: center; /* Центруємо вміст кнопки */
+    background: rgb(255, 255, 255);
+    border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    color: rgb(33, 33, 33);
+    box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+    border: none;
+    outline: none;
   }
 
  .row{
@@ -1203,6 +1222,8 @@ span.choose {
     display: flex;        /* Establishes a flex container */
     flex-wrap: wrap;      /* Allows wrapping of child elements to new lines */
     justify-content: space-around; /* Centers buttons and provides space around them */
+    width: 105%;
+    margin-left: 10%;
   }
 
 
