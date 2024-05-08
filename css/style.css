@@ -1113,7 +1113,7 @@ span.choose {
   }
 
   #menu {
-    margin-left: 14% !important;
+    margin-left: 11.5% !important;
     width: 100% !important;
     text-align: center; /* Центруємо вміст кнопки */
     background: rgb(255, 255, 255);
@@ -1229,9 +1229,13 @@ span.choose {
     flex-wrap: wrap;      /* Allows wrapping of child elements to new lines */
     justify-content: space-around; /* Centers buttons and provides space around them */
     width: 105%;
-    margin-left: 10%;
+    margin-left: 9% !important;
   }
 
+  #enter{
+    font-size: 22px !important;
+    padding: 6px 6px !important;
+  }
 
 }
 
