@@ -2,7 +2,7 @@ import * as deductive from "./deductiveEngine";
 import * as fitchMain from "./FitchProof";
 import {checkRule, shakeElement} from "./index";
 import * as editorMonaco from "./monacoEditor";
-import {addNumberedDivs, clearItems, clickedBranch, clickedProofs} from "./FitchProof";
+import {addNumberedDivs, clearItems, clickedBranch, clickedProofs, fitchStates, setStateFitch} from "./FitchProof";
 import {
   addRedundantParentheses,
   checkWithAntlr,
@@ -173,6 +173,7 @@ export function thirdRule(proofs, branches) {
     </svg>
   </div>`;
 
+
   button.addEventListener('click', function () {
     let ruleUser = getProof(checkWithAntlr(editorMonaco.editor.getValue()));
     let lastRule = getProof(checkWithAntlr(rule));
@@ -194,6 +195,7 @@ export function thirdRule(proofs, branches) {
       par.style.display = 'flex';
       par.textContent = removeRedundantParentheses(ruleUser);
       fitchMain.processExpression("AllRules", 1);
+      saveStateFitch();
       return 0;
     } else {
       alert("Please correct your input")

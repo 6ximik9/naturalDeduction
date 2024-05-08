@@ -122,6 +122,9 @@ function fitchProof()
     fitch.setUserHypothesesFitch(lineArray[0].split(","));
     fitch.fitchStart(lineArray[1]);
   }
+  else{
+    alert("Please enter the premises.")
+  }
 }
 
 function gentzenProof()

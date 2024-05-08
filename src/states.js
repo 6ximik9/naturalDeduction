@@ -71,7 +71,20 @@ export function addNextLastButtonClickGentzen() {
 
 
 export function addNextLastButtonClickFitch() {
+
   backwardButton.addEventListener('click', function () {
+
+    if (document.getElementsByClassName('userFormula').length > 0) {
+      document.getElementsByClassName('userFormula')[0].remove();
+      var outNums = document.getElementById('out_nums');
+      var outJust = document.getElementById('out_just');
+
+// Видалити останній елемент у контейнері 'out_nums'
+      outNums.removeChild(outNums.lastElementChild);
+
+      outJust.removeChild(outJust.lastElementChild);
+      return;
+    }
 
     if (!elementsAndVariablesArray[fitchStates]) {
       setStateFitch(fitchStates - 1);
@@ -90,8 +103,8 @@ export function addNextLastButtonClickFitch() {
     }
   });
 
-
   forwardButton.addEventListener('click', function () {
+
     setStateFitch(fitchStates + 1);
     if (!elementsAndVariablesArray[fitchStates]) {
       setStateFitch(fitchStates - 1);

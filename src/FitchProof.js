@@ -59,7 +59,7 @@ export function fitchStart(formula) {
   let filteredArray = userHypothesesFitch.filter(item => item.trim().length > 0);
   if(filteredArray.length===0)
   {
-    alert("Please enter the assumptions.")
+    alert("Please enter the premises.")
     return;
   }
   document.getElementById('enterFormula').className = 'hidden';
@@ -195,7 +195,7 @@ function buttonClicked(buttonText, button) {
         return;
       }
       clearItems();
-      saveStateFitch();
+      // saveStateFitch();
       break;
     case "\\lor E, m, n, p":
       if (rulesFitch.fourthRule(clickedProofs, clickedBranch) === -1) {
