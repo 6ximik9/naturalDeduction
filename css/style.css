@@ -1237,6 +1237,33 @@ span.choose {
     padding: 6px 6px !important;
   }
 
+  #userText{
+    margin-top: 10%;
+    font-size: 22px !important;
+  }
+
+  #out_fitch *
+  {
+    font-size: 22px !important;
+  }
+
+  #out_nums{
+    display: block;
+  }
+
+  #out_nums > div{
+    height: 27px !important;
+  }
+
+  #out_just
+  {
+    margin-left: 1em;
+  }
+
+  #out_just > div{
+    height: 27px !important;
+  }
+
 }
 
 #menu {

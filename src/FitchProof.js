@@ -87,13 +87,13 @@ export function processExpression(expression, countRules) {
     , "$$ \\begin{array}{c|ll} m & A \\\\ n & B \\\\  & A \\land B & (\\land I, m, n) \\end{array} $$"
     , "$$ \\begin{array}{c|ll} n & A \\land B \\\\ & A & (\\land E, n) \\\\ & B & (\\land E, n) \\\\ \\end{array} $$"
     , "$$ \\begin{array}{c|ll} n & A \\\\  & A \\lor B & (\\lor I, n) \\end{array} $$"
-    , "$$ \\begin{array}{c|ll} m & A \\lor B \\\\ n & \\quad A \\\\ & \\quad C \\\\ p & \\quad B \\\\ & \\quad C \\\\ & C & (\\lor E, m, n, p) \\end{array} $$"
+    , "$$ \\begin{array}{c|ll} m & A \\lor B \\\\ n & \\begin{array}{|c} A  \\\\ \\hline C  \\end{array}  \\\\ p & \\begin{array}{|c} B  \\\\ \\hline C  \\end{array}  \\\\ & C & (\\lor E, m, n, p) \\end{array} $$"
     , "$$ \\begin{array}{c|ll} \\begin{array}{c} n \\\\ m \\end{array} &  \\quad\\begin{array}{|c} A  \\\\ B  \\end{array} \\\\ & A \\rightarrow B & (\\Rightarrow I, n, m) \\end{array} $$"
     , "$$ \\begin{array}{c|ll} m & A \\rightarrow B \\\\ & A \\\\ \\hline& B & (\\Rightarrow E,m,n) \\end{array}$$"
     , "$$ \\begin{array}{c|ll} \\begin{array}{c} m \\\\ n \\end{array} &  \\quad\\begin{array}{|c} A  \\\\ \\perp  \\end{array} \\\\ & \\neg A & (\\neg I, m, n) \\end{array}\n $$"
     , "$$ \\begin{array}{c|ll} n & A \\\\ m & \\neg A \\\\  & \\perp & (\\neg E, n, m) \\end{array}$$"
-    , "$$ \\begin{array}{c|ll} n & \\perp \\\\ & A  &   (\\perp E1,n) \\end{array}$$"
-    , "$$ \\begin{array}{c|ll} \\begin{array}{c} m \\\\ n \\end{array} &  \\quad\\begin{array}{|c} \\neg A  \\\\ \\perp  \\end{array} \\\\ & A & (C, m,n) \\end{array}\n $$"
+    , "$$ \\begin{array}{c|ll} n & \\perp \\\\ & A  &   (\\perp E,n) \\end{array}$$"
+    , "$$ \\begin{array}{c|ll} \\begin{array}{c} m \\\\ n \\end{array} &  \\quad\\begin{array}{|c} \\neg A  \\\\ \\perp  \\end{array} \\\\ & A & (C, m-n) \\end{array}\n $$"
     , "$$ \\begin{array}{c|ll} n & \\neg\\neg A \\\\ & A \\quad  (\\neg\\neg E,n) \\end{array} $$"
     , "$$ \\begin{array}{c|ll} n & A \\\\ & A \\quad  (R,n) \\end{array} $$"];
   if (countRules === 1) {
@@ -242,7 +242,7 @@ function buttonClicked(buttonText, button) {
       clearItems();
       saveStateFitch();
       break;
-    case "\\perp E1,n":
+    case "\\perp E,n":
       if (rulesFitch.ninthRule(clickedProofs, clickedBranch) === -1) {
         clearItems();
         shakeButton(button);
@@ -251,7 +251,7 @@ function buttonClicked(buttonText, button) {
       clearItems();
       saveStateFitch();
       break;
-    case "C, m,n":
+    case "C, m-n":
       if (rulesFitch.tenthRule(clickedProofs, clickedBranch) === -1) {
         clearItems();
         shakeButton(button);
