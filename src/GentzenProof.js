@@ -123,11 +123,11 @@ function handleClick() {
   if (!side.querySelector('.preview') && side.className !== "closed") {
     // oldUserInput = "";
     try {
-      //   if(oldUserInput==="") {
       oldUserInput = side.querySelector('#proofText').textContent;
-      // }
-      processExpression(deductive.checkWithAntlr(side.querySelector('#proofText').textContent), 1);
+      console.log(side.querySelector('#proofText').textContent);
+      processExpression(deductive.checkWithAntlr(oldUserInput), 1);
       showAllHyp();
+      console.log(getProof(deductive.checkWithAntlr(oldUserInput)));
     } catch (error) {
       // console.error('Close or previous');
     }
@@ -200,6 +200,7 @@ export function processExpression(expression, countRules) {
   }
 
   expression = deductive.getProof(expression);
+
   switch (expression.type) {
     case "atom":
       if (expression.value === '⊤') {
@@ -235,12 +236,13 @@ function generateButtons(buttonCount, buttonTexts) {
   let hypothesesAll = deductive.getAllHypotheses(side);
   let find = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
 
+
   let isElementInArray = hypothesesAll.find(function (item) {
     item = deductive.getProof(item);
     find = deductive.getProof(find);
-    // return JSON.stringify(deductive.getProof(item)) === JSON.stringify(deductive.getProof(find));
     return deductive.compareExpressions(item, find);
   });
+
 
   if (isElementInArray) {
     let btn = createButton("Close branch", () => closeSide(side));
@@ -811,7 +813,7 @@ function addClickGentzenRules() {
         if (typeProof === 1) {
           return;
         }
-        processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 1);
+        processExpression(checkWithAntlr(oldUserInput), 1);
       } else if (tabId === 'tab2') {
         if (typeProof === 1) {
           return;

@@ -476,10 +476,9 @@ label:hover
 
 .returnMain
 {
-  margin-bottom: 0.5%;
+  margin-bottom: 1%;
   display: none;
-  width: 25%;
-  margin-left: -10px;
+  width: 30%;
 }
 
 .returnMain button{
@@ -1084,6 +1083,13 @@ span.choose {
     margin-left: -10px;
   }
 
+  .nameRule {
+    font-size: 22px !important;
+    position: absolute;
+    bottom: -10px;
+    left: calc(100% - 5px);
+    width: 100px;
+  }
 
   .button-container button {
     flex: 0 0 calc(33.33% - 200px); /* Розмір кнопки. Мінус 20px - це місце для відступів */

@@ -84,6 +84,7 @@ export function addRedundantParentheses(expression) {
 }
 
 export function getProof(proof) {
+  console.log(proof);
   if (proof.type !== "parenthesis") {
     return proof;
   }
@@ -266,8 +267,13 @@ export function compareExpressions(expr1, expr2) {
       (compareExpressions(expr1.left, expr2.right) && compareExpressions(expr1.right, expr2.left));
   }
 
-  // Обробка негації та імплікації без комутативності
-  if (expr1.type === 'negation' || expr1.type === 'implication') {
+  // Обробка негації
+  if (expr1.type === 'negation') {
+    return compareExpressions(expr1.value, expr2.value);
+  }
+
+  // Обробка імплікації без комутативності
+  if (expr1.type === 'implication') {
     return compareExpressions(expr1.left, expr2.left) && compareExpressions(expr1.right, expr2.right);
   }
 
@@ -279,3 +285,4 @@ export function compareExpressions(expr1, expr2) {
   // Повертаємо false для невідомих типів
   return false;
 }
+
