@@ -124,10 +124,10 @@ function handleClick() {
     // oldUserInput = "";
     try {
       oldUserInput = side.querySelector('#proofText').textContent;
-      console.log(side.querySelector('#proofText').textContent);
+      // console.log(side.querySelector('#proofText').textContent);
       processExpression(deductive.checkWithAntlr(oldUserInput), 1);
       showAllHyp();
-      console.log(getProof(deductive.checkWithAntlr(oldUserInput)));
+      // console.log(getProof(deductive.checkWithAntlr(oldUserInput)));
     } catch (error) {
       // console.error('Close or previous');
     }
@@ -740,7 +740,8 @@ function showAllHyp() {
     document.getElementById('currentLabelHypotheses').style.display = 'flex';
     currentHypotheses.style.display = 'block';
     currentHypotheses.innerHTML = '';
-    let hypothesesCur = deductive.getAllHypotheses(side);
+    let all = deductive.getAllHypotheses(side);
+    let hypothesesCur = Array.from(new Set(all.map(JSON.stringify))).map(JSON.parse);
     for (let y = 0; y < hypothesesCur.length; y++) {
       let index = String.fromCharCode(97 + y); // 97 відповідає коду символа 'a'
       let text1 = deductive.convertToLogicalExpression(hypothesesCur[y]);

@@ -414,7 +414,7 @@ function addBranch(formulas, title) {
 }
 
 editorMonaco.editor.onKeyDown(function (e) {
-  console.log(document.getElementsByClassName('userFormula'));
+  // console.log(document.getElementsByClassName('userFormula'));
   if (e.keyCode === monaco.KeyCode.Enter && document.getElementsByClassName('userFormula').length>0) {
     e.preventDefault();
   }

@@ -84,7 +84,6 @@ export function addRedundantParentheses(expression) {
 }
 
 export function getProof(proof) {
-  console.log(proof);
   if (proof.type !== "parenthesis") {
     return proof;
   }

@@ -170,7 +170,7 @@ editor.onDidChangeModelContent(() => {
     if (lines[i].trim() !== '' && !lines[i].includes("—")) {
       let c = checkRule(i + 1, lines[i].replaceAll('\n', ''));
       if (c === 1) {
-        console.log(c);
+        // console.log(c);
         return;
       }
     }
@@ -194,7 +194,7 @@ export function setEditorError(line, column, msg) {
     severity: monaco.MarkerSeverity.Error
   }];
 
-  console.log(markers);
+  // console.log(markers);
 
   monaco.editor.setModelMarkers(editor.getModel(), 'owner', markers);
 }
