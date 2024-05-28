@@ -15,7 +15,6 @@ import {checkRule, shakeElement} from "./index";
 import {ninthRule, seventhRule} from "./rulesFitch";
 import {addNextLastButtonClickFitch, saveStateFitch} from "./states";
 import {latexFitch} from "./latexGen";
-import {get} from "mobx";
 
 
 let fitchProof = [];
