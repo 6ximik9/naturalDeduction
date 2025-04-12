@@ -1,15 +1,10 @@
-import {CharStreams, CommonTokenStream, ParseTreeWalker} from 'antlr4';
+import antlr4, {CharStreams, CommonTokenStream} from 'antlr4';
 import GrammarLexer from '../my_antlr/GrammarLexer';
 import GrammarParser from '../my_antlr/GrammarParser';
-import MyGrammarListener from '../my_antlr/MyGrammarListener';
 import * as editorMonaco from './monacoEditor';
 import * as gentzen from './GentzenProof'
 import * as deductive from './deductiveEngine';
-import * as help from './help';
-import * as latex from './latexGen';
-import {getProof} from "./deductiveEngine";
 import * as fitch from "./FitchProof";
-import {fitchStart, setUserHypothesesFitch, userHypothesesFitch} from "./FitchProof";
 
 let hasError = false;
 let inputText = "";
@@ -34,8 +29,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 });
-
-
 
 export function checkRule(index, text) {
 

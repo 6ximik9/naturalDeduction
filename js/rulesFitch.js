@@ -17,10 +17,14 @@ export function firstRule(proofs, branches) {
   if (proofs.length !== 2 || branches.length > 0) {
     return -1;
   }
+  console.log(proofs);
+  console.log(branches);
   proofs[0].element.querySelector('span.indexC').remove();
   proofs[1].element.querySelector('span.indexC').remove();
+
   let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
   let secondPart = proofs[1].element.textContent.replaceAll(" ", "");
+
 
   let nameRule = '∧I ' + (proofs[0].index + 1) + ',' + (proofs[1].index + 1);
   let proof =
@@ -29,6 +33,7 @@ export function firstRule(proofs, branches) {
       title: nameRule,
       branchIndex: fitchMain.branchIndex
     }
+
   fitchMain.addNewProof(proof);
 
   fitchMain.addRowToBranch(proof.formula, nameRule);

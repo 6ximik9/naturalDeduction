@@ -1,6 +1,5 @@
 grammar Grammar;
 
-//formula: implication EOF;
 formula: (atomList '⊢')? implication EOF;
 
 atomList: implication (',' implication)*;
@@ -14,18 +13,40 @@ disjunction:  conjunction
 conjunction: negation
              ( CON negation)* ;
 
-negation: NEG+ parenthesis
+negation:   NEG+ quantifier
+          | quantifier
+          | NEG+ parenthesis
           | parenthesis;
 
-parenthesis: '(' implication ')' | atom;
+quantifier: '(' (FORALL | EXISTS) constantSymb ')' parenthesis;
 
-atom: LETTER;
+parenthesis: '(' implication ')' | term | equality;
 
-LETTER : [A-Z]+|[a-z]+|[α-ω]|[Α-Ω]|'⊥'|'⊤'|'⊢';
+equality: term '=' term;
+
+term:
+      relationSymb  # relationClause
+    | constantSymb  # constantClause
+    | atom          # variableClause
+    ;
+
+relationSymb: UPPERCASE_LETTER '(' ((term|functionSymb) (',' (term|functionSymb))*)? ')';
+functionSymb: LOWERCASE_LETTER '(' (term (',' term)*)? ')';
+constantSymb: LOWERCASE_LETTER;
+atom: UPPERCASE_LETTER|'⊥'|'⊤';
+
+UPPERCASE_LETTER : [A-Z][A-Za-z]*|[Α-Ω];
+LOWERCASE_LETTER : [a-z][A-Za-z]*|[α-ω];
 
 IMPL: '⇒'|'->'|'→'|'=>';
 DIS: '∨'|'OR'|'or'|'|'|'||';
 CON: '∧'|'AND'|'and'|'&'|'&&';
 NEG: '~'|'¬'|'!';
+FORALL: '∀';
+EXISTS: '∃';
 
+TRUE: [Tt][Rr][Uu][Ee];
+FALSE: [Ff][Aa][Ll][Ss][Ee];
+
+COMMENT : '//' ~[\r\n]* -> skip;
 WS : [ \t\r\n]+ -> skip;

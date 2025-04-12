@@ -9,41 +9,49 @@ export function removeRedundantParentheses(expression, parentType = null, isLeft
   // Функція для перевірки, чи дужки навколо виразу непотрібні
   function isParenthesesRedundant(expr, parentType, isLeftChild) {
     if (parentType === 'negation' && expr.type === 'parenthesis') {
-      return false; // Зберігаємо дужки для негації складного виразу без додавання їх повторно
+      return false; // Зберігаємо дужки для негації складного виразу
     }
-    if (expr.type === 'parenthesis' && ['conjunction', 'implication'].includes(expr.value.type) && parentType !== 'conjunction') {
-      // Для імплікації: зберігаємо дужки, якщо це ліва частина іншої імплікації
+    if (expr.type === 'parenthesis' && ['conjunction', 'implication', 'disjunction'].includes(expr.value.type)) {
       if (expr.value.type === 'implication' && parentType === 'implication' && isLeftChild) {
-        return false; // Зберігаємо дужки для правильного представлення асоціативності
+        return false; // Зберігаємо дужки для асоціативності імплікації
       }
-      return true;
+      return parentType !== 'conjunction'; // Дужки потрібні, якщо батьківський тип не кон'юнкція
     }
-
-    if (expr.type === 'parenthesis' && expr.value.type === 'atom') {
-      return true;
-    }
-
-    return false;
+    return expr.type === 'parenthesis' && expr.value.type === 'atom';
   }
 
   if (!expression) return ''; // Перевірка на невизначеність
 
   switch (expression.type) {
     case 'atom':
+    case 'constant':
+    case 'variable':
       return expression.value;
     case 'parenthesis':
-      return isParenthesesRedundant(expression, parentType, isLeftChild) ? removeRedundantParentheses(expression.value, expression.type) : "(" + removeRedundantParentheses(expression.value, expression.type, false) + ")";
+      return isParenthesesRedundant(expression, parentType, isLeftChild)
+        ? removeRedundantParentheses(expression.value, expression.type)
+        : "(" + removeRedundantParentheses(expression.value, expression.type, false) + ")";
     case 'negation':
-      let negatedExpression = removeRedundantParentheses(expression.value, 'negation', false);
+      const negatedExpression = removeRedundantParentheses(expression.value, 'negation', false);
       return "¬" + (expression.value.type === 'parenthesis' ? negatedExpression : "(" + negatedExpression + ")");
+    case 'quantifier':
+      const quantifierExpression = removeRedundantParentheses(expression.expression, 'quantifier', false);
+      return `(${expression.quantifier}${expression.variable})${quantifierExpression}`;
+    case 'equality':
+      const leftEquality = removeRedundantParentheses(expression.left, 'equality', true);
+      const rightEquality = removeRedundantParentheses(expression.right, 'equality', false);
+      return `${leftEquality} = ${rightEquality}`;
+    case 'relation':
+    case 'function':
+      const args = expression.arguments.map(arg => removeRedundantParentheses(arg)).join(", ");
+      return `${expression.name}(${args})`;
     default:
-      let left = expression.left ? removeRedundantParentheses(expression.left, expression.type, true) : '';
-      let right = expression.right ? removeRedundantParentheses(expression.right, expression.type, false) : '';
-      let operator = {"implication": " ⇒ ", "conjunction": " ∧ ", "disjunction": " ∨ "}[expression.type] || " ";
+      const left = expression.left ? removeRedundantParentheses(expression.left, expression.type, true) : '';
+      const right = expression.right ? removeRedundantParentheses(expression.right, expression.type, false) : '';
+      const operator = {"implication": " ⇒ ", "conjunction": " ∧ ", "disjunction": " ∨ "}[expression.type] || " ";
       return left + operator + right;
   }
 }
-
 
 export function deleteHeadBack(removed) {
   if (removed.type === "parenthesis") {
@@ -62,6 +70,21 @@ export function addRedundantParentheses(expression) {
   } else if (expression.type === "negation") {
     let negatedExpression = addRedundantParentheses(expression.value);
     return "¬" + negatedExpression;
+  } else if (expression.type === "quantifier") {
+    const quantifierExpression = addRedundantParentheses(expression.expression);
+    return `(${expression.quantifier}${expression.variable})${quantifierExpression}`;
+  } else if (expression.type === "equality") {
+    const left = addRedundantParentheses(expression.left);
+    const right = addRedundantParentheses(expression.right);
+    return `(${left} = ${right})`;
+  } else if (expression.type === "relation") {
+    const args = expression.arguments.map(arg => addRedundantParentheses(arg)).join(", ");
+    return `${expression.name}(${args})`;
+  } else if (expression.type === "constant" || expression.type === "variable") {
+    return expression.value;
+  } else if (expression.type === "function") {
+    const args = expression.arguments.map(arg => addRedundantParentheses(arg)).join(", ");
+    return `${expression.name}(${args})`;
   } else {
     let left = addRedundantParentheses(expression.left);
     let right = addRedundantParentheses(expression.right);
@@ -113,6 +136,23 @@ export function convertToLogicalExpression(conclusion) {
   } else if (conclusion.type === "parenthesis") {
     const parenthesis = convertToLogicalExpression(conclusion.value);
     return `(${parenthesis})`;
+  } else if (conclusion.type === "quantifier") {
+    const expression = convertToLogicalExpression(conclusion.expression);
+    return `(${conclusion.quantifier}${conclusion.variable})${expression}`;
+  } else if (conclusion.type === "equality") {
+    const left = convertToLogicalExpression(conclusion.left);
+    const right = convertToLogicalExpression(conclusion.right);
+    return `${left}=${right}`;
+  } else if (conclusion.type === "relation") {
+    const args = conclusion.arguments.map(arg => convertToLogicalExpression(arg)).join(", ");
+    return `${conclusion.name}(${args})`;
+  } else if (conclusion.type === "constant") {
+    return conclusion.value;
+  } else if (conclusion.type === "variable") {
+    return conclusion.value;
+  } else if (conclusion.type === "function") {
+    const args = conclusion.arguments.map(arg => convertToLogicalExpression(arg)).join(", ");
+    return `${conclusion.name}(${args})`;
   } else {
     return conclusion.type;
   }

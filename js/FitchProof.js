@@ -51,7 +51,6 @@ export function setBranchIndex(newIndex) {
 
 export function addNewProof(proof) {
   fitchProof.push(proof);
-  // console.log(fitchProof);
 }
 
 export function fitchStart(formula) {
@@ -576,6 +575,8 @@ export function addRowToBranch(formula, title) {
   const div = document.createElement('div');
   div.className = 'fitch_formula';
   div.textContent = removeRedundantParentheses(getProof(checkWithAntlr(formula)));
+  // div.textContent = getProof(checkWithAntlr(formula));
+
   const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
   let par = fitchBranches[fitchBranches.length - 1];
 

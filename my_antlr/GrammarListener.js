@@ -1,4 +1,4 @@
-// Generated from Grammar.g4 by ANTLR 4.13.1
+// Generated from Grammar.g4 by ANTLR 4.13.2
 // jshint ignore: start
 import antlr4 from 'antlr4';
 
@@ -59,12 +59,84 @@ export default class GrammarListener extends antlr4.tree.ParseTreeListener {
 	}
 
 
+	// Enter a parse tree produced by GrammarParser#quantifier.
+	enterQuantifier(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#quantifier.
+	exitQuantifier(ctx) {
+	}
+
+
 	// Enter a parse tree produced by GrammarParser#parenthesis.
 	enterParenthesis(ctx) {
 	}
 
 	// Exit a parse tree produced by GrammarParser#parenthesis.
 	exitParenthesis(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#equality.
+	enterEquality(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#equality.
+	exitEquality(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#relationClause.
+	enterRelationClause(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#relationClause.
+	exitRelationClause(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#constantClause.
+	enterConstantClause(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#constantClause.
+	exitConstantClause(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#variableClause.
+	enterVariableClause(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#variableClause.
+	exitVariableClause(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#relationSymb.
+	enterRelationSymb(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#relationSymb.
+	exitRelationSymb(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#functionSymb.
+	enterFunctionSymb(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#functionSymb.
+	exitFunctionSymb(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#constantSymb.
+	enterConstantSymb(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#constantSymb.
+	exitConstantSymb(ctx) {
 	}
 
 

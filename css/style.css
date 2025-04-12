@@ -87,6 +87,7 @@ h3 {
 #proof label
 {
   font-size: 38px;
+  text-wrap: nowrap;
 }
 
 #proof .nameRule

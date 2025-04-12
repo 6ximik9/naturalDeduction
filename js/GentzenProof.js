@@ -152,7 +152,7 @@ export function parseExpression(text) {
   let parser = new GrammarParser(tokens);
   let tree = parser.implication();
 
-  const listener = new MyGrammarListener(); // Викликати конструктор вашого Лісенера
+  const listener = new MyGrammarListener();
   ParseTreeWalker.DEFAULT.walk(listener, tree);
 
   // deductionContext.conclusions[0] = listener.stack.pop();
@@ -162,6 +162,8 @@ export function parseExpression(text) {
     proof: listener.stack.pop()
   };
 
+  console.log(deductionContext.conclusions[0]);
+  // console.log(JSON.stringify(deductionContext.conclusions[0], null, 2));
   createProofTree(deductionContext.conclusions[0], document.getElementById('proof'));
 
   side = document.querySelector('.proof-element_level-0').children[0];
@@ -609,10 +611,13 @@ function createProofTree(conclusions, container) {
   }
   // Обробка conclusions.proof як масиву, якщо це масив
   if (Array.isArray(conclusions.proof)) {
+    console.log("Test");
     conclusions.proof.forEach((proofElement, index) => {
       const proofDiv = document.createElement(`div`);
       const result = deductive.addRedundantParentheses(proofElement);
+      console.log(result);
       let text = `${deductive.convertToLogicalExpression(getProof(deductive.checkWithAntlr(result)))}`;
+      console.log(text);
       proofDiv.id = 'divId-' + container.id;
       proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
       proofDiv.style.alignSelf = 'flex-end';
@@ -636,6 +641,9 @@ function createProofTree(conclusions, container) {
     if (currentLevel !== 3) {
       let result = deductive.convertToLogicalExpression(conclusions.proof);
       if (level !== 1) {
+        console.log("test");
+        console.log(conclusions.proof);
+        console.log(getProof(conclusions.proof));
         result = deductive.addRedundantParentheses(getProof(conclusions.proof));
       }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
@@ -727,6 +735,7 @@ function showAllHyp() {
       element.className = 'hyp';
       element.innerHTML = '[' + text1 + ']' + '<sup>' + index + '</sup>';
       element.style.fontFamily = "'Times New Roman', sans-serif";
+      element.style.textWrap = 'nowrap';
       allHypotheses.appendChild(element);
     }
   } else {
@@ -750,6 +759,7 @@ function showAllHyp() {
       element.className = 'hyp';
       element.innerHTML = '[' + text1 + ']' + '<sup>' + index + '</sup>';
       element.style.fontFamily = "'Times New Roman', sans-serif";
+      element.style.textWrap = 'nowrap';
       currentHypotheses.appendChild(element);
     }
   } catch (error) {
