@@ -181,11 +181,10 @@ export function parseExpression(text) {
 
 export function processExpression(expression, countRules) {
   document.getElementById('proof-menu').className = 'proof-menu';
-  const buttons = ["$$\\frac{\\bot}{\\phi} \\quad (\\bot E1) $$"
-    // , "$$\\frac{\\bot}{\\phi} \\quad \\ldots [\\neg\\phi] (\\bot E2) $$"
+  const buttons = [
+      "$$\\frac{\\bot}{\\phi} \\quad (\\bot E1) $$"
     , "$${\\frac{[\\neg\\phi]}{\\vdots} \\atop \\frac{\\bot}{\\phi}} (\\bot E2) $$"
     , "$$\\frac{}{\\top} \\quad (\\top I) $$"
-    // , "$$\\frac{\\bot}{\\neg \\phi} \\quad \\ldots [\\phi] (\\neg I) $$"
     , "$${\\frac{[\\phi]}{\\vdots} \\atop \\frac{\\bot}{\\neg\\phi}} (\\neg I) $$"
     , "$$ \\frac{\\phi \\quad \\quad \\neg \\phi }{\\bot} \\quad (\\neg E)  $$"
     , "$$\\frac{\\phi \\quad \\quad \\psi}{\\phi \\wedge \\psi} (\\wedge I)$$"
@@ -195,9 +194,14 @@ export function processExpression(expression, countRules) {
     , "$$ \\frac{\\psi}{\\phi \\vee \\psi} (\\vee I2) $$"
     , "$$ \\frac{\\phi \\vee \\psi \\quad \\quad \\theta \\quad \\quad \\theta}{ \\theta} (\\vee E) $$"
     , "$$\\frac{\\psi}{\\phi \\Rightarrow \\psi} (\\Rightarrow I)$$"
-    , "$$ \\frac{\\phi \\quad \\quad \\phi \\Rightarrow \\psi }{\\psi}  (\\Rightarrow E) $$"];
+    , "$$ \\frac{\\phi \\quad \\quad \\phi \\Rightarrow \\psi }{\\psi}  (\\Rightarrow E) $$"
+    , "$$ \\frac{\\varphi[t/x]}{(\\exists x)\\varphi} \\; (\\exists I) $$"
+    , "$$ \\frac{\\varphi[t/x]}{(\\forall x)\\varphi} \\; (\\forall I) \\; \\tiny t \\text{ fresh} $$"
+    , "$$ \\frac{(\\forall x)\\varphi}{\\varphi[t/x]} \\; (\\forall E) $$"
+    , "$$ \\frac{(\\exists x)\\varphi \\quad {\\normalsize \\frac{[\\varphi[t/x]]}{\\vdots} \\atop \\normalsize \\psi}}{\\psi} \\; (\\exists E) \\; \\tiny t \\text{ fresh}\n $$"
+  ];
   if (countRules === 1) {
-    generateButtons(13, buttons);
+    generateButtons(17, buttons);
     return;
   }
 
@@ -226,6 +230,16 @@ export function processExpression(expression, countRules) {
     case "negation":
       generateButtons(1, [buttons[3]]);
       break;
+    case "quantifier":
+      if(expression.quantifier === '∃') {
+        generateButtons(2, [buttons[13], buttons[16]]);
+      }
+      else
+      {
+        generateButtons(2, [buttons[14], buttons[15]]);
+      }
+      break;
+
   }
 }
 
@@ -293,6 +307,7 @@ function buttonClicked(buttonText) {
   const allButtons = document.querySelectorAll('#button-container button');
   let canUseRule = deductive.checkWithAntlr(lastSide.querySelector('#proofText').textContent);
   canUseRule = getProof(canUseRule);
+  console.log(lastParentheses);
   switch (lastParentheses) {
     case "\\bot E1":
       if (canUseRule.type !== 'negation' && canUseRule.value !== '⊤' && canUseRule.value !== '⊥') {
@@ -414,6 +429,30 @@ function buttonClicked(buttonText) {
         return;
       }
       break;
+    case "\\exists I":
+      if (canUseRule.type === 'quantifier' && canUseRule.quantifier === '∃') {
+        rules.fourteenthRule();
+      } else {
+        shakeButton(allButtons[13]);
+        return;
+      }
+      break;
+    case "\\forall I":
+
+      break;
+    case "\\forall E":
+      if (canUseRule.type === 'relation') {
+         rules.sixteenthRule();
+         createProofTree(deductionContext.conclusions[size + 1], side);
+         controlState.saveState();
+      } else {
+        shakeButton(allButtons[15]);
+        return;
+      }
+      break;
+    case "\\exists E":
+
+      break;
   }
 
   document.getElementById('proof-menu').className = 'hidden';
@@ -448,9 +487,7 @@ export function saveTree() {
   }
 
   let er = 0;
-  // const parentDiv = document.getElementById('preview');
-  // Отримуємо всі дочірні елементи з класом "innerDiv"
-  // console.log(deductive.checkCorrect(deductive.checkWithAntlr(editorMonaco.editor.getValue(), er)));
+
   if (deductive.checkCorrect(deductive.checkWithAntlr(editorMonaco.editor.getValue(), er)) === 1 && currentLevel !== 5) {
     if (currentLevel === 7 || currentLevel === 8) {
       alert("Missing conjunction, please correct your input");
@@ -462,6 +499,7 @@ export function saveTree() {
     return;
   }
 
+  let replaces = "";
   // Перебираємо кожен знайдений елемент та виводимо інформацію в консоль
   let data = [];
   let premises;
@@ -473,7 +511,28 @@ export function saveTree() {
   } else if (currentLevel === 13) {
     let prof1 = deductive.checkWithAntlr(editorMonaco.editor.getValue(), er);
     premises = [deductive.convertToLogicalExpression(prof1.left), deductive.convertToLogicalExpression(prof1)];
-  } else {
+  }
+  else if (currentLevel === 14) {
+    let innerText = lastSide.querySelector('#proofText').textContent;
+    let newVar = editorMonaco.editor.getValue();
+    let splitResult = newVar.split('/');
+
+    if(splitResult.length !== 2 || splitResult[0].length === 0 || splitResult[1].length === 0)
+    {
+      alert("Please enter a valid t/x substitution.")
+      return;
+    }
+    replaces = newVar;
+
+    let astFromText = deductive.checkWithAntlr(innerText).expression;
+
+    let textFromAstWithoutQuantifier = deductive.convertToLogicalExpression(astFromText);
+
+    let updatedText = textFromAstWithoutQuantifier.replaceAll(splitResult[1], splitResult[0]); // Замінюємо всі входження символу
+
+    premises = [updatedText];
+  }
+  else {
     premises = [editorMonaco.editor.getValue()];
   }
   for (const str1 of premises) {
@@ -483,7 +542,6 @@ export function saveTree() {
     return;
   }
 
-  // document.getElementById('keyProof').className = 'hidden';
   let newConclusion;
   if (data.length > 1) {
     newConclusion = {
@@ -499,7 +557,6 @@ export function saveTree() {
 
   deductionContext.conclusions.push(newConclusion);
 
-  // const parentElement = document.getElementById("proof");
   const divToRemove = document.getElementById("preview");
   divToRemove.remove();
 
@@ -508,7 +565,8 @@ export function saveTree() {
     element.addEventListener('click', handleClick);
   });
 
-  createProofTree(newConclusion, lastSide);
+
+  createProofTree(newConclusion, lastSide, replaces);
 
   controlState.saveState();
 }
@@ -594,8 +652,7 @@ function createProofElement(level) {
   return proofElement;
 }
 
-
-function createProofTree(conclusions, container) {
+function createProofTree(conclusions, container, replaces = "") {
   if (!conclusions || Object.keys(conclusions).length === 0 || !conclusions.proof) {
     return;
   }
@@ -611,13 +668,12 @@ function createProofTree(conclusions, container) {
   }
   // Обробка conclusions.proof як масиву, якщо це масив
   if (Array.isArray(conclusions.proof)) {
-    console.log("Test");
     conclusions.proof.forEach((proofElement, index) => {
       const proofDiv = document.createElement(`div`);
       const result = deductive.addRedundantParentheses(proofElement);
-      console.log(result);
+      // console.log(result);
       let text = `${deductive.convertToLogicalExpression(getProof(deductive.checkWithAntlr(result)))}`;
-      console.log(text);
+      // console.log(text);
       proofDiv.id = 'divId-' + container.id;
       proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
       proofDiv.style.alignSelf = 'flex-end';
@@ -628,9 +684,6 @@ function createProofTree(conclusions, container) {
 
       // Додавання роздільника, якщо це не останній елемент
       if (index < conclusions.proof.length - 1) {
-        // const margin = document.createElement(`div`);
-        // margin.style.width = '130px';
-        // levelDiv.appendChild(margin);
         proofDiv.style.marginRight = '130px';
       }
 
@@ -641,25 +694,30 @@ function createProofTree(conclusions, container) {
     if (currentLevel !== 3) {
       let result = deductive.convertToLogicalExpression(conclusions.proof);
       if (level !== 1) {
-        console.log("test");
-        console.log(conclusions.proof);
-        console.log(getProof(conclusions.proof));
         result = deductive.addRedundantParentheses(getProof(conclusions.proof));
       }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
     }
 
-
     proofDiv.id = 'divId-' + container.id;
     if (text !== " ") {
-      proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
+      if (replaces !== "") {
+        proofDiv.innerHTML = '<label id="proofText">' + text + '</label>' +
+          '<span id="repl" style="display: none;">' + replaces + '</span>';
+      } else {
+        proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
+      }
     } else {
-      proofDiv.innerHTML = '<label class="previous" id="proofText">' + text + '</label>';
+      if (replaces !== "") {
+        proofDiv.innerHTML = '<label class="previous" id="proofText">' + text + '</label>' +
+          '<span id="repl" style="display: none;">' + replaces + '</span>';
+      } else {
+        proofDiv.innerHTML = '<label class="previous" id="proofText">' + text + '</label>';
+      }
       proofDiv.style.paddingTop = "25px";
       proofDiv.style.background = "white";
       proofDiv.className = 'closed';
       closeSide(side);
-      // console.log(side);
     }
     proofDiv.style.fontFamily = "'Times New Roman', sans-serif";
     addUserHyp(conclusions, proofDiv);
@@ -670,12 +728,7 @@ function createProofTree(conclusions, container) {
 
   //11 правило гіпотези
   if (conclusions.proof.length === 3 && currentLevel === 11) {
-    // console.log(conclusions.proof[0].left);
-    // console.log(conclusions.proof[0].right);
-    // let childElements = levelDiv.querySelectorAll('[class^="divItem-{\\"type\\":\\"atom\\""]');
     let childElements = levelDiv.children;
-
-    // console.log(childElements);
 
     childElements[2].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].left);
     childElements[3].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].right);
@@ -685,9 +738,22 @@ function createProofTree(conclusions, container) {
 
   }
 
+  //14 правило(запамятати заміни)
+  if (container.querySelector('span#repl')) {
+    const spanRepl = container.querySelector('span#repl');
+    if (spanRepl) {
+      const clonedSpan = spanRepl.cloneNode(true); // Clone the existing span
+      const childElements = levelDiv.children; // Get all child elements of levelDiv
+
+      Array.from(childElements).forEach(child => {
+        if (!child.classList.contains('nameRule')) {
+          child.appendChild(clonedSpan.cloneNode(true)); // Append the cloned span to each child except those with class 'nameRule'
+        }
+      });
+    }
+  }
 
   showAllHyp();
-
 
   if (container.id !== 'proof' && container.className !== 'closed') {
     container.className = 'previous';

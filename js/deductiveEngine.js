@@ -192,11 +192,11 @@ export function getAllHypotheses(container) {
 }
 
 export function extractTextBetweenParentheses(expression) {
-  var startIndex = expression.indexOf('(');
+  const startIndex = expression.lastIndexOf('('); // Знаходимо останню відкриваючу дужку
 
   if (startIndex !== -1) {
-    var count = 1;
-    var currentIndex = startIndex + 1;
+    let count = 1;
+    let currentIndex = startIndex + 1;
 
     while (currentIndex < expression.length) {
       if (expression[currentIndex] === '(') {
@@ -211,11 +211,11 @@ export function extractTextBetweenParentheses(expression) {
     }
 
     if (count === 0) {
-      return expression.substring(startIndex + 1, currentIndex);
+      return expression.substring(startIndex + 1, currentIndex); // Повертаємо текст між останніми дужками
     }
   }
 
-  return null;
+  return null; // Якщо дужки не знайдено
 }
 
 
@@ -296,11 +296,11 @@ export function editPadding() {
 export function compareExpressions(expr1, expr2) {
   expr1 = getProof(expr1);
   expr2 = getProof(expr2);
+
   // Перевірка, що типи обох виразів однакові
   if (expr1.type !== expr2.type) return false;
 
-  // Обробка комутативних операцій: кон'юнкції і дизюнкції
-  // A AND B = B AND A і A OR B = B OR A.
+  // Обробка комутативних операцій: кон'юнкції і диз'юнкції
   if (expr1.type === 'conjunction' || expr1.type === 'disjunction') {
     return (compareExpressions(expr1.left, expr2.left) && compareExpressions(expr1.right, expr2.right)) ||
       (compareExpressions(expr1.left, expr2.right) && compareExpressions(expr1.right, expr2.left));
@@ -311,9 +311,47 @@ export function compareExpressions(expr1, expr2) {
     return compareExpressions(expr1.value, expr2.value);
   }
 
-  // Обробка імплікації без комутативності
+  // Обробка імплікації
   if (expr1.type === 'implication') {
     return compareExpressions(expr1.left, expr2.left) && compareExpressions(expr1.right, expr2.right);
+  }
+
+  // Обробка кванторів
+  if (expr1.type === 'quantifier') {
+    return expr1.quantifier === expr2.quantifier &&
+      expr1.variable === expr2.variable &&
+      compareExpressions(expr1.expression, expr2.expression);
+  }
+
+  // Обробка рівності
+  if (expr1.type === 'equality') {
+    return compareExpressions(expr1.left, expr2.left) && compareExpressions(expr1.right, expr2.right);
+  }
+
+  // Обробка відношень
+  if (expr1.type === 'relation') {
+    if (expr1.name !== expr2.name || expr1.arguments.length !== expr2.arguments.length) {
+      return false;
+    }
+    return expr1.arguments.every((arg, index) => compareExpressions(arg, expr2.arguments[index]));
+  }
+
+  // Обробка функцій
+  if (expr1.type === 'function') {
+    if (expr1.name !== expr2.name || expr1.arguments.length !== expr2.arguments.length) {
+      return false;
+    }
+    return expr1.arguments.every((arg, index) => compareExpressions(arg, expr2.arguments[index]));
+  }
+
+  // Обробка констант
+  if (expr1.type === 'constant') {
+    return expr1.value === expr2.value;
+  }
+
+  // Обробка змінних
+  if (expr1.type === 'variable') {
+    return expr1.value === expr2.value;
   }
 
   // Обробка атомарних значень

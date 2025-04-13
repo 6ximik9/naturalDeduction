@@ -104,7 +104,11 @@ function suggestions(position, range) {
     {label: '\\top', insertText: '⊤', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\bot', insertText: '⊥', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\-', insertText: '————————————————\n', range: range, kind: monaco.languages.CompletionItemKind.Text},
-    {label: '\\proves', insertText: '⊢', range: range, kind: monaco.languages.CompletionItemKind.Text}
+    {label: '\\proves', insertText: '⊢', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\forall', insertText: '∀', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\FORALL', insertText: '∀', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\exists', insertText: '∃', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\EXISTS', insertText: '∃', range: range, kind: monaco.languages.CompletionItemKind.Text}
   ];
 
   return {suggestions: greekAlphabet};

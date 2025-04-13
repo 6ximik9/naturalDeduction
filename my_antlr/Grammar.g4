@@ -32,11 +32,11 @@ term:
 
 relationSymb: UPPERCASE_LETTER '(' ((term|functionSymb) (',' (term|functionSymb))*)? ')';
 functionSymb: LOWERCASE_LETTER '(' (term (',' term)*)? ')';
-constantSymb: LOWERCASE_LETTER;
-atom: UPPERCASE_LETTER|'⊥'|'⊤';
+constantSymb: LOWERCASE_LETTER|'⊥'|'⊤';
+atom: UPPERCASE_LETTER;
 
-UPPERCASE_LETTER : [A-Z][A-Za-z]*|[Α-Ω];
-LOWERCASE_LETTER : [a-z][A-Za-z]*|[α-ω];
+UPPERCASE_LETTER : [A-Z][A-Za-z0-9]*|[Α-Ω];
+LOWERCASE_LETTER : [a-z][A-Za-z0-9]*|[α-ω];
 
 IMPL: '⇒'|'->'|'→'|'=>';
 DIS: '∨'|'OR'|'or'|'|'|'||';

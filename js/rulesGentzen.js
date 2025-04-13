@@ -256,3 +256,51 @@ export function thirteenthRule() {
   btnSave.addEventListener('click', index.saveTree)
 
 }
+
+export function fourteenthRule() {
+  index.setCurrentLevel(14);
+  let newConclusion = {
+    level: level,  // Додаємо поле level
+    proof: ["t/x"]
+  };
+
+  index.createTestProof(newConclusion);
+
+  let btnSave = document.getElementById('saveBtn');
+
+  btnSave.addEventListener('click', index.saveTree)
+
+}
+
+export function fifteenthRule() {
+  index.setCurrentLevel(15);
+
+}
+
+export function sixteenthRule() {
+  index.setCurrentLevel(16);
+  let innerText = index.lastSide.querySelector('#proofText').textContent;
+  let repl = index.lastSide.querySelector('#repl').textContent.split("/", 2);
+
+  console.log(repl);
+  innerText = innerText.replaceAll(repl[0], repl[1]);
+
+  let rule = deductive.checkWithAntlr('(∀' + repl[1] + ')' + innerText);
+
+  let newConclusion = {
+    level: level,  // Додаємо поле level
+    proof: rule
+  };
+
+  index.setLevel(index.level + 1);
+
+  index.addConclusions(newConclusion);
+
+}
+
+export function seventeenthRule() {
+  index.setCurrentLevel(17);
+
+}
+
+
