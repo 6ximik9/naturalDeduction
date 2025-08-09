@@ -1,306 +1,333 @@
-import * as index from "./GentzenProof";
-// import {createTestProof, currentLevel, lastSide, level, saveTree, side} from "./index";
-import {createTestProof, currentLevel, lastSide, level, saveTree, side} from "./GentzenProof";
-import * as deductive from "./deductiveEngine";
 
+import * as index from "./GentzenProof";
+import * as deductive from "./deductiveEngine";
+import { createModal } from "./modalForRules/modalForSubstitution";
+import {convertToLogicalExpression, getProof} from "./deductiveEngine";
+import {createAdvancedModal} from "./modalForRules/modalForSeventeenthRule";
+import {createModalForReturn} from "./modalForRules/modalForReturn";
+
+// Утиліти
+function createConclusion(proof) {
+  console.log(proof);
+  index.addConclusions({ level: index.level, proof });
+  index.setLevel(index.level + 1);
+}
+
+function createTestConclusion(proof) {
+  index.createTestProof({ level: index.level, proof });
+  const btnSave = document.getElementById('saveBtn');
+  btnSave?.addEventListener('click', index.saveTree);
+}
+
+function parseProofFromLastSide() {
+  const text = index.lastSide.querySelector('#proofText')?.textContent;
+  const parsed = deductive.checkWithAntlr(text);
+  return deductive.getProof(parsed);
+}
+
+// 1. ⊥-введення
 export function firstRule() {
   index.setCurrentLevel(1);
-  let data = {
-    level: index.level,  // Додаємо поле level
-    proof: {type: "atom", value: "⊥"}
-  };
-  index.setLevel(index.level + 1);
-
-  index.addConclusions(data);
+  createConclusion({ type: "atom", value: "⊥" });
 }
-
-export function secondRule(context) {
-  // currentLevel = 2;
+// 2. Введення заперечення
+export function secondRule() {
   index.setCurrentLevel(2);
-  let innerText = '¬(' + side.innerText + ')';
+  const innerText = '¬(' + index.side.innerText + ')';
+  const hyp = deductive.checkWithAntlr(innerText);
 
-  let hp = {
-    level: level,  // Додаємо поле level
-    hyp: deductive.checkWithAntlr(innerText)
-  };
+  index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
+  index.addHypotheses({ level: index.level, hyp });
 
-  index.lastSide.id = index.lastSide.id + 'divId-' + deductive.convertToLogicalExpression(hp.hyp);
-
-  // context.hypotheses.push(hp);
-  index.addHypotheses(hp);
-
-  let con = {
-    level: level,  // Додаємо поле level
-    proof: {type: "atom", value: "⊥"}
-  };
-
-  index.setLevel(index.level + 1);
-  index.addConclusions(con);
-  // context.conclusions.push(con);
+  createConclusion({ type: "atom", value: "⊥" });
 }
 
+// 3. Порожній висновок
 export function thirdRule() {
   index.setCurrentLevel(3);
-  let data = {
-    level: level,  // Додаємо поле level
-    proof: {type: "atom", value: " "}
-  };
-  index.setLevel(index.level + 1);
-
-  index.addConclusions(data);
+  createConclusion({ type: "atom", value: " " });
 }
 
+// 4. Виведення з ¬
 export function fourthRule() {
   index.setCurrentLevel(4);
-  let innerText = side.innerText.replace('¬', '');
+  const innerText = index.side.innerText.replace('¬', '');
+  const hyp = deductive.checkWithAntlr(innerText);
 
-  let hp = {
-    level: level,  // Додаємо поле level
-    hyp: deductive.checkWithAntlr(innerText)
-  };
-  // index.setLevel(index.level+1);
+  index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
+  index.addHypotheses({ level: index.level, hyp });
 
-  index.lastSide.id = index.lastSide.id + 'divId-' + deductive.convertToLogicalExpression(hp.hyp);
-
-  index.addHypotheses(hp);
-
-  let data = {
-    level: level,  // Додаємо поле level
-    proof: {type: "atom", value: "⊥"}
-  };
-  index.setLevel(index.level + 1);
-
-  index.addConclusions(data);
-
+  createConclusion({ type: "atom", value: "⊥" });
 }
 
-
+// 5. Тестовий висновок φ
 export function fifthRule() {
   index.setCurrentLevel(5);
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: ["φ"]
-  };
-
-  index.createTestProof(newConclusion);
-
-  let btnSave = document.getElementById('saveBtn');
-
-  btnSave.addEventListener('click', index.saveTree)
+  createTestConclusion(["φ"]);
 }
 
+// 6. Виведення з подвійного висновку
 export function sixthRule() {
   index.setCurrentLevel(6);
+  const proof = parseProofFromLastSide();
 
-  // let proof = JSON.parse(innerText.replaceAll('divItem-', ""));
-  let proof = deductive.checkWithAntlr(index.lastSide.querySelector('#proofText').textContent);
-
-  proof = deductive.getProof(proof);
-
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: [proof.left, proof.right]
-  };
-
-  index.setLevel(index.level + 1);
-  // context.conclusions.push(newConclusion);
-  index.addConclusions(newConclusion)
+  // Handle new left/right structure and legacy operands structure
+  if (proof.left && proof.right) {
+    createConclusion([proof.left, proof.right]);
+  } else if (proof.operands && proof.operands.length >= 2) {
+    createConclusion(proof.operands);
+  } else {
+    console.error("Invalid conjunction structure:", proof);
+  }
 }
 
-
+// 7. Введення кон’юнкції (ліва частина)
 export function seventhRule() {
   index.setCurrentLevel(7);
-  let innerText = index.lastSide.querySelector('#proofText').textContent;
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: ['(' + innerText + ')' + '∧' + '()']
-  };
-
-  index.createTestProof(newConclusion);
-
-  let btnSave = document.getElementById('saveBtn');
-
-  btnSave.addEventListener('click', index.saveTree)
+  const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+  createTestConclusion(['(' + innerText + ')' + '∧' + '()']);
 }
 
-
+// 8. Введення кон’юнкції (права частина)
 export function eighthRule() {
   index.setCurrentLevel(8);
-  // let innerText = lastSide.innerText;
-  let innerText = index.lastSide.querySelector('#proofText').textContent;
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: ['()' + '∧' + '(' + innerText + ')']
-  };
-
-  index.createTestProof(newConclusion);
-
-  let btnSave = document.getElementById('saveBtn');
-
-  btnSave.addEventListener('click', index.saveTree)
-
+  const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+  createTestConclusion(['()' + '∧' + '(' + innerText + ')']);
 }
 
 
-
+// 9. Елімінація диз’юнкції (ліва частина)
 export function ninthRule() {
   index.setCurrentLevel(9);
-  let proof = deductive.checkWithAntlr(index.lastSide.querySelector('#proofText').textContent);
+  const proof = parseProofFromLastSide();
 
-  proof = deductive.getProof(proof);
-
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: proof.left
-  };
-
-  index.setLevel(index.level + 1);
-
-  index.addConclusions(newConclusion);
-  // context.conclusions.push(newConclusion);
-
+  // Handle new left/right structure and legacy operands structure
+  if (proof.left) {
+    createConclusion(proof.left);
+  } else if (proof.operands && proof.operands.length >= 1) {
+    createConclusion(proof.operands[0]);
+  } else {
+    console.error("Invalid disjunction structure for left operand:", proof);
+  }
 }
 
-
-
-
+// 10. Елімінація диз’юнкції (права частина)
 export function tenthRule() {
   index.setCurrentLevel(10);
-  // let innerText = lastSide.querySelector('#proofText').textContent;
-  // let proof = JSON.parse(innerText.replace('divItem-', ""));
-  let proof = deductive.checkWithAntlr(index.lastSide.querySelector('#proofText').textContent);
+  const proof = parseProofFromLastSide();
 
-  proof = deductive.getProof(proof);
-
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: proof.right
-  };
-
-  index.setLevel(index.level + 1);
-
-  index.addConclusions(newConclusion);
+  // Handle new left/right structure and legacy operands structure
+  if (proof.right) {
+    createConclusion(proof.right);
+  } else if (proof.operands && proof.operands.length >= 2) {
+    createConclusion(proof.operands[1]);
+  } else {
+    console.error("Invalid disjunction structure for right operand:", proof);
+  }
 }
 
+// 11. Введення диз’юнкції
 export function eleventhRule() {
   index.setCurrentLevel(11);
-  // let innerText = lastSide.querySelector('#proofText').textContent;
-  // let proof = JSON.parse(innerText.replace('divItem-', ""));
-  let proof = deductive.checkWithAntlr(index.lastSide.querySelector('#proofText').textContent);
-
-  proof = deductive.getProof(proof);
-
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: ["φ∨ψ", proof.value, proof.value]
-  };
-
-  index.createTestProof(newConclusion);
-
-  let btnSave = document.getElementById('saveBtn');
-
-  btnSave.addEventListener('click', index.saveTree)
+  const proof = parseProofFromLastSide();
+  const value = proof.value || proof.name || deductive.convertToLogicalExpression(proof);
+  createTestConclusion(["φ∨ψ", value, value]);
 }
 
-
+// 12. Імплікація: додавання гіпотези та висновку
 export function twelfthRule() {
   index.setCurrentLevel(12);
-  // let pr = JSON.parse(lastSide.className.replace('divItem-', ""));
-  let pr = deductive.checkWithAntlr(index.lastSide.querySelector('#proofText').textContent);
+  const pr = parseProofFromLastSide();
 
-  pr = deductive.getProof(pr);
-
-  let data = {
-    level: level,  // Додаємо поле level
-    hyp: pr.left
-  };
-
-
-  index.lastSide.id = index.lastSide.id + 'divId-' + deductive.convertToLogicalExpression(pr.left);
-
-
-// Перевірка, чи немає елемента з таким же hyp у масиві
-  let isElementAlreadyExists = index.deductionContext.hypotheses.some(function (item) {
-    return JSON.stringify(item.hyp) === JSON.stringify(data.hyp);
-  });
-
-  if (!isElementAlreadyExists) {
-    index.addHypotheses(data);
+  // Handle new left/right structure and legacy operands structure
+  let hyp, conclusion;
+  if (pr.left && pr.right) {
+    hyp = pr.left;
+    conclusion = deductive.getProof(pr.right);
+  } else if (pr.operands && pr.operands.length >= 2) {
+    hyp = pr.operands[0];
+    conclusion = deductive.getProof(pr.operands[1]);
+  } else {
+    console.error("Invalid implication structure:", pr);
+    return;
   }
 
-  // Додаємо висновок до списку висновків
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: deductive.getProof(pr.right)
-  };
+  index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
 
-  index.setLevel(index.level + 1);
+  const alreadyExists = index.deductionContext.hypotheses.some(item =>
+    JSON.stringify(item.hyp) === JSON.stringify(hyp)
+  );
 
-  // context.conclusions.push(newConclusion);
-  index.addConclusions(newConclusion);
+  if (!alreadyExists) {
+    index.addHypotheses({ level: index.level, hyp });
+  }
+
+  createConclusion(conclusion);
 }
 
-
+// 13. Введення імплікації
 export function thirteenthRule() {
   index.setCurrentLevel(13);
-  let innerText = index.lastSide.querySelector('#proofText').textContent;
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: ["()⇒(" + innerText + ")"]
-  };
-
-  index.createTestProof(newConclusion);
-
-  let btnSave = document.getElementById('saveBtn');
-
-  btnSave.addEventListener('click', index.saveTree)
-
+  const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+  createTestConclusion(["()⇒(" + innerText + ")"]);
 }
 
-export function fourteenthRule() {
+// 14. Існування: підстановка (∃-елімінація)
+export async function fourteenthRule() {
+  const previousLevel = index.currentLevel;
   index.setCurrentLevel(14);
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: ["t/x"]
-  };
+  try {
+    const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+    const proof = getProof(deductive.checkWithAntlr(innerText)).operand;
+    const allConst = deductive.extractConstantsOrVariables(proof);
 
-  index.createTestProof(newConclusion);
+    console.log("Test");
+    console.log(proof);
 
-  let btnSave = document.getElementById('saveBtn');
+    const result = await createModal(allConst);
+    console.log(result);
+    index.setReplaces(result[1] + "/" + result[0]);
 
-  btnSave.addEventListener('click', index.saveTree)
+    // Use precise replacement - replace only the selected term, not all occurrences
+    const replacementCount = deductive.updateTermsFirst(proof, result[0], result[1]);
+    console.log(`Replaced ${replacementCount} occurrence(s) of "${result[0]}" with "${result[1]}"`);
+    console.log(proof);
 
+    createConclusion(proof);
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 14", error)) {
+      index.setCurrentLevel(-1); // Restore previous level
+      return; // Gracefully exit without doing anything
+    }
+    console.error("Error in fourteenthRule:", error);
+    throw error; // Re-throw non-cancellation errors
+  }
 }
 
-export function fifteenthRule() {
+// 15. Універсальна підстановка (∀-елімінація)
+export async function fifteenthRule() {
+  const previousLevel = index.currentLevel;
   index.setCurrentLevel(15);
+  try {
+    const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+    const proof = getProof(deductive.checkWithAntlr(innerText)).operand;
+    const allConst = deductive.extractConstantsOrVariables(proof);
 
+    const result = await createModal(allConst);
+    index.setReplaces(result[0] + "/" + result[1]);
+
+    // Use precise replacement - replace only the selected term, not all occurrences
+    const replacementCount = deductive.updateTermsFirst(proof, result[0], result[1]);
+    console.log(`Replaced ${replacementCount} occurrence(s) of "${result[0]}" with "${result[1]}"`);
+    // console.log(proof);
+    createConclusion(proof);
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 15", error)) {
+      index.setCurrentLevel(-1); // Restore previous level
+      return; // Gracefully exit without doing anything
+    }
+    console.error("Error in fifteenthRule:", error);
+    throw error; // Re-throw non-cancellation errors
+  }
 }
 
-export function sixteenthRule() {
+// 16. Введення ∀
+export async function sixteenthRule() {
+  const previousLevel = index.currentLevel;
   index.setCurrentLevel(16);
-  let innerText = index.lastSide.querySelector('#proofText').textContent;
-  let repl = index.lastSide.querySelector('#repl').textContent.split("/", 2);
+  try {
+    const innerText = index.lastSide.querySelector('#proofText')?.textContent;
 
-  console.log(repl);
-  innerText = innerText.replaceAll(repl[0], repl[1]);
+    const replElements = index.lastSide.querySelectorAll('#repl');
+    const replValues = Array.from(replElements).map(el => el.textContent);
+    console.log(replValues);
 
-  let rule = deductive.checkWithAntlr('(∀' + repl[1] + ')' + innerText);
+    const result = await createModalForReturn(replValues);
 
-  let newConclusion = {
-    level: level,  // Додаємо поле level
-    proof: rule
-  };
+    const repl = result[0].split("/", 2);
+    console.log(repl);
+    const ast = deductive.checkWithAntlr(innerText);
+    console.log(ast);
 
-  index.setLevel(index.level + 1);
+    // Use precise replacement - replace only the selected term, not all occurrences
+    const replacementCount = deductive.updateTermsFirst(ast, repl[1], repl[0]);
+    console.log(`Replaced ${replacementCount} occurrence(s) of "${repl[1]}" with "${repl[0]}"`);
+    console.log(ast);
 
-  index.addConclusions(newConclusion);
-
+    const rule = deductive.checkWithAntlr('(∀' + repl[0] + ')' + deductive.convertToLogicalExpression(ast));
+    createConclusion(rule);
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 16", error)) {
+      index.setCurrentLevel(previousLevel); // Restore previous level
+      return; // Gracefully exit without doing anything
+    }
+    console.error("Error in sixteenthRule:", error);
+    throw error; // Re-throw non-cancellation errors
+  }
 }
 
-export function seventeenthRule() {
+// 17.
+export async function seventeenthRule() {
+  const previousLevel = index.currentLevel;
   index.setCurrentLevel(17);
+  try {
+    const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+    const rightSide = getProof(deductive.checkWithAntlr(innerText));
 
+    const allHyp = deductive.getAllHypotheses(index.lastSide);
+    const allHypArray = allHyp.map(constant => deductive.convertToLogicalExpression(constant));
+
+    const result = await createAdvancedModal(allHypArray);
+    const leftSide = getProof(deductive.checkWithAntlr(result[0]));
+
+    createConclusion([leftSide, rightSide]);
+    console.log("test");
+    console.log(deductive.checkWithAntlr(result[0]).operand);
+    let ast = getProof(getProof(deductive.checkWithAntlr(result[0]).operand));
+
+    // Use precise replacement - replace only the selected term, not all occurrences
+    const replacementCount = deductive.updateTermsFirst(ast, result[1], result[2]);
+    console.log(`Replaced ${replacementCount} occurrence(s) of "${result[1]}" with "${result[2]}"`);
+
+    // Повертаємо гіпотезу для правої частини
+    return ast
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 17", error)) {
+      index.setCurrentLevel(previousLevel); // Restore previous level
+      return; // Gracefully exit without doing anything
+    }
+    console.error("Error in seventeenthRule:", error);
+    throw error; // Re-throw non-cancellation errors
+  }
 }
 
+// 18.
+export async function eighteenthRule() {
+  index.setCurrentLevel(18);
+  createTestConclusion(["P(a)"]);
+}
 
+// 19.
+export async function nineteenthRule() {
+  index.setCurrentLevel(19);
+  createTestConclusion(["P(b)"]);
+}
+
+// 20.
+export async function twentiethRule() {
+  index.setCurrentLevel(20);
+  const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+  const proof = getProof(deductive.checkWithAntlr(innerText));
+
+  // Handle equality structure
+  let leftSide, rightSide;
+  if (proof.left && proof.right) {
+    leftSide = 'P('+ convertToLogicalExpression(proof.left) + ')';
+    rightSide = 'P('+ convertToLogicalExpression(proof.right) + ')';
+  } else {
+    console.error("Invalid equality structure:", proof);
+    return;
+  }
+
+  createConclusion([getProof(deductive.checkWithAntlr(leftSide)), getProof(deductive.checkWithAntlr(rightSide))]);
+}

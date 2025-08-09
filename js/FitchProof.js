@@ -2,11 +2,9 @@ import * as editorMonaco from './monacoEditor';
 import * as deductive from "./deductiveEngine";
 import {currentLevel, deductionContext, lastSide, level, saveTree, side, state, userHypotheses} from "./GentzenProof";
 import {
-  addRedundantParentheses,
   checkWithAntlr,
   convertToLogicalExpression,
-  getProof,
-  removeRedundantParentheses
+  getProof
 } from "./deductiveEngine";
 import * as rulesFitch from "./rulesFitch";
 import * as controlState from "./states";
@@ -15,6 +13,7 @@ import {checkRule, shakeElement} from "./index";
 import {ninthRule, seventhRule} from "./rulesFitch";
 import {addNextLastButtonClickFitch, saveStateFitch} from "./states";
 import {latexFitch} from "./latexGen";
+import {formulaToString} from "./formatter";
 
 
 let fitchProof = [];
@@ -368,8 +367,11 @@ function addBranch(formulas, title) {
     checkRule(1, editorMonaco.editor.getValue());
     editorMonaco.editor.updateOptions({fontSize: 28})
 
-    enterText.style.width = '300px';
-    enterText.style.height = '50px';
+    // Check if enterText element exists before accessing its style
+    if (enterText) {
+      enterText.style.width = '300px';
+      enterText.style.height = '50px';
+    }
 
     // Створюємо кнопку
     let button = document.createElement('button');
@@ -388,7 +390,10 @@ function addBranch(formulas, title) {
     button.addEventListener('click', saveAsp);
 
 
-    div.appendChild(enterText);
+    // Only append enterText if it exists
+    if (enterText) {
+      div.appendChild(enterText);
+    }
     div.appendChild(button);
 
     fitchBranch.appendChild(div);
@@ -574,7 +579,7 @@ function addClickFitchRules() {
 export function addRowToBranch(formula, title) {
   const div = document.createElement('div');
   div.className = 'fitch_formula';
-  div.textContent = removeRedundantParentheses(getProof(checkWithAntlr(formula)));
+  div.textContent = formulaToString(getProof(checkWithAntlr(formula)), 0);
   // div.textContent = getProof(checkWithAntlr(formula));
 
   const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
@@ -590,8 +595,8 @@ export function addRowToBranch(formula, title) {
 
   let mainBranch = document.querySelectorAll('.fitch_branch')[0];
   let lastElement = mainBranch.children[mainBranch.children.length - 1];
-  let lastFormula = addRedundantParentheses(getProof(checkWithAntlr(lastElement.textContent)));
-  let startFormula = addRedundantParentheses(getProof(checkWithAntlr(document.getElementById('userText').textContent)));
+  let lastFormula = formulaToString(getProof(checkWithAntlr(lastElement.textContent)), 1);
+  let startFormula = formulaToString(getProof(checkWithAntlr(document.getElementById('userText').textContent)), 0);
 
   if (deductive.compareExpressions(getProof(checkWithAntlr(lastFormula)), getProof(checkWithAntlr(startFormula)))) {
     document.getElementById('proof-menu').className = 'proof-menu hidden';
@@ -638,7 +643,7 @@ function addOrRemoveParenthesesFitch() {
       if (clonedArray.length !== 2) {
         clonedArray.push(item.element.textContent);
       }
-      item.element.textContent = deductive.addRedundantParentheses(getProof(checkWithAntlr(item.element.textContent))).replaceAll(" ", "");
+      item.element.textContent = formulaToString(getProof(checkWithAntlr(item.element.textContent)), 1);
 
       item.element.appendChild(spanElement);
     });
@@ -653,7 +658,7 @@ function addOrRemoveParenthesesFitch() {
       if (clonedArray.length !== 2) {
         clonedArray.push(item.element.textContent);
       }
-      item.element.textContent = deductive.removeRedundantParentheses(getProof(checkWithAntlr(item.element.textContent))).replaceAll(" ", "");
+      item.element.textContent = formulaToString(getProof(checkWithAntlr(item.element.textContent)), 0);
 
       item.element.appendChild(spanElement);
     });

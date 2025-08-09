@@ -260,10 +260,12 @@ function latexEdit(str, mode) {
     'Ν': '\\Nu', 'Ξ': '\\Xi', 'Ο': '\\Omicron', 'Π': '\\Pi',
     'Ρ': '\\Rho', 'Σ': '\\Sigma', 'Τ': '\\Tau', 'Υ': '\\Upsilon',
     'Φ': '\\Phi', 'Χ': '\\Chi', 'Ψ': '\\Psi', 'Ω': '\\Omega',
-    '⇒': '\\Rightarrow', '->': '\\rightarrow', '→': '\\rightarrow',
-    '∨': '\\lor', 'OR': '\\lor', 'or': '\\lor', '|': '\\lor', '||': '\\lor',
-    '∧': '\\land', 'AND': '\\land', 'and': '\\land', '&': '\\land', '&&': '\\land',
-    '~': '\\neg', '¬': '\\neg', '!': '\\neg'
+    '⇒': ' \\Rightarrow ', '->': ' \\rightarrow ', '→': ' \\rightarrow ',
+    '∨': ' \\lor ', 'OR': ' \\lor ', 'or': ' \\lor ', '|': ' \\lor ', '||': ' \\lor ',
+    '∧': ' \\land ', 'AND': ' \\land ', 'and': ' \\land ', '&': ' \\land ', '&&': ' \\land ',
+    '~': ' \\neg ', ' ¬': ' \\neg ', '!': ' \\neg ',
+    '∀': ' \\forall ', '∃': ' \\exists '
+
   };
 
   // Порядок важливий для запобігання неправильній заміні підрядків

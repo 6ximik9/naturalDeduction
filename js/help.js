@@ -27,6 +27,7 @@ var helpModal = document.getElementById('helpModal');
 
 // Показати модальне вікно при кліку на кнопку
 modalButton.addEventListener('click', function () {
+  console.log("test");
   helpModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
   setGeneral();
 });
@@ -270,15 +271,19 @@ function createMathTable() {
 
 
   const logicalSymbols = [
-    {symbol: '⇒', code: '\\Rightarrow'},
-    {symbol: '∨', code: '\\lor'},
-    {symbol: '∧', code: '\\land'},
-    {symbol: '¬', code: '\\neg'},
-    {symbol: '⊤', code: '\\verum'},
-    {symbol: '⊥', code: '\\absurdum'},
-    {symbol: '——————', code: '\\-'},
-    {symbol: '⊢', code: '\\proves'}
+    { symbol: '⇒', code: '\\Rightarrow' },
+    { symbol: '∨', code: '\\lor' },
+    { symbol: '∧', code: '\\land' },
+    { symbol: '¬', code: '\\neg' },
+    { symbol: '∀', code: '\\forall' },
+    { symbol: '∃', code: '\\exists' },
+    { symbol: '=', code: '\\eq' },
+    { symbol: '⊤', code: '\\verum' },
+    { symbol: '⊥', code: '\\absurdum' },
+    { symbol: '——————', code: '\\-' },
+    { symbol: '⊢', code: '\\proves' }
   ];
+
 
 
   const tableLogic = document.createElement('table');

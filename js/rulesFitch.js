@@ -4,13 +4,12 @@ import {checkRule, shakeElement} from "./index";
 import * as editorMonaco from "./monacoEditor";
 import {addNumberedDivs, clearItems, clickedBranch, clickedProofs, fitchStates, setStateFitch} from "./FitchProof";
 import {
-  addRedundantParentheses,
   checkWithAntlr,
   convertToLogicalExpression,
-  getProof,
-  removeRedundantParentheses
+  getProof
 } from "./deductiveEngine";
 import {saveStateFitch} from "./states";
+import {formulaToString} from "./formatter";
 
 
 export function firstRule(proofs, branches) {
@@ -151,8 +150,11 @@ export function thirdRule(proofs, branches) {
   checkRule(1, editorMonaco.editor.getValue());
   editorMonaco.editor.updateOptions({fontSize: 28})
 
-  enterText.style.width = '500px';
-  enterText.style.height = '50px';
+  // Check if enterText element exists before accessing its style
+  if (enterText) {
+    enterText.style.width = '500px';
+    enterText.style.height = '50px';
+  }
 
   // Створюємо кнопку
   let button = document.createElement('button');
@@ -198,7 +200,7 @@ export function thirdRule(proofs, branches) {
       // const div = document.createElement('div');
       par.className = 'fitch_formula';
       par.style.display = 'flex';
-      par.textContent = removeRedundantParentheses(ruleUser);
+      par.textContent = formulaToString(ruleUser, 0);
       fitchMain.processExpression("AllRules", 1);
       saveStateFitch();
       return 0;
@@ -207,7 +209,10 @@ export function thirdRule(proofs, branches) {
     }
   });
 
-  div.appendChild(enterText);
+  // Only append enterText if it exists
+  if (enterText) {
+    div.appendChild(enterText);
+  }
   div.appendChild(button);
 
   const outJust = document.getElementById('out_just');
@@ -247,13 +252,13 @@ export function fourthRule(proofs, branches) {
   let branch1 = branches[0].element.querySelectorAll('.fitch_formula');
   let branch2 = branches[1].element.querySelectorAll('.fitch_formula');
 
-  let firstPartLeft = deductive.removeRedundantParentheses(getProof(checkWithAntlr(firstPart).left));
-  let firstPartRight = deductive.removeRedundantParentheses(getProof(checkWithAntlr(firstPart).right));
-  let firstBranch1 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch1[0].textContent)));
-  let lastBranch1 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch1[branch1.length - 1].textContent)));
+  let firstPartLeft = formulaToString(getProof(checkWithAntlr(firstPart).left), 0);
+  let firstPartRight = formulaToString(getProof(checkWithAntlr(firstPart).right), 0);
+  let firstBranch1 = formulaToString(getProof(checkWithAntlr(branch1[0].textContent)), 0);
+  let lastBranch1 = formulaToString(getProof(checkWithAntlr(branch1[branch1.length - 1].textContent)), 0);
 
-  let firstBranch2 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch2[0].textContent)));
-  let lastBranch2 = deductive.removeRedundantParentheses(getProof(checkWithAntlr(branch2[branch1.length - 1].textContent)));
+  let firstBranch2 = formulaToString(getProof(checkWithAntlr(branch2[0].textContent)), 0);
+  let lastBranch2 = formulaToString(getProof(checkWithAntlr(branch2[branch1.length - 1].textContent)), 0);
 
 
   if ((firstPartLeft === firstBranch1 && firstPartRight === firstBranch2) ||
@@ -301,7 +306,7 @@ export function fifthRule(rules, branches) {
 
   let newRule = allFormula[0].textContent + "⇒" + allFormula[allFormula.length - 1].textContent;
 
-  newRule = deductive.removeRedundantParentheses(checkWithAntlr(newRule));
+  newRule = formulaToString(checkWithAntlr(newRule), 0);
 
   const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
   // Знаходимо індекс клікнутого елемента в масиві allFitchFormulas
@@ -363,7 +368,7 @@ export function seventhRule(rules, branches) {
 
   let newRule = "~" + "(" + allFormula[0].textContent + ")";
 
-  newRule = deductive.addRedundantParentheses(checkWithAntlr(newRule));
+  newRule = formulaToString(checkWithAntlr(newRule), 1);
 
   const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
   // Знаходимо індекс клікнутого елемента в масиві allFitchFormulas
@@ -431,8 +436,11 @@ export function ninthRule(proofs, branches) {
   checkRule(1, editorMonaco.editor.getValue());
   editorMonaco.editor.updateOptions({fontSize: 28})
 
-  enterText.style.width = '500px';
-  enterText.style.height = '50px';
+  // Check if enterText element exists before accessing its style
+  if (enterText) {
+    enterText.style.width = '500px';
+    enterText.style.height = '50px';
+  }
 
   // Створюємо кнопку
   let button = document.createElement('button');
@@ -469,13 +477,16 @@ export function ninthRule(proofs, branches) {
     // const div = document.createElement('div');
     par.className = 'fitch_formula';
     par.style.display = 'flex';
-    par.textContent = removeRedundantParentheses(checkWithAntlr(editorMonaco.editor.getValue()));
+    par.textContent = formulaToString(checkWithAntlr(editorMonaco.editor.getValue()), 0);
     fitchMain.processExpression("AllRules", 1);
     // fitchMain.addRowToBranch(editorMonaco.editor.getValue(), '⊥E1, ' + (rules[0].index + 1));
     saveStateFitch();
   });
 
-  div.appendChild(enterText);
+  // Only append enterText if it exists
+  if (enterText) {
+    div.appendChild(enterText);
+  }
   div.appendChild(button);
 
   const outJust = document.getElementById('out_just');
@@ -516,7 +527,7 @@ export function tenthRule(rules, branches) {
 
   let newRule = convertToLogicalExpression(check.value);
 
-  newRule = deductive.removeRedundantParentheses(checkWithAntlr(newRule));
+  newRule = formulaToString(checkWithAntlr(newRule), 0);
 
   const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
   // Знаходимо індекс клікнутого елемента в масиві allFitchFormulas

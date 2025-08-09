@@ -2,7 +2,6 @@ import * as monaco from 'monaco-editor';
 import {checkRule} from './index';
 
 
-
 monaco.languages.register({
   id: 'proofLanguage'
 });
@@ -108,7 +107,9 @@ function suggestions(position, range) {
     {label: '\\forall', insertText: '∀', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\FORALL', insertText: '∀', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\exists', insertText: '∃', range: range, kind: monaco.languages.CompletionItemKind.Text},
-    {label: '\\EXISTS', insertText: '∃', range: range, kind: monaco.languages.CompletionItemKind.Text}
+    {label: '\\EXISTS', insertText: '∃', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\EQ', insertText: '=', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\eq', insertText: '=', range: range, kind: monaco.languages.CompletionItemKind.Text}
   ];
 
   return {suggestions: greekAlphabet};
@@ -188,23 +189,24 @@ editor.onDidChangeModelContent(() => {
 });
 
 
-export function setEditorError(line, column, msg) {
-  const markers = [{
+
+export function setEditorError(editorInstance=editor, line, column, message) {
+  const model = editorInstance.getModel();
+  monaco.editor.setModelMarkers(model, 'owner', [{
     startLineNumber: line,
-    startColumn: 0,
+    startColumn: column,
     endLineNumber: line,
-    endColumn: column,
-    message: msg,
+    endColumn: column + 1,
+    message: message,
     severity: monaco.MarkerSeverity.Error
-  }];
-
-  // console.log(markers);
-
-  monaco.editor.setModelMarkers(editor.getModel(), 'owner', markers);
+  }]);
 }
 
-export function clearEditorErrors() {
-  monaco.editor.setModelMarkers(editor.getModel(), 'owner', []);
+
+
+export function clearEditorErrors(editorInstance = editor) {
+  const model = editorInstance.getModel();
+  monaco.editor.setModelMarkers(model, 'owner', []);
 }
 
 export function hasEditorErrors() {
@@ -213,6 +215,10 @@ export function hasEditorErrors() {
   return markers.length > 0 ? 1 : 0;
 }
 
+export function getEditorErrors() {
+  const markers = monaco.editor.getModelMarkers({});
+  return markers.map(marker => marker.message); // Повертаємо масив текстів помилок
+}
 
 // Отримуємо посилання на елементи
 const editorPanel = document.querySelector('.editorPanel');
@@ -302,5 +308,23 @@ dropdownItemsFont.forEach(item => {
     checkboxFont.click();
   });
 });
+
+
+export function createEditor(container) {
+  return monaco.editor.create(container, {
+    value: '',
+    language: 'proofLanguage',
+    fontSize: 28,
+    automaticLayout: true,
+    scrollbar: {
+      vertical: 'auto',
+      useShadows: true,
+      verticalScrollbarSize: 17,
+      horizontalScrollbarSize: 17,
+      arrowSize: 30,
+    },
+    wordBasedSuggestions: false
+  });
+}
 
 

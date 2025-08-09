@@ -1,17 +1,20 @@
 import {CharStreams, CommonTokenStream, ParseTreeWalker} from 'antlr4';
-import GrammarLexer from '../my_antlr/GrammarLexer';
-import GrammarParser from '../my_antlr/GrammarParser';
-import MyGrammarListener from '../my_antlr/MyGrammarListener';
+import GrammarLexer from '../my_antlr/GrammarLexer.js';
+import GrammarParser from '../my_antlr/GrammarParser.js';
+import MyGrammarListener from '../my_antlr/MyGrammarListener.js';
 import * as editorMonaco from './monacoEditor';
 import * as deductive from './deductiveEngine';
 import * as controlState from './states';
-import * as rules from './rulesGentzen';
-import {checkWithAntlr, getProof} from "./deductiveEngine";
+import {checkWithAntlr, convertToLogicalExpression, getProof, handleModalCancellation} from "./deductiveEngine";
 import {checkRule, typeProof} from "./index";
 import {shakeElement} from "./index";
 import {createTreeD3} from "./tree";
-import {addNextLastButtonClick, addNextLastButtonClickGentzen} from "./states";
+import {addNextLastButtonClickGentzen} from "./states";
 import {latexGentzen} from "./latexGen";
+import {GENTZEN_BUTTONS, ruleGentzenHandlers,} from './ruleGentzenHandlers';
+import {get} from "mobx";
+import {formulaToString} from "./formatter";
+
 
 // Структура для зберігання контексту дедукції
 export let deductionContext = {
@@ -26,9 +29,9 @@ export let userHypotheses;
 
 export let side;
 export let lastSide;
+export let mainReplaces = "";
 
 let hasError = false;
-
 
 export let state = 0;
 
@@ -38,6 +41,10 @@ let oldUserInput = "";
 
 export function setState(newValue) {
   state = newValue;
+}
+
+export function setReplaces(newValue) {
+  mainReplaces = newValue;
 }
 
 // Сетер для level
@@ -73,212 +80,313 @@ export function addHypotheses(data) {
   deductionContext.hypotheses.push(data);
 }
 
-// Додаємо обробник події кліку до body (можна вибрати інший контейнер)
+/**
+ * Обробляє клік по дереву доказу: виділяє елемент та ініціює обробку виразу.
+ */
 document.getElementById('proof').addEventListener('click', function (event) {
-  if (typeProof === 1) {
-    return;
-  }
+  if (typeProof === 1) return;
 
   const clickedElement = event.target;
 
-  if (clickedElement.className === "previous") {
-    return;
-  }
+  // Ігнорувати клік по вже закритому елементу
+  if (clickedElement.className === "previous") return;
 
-  const container = document.getElementById('proof');
-  const labels = container.querySelectorAll('label');
-  labels.forEach(label => {
-    label.style.background = '';
-  });
+  clearLabelHighlights();
 
   if (clickedElement.tagName === 'DIV') {
     side = clickedElement;
-    side.querySelector('label').style.background = 'rgba(136,190,213,0.78)';
+    try {
+      side.querySelector('label').style.background = 'rgba(136,190,213,0.78)';
+    } catch (error) {
+      console.error('Monaco editor clicked');
+    }
   } else if (clickedElement.tagName === 'LABEL') {
-
     side = clickedElement.parentNode;
     clickedElement.style.background = 'rgba(136,190,213,0.78)';
   }
 
-
-  let elements = document.getElementsByClassName("preview");
-  if (elements.length <= 0) {
-    setTimeout(() => {
-      handleClick();
-    }, 100);
+  // Якщо немає попереднього перегляду — обробити клік
+  if (document.getElementsByClassName("preview").length === 0) {
+    setTimeout(handleClick, 100);
   }
 
-  const radioInput = document.getElementById('tab1');
-  radioInput.checked = true;
-
-
+  // Перемикаємося на вкладку 1
+  document.getElementById('tab1').checked = true;
 });
 
-
-function handleClick() {
-  if (!side) {
-    return;
-  }
-
-  if (!side.querySelector('.preview') && side.className !== "closed") {
-    // oldUserInput = "";
-    try {
-      oldUserInput = side.querySelector('#proofText').textContent;
-      // console.log(side.querySelector('#proofText').textContent);
-      processExpression(deductive.checkWithAntlr(oldUserInput), 1);
-      showAllHyp();
-      // console.log(getProof(deductive.checkWithAntlr(oldUserInput)));
-    } catch (error) {
-      // console.error('Close or previous');
-    }
-  }
-
+/**
+ * Скидає підсвічування всіх label-елементів у дереві доказу.
+ */
+function clearLabelHighlights() {
+  const labels = document.getElementById('proof').querySelectorAll('label');
+  labels.forEach(label => {
+    label.style.background = '';
+  });
 }
 
+/**
+ * Обробляє вибраний елемент дерева доказу, якщо він ще не оброблений.
+ */
+function handleClick() {
+  if (!side) return;
+
+  const isAlreadyProcessed = side.querySelector('.preview');
+  const isClosed = side.className === "closed";
+
+  if (!isAlreadyProcessed && !isClosed) {
+    try {
+      oldUserInput = side.querySelector('#proofText').textContent;
+      const parsed = deductive.checkWithAntlr(oldUserInput);
+      processExpression(parsed, 1);
+      showAllHyp();
+    } catch (error) {
+      console.warn('Не вдалося обробити клік:', error);
+    }
+  }
+}
+
+/**
+ * Парсить логічний вираз, створює дерево доказу та ініціалізує інтерфейс.
+ * @param {string} text - Вхідний логічний вираз.
+ */
 export function parseExpression(text) {
-  if (hasError || text === null || text.length === 0) {
+  if (hasError || !text || text.trim().length === 0) {
     shakeElement('enter', 5);
     return;
   }
 
+  // Приховуємо поле введення формули
   document.getElementById('enterFormula').className = 'hidden';
+
+  // Ініціалізація інтерфейсу
   addClickGentzenRules();
   addNextLastButtonClickGentzen();
   latexGentzen();
   addOrRemoveParenthesesGentzen();
-  let chars = CharStreams.fromString(text);
-  let lexer = new GrammarLexer(chars);
-  let tokens = new CommonTokenStream(lexer);
-  let parser = new GrammarParser(tokens);
-  let tree = parser.implication();
+  addClickSwitchNotation();
 
-  const listener = new MyGrammarListener();
-  ParseTreeWalker.DEFAULT.walk(listener, tree);
+  try {
+    // Парсинг виразу через ANTLR
+    const chars = CharStreams.fromString(text);
+    const lexer = new GrammarLexer(chars);
+    const tokens = new CommonTokenStream(lexer);
+    const parser = new GrammarParser(tokens);
 
-  // deductionContext.conclusions[0] = listener.stack.pop();
+    // Add error handling to prevent reportAttemptingFullContext errors
+    parser.removeErrorListeners();
+    parser.addErrorListener({
+      syntaxError: function (recognizer, offendingSymbol, line, column, msg, e) {
+        throw new Error(`Parse error at line ${line}, column ${column}: ${msg}`);
+      },
+      reportAmbiguity: function(recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs) {
+        console.warn('Grammar ambiguity detected in Gentzen proof parsing');
+      },
+      reportAttemptingFullContext: function(recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs) {
+        console.warn('Parser attempting full context in Gentzen proof parsing');
+      },
+      reportContextSensitivity: function(recognizer, dfa, startIndex, stopIndex, prediction, configs) {
+        console.warn('Context sensitivity detected in Gentzen proof parsing');
+      }
+    });
 
-  deductionContext.conclusions[0] = {
-    level: level++,  // Додаємо поле level
-    proof: listener.stack.pop()
-  };
+    const tree = parser.implication();
 
-  console.log(deductionContext.conclusions[0]);
-  // console.log(JSON.stringify(deductionContext.conclusions[0], null, 2));
-  createProofTree(deductionContext.conclusions[0], document.getElementById('proof'));
+    const listener = new MyGrammarListener();
+    ParseTreeWalker.DEFAULT.walk(listener, tree);
 
-  side = document.querySelector('.proof-element_level-0').children[0];
-  // side = parentElement.querySelector('[class^="divItem-"]');
-  oldUserInput = side.querySelector('#proofText').textContent;
+    const parsedProof = listener.stack.pop();
 
-  controlState.saveState();
-  // side = document.get
-  processExpression(deductionContext.conclusions[0].proof, 1);
-  document.getElementById('undo_redo').style.display = 'flex';
+    console.log(parsedProof);
+    console.log(JSON.stringify(parsedProof, null, 2));
 
+    const full = formulaToString(parsedProof, 1);    // з усіма дужками
+    const minimal = formulaToString(parsedProof, 0); // тільки необхідні
 
-  showAllHyp();
+    console.log('FULL:', full);
+    console.log('MINIMAL:', minimal);
+
+    // Зберігаємо результат у контекст
+    const conclusion = {
+      level: level++,
+      proof: parsedProof
+    };
+    deductionContext.conclusions[0] = conclusion;
+
+    // Створюємо дерево доказу
+    createProofTree(conclusion, document.getElementById('proof'));
+
+    // Встановлюємо активну сторону
+    side = document.querySelector('.proof-element_level-0').children[0];
+    oldUserInput = side.querySelector('#proofText').textContent;
+
+    // Зберігаємо стан і показуємо кнопки
+    controlState.saveState();
+    processExpression(parsedProof, 1);
+    document.getElementById('undo_redo').style.display = 'flex';
+
+    showAllHyp();
+  } catch (error) {
+    console.error("Помилка при парсингу виразу:", error);
+    shakeElement('enter', 5);
+  }
 }
 
+/**
+ * Генерує кнопки правил виводу на основі типу логічного виразу.
+ * @param {Object} expression - Об'єкт логічного виразу.
+ * @param {number} countRules - Якщо 1 — показати всі правила.
+ */
 export function processExpression(expression, countRules) {
   document.getElementById('proof-menu').className = 'proof-menu';
-  const buttons = [
-      "$$\\frac{\\bot}{\\phi} \\quad (\\bot E1) $$"
-    , "$${\\frac{[\\neg\\phi]}{\\vdots} \\atop \\frac{\\bot}{\\phi}} (\\bot E2) $$"
-    , "$$\\frac{}{\\top} \\quad (\\top I) $$"
-    , "$${\\frac{[\\phi]}{\\vdots} \\atop \\frac{\\bot}{\\neg\\phi}} (\\neg I) $$"
-    , "$$ \\frac{\\phi \\quad \\quad \\neg \\phi }{\\bot} \\quad (\\neg E)  $$"
-    , "$$\\frac{\\phi \\quad \\quad \\psi}{\\phi \\wedge \\psi} (\\wedge I)$$"
-    , "$$\\frac{\\phi \\wedge \\psi}{\\phi} (\\wedge E1)$$"
-    , "$$\\frac{\\phi \\wedge \\psi}{\\psi} (\\wedge E2)$$"
-    , "$$\\frac{\\phi}{\\phi \\vee \\psi} (\\vee I1)$$"
-    , "$$ \\frac{\\psi}{\\phi \\vee \\psi} (\\vee I2) $$"
-    , "$$ \\frac{\\phi \\vee \\psi \\quad \\quad \\theta \\quad \\quad \\theta}{ \\theta} (\\vee E) $$"
-    , "$$\\frac{\\psi}{\\phi \\Rightarrow \\psi} (\\Rightarrow I)$$"
-    , "$$ \\frac{\\phi \\quad \\quad \\phi \\Rightarrow \\psi }{\\psi}  (\\Rightarrow E) $$"
-    , "$$ \\frac{\\varphi[t/x]}{(\\exists x)\\varphi} \\; (\\exists I) $$"
-    , "$$ \\frac{\\varphi[t/x]}{(\\forall x)\\varphi} \\; (\\forall I) \\; \\tiny t \\text{ fresh} $$"
-    , "$$ \\frac{(\\forall x)\\varphi}{\\varphi[t/x]} \\; (\\forall E) $$"
-    , "$$ \\frac{(\\exists x)\\varphi \\quad {\\normalsize \\frac{[\\varphi[t/x]]}{\\vdots} \\atop \\normalsize \\psi}}{\\psi} \\; (\\exists E) \\; \\tiny t \\text{ fresh}\n $$"
-  ];
+
+  // Якщо потрібно показати всі правила
   if (countRules === 1) {
-    generateButtons(17, buttons);
+    generateButtons(GENTZEN_BUTTONS.length, GENTZEN_BUTTONS);
     return;
   }
 
-  expression = deductive.getProof(expression);
+  const expr = deductive.getProof(expression);
 
-  switch (expression.type) {
+  switch (expr.type) {
+    case "variable":
+    case "constant":
+    case "number":
     case "atom":
-      if (expression.value === '⊤') {
-        generateButtons(1, [buttons[2]]);
-      } else if (expression.value === '⊥') {
-        generateButtons(1, [buttons[4]]);
+      const value = expr.value || expr.name;
+      if (value === '⊤') {
+        generateButtons(1, [GENTZEN_BUTTONS[2]]);
+      } else if (value === '⊥') {
+        generateButtons(1, [GENTZEN_BUTTONS[4]]);
       } else {
-        generateButtons(6, [buttons[0], buttons[1], buttons[6], buttons[7], buttons[10], buttons[12]]);
-      }
-      break;
-    case "implication":
-      generateButtons(7, [buttons[0], buttons[1], buttons[6], buttons[7], buttons[10], buttons[11]
-        , buttons[12]]);
-      break;
-    case "conjunction":
-      generateButtons(7, [buttons[0], buttons[1], buttons[5], buttons[6], buttons[7], buttons[10], buttons[12]]);
-      break;
-    case "disjunction":
-      generateButtons(8, [buttons[0], buttons[1], buttons[6], buttons[7], buttons[8], buttons[9], buttons[10], buttons[12]]);
-      break;
-    case "negation":
-      generateButtons(1, [buttons[3]]);
-      break;
-    case "quantifier":
-      if(expression.quantifier === '∃') {
-        generateButtons(2, [buttons[13], buttons[16]]);
-      }
-      else
-      {
-        generateButtons(2, [buttons[14], buttons[15]]);
+        generateButtons(6, [
+          GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+          GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+          GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12]
+        ]);
       }
       break;
 
+    case "implication":
+      generateButtons(8, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[11],
+        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[16]
+      ]);
+      break;
+
+    case "conjunction":
+      generateButtons(8, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[5], GENTZEN_BUTTONS[6],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
+        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[16]
+      ]);
+      break;
+
+    case "disjunction":
+      generateButtons(9, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[8], GENTZEN_BUTTONS[9],
+        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+        GENTZEN_BUTTONS[16]
+      ]);
+      break;
+
+    case "negation":
+      generateButtons(2, [GENTZEN_BUTTONS[3], GENTZEN_BUTTONS[16]]);
+      break;
+
+    case "quantifier":
+      if (expr.quantifier === '∃') {
+        generateButtons(2, [GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[16]]);
+      } else if (expr.quantifier === '∀') {
+        generateButtons(2, [GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[16]]);
+      }
+      break;
+
+    case "forall":
+      generateButtons(2, [GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[16]]);
+      break;
+
+    case "exists":
+      generateButtons(2, [GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[16]]);
+      break;
+
+    case "predicate":
+    case "relation":
+      generateButtons(4, [GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]]);
+      break;
+
+    case "equality":
+      generateButtons(3, [GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[19]]);
+      break;
+
+    case "addition":
+    case "multiplication":
+    case "successor":
+    case "function":
+      // Arithmetic and function expressions
+      generateButtons(4, [GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]]);
+      break;
+
+    case "sequent":
+      // Handle sequent notation
+      generateButtons(6, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12]
+      ]);
+      break;
+
+    default:
+      console.warn("Невідомий тип виразу:", expr);
+      break;
   }
 }
 
-// Функція для генерації кнопок
+/**
+ * Генерує кнопки правил виводу та, за потреби, кнопку закриття гілки.
+ * @param {number} buttonCount - Кількість кнопок.
+ * @param {string[]} buttonTexts - Тексти кнопок (LaTeX).
+ */
 function generateButtons(buttonCount, buttonTexts) {
-  // const buttonContainer = document.getElementById('button-container');
   const buttonContainer = document.getElementById('button-container');
   buttonContainer.innerHTML = '';
 
-  let hypothesesAll = deductive.getAllHypotheses(side);
-  let find = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
+  const currentExpr = deductive.getProof(
+    deductive.checkWithAntlr(side.querySelector('#proofText').textContent)
+  );
 
+  const hypotheses = deductive.getAllHypotheses(side).map(h =>
+    deductive.getProof(h)
+  );
 
-  let isElementInArray = hypothesesAll.find(function (item) {
-    item = deductive.getProof(item);
-    find = deductive.getProof(find);
-    return deductive.compareExpressions(item, find);
-  });
+  const isInHypotheses = hypotheses.some(h =>
+    deductive.compareExpressions(h, currentExpr)
+  );
 
-
-  if (isElementInArray) {
-    let btn = createButton("Close branch", () => closeSide(side));
-    btn.style.minHeight = '80px';
-    buttonContainer.appendChild(btn);
+  if (isInHypotheses) {
+    const closeBtn = createButton("Close branch", () => closeSide(side));
+    closeBtn.style.minHeight = '80px';
+    buttonContainer.appendChild(closeBtn);
   }
 
   for (let i = 0; i < buttonCount; i++) {
-    let button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i]));
+    const button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i]));
     buttonContainer.appendChild(button);
   }
 
-  MathJax.typesetPromise().then(() => {
-    // Код тут виконається після того, як MathJax закінчить форматування формул
-  }).catch((err) => console.log('Помилка MathJax:', err));
-
-
+  MathJax.typesetPromise().catch(err => console.warn('MathJax помилка:', err));
 }
 
-// Функція для створення кнопки з обробником події
+/**
+ * Створює HTML-кнопку з заданим текстом та обробником кліку.
+ * @param {string} text - Текст кнопки (може містити LaTeX).
+ * @param {Function} clickHandler - Функція, яка викликається при кліку.
+ * @returns {HTMLButtonElement} - Створена кнопка.
+ */
 function createButton(text, clickHandler) {
   const button = document.createElement('button');
   button.className = 'button';
@@ -287,178 +395,90 @@ function createButton(text, clickHandler) {
   return button;
 }
 
+
+/**
+ * Закриває гілку дерева доказу, очищаючи заміни та оновлюючи інтерфейс.
+ * @param {HTMLElement} container - DOM-елемент гілки.
+ */
 function closeSide(container) {
+  // Видаляємо всі span-елементи (заміни)
+  container.querySelectorAll('span').forEach(span => span.remove());
+
+  // Позначаємо гілку як закриту
   container.className = 'closed';
-  container.innerHTML = '<label class = "previous" id="proofText">' + '[' + container.textContent + ']' + '</label>';
+  const labelText = `[${container.textContent}]`;
+  container.innerHTML = `<label class="previous" id="proofText">${labelText}</label>`;
+
+  // Оновлюємо інтерфейс
   document.getElementById('proof-menu').className = 'hidden';
-  controlState.saveState();
   document.getElementById('currentHypotheses').style.display = 'none';
   document.getElementById('currentLabelHypotheses').style.display = 'none';
+
+  controlState.saveState();
 }
 
-
-// Функція для обробки кліку на кнопку
-function buttonClicked(buttonText) {
-  // saveState();
+/**
+ * Обробляє натискання на кнопку правила виводу.
+ * Використовує ruleGentzenHandlers для визначення дії.
+ * @param {string} buttonText - Текст кнопки (LaTeX з назвою правила).
+ */
+async function buttonClicked(buttonText) {
   lastSide = side;
   const size = deductionContext.conclusions.length - 1;
-  let lastParentheses = deductive.extractTextBetweenParentheses(buttonText.toString());
-  nameRule = lastParentheses;
   const allButtons = document.querySelectorAll('#button-container button');
-  let canUseRule = deductive.checkWithAntlr(lastSide.querySelector('#proofText').textContent);
-  canUseRule = getProof(canUseRule);
-  console.log(lastParentheses);
-  switch (lastParentheses) {
-    case "\\bot E1":
-      if (canUseRule.type !== 'negation' && canUseRule.value !== '⊤' && canUseRule.value !== '⊥') {
-        rules.firstRule();
-        createProofTree(deductionContext.conclusions[size + 1], side);
-        controlState.saveState();
-      } else {
-        shakeButton(allButtons[0]);
-        return;
-      }
-      break;
-    case "\\bot E2":
-      if (canUseRule.type !== 'negation' && canUseRule.value !== '⊤' && canUseRule.value !== '⊥') {
-        rules.secondRule(deductionContext);
-        createProofTree(deductionContext.conclusions[size + 1], side);
-        controlState.saveState();
-      } else {
-        shakeButton(allButtons[1]);
-        return;
-      }
-      break;
-    case "\\top I":
-      if (canUseRule.value === '⊤') {
-        rules.thirdRule();
-        createProofTree(deductionContext.conclusions[size + 1], side);
-        controlState.saveState();
-      } else {
-        shakeButton(allButtons[2]);
-        return;
-      }
-      break;
-    case "\\neg I":
-      if (canUseRule.type === 'negation') {
-        rules.fourthRule();
-        createProofTree(deductionContext.conclusions[size + 1], side);
-        controlState.saveState();
-      } else {
-        shakeButton(allButtons[3]);
-        return;
-      }
-      break;
-    case "\\neg E":
-      if (canUseRule.value === '⊥') {
-        rules.fifthRule();
-      } else {
-        shakeButton(allButtons[4]);
-        return;
-      }
-      break;
-    case "\\wedge I":
-      if (canUseRule.type === 'conjunction') {
-        rules.sixthRule();
-        createProofTree(deductionContext.conclusions[size + 1], side);
-        controlState.saveState();
-      } else {
-        shakeButton(allButtons[5]);
-        return;
-      }
-      break;
-    case "\\wedge E1":
-      if (canUseRule.type !== 'negation' && canUseRule.value !== '⊤' && canUseRule.value !== '⊥') {
-        rules.seventhRule(deductionContext);
-      } else {
-        shakeButton(allButtons[6]);
-        return;
-      }
-      break;
-    case "\\wedge E2":
-      if (canUseRule.type !== 'negation' && canUseRule.value !== '⊤' && canUseRule.value !== '⊥') {
-        rules.eighthRule(deductionContext);
-      } else {
-        shakeButton(allButtons[7]);
-        return;
-      }
-      break;
-    case "\\vee I1":
-      if (canUseRule.type === 'disjunction') {
-        rules.ninthRule();
-        createProofTree(deductionContext.conclusions[size + 1], side);
-        controlState.saveState();
-      } else {
-        shakeButton(allButtons[8]);
-        return;
-      }
-      break;
-    case "\\vee I2":
-      if (canUseRule.type === 'disjunction') {
-        rules.tenthRule();
-        createProofTree(deductionContext.conclusions[size + 1], side);
-        controlState.saveState();
-      } else {
-        shakeButton(allButtons[9]);
-        return;
-      }
-      break;
-    case "\\vee E":
-      if (canUseRule.type !== 'negation' && canUseRule.value !== '⊤' && canUseRule.value !== '⊥') {
-        rules.eleventhRule();
-      } else {
-        shakeButton(allButtons[10]);
-        return;
-      }
-      break;
-    case "\\Rightarrow I":
-      if (canUseRule.type === 'implication') {
-        rules.twelfthRule();
-        createProofTree(deductionContext.conclusions[size + 1], side);
-        controlState.saveState();
-      } else {
-        shakeButton(allButtons[11]);
-        return;
-      }
-      break;
-    case "\\Rightarrow E":
-      if (canUseRule.type !== 'negation' && canUseRule.value !== '⊤' && canUseRule.value !== '⊥') {
-        rules.thirteenthRule();
-      } else {
-        shakeButton(allButtons[12]);
-        return;
-      }
-      break;
-    case "\\exists I":
-      if (canUseRule.type === 'quantifier' && canUseRule.quantifier === '∃') {
-        rules.fourteenthRule();
-      } else {
-        shakeButton(allButtons[13]);
-        return;
-      }
-      break;
-    case "\\forall I":
 
-      break;
-    case "\\forall E":
-      if (canUseRule.type === 'relation') {
-         rules.sixteenthRule();
-         createProofTree(deductionContext.conclusions[size + 1], side);
-         controlState.saveState();
-      } else {
-        shakeButton(allButtons[15]);
-        return;
-      }
-      break;
-    case "\\exists E":
+  const ruleName = deductive.extractTextBetweenParentheses(buttonText.toString());
+  nameRule = ruleName;
 
-      break;
+  let expr = getProof(checkWithAntlr(lastSide.querySelector('#proofText').textContent));
+  const handler = ruleGentzenHandlers[ruleName];
+
+  if (!handler) {
+    console.warn(`Правило "${ruleName}" не знайдено.`);
+    return;
   }
 
+  // Перевірка умови застосування правила
+  if (!handler.condition(expr)) {
+    const index = Object.keys(ruleGentzenHandlers).indexOf(ruleName);
+    if (allButtons[index]) shakeButton(allButtons[index]);
+    return;
+  }
+
+  // Виконання дії з обробкою скасування модального вікна
+  try {
+    let result = handler.returnsResult ? await handler.action() : await handler.action();
+
+    // Створення дерева доказу, якщо потрібно
+    if (handler.requiresTree && currentLevel!==-1) {
+      console.log(deductionContext.conclusions);
+      const newConclusion = deductionContext.conclusions[size + 1];
+      console.log('new', newConclusion);
+
+      // Check if a new conclusion was actually added
+      if (newConclusion) {
+        createProofTree(newConclusion, side, result);
+        controlState.saveState();
+      } else {
+        console.log('No new conclusion was added - rule may have been cancelled');
+      }
+    }
+  } catch (error) {
+    if (deductive.handleModalCancellation(`Rule "${ruleName}"`, error)) {
+      console.log(`- no action taken`);
+      return; // Gracefully exit without creating tree or changing state
+    }
+    // For other errors, log and potentially show user feedback
+    console.error(`Error in rule "${ruleName}":`, error);
+    // Optionally show user-friendly error message
+    // alert(`An error occurred while applying the rule: ${error.message}`);
+  }
+
+  // Очистка інтерфейсу
   document.getElementById('proof-menu').className = 'hidden';
   document.getElementById("tab1").checked = true;
-  const container = document.getElementById('proof');
-  const labels = container.querySelectorAll('label');
+
+  const labels = document.getElementById('proof').querySelectorAll('label');
   labels.forEach(label => {
     label.style.background = '';
   });
@@ -479,133 +499,192 @@ function shakeButton(button) {
   }, interval * 5);
 }
 
-export function saveTree() {
 
+/**
+ * Зберігає поточне піддерево доказу, створене користувачем у редакторі.
+ * Перевіряє правильність виразу, створює новий висновок і додає його до дерева.
+ */
+export function saveTree() {
   if (hasError) {
     shakeElement('saveBtn', 5);
     return;
   }
 
   let er = 0;
+  const inputText = editorMonaco.editor.getValue();
+  const parsed = deductive.checkWithAntlr(inputText, er);
 
-  if (deductive.checkCorrect(deductive.checkWithAntlr(editorMonaco.editor.getValue(), er)) === 1 && currentLevel !== 5) {
-    if (currentLevel === 7 || currentLevel === 8) {
-      alert("Missing conjunction, please correct your input");
-    } else if (currentLevel === 11) {
-      alert("Missing disjunction, please correct your input")
-    } else if (currentLevel === 13) {
-      alert("Missing implication, please correct your input")
-    }
+  // Перевірка на синтаксичну коректність
+  if (deductive.checkCorrect(parsed) === 1 && currentLevel !== 5) {
+    const errorMessages = {
+      7: "Missing conjunction, please correct your input",
+      8: "Missing conjunction, please correct your input",
+      11: "Missing disjunction, please correct your input",
+      13: "Missing implication, please correct your input",
+      18: "Missing relation, please correct your input",
+      19: "Missing relation, please correct your input"
+    };
+    if (errorMessages[currentLevel]) alert(errorMessages[currentLevel]);
     return;
   }
 
-  let replaces = "";
-  // Перебираємо кожен знайдений елемент та виводимо інформацію в консоль
-  let data = [];
-  let premises;
+  // Формування premises залежно від рівня
+  let premises = [];
   if (currentLevel === 5) {
-    premises = [editorMonaco.editor.getValue(), `!${editorMonaco.editor.getValue()}`.toString()];
+    premises = [inputText, `!${inputText}`];
   } else if (currentLevel === 11) {
-    let text = deductive.convertToLogicalExpression(deductive.checkWithAntlr(lastSide.querySelector('#proofText').textContent));
-    premises = [editorMonaco.editor.getValue(), text, text];
+    const base = deductive.convertToLogicalExpression(
+      deductive.checkWithAntlr(lastSide.querySelector('#proofText').textContent)
+    );
+    premises = [inputText, base, base];
   } else if (currentLevel === 13) {
-    let prof1 = deductive.checkWithAntlr(editorMonaco.editor.getValue(), er);
-    premises = [deductive.convertToLogicalExpression(prof1.left), deductive.convertToLogicalExpression(prof1)];
-  }
-  else if (currentLevel === 14) {
-    let innerText = lastSide.querySelector('#proofText').textContent;
-    let newVar = editorMonaco.editor.getValue();
-    let splitResult = newVar.split('/');
-
-    if(splitResult.length !== 2 || splitResult[0].length === 0 || splitResult[1].length === 0)
-    {
-      alert("Please enter a valid t/x substitution.")
-      return;
-    }
-    replaces = newVar;
-
-    let astFromText = deductive.checkWithAntlr(innerText).expression;
-
-    let textFromAstWithoutQuantifier = deductive.convertToLogicalExpression(astFromText);
-
-    let updatedText = textFromAstWithoutQuantifier.replaceAll(splitResult[1], splitResult[0]); // Замінюємо всі входження символу
-
-    premises = [updatedText];
-  }
-  else {
-    premises = [editorMonaco.editor.getValue()];
-  }
-  for (const str1 of premises) {
-    data.push(deductive.checkWithAntlr(str1, er));
-  }
-  if (er === 1) {
-    return;
-  }
-
-  let newConclusion;
-  if (data.length > 1) {
-    newConclusion = {
-      level: level++,  // Додаємо поле level
-      proof: data
-    };
+    const prof1 = deductive.checkWithAntlr(inputText, er);
+    premises = [
+      deductive.convertToLogicalExpression(prof1.left),
+      deductive.convertToLogicalExpression(prof1)
+    ];
+  } else if (currentLevel === 18) {
+    const input = getProof(deductive.checkWithAntlr(inputText, er));
+    let prev = deductive.checkWithAntlr(lastSide.querySelector('#proofText').textContent);
+    console.log(prev);
+    let var1 = deductive.extractConstantsOrVariables(input)
+    let var2 = deductive.extractConstantsOrVariables(prev)
+    premises = [inputText, var1 + "=" + var2];
+  } else if (currentLevel === 19) {
+    const input = getProof(deductive.checkWithAntlr(inputText, er));
+    let prev = deductive.checkWithAntlr(lastSide.querySelector('#proofText').textContent);
+    console.log(prev);
+    let var1 = deductive.extractConstantsOrVariables(input)
+    let var2 = deductive.extractConstantsOrVariables(prev)
+    premises = [inputText, var2 + "=" + var1];
   } else {
-    newConclusion = {
-      level: level++,  // Додаємо поле level
-      proof: data.pop()
-    };
+    premises = [inputText];
   }
 
+  // Парсимо всі premises
+  const data = premises.map(str => deductive.checkWithAntlr(str, er));
+  if (er === 1) return;
+
+  // Створюємо новий висновок
+  const newConclusion = {
+    level: level++,
+    proof: data.length > 1 ? data : data[0]
+  };
   deductionContext.conclusions.push(newConclusion);
 
+  // Видаляємо попередній preview
   const divToRemove = document.getElementById("preview");
-  divToRemove.remove();
+  if (divToRemove) divToRemove.remove();
 
-  let elements = document.querySelectorAll('[class^="divItem-"]');
-  elements.forEach(function (element) {
-    element.addEventListener('click', handleClick);
-  });
+  // Додаємо обробник кліку до всіх елементів дерева
+  document.querySelectorAll('[class^="divItem-"]').forEach(el =>
+    el.addEventListener('click', handleClick)
+  );
 
-
-  createProofTree(newConclusion, lastSide, replaces);
-
+  // Додаємо нове піддерево
+  createProofTree(newConclusion, lastSide);
   controlState.saveState();
 }
 
 let enterText = document.getElementById('editorPanel');
 
+/**
+ * Створює попередній перегляд доказу з редактором і кнопкою збереження.
+ * @param {Object} conclusions - Об'єкт з висновками користувача.
+ */
 export function createTestProof(conclusions) {
   let container = document.getElementById('proof');
-  // container.removeEventListener('click', handleClick);
   if (level > 1) {
     container = side;
   }
 
+  // Очистити редактор
   editorMonaco.clearEditorErrors();
   editorMonaco.editor.setValue('');
-
   editorMonaco.editor.setValue(conclusions.proof[0]);
-  checkRule(1, editorMonaco.editor.getValue());
-  let proofPreview = document.createElement('div');
-  editorMonaco.editor.updateOptions({fontSize: 28})
-  enterText.style.width = '600px';
-  enterText.style.height = '60px';
-  proofPreview.className = "preview";
-  proofPreview.style.borderBottom = '2px solid #000000';
-  proofPreview.id = 'preview';
-  // Створюємо кнопку
+  editorMonaco.editor.updateOptions({fontSize: 24});
 
-  let button = document.createElement('button');
+  // Перевірити вираз
+  checkRule(1, editorMonaco.editor.getValue());
+
+  // Створити preview-контейнер
+  const preview = document.createElement('div');
+  preview.className = "preview";
+  preview.id = 'preview';
+  preview.style.display = 'flex';
+  preview.style.flexDirection = 'row';
+  preview.style.alignItems = 'center';
+  preview.style.justifyContent = 'flex-start';
+  preview.style.gap = '10px';
+
+  // Стилізувати редактор
+  styleEditorPanel();
+
+  // Створити кнопку "Save"
+  const saveButton = createSaveButton();
+
+  // Додати редактор і кнопку до preview
+  // Only append enterText if it exists
+  if (enterText) {
+    preview.appendChild(enterText);
+  }
+  preview.appendChild(saveButton);
+
+  // Додати preview до контейнера
+  if (container.firstChild) {
+    container.insertBefore(preview, container.firstChild);
+  } else {
+    container.appendChild(preview);
+  }
+
+  // Видалити resize-елемент, якщо є
+  const resize = document.getElementById('editorResize');
+  if (resize) resize.remove();
+
+  deductive.editPadding();
+}
+
+/**
+ * Стилізує панель редактора.
+ */
+function styleEditorPanel() {
+  // Check if enterText element exists before accessing its style
+  if (enterText) {
+    enterText.style.display = 'inline-block';
+    enterText.style.verticalAlign = 'middle';
+    enterText.style.width = '400px';
+    enterText.style.height = '70px';
+    enterText.style.padding = '10px';
+    enterText.style.overflow = 'auto';
+    enterText.style.textAlign = 'left';
+    enterText.style.fontFamily = "'Times New Roman', sans-serif";
+    enterText.style.fontSize = '16px';
+    enterText.style.lineHeight = '1.5';
+    enterText.style.border = '1px solid #ccc';
+    enterText.style.borderRadius = '4px';
+    enterText.style.boxSizing = 'border-box';
+  }
+}
+
+/**
+ * Створює кнопку "Save" з іконкою.
+ * @returns {HTMLButtonElement} - Кнопка збереження.
+ */
+function createSaveButton() {
+  const button = document.createElement('button');
   button.classList.add('buttonWithIcon');
-  button.style.background = 'rgb(255, 255, 255)';
-  button.style.color = 'rgb(33, 33, 33)';
-  button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
-  button.style.fontSize = '32px';
-  button.style.marginLeft = '20px';
-  button.style.marginTop = '15px';
-  button.style.height = '60px';
   button.id = 'saveBtn';
 
-  button.addEventListener('click', saveTree);
+  button.style.display = 'flex';
+  button.style.justifyContent = 'center';
+  button.style.alignItems = 'center';
+  button.style.background = 'white';
+  button.style.color = '#212121';
+  button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
+  button.style.fontSize = '24px';
+  button.style.marginLeft = '20px';
+  button.style.marginTop = '15px';
+  button.style.height = '40px';
 
   button.innerHTML = `
   <span class="buttonText">Save</span>
@@ -619,21 +698,8 @@ export function createTestProof(conclusions) {
     </svg>
   </div>`;
 
-
-  proofPreview.appendChild(enterText);
-  proofPreview.appendChild(button);
-
-
-  if (container.firstChild) {
-    container.insertBefore(proofPreview, container.firstChild);
-  } else {
-    container.appendChild(proofPreview);
-  }
-  if (document.getElementById('editorResize')) {
-    document.getElementById('editorResize').remove();
-  }
-
-  deductive.editPadding();
+  button.addEventListener('click', saveTree);
+  return button;
 }
 
 editorMonaco.editor.onKeyDown(function (e) {
@@ -644,7 +710,6 @@ editorMonaco.editor.onKeyDown(function (e) {
   }
 });
 
-
 // Функція для створення елементу дерева доказу
 function createProofElement(level) {
   const proofElement = document.createElement('div');
@@ -652,7 +717,7 @@ function createProofElement(level) {
   return proofElement;
 }
 
-function createProofTree(conclusions, container, replaces = "") {
+function createProofTree(conclusions, container, hyp = null) {
   if (!conclusions || Object.keys(conclusions).length === 0 || !conclusions.proof) {
     return;
   }
@@ -670,9 +735,10 @@ function createProofTree(conclusions, container, replaces = "") {
   if (Array.isArray(conclusions.proof)) {
     conclusions.proof.forEach((proofElement, index) => {
       const proofDiv = document.createElement(`div`);
-      const result = deductive.addRedundantParentheses(proofElement);
-      // console.log(result);
+      //вернутись бо не працюэ
+      const result = formulaToString(getProof(proofElement), 1);
       let text = `${deductive.convertToLogicalExpression(getProof(deductive.checkWithAntlr(result)))}`;
+
       // console.log(text);
       proofDiv.id = 'divId-' + container.id;
       proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
@@ -693,24 +759,29 @@ function createProofTree(conclusions, container, replaces = "") {
     let text = " ";
     if (currentLevel !== 3) {
       let result = deductive.convertToLogicalExpression(conclusions.proof);
+      console.log(conclusions.proof);
+      console.log(result);
       if (level !== 1) {
-        result = deductive.addRedundantParentheses(getProof(conclusions.proof));
+        const result = formulaToString(getProof(conclusions.proof), 1);
       }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
     }
 
+
     proofDiv.id = 'divId-' + container.id;
     if (text !== " ") {
-      if (replaces !== "") {
+      if (mainReplaces !== "") {
         proofDiv.innerHTML = '<label id="proofText">' + text + '</label>' +
-          '<span id="repl" style="display: none;">' + replaces + '</span>';
+          '<span id="repl" style="display: none;">' + mainReplaces + '</span>';
+        mainReplaces = "";
       } else {
         proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
       }
     } else {
-      if (replaces !== "") {
+      if (mainReplaces !== "") {
         proofDiv.innerHTML = '<label class="previous" id="proofText">' + text + '</label>' +
-          '<span id="repl" style="display: none;">' + replaces + '</span>';
+          '<span id="repl" style="display: none;">' + mainReplaces + '</span>';
+        mainReplaces = "";
       } else {
         proofDiv.innerHTML = '<label class="previous" id="proofText">' + text + '</label>';
       }
@@ -725,7 +796,6 @@ function createProofTree(conclusions, container, replaces = "") {
 
   }
 
-
   //11 правило гіпотези
   if (conclusions.proof.length === 3 && currentLevel === 11) {
     let childElements = levelDiv.children;
@@ -735,22 +805,44 @@ function createProofTree(conclusions, container, replaces = "") {
 
     deductionContext.hypotheses.push({level: level - 1, hyp: conclusions.proof[0].left});
     deductionContext.hypotheses.push({level: level - 1, hyp: conclusions.proof[0].right});
-
   }
 
   //14 правило(запамятати заміни)
-  if (container.querySelector('span#repl')) {
-    const spanRepl = container.querySelector('span#repl');
-    if (spanRepl) {
-      const clonedSpan = spanRepl.cloneNode(true); // Clone the existing span
-      const childElements = levelDiv.children; // Get all child elements of levelDiv
+  const spansRepl = container.querySelectorAll('span#repl'); // Знаходимо всі span з id="repl"
+  if (spansRepl.length > 0) {
+    const childElements = levelDiv.children; // Отримуємо всі дочірні елементи levelDiv
 
+    spansRepl.forEach(spanRepl => {
+      const clonedSpan = spanRepl.cloneNode(true); // Клонуємо кожен span
       Array.from(childElements).forEach(child => {
         if (!child.classList.contains('nameRule')) {
-          child.appendChild(clonedSpan.cloneNode(true)); // Append the cloned span to each child except those with class 'nameRule'
+          child.appendChild(clonedSpan.cloneNode(true)); // Додаємо клонований span до дочірніх елементів
         }
       });
-    }
+    });
+  }
+
+  //17 правило
+  if (currentLevel === 17 && hyp !== null) {
+    let childElements = levelDiv.children;
+
+    childElements[2].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(hyp);
+
+    deductionContext.hypotheses.push({level: level - 1, hyp: hyp});
+  }
+
+  if (currentLevel === 20) {
+    let childElements = levelDiv.children;
+
+    const firstChildText = childElements[1]?.querySelector('#proofText')?.textContent;
+    const secondChildText = childElements[2]?.querySelector('#proofText')?.textContent;
+
+    childElements[1].id = lastSide.id + 'divId-' + secondChildText;
+    childElements[2].id = lastSide.id + 'divId-' + firstChildText;
+
+    deductionContext.hypotheses.push({level: level - 1, hyp: getProof(checkWithAntlr(secondChildText))});
+    deductionContext.hypotheses.push({level: level - 1, hyp: getProof(checkWithAntlr(firstChildText))});
+    console.log(childElements);
   }
 
   showAllHyp();
@@ -833,37 +925,48 @@ function showAllHyp() {
   }
 }
 
-function addUserHyp(conclusions, proofDiv) {
-  if (conclusions.level === 0 && userHypotheses != null) {
-    for (let h = 0; h < userHypotheses.length; h++) {
-      let err = 0;
-      let data = deductive.getProof(deductive.checkWithAntlr(deductive.addRedundantParentheses(deductive.checkWithAntlr(userHypotheses[h], err))));
-      // console.log(data);
-      let test = {
-        level: level,  // Додаємо поле level
-        hyp: data
-      };
 
-      deductionContext.hypotheses.push(test);
-      proofDiv.id = proofDiv.id + 'divId-' + userHypotheses[h];
+/**
+ * Додає гіпотези користувача до дерева доказу на першому рівні.
+ * @param {Object} conclusions - Висновок, до якого додаються гіпотези.
+ * @param {HTMLElement} proofDiv - DOM-елемент, до якого додається ідентифікатор.
+ */
+function addUserHyp(conclusions, proofDiv) {
+  if (conclusions.level !== 0 || !userHypotheses || userHypotheses.length === 0) return;
+
+  userHypotheses.forEach(hypText => {
+    try {
+      const parsed = deductive.checkWithAntlr(hypText);
+      const withParens = formulaToString(parsed, 1);
+      const proof = deductive.getProof(deductive.checkWithAntlr(withParens));
+
+      deductionContext.hypotheses.push({
+        level: level,
+        hyp: proof
+      });
+
+      proofDiv.id += 'divId-' + hypText;
+    } catch (error) {
+      console.warn("Помилка при додаванні гіпотези користувача:", error);
     }
-    userHypotheses = "";
-  }
+  });
+
+  userHypotheses = "";
 }
 
 
 function addOrRemoveParenthesesGentzen() {
 
   document.getElementById('addParentheses').addEventListener('click', function () {
-    let inProof = deductive.checkWithAntlr(deductive.addRedundantParentheses(deductive.checkWithAntlr(side.querySelector('#proofText').textContent)));
-    // console.log(inProof);
-    side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.deleteHeadBack(inProof));
+    const inProof = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
+    // side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.deleteHeadBack(inProof));
+    side.querySelector('#proofText').textContent = formulaToString(inProof, 1);
   });
 
   document.getElementById('deleteParentheses').addEventListener('click', function () {
     const expression = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
-    side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.getProof(deductive.checkWithAntlr(deductive.removeRedundantParentheses(expression))));
-
+    // side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.getProof(deductive.checkWithAntlr(deductive.removeRedundantParentheses(expression))));
+    side.querySelector('#proofText').textContent = formulaToString(getProof(expression), 0);
   });
 
   document.getElementById('returnUserInput').addEventListener('click', function () {
@@ -876,9 +979,7 @@ function addOrRemoveParenthesesGentzen() {
 
 }
 
-
 function addClickGentzenRules() {
-  // document.addEventListener('DOMContentLoaded', function () {
   const tabTriggers = document.querySelectorAll('.tab-trigger');
   tabTriggers.forEach(function (trigger) {
     trigger.addEventListener('click', function () {
@@ -921,5 +1022,52 @@ function addClickGentzenRules() {
       }
     });
   });
-  // });
+
 }
+
+function addClickSwitchNotation() {
+  const switchBtn = document.getElementById('switchNotationBtn');
+  if (!switchBtn) return;
+
+  switchBtn.addEventListener('click', function () {
+    const expression = getProof(deductive.checkWithAntlr(side.querySelector('#proofText').textContent));
+
+    try {
+      const convertedExpr = convertExpression(formulaToString(expression,0));
+      side.querySelector('#proofText').textContent = convertedExpr;
+    } catch (e) {
+      console.error('Conversion error:', e);
+      alert('Помилка при конвертації виразу. Перевірте формат.');
+    }
+  });
+}
+
+// І пам'ятай — функція convertExpression має бути визначена в глобальній області
+function convertExpression(expr) {
+  console.log(expr);
+  const hasSNotation = /s\(0\)/.test(expr);
+
+  console.log(hasSNotation);
+  if (hasSNotation) {
+    function decodeSNotation(str) {
+      let count = 0;
+      while (str.startsWith('s(')) {
+        count++;
+        str = str.slice(2);
+      }
+      str = str.replace(/\)+$/, '');
+      if (str !== '0') throw new Error('Bad format: ' + str);
+      return count;
+    }
+
+    return expr.replace(/s\(.*?0\)+/g, (match) => decodeSNotation(match));
+  } else {
+    function encodeSNotation(num) {
+      if (num === 0) return '0';
+      return 's('.repeat(num) + '0' + ')'.repeat(num);
+    }
+
+    return expr.replace(/\d+/g, (match) => encodeSNotation(Number(match)));
+  }
+}
+

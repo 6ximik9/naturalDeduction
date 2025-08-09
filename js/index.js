@@ -5,6 +5,8 @@ import * as editorMonaco from './monacoEditor';
 import * as gentzen from './GentzenProof'
 import * as deductive from './deductiveEngine';
 import * as fitch from "./FitchProof";
+import * as help from './help';
+import {setEditorError} from "./monacoEditor";
 
 let hasError = false;
 let inputText = "";
@@ -30,9 +32,10 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 });
 
-export function checkRule(index, text) {
 
-  editorMonaco.clearEditorErrors();
+export function checkRule(index, text, editorInstance = editorMonaco.editor) {
+  editorMonaco.clearEditorErrors(editorInstance);
+  // editorMonaco.clearEditorErrors();
   hasError = false;
   let chars = CharStreams.fromString(text);
   let lexer = new GrammarLexer(chars);
@@ -43,7 +46,8 @@ export function checkRule(index, text) {
       hasError = true;
       // console.error(`Error on a line ${line}:${column} ${msg.replaceAll("\u22A2", '⊢')}`);
       msg = msg.replaceAll("\\u22A2", '⊢');
-      editorMonaco.setEditorError(index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
+      // editorMonaco.setEditorError(index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
+      setEditorError(editorInstance, index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
       enterButton.style.backgroundColor = 'rgba(253, 81, 81, 0.73)';
     }
   });
@@ -52,18 +56,31 @@ export function checkRule(index, text) {
     return 1;
   }
 
-
   let tokens = new CommonTokenStream(lexer);
   let parser = new GrammarParser(tokens);
 
-  parser.removeErrorListeners(); // Видаляємо стандартних слухачів
+  // Configure parser for better error handling
+  parser.removeErrorListeners(); // Remove default error listeners
   parser.addErrorListener({
     syntaxError: function (recognizer, offendingSymbol, line, column, msg, e) {
       // console.error(`Error on a line ${line}:${column} ${msg.replaceAll("\\u22A2", '⊢')}`);
       msg = msg.replaceAll("\\u22A2", '⊢');
-      editorMonaco.setEditorError(index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
+      // editorMonaco.setEditorError(index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
+      setEditorError(editorInstance, index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
       enterButton.style.backgroundColor = 'rgba(253, 81, 81, 0.73)';
       hasError = true;
+    },
+    reportAmbiguity: function(recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs) {
+      // Handle ambiguity errors gracefully
+      console.warn('Grammar ambiguity detected, but continuing parsing');
+    },
+    reportAttemptingFullContext: function(recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs) {
+      // Handle full context attempts gracefully
+      console.warn('Parser attempting full context, but continuing parsing');
+    },
+    reportContextSensitivity: function(recognizer, dfa, startIndex, stopIndex, prediction, configs) {
+      // Handle context sensitivity gracefully
+      console.warn('Context sensitivity detected, but continuing parsing');
     }
   });
 

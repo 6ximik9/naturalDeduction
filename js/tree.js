@@ -104,34 +104,147 @@ export function createTreeD3(treeJ) {
 
 function transformToD3S(node) {
   function processNode(node) {
-    // Base case: if the node is an atom, return its value
+    if (node.type === "constant" || node.type === "variable" || node.type === "number") {
+      return { name: node.value || node.name };
+    }
+
     if (node.type === "atom") {
       return { name: node.value };
     }
 
-    // Special handling for negation
-    if (node.type === "negation" && node.value) {
+    if (node.type === "negation") {
+      const operand = node.operand || node.value;
+      const negSymbols = "¬".repeat(node.count || 1);
       return {
-        name: "¬",
-        children: [processNode(node.value)]
+        name: negSymbols,
+        children: [processNode(operand)]
       };
     }
 
-    const children = [];
+    if (node.type === "quantifier") {
+      return {
+        name: node.quantifier === "∀" ? "∀" : "∃",
+        children: [
+          { name: node.variable },
+          processNode(node.expression)
+        ]
+      };
+    }
 
-    // Handle the left child if exists, including parenthesis
+    if (node.type === "forall" || node.type === "exists") {
+      const symbol = node.type === "forall" ? "∀" : "∃";
+      return {
+        name: symbol,
+        children: [
+          { name: node.variable },
+          processNode(node.operand)
+        ]
+      };
+    }
+
+    if (node.type === "predicate") {
+      const symbolName = node.symbol ? (node.symbol.name || node.symbol.value) : node.name;
+      const terms = node.terms || [];
+      return {
+        name: symbolName,
+        children: terms.map(arg => processNode(arg))
+      };
+    }
+
+    if (node.type === "relation") {
+      const terms = node.value || [];
+      return {
+        name: node.name,
+        children: terms.map(arg => processNode(arg))
+      };
+    }
+
+    if (node.type === "function") {
+      const terms = node.terms || node.value || [];
+      return {
+        name: node.name,
+        children: terms.map(arg => processNode(arg))
+      };
+    }
+
+    if (node.type === "successor") {
+      return {
+        name: "s",
+        children: [processNode(node.term)]
+      };
+    }
+
+    if (node.type === "equality") {
+      return {
+        name: node.operator,
+        children: [
+          processNode(node.left),
+          processNode(node.right)
+        ]
+      };
+    }
+
+    if (node.type === "addition" || node.type === "multiplication") {
+      const symbol = node.type === "addition" ? "+" : "*";
+      const operands = node.operands || [];
+      return {
+        name: symbol,
+        children: operands.map(operand => processNode(operand))
+      };
+    }
+
+    if (node.type === "parenthesis") {
+      return {
+        name: "()",
+        children: [
+          { name: "(" },
+          processNode(node.value),
+          { name: ")" }
+        ]
+      };
+    }
+
+    if (node.type === "sequent") {
+      const children = [];
+      // Add premises
+      node.premises.forEach(premise => children.push(processNode(premise)));
+      // Add turnstile
+      children.push({ name: "⊢" });
+      // Add conclusion
+      children.push(processNode(node.conclusion));
+      return {
+        name: "sequent",
+        children: children
+      };
+    }
+
+    // Handle new left/right structure
+    if (node.left && node.right) {
+      return {
+        name: getType(node),
+        children: [processParenthesis(node.left), processParenthesis(node.right)]
+      };
+    }
+
+    // Legacy support for operands structure
+    if (node.operands && node.operands.length > 0) {
+      return {
+        name: getType(node),
+        children: node.operands.map(operand => processParenthesis(operand))
+      };
+    }
+
+    // Fallback for other structures
+    const children = [];
     if (node.left) {
       children.push(processParenthesis(node.left));
     }
-
-    // Handle the right child if exists, including parenthesis
     if (node.right) {
       children.push(processParenthesis(node.right));
     }
 
-    // Return the node with its processed children
     return {
-      name: getType(node.type),
+      name: getType(node),
       children: children
     };
   }
@@ -150,16 +263,26 @@ function transformToD3S(node) {
       return processNode(node);
     }
   }
+
   return processNode(node);
 }
 
-
-function getType(type) {
-  if (type === "implication") {
-    return `⇒`;
-  } else if (type === "disjunction") {
-    return `∨`;
-  } else if (type === "conjunction") {
-    return `∧`;
+function getType(node) {
+  switch (node.type) {
+    case "implication": return "⇒";
+    case "disjunction": return "∨";
+    case "conjunction": return "∧";
+    case "equality": return node.operator || "=";
+    case "addition": return "+";
+    case "multiplication": return "*";
+    case "negation": return "¬".repeat(node.count || 1);
+    case "forall": return "∀";
+    case "exists": return "∃";
+    case "successor": return "s";
+    case "predicate": return node.symbol ? (node.symbol.name || node.symbol.value) : node.name;
+    case "relation": return node.name;
+    case "function": return node.name;
+    case "sequent": return "⊢";
+    default: return node.type;
   }
 }
