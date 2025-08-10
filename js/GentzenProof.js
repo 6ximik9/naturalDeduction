@@ -307,11 +307,11 @@ export function processExpression(expression, countRules) {
       break;
 
     case "forall":
-      generateButtons(2, [GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[16]]);
+      generateButtons(3, [GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]]);
       break;
 
     case "exists":
-      generateButtons(2, [GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[16]]);
+      generateButtons(3, [GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]]);
       break;
 
     case "predicate":
@@ -320,7 +320,7 @@ export function processExpression(expression, countRules) {
       break;
 
     case "equality":
-      generateButtons(3, [GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[19]]);
+      generateButtons(4, [GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[19]]);
       break;
 
     case "addition":
@@ -736,7 +736,7 @@ function createProofTree(conclusions, container, hyp = null) {
     conclusions.proof.forEach((proofElement, index) => {
       const proofDiv = document.createElement(`div`);
       //вернутись бо не працюэ
-      const result = formulaToString(getProof(proofElement), 1);
+      const result = formulaToString(getProof(proofElement), 0);
       let text = `${deductive.convertToLogicalExpression(getProof(deductive.checkWithAntlr(result)))}`;
 
       // console.log(text);
@@ -762,7 +762,7 @@ function createProofTree(conclusions, container, hyp = null) {
       console.log(conclusions.proof);
       console.log(result);
       if (level !== 1) {
-        const result = formulaToString(getProof(conclusions.proof), 1);
+        const result = formulaToString(getProof(conclusions.proof), 0);
       }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
     }

@@ -59,21 +59,39 @@ export default class GrammarListener extends antlr4.tree.ParseTreeListener {
 	}
 
 
-	// Enter a parse tree produced by GrammarParser#quantifier.
-	enterQuantifier(ctx) {
+	// Enter a parse tree produced by GrammarParser#quantified.
+	enterQuantified(ctx) {
 	}
 
-	// Exit a parse tree produced by GrammarParser#quantifier.
-	exitQuantifier(ctx) {
+	// Exit a parse tree produced by GrammarParser#quantified.
+	exitQuantified(ctx) {
 	}
 
 
-	// Enter a parse tree produced by GrammarParser#parenthesis.
-	enterParenthesis(ctx) {
+	// Enter a parse tree produced by GrammarParser#forallQuant.
+	enterForallQuant(ctx) {
 	}
 
-	// Exit a parse tree produced by GrammarParser#parenthesis.
-	exitParenthesis(ctx) {
+	// Exit a parse tree produced by GrammarParser#forallQuant.
+	exitForallQuant(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#existQuant.
+	enterExistQuant(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#existQuant.
+	exitExistQuant(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#atomic.
+	enterAtomic(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#atomic.
+	exitAtomic(ctx) {
 	}
 
 
@@ -86,30 +104,84 @@ export default class GrammarListener extends antlr4.tree.ParseTreeListener {
 	}
 
 
-	// Enter a parse tree produced by GrammarParser#relationClause.
-	enterRelationClause(ctx) {
+	// Enter a parse tree produced by GrammarParser#addExpr.
+	enterAddExpr(ctx) {
 	}
 
-	// Exit a parse tree produced by GrammarParser#relationClause.
-	exitRelationClause(ctx) {
-	}
-
-
-	// Enter a parse tree produced by GrammarParser#constantClause.
-	enterConstantClause(ctx) {
-	}
-
-	// Exit a parse tree produced by GrammarParser#constantClause.
-	exitConstantClause(ctx) {
+	// Exit a parse tree produced by GrammarParser#addExpr.
+	exitAddExpr(ctx) {
 	}
 
 
-	// Enter a parse tree produced by GrammarParser#variableClause.
-	enterVariableClause(ctx) {
+	// Enter a parse tree produced by GrammarParser#multExpr.
+	enterMultExpr(ctx) {
 	}
 
-	// Exit a parse tree produced by GrammarParser#variableClause.
-	exitVariableClause(ctx) {
+	// Exit a parse tree produced by GrammarParser#multExpr.
+	exitMultExpr(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#basicTerm.
+	enterBasicTerm(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#basicTerm.
+	exitBasicTerm(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#predicate.
+	enterPredicate(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#predicate.
+	exitPredicate(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#termList.
+	enterTermList(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#termList.
+	exitTermList(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#term.
+	enterTerm(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#term.
+	exitTerm(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#functionApp.
+	enterFunctionApp(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#functionApp.
+	exitFunctionApp(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#variable.
+	enterVariable(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#variable.
+	exitVariable(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#constant.
+	enterConstant(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#constant.
+	exitConstant(ctx) {
 	}
 
 
@@ -122,21 +194,30 @@ export default class GrammarListener extends antlr4.tree.ParseTreeListener {
 	}
 
 
-	// Enter a parse tree produced by GrammarParser#functionSymb.
-	enterFunctionSymb(ctx) {
+	// Enter a parse tree produced by GrammarParser#successorFunc.
+	enterSuccessorFunc(ctx) {
 	}
 
-	// Exit a parse tree produced by GrammarParser#functionSymb.
-	exitFunctionSymb(ctx) {
+	// Exit a parse tree produced by GrammarParser#successorFunc.
+	exitSuccessorFunc(ctx) {
 	}
 
 
-	// Enter a parse tree produced by GrammarParser#constantSymb.
-	enterConstantSymb(ctx) {
+	// Enter a parse tree produced by GrammarParser#arithmeticFunc.
+	enterArithmeticFunc(ctx) {
 	}
 
-	// Exit a parse tree produced by GrammarParser#constantSymb.
-	exitConstantSymb(ctx) {
+	// Exit a parse tree produced by GrammarParser#arithmeticFunc.
+	exitArithmeticFunc(ctx) {
+	}
+
+
+	// Enter a parse tree produced by GrammarParser#numberSymb.
+	enterNumberSymb(ctx) {
+	}
+
+	// Exit a parse tree produced by GrammarParser#numberSymb.
+	exitNumberSymb(ctx) {
 	}
 
 

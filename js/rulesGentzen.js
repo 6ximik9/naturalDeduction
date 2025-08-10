@@ -1,10 +1,11 @@
 
 import * as index from "./GentzenProof";
 import * as deductive from "./deductiveEngine";
-import { createModal } from "./modalForRules/modalForSubstitution";
+import {createModal, createModalForQuantifierSubstitution} from "./modalForRules/modalForSubstitution";
 import {convertToLogicalExpression, getProof} from "./deductiveEngine";
 import {createAdvancedModal} from "./modalForRules/modalForSeventeenthRule";
 import {createModalForReturn} from "./modalForRules/modalForReturn";
+import { createModalForLeibniz } from './modalForRules/modalForLeibniz.js';
 
 // Утиліти
 function createConclusion(proof) {
@@ -177,23 +178,31 @@ export async function fourteenthRule() {
   const previousLevel = index.currentLevel;
   index.setCurrentLevel(14);
   try {
-    const innerText = index.lastSide.querySelector('#proofText')?.textContent;
-    const proof = getProof(deductive.checkWithAntlr(innerText)).operand;
-    const allConst = deductive.extractConstantsOrVariables(proof);
+    const formulaString = index.lastSide.querySelector('#proofText')?.textContent;
+    const formula = deductive.checkWithAntlr(formulaString);
 
-    console.log("Test");
-    console.log(proof);
-
-    const result = await createModal(allConst);
+    const result = await createModalForQuantifierSubstitution(formula, formulaString);
     console.log(result);
-    index.setReplaces(result[1] + "/" + result[0]);
-
-    // Use precise replacement - replace only the selected term, not all occurrences
-    const replacementCount = deductive.updateTermsFirst(proof, result[0], result[1]);
-    console.log(`Replaced ${replacementCount} occurrence(s) of "${result[0]}" with "${result[1]}"`);
-    console.log(proof);
-
+    const proof = getProof(deductive.checkWithAntlr(result.formula));
+    index.setReplaces(result.substitution);
     createConclusion(proof);
+    // const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+    // const proof = getProof(deductive.checkWithAntlr(innerText)).operand;
+    // const allConst = deductive.extractConstantsOrVariables(proof);
+    //
+    // console.log("Test");
+    // console.log(proof);
+    //
+    // const result = await createModal(allConst);
+    // console.log(result);
+    // index.setReplaces(result[1] + "/" + result[0]);
+    //
+    // // Use precise replacement - replace only the selected term, not all occurrences
+    // const replacementCount = deductive.updateTermsFirst(proof, result[0], result[1]);
+    // console.log(`Replaced ${replacementCount} occurrence(s) of "${result[0]}" with "${result[1]}"`);
+    // console.log(proof);
+    //
+    // createConclusion(proof);
   } catch (error) {
     if (deductive.handleModalCancellation("Rule 14", error)) {
       index.setCurrentLevel(-1); // Restore previous level
@@ -209,18 +218,27 @@ export async function fifteenthRule() {
   const previousLevel = index.currentLevel;
   index.setCurrentLevel(15);
   try {
-    const innerText = index.lastSide.querySelector('#proofText')?.textContent;
-    const proof = getProof(deductive.checkWithAntlr(innerText)).operand;
-    const allConst = deductive.extractConstantsOrVariables(proof);
+    const formulaString = index.lastSide.querySelector('#proofText')?.textContent;
+    const formula = deductive.checkWithAntlr(formulaString);
 
-    const result = await createModal(allConst);
-    index.setReplaces(result[0] + "/" + result[1]);
-
-    // Use precise replacement - replace only the selected term, not all occurrences
-    const replacementCount = deductive.updateTermsFirst(proof, result[0], result[1]);
-    console.log(`Replaced ${replacementCount} occurrence(s) of "${result[0]}" with "${result[1]}"`);
-    // console.log(proof);
+    const result = await createModalForQuantifierSubstitution(formula, formulaString);
+    console.log(result);
+    const proof = getProof(deductive.checkWithAntlr(result.formula));
+    index.setReplaces(result.substitution);
     createConclusion(proof);
+    // const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+    // const proof = getProof(deductive.checkWithAntlr(innerText)).operand;
+    // const allConst = deductive.extractConstantsOrVariables(proof);
+    //
+    // const result = await createModal(allConst);
+    // console.log(result[0] + "/" + result[1]);
+    // index.setReplaces(result[0] + "/" + result[1]);
+    //
+    // // Use precise replacement - replace only the selected term, not all occurrences
+    // const replacementCount = deductive.updateTermsFirst(proof, result[0], result[1]);
+    // console.log(`Replaced ${replacementCount} occurrence(s) of "${result[0]}" with "${result[1]}"`);
+    // // console.log(proof);
+    // createConclusion(proof);
   } catch (error) {
     if (deductive.handleModalCancellation("Rule 15", error)) {
       index.setCurrentLevel(-1); // Restore previous level
@@ -242,20 +260,32 @@ export async function sixteenthRule() {
     const replValues = Array.from(replElements).map(el => el.textContent);
     console.log(replValues);
 
-    const result = await createModalForReturn(replValues);
+    const formulaString = index.lastSide.querySelector('#proofText')?.textContent;
+    const formula = deductive.checkWithAntlr(formulaString);
 
-    const repl = result[0].split("/", 2);
+    const result = await createModalForReturn(replValues, formula, formulaString);
+
+    console.log(result);
+    const repl = result.selectedConstant ? result.selectedConstant.split("/", 2)[0] : result.replacement;
     console.log(repl);
-    const ast = deductive.checkWithAntlr(innerText);
-    console.log(ast);
 
-    // Use precise replacement - replace only the selected term, not all occurrences
-    const replacementCount = deductive.updateTermsFirst(ast, repl[1], repl[0]);
-    console.log(`Replaced ${replacementCount} occurrence(s) of "${repl[1]}" with "${repl[0]}"`);
-    console.log(ast);
-
-    const rule = deductive.checkWithAntlr('(∀' + repl[0] + ')' + deductive.convertToLogicalExpression(ast));
+    const rule = deductive.checkWithAntlr('(∀' + repl[0] + ')' + result.modifiedFormula);
     createConclusion(rule);
+
+    // const rule = deductive.checkWithAntlr('(∀' + repl[0] + ')';
+    // createConclusion(rule);
+    // const repl = result[0].split("/", 2);
+    // console.log(repl);
+    // const ast = deductive.checkWithAntlr(innerText);
+    // console.log(ast);
+    //
+    // // Use precise replacement - replace only the selected term, not all occurrences
+    // const replacementCount = deductive.updateTermsFirst(ast, repl[1], repl[0]);
+    // console.log(`Replaced ${replacementCount} occurrence(s) of "${repl[1]}" with "${repl[0]}"`);
+    // console.log(ast);
+    //
+    // const rule = deductive.checkWithAntlr('(∀' + repl[0] + ')' + deductive.convertToLogicalExpression(ast));
+    // createConclusion(rule);
   } catch (error) {
     if (deductive.handleModalCancellation("Rule 16", error)) {
       index.setCurrentLevel(previousLevel); // Restore previous level
@@ -304,13 +334,47 @@ export async function seventeenthRule() {
 // 18.
 export async function eighteenthRule() {
   index.setCurrentLevel(18);
-  createTestConclusion(["P(a)"]);
+  try {
+    const formulaString = index.lastSide.querySelector('#proofText')?.textContent;
+    const formula = deductive.checkWithAntlr(formulaString);
+
+    const result = await createModalForLeibniz(formula, formulaString, 'a=b');
+
+    console.log(result);
+
+    createConclusion([deductive.checkWithAntlr(result.left), deductive.checkWithAntlr(result.right)]);
+
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 18", error)) {
+      index.setCurrentLevel(-1); // Restore previous level
+      return; // Gracefully exit without doing anything
+    }
+    console.error("Error in eighteenthRule:", error);
+    throw error; // Re-throw non-cancellation errors
+  }
 }
 
 // 19.
 export async function nineteenthRule() {
   index.setCurrentLevel(19);
-  createTestConclusion(["P(b)"]);
+  try {
+    const formulaString = index.lastSide.querySelector('#proofText')?.textContent;
+    const formula = deductive.checkWithAntlr(formulaString);
+
+    const result = await createModalForLeibniz(formula, formulaString, 'b=a');
+
+    console.log(result);
+
+    createConclusion([deductive.checkWithAntlr(result.left), deductive.checkWithAntlr(result.right)]);
+
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 19", error)) {
+      index.setCurrentLevel(-1); // Restore previous level
+      return; // Gracefully exit without doing anything
+    }
+    console.error("Error in nineteenthRule:", error);
+    throw error; // Re-throw non-cancellation errors
+  }
 }
 
 // 20.
