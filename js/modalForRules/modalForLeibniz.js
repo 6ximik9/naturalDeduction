@@ -265,8 +265,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
         const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
         const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
         const value = getNodeText(modifiedFormula);
-
-        console.log(value);
+        if(!value) return;
         let hasErrors = false;
         let errorMessage = '';
 

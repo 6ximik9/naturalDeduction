@@ -738,7 +738,8 @@ function createProofTree(conclusions, container, hyp = null) {
       //вернутись бо не працюэ
       const result = formulaToString(getProof(proofElement), 0);
       let text = `${deductive.convertToLogicalExpression(getProof(deductive.checkWithAntlr(result)))}`;
-
+      //Заміна всіх s0 на s(0)
+      text = text.replace(/s0/g, 's(0)');
       // console.log(text);
       proofDiv.id = 'divId-' + container.id;
       proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
@@ -765,6 +766,7 @@ function createProofTree(conclusions, container, hyp = null) {
         const result = formulaToString(getProof(conclusions.proof), 0);
       }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
+      text = text.replace(/s0/g, 's(0)');
     }
 
 

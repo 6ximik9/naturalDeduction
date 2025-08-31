@@ -537,7 +537,11 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       const validateInput = () => {
         clearTimeout(validationTimeout);
         validationTimeout = setTimeout(() => {
-          const value = monacoEditor.getValue().trim();
+          const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
+          const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+          const value = getNodeText(modifiedFormula);
+          if(!value) return;
+          // const value = monacoEditor.getValue().trim();
           let hasErrors = false;
           let errorMessage = '';
 
@@ -567,6 +571,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
             }
           }
 
+          console.log(hasErrors);
           if (hasErrors) {
             editorContainer.classList.add('editor-error');
             errorDisplay.textContent = errorMessage;
@@ -632,7 +637,11 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           let hasValidInput = true;
 
           if (monacoEditor) {
-            const value = monacoEditor.getValue().trim();
+            const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
+            const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+            const value = getNodeText(modifiedFormula);
+            // if(!value) return;
+            // const value = monacoEditor.getValue().trim();
             hasValidInput = value.length > 0;
 
             // Check for syntax errors
@@ -651,7 +660,11 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         let hasValidInput = true;
 
         if (hasSelectedElement && monacoEditor) {
-          const value = monacoEditor.getValue().trim();
+          const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
+          const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+          const value = getNodeText(modifiedFormula);
+          if(!value) return;
+          // const value = monacoEditor.getValue().trim();
           hasValidInput = value.length > 0;
 
           // Check for syntax errors
@@ -770,7 +783,10 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
             // Additional syntax validation
             try {
-              deductive.checkWithAntlr(replacement);
+              const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
+              const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+              const value = getNodeText(modifiedFormula);
+              deductive.checkWithAntlr(value);
             } catch (parseError) {
               showNotification('Invalid syntax in the replacement term. Please check your input.', 'error');
               editorContainer.classList.add('editor-error');
@@ -820,7 +836,11 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
           // Additional syntax validation
           try {
-            deductive.checkWithAntlr(replacement);
+            const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
+            const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+            const value = getNodeText(modifiedFormula);
+            deductive.checkWithAntlr(value);
+            // deductive.checkWithAntlr(replacement);
           } catch (parseError) {
             showNotification('Invalid syntax in the replacement term. Please check your input.', 'error');
             editorContainer.classList.add('editor-error');
