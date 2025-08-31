@@ -84,8 +84,7 @@ constant: numberSymb;
 relationSymb: UPPERCASE_LETTER | UPPERCASE_GREEK_LETTER;
 
 // Successor function: s(term) - using addExpr to avoid recursion
-successorFunc: 's' '(' addExpr ')'
-              | 's0' ;
+successorFunc: 's' '(' addExpr ')';
 
 // Arithmetic functions: +(t1, t2), *(t1, t2) - prefix notation
 arithmeticFunc: PLUS '(' addExpr ',' addExpr ')'
