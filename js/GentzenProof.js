@@ -90,7 +90,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
   const clickedElement = event.target;
 
   // Ігнорувати клік по вже закритому елементу
-  if (clickedElement.className === "previous" || clickedElement.className.includes("proof-element_level-")) return;
+  if (clickedElement.className === "previous" || clickedElement.className.includes("proof-element_level-") || clickedElement.id==="proof") return;
 
   clearLabelHighlights();
 
