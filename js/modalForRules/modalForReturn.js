@@ -82,15 +82,11 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         .modal-button:focus { outline: 2px solid #007bff; outline-offset: 2px; }
         .formula-element {
           cursor: pointer;
-          padding: 3px 6px;
+          padding: 2px 4px;
           border-radius: 4px;
           transition: all 0.2s ease;
           display: inline-block;
           margin: 1px;
-          min-width: 16px;
-          min-height: 20px;
-          text-align: center;
-          line-height: 1.2;
         }
         .formula-element:hover {
           background-color: #e3f2fd;
@@ -100,11 +96,6 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           background-color: #2196f3;
           color: white;
           transform: scale(1.1);
-        }
-        .formula-element.disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-          background-color: #f5f5f5;
         }
         .formula-container {
           font-size: 28px;
@@ -225,30 +216,30 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
     // Enhanced button state management function
     const updateButtonState = (targetButton, isActive, isHovered = false) => {
-      if (isActive) {
-        Object.assign(targetButton.style, {
-          backgroundColor: '#007bff',
-          borderColor: '#007bff',
-          color: '#fff',
-          transform: 'translateY(-2px)',
-          boxShadow: '0 4px 12px rgba(0, 123, 255, 0.3)'
-        });
-      } else if (isHovered) {
-        Object.assign(targetButton.style, {
-          backgroundColor: '#e9ecef',
-          borderColor: '#adb5bd',
-          transform: 'translateY(-1px)',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-        });
-      } else {
-        Object.assign(targetButton.style, {
-          backgroundColor: '#f8f9fa',
-          borderColor: '#e0e0e0',
-          color: '#495057',
-          transform: 'translateY(0)',
-          boxShadow: 'none'
-        });
-      }
+      // if (isActive) {
+      //   Object.assign(targetButton.style, {
+      //     backgroundColor: '#007bff',
+      //     borderColor: '#007bff',
+      //     color: '#fff',
+      //     transform: 'translateY(-2px)',
+      //     boxShadow: '0 4px 12px rgba(0, 123, 255, 0.3)'
+      //   });
+      // } else if (isHovered) {
+      //   Object.assign(targetButton.style, {
+      //     backgroundColor: '#e9ecef',
+      //     borderColor: '#adb5bd',
+      //     transform: 'translateY(-1px)',
+      //     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+      //   });
+      // } else {
+      //   Object.assign(targetButton.style, {
+      //     backgroundColor: '#f8f9fa',
+      //     borderColor: '#e0e0e0',
+      //     color: '#495057',
+      //     transform: 'translateY(0)',
+      //     boxShadow: 'none'
+      //   });
+      // }
     };
 
     // Element click handler for formula interface
