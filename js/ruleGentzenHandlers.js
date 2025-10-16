@@ -2,6 +2,17 @@ import * as rules from './rulesGentzen';
 import {deductionContext} from "./GentzenProof";
 import {nineteenthRule, twentiethRule} from "./rulesGentzen";
 
+// Robinson Arithmetic Axioms
+export const ROBINSON_AXIOMS = [
+  "∀x ∀y (s(x) = s(y) ⇒ x = y)", // ax1
+  "∀x (0 ≠ s(x))", // ax2
+  "∀x (x ≠ 0 ⇒ ∃y (x = s(y)))", // ax3
+  "∀x (x + 0 = x)", // ax4
+  "∀x ∀y (x + s(y) = s(x + y))", // ax5
+  "∀x (x * 0 = 0)", // ax6
+  "∀x ∀y (x * s(y) = (x * y) + x)" // ax7
+];
+
 // Всі правила виводу у вигляді LaTeX-формул
 export const GENTZEN_BUTTONS = [
   "1. $$\\frac{\\bot}{\\phi} \\quad (\\bot E1) $$",

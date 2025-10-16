@@ -11,7 +11,7 @@ import {shakeElement} from "./index";
 import {createTreeD3} from "./tree";
 import {addNextLastButtonClickGentzen} from "./states";
 import {latexGentzen} from "./latexGen";
-import {GENTZEN_BUTTONS, ruleGentzenHandlers,} from './ruleGentzenHandlers';
+import {GENTZEN_BUTTONS, ruleGentzenHandlers, ROBINSON_AXIOMS} from './ruleGentzenHandlers';
 import {get} from "mobx";
 import {formulaToString} from "./formatter";
 
@@ -86,10 +86,11 @@ export function addHypotheses(data) {
 document.getElementById('proof').addEventListener('click', function (event) {
   if (typeProof === 1) return;
 
+
   const clickedElement = event.target;
 
   // Ігнорувати клік по вже закритому елементу
-  if (clickedElement.className === "previous") return;
+  if (clickedElement.className === "previous" || clickedElement.className.includes("proof-element_level-")) return;
 
   clearLabelHighlights();
 
@@ -367,7 +368,18 @@ function generateButtons(buttonCount, buttonTexts) {
     deductive.compareExpressions(h, currentExpr)
   );
 
-  if (isInHypotheses) {
+  // Check if current expression matches any Robinson arithmetic axiom
+  const isRobinsonAxiom = ROBINSON_AXIOMS.some(axiom => {
+    try {
+      const axiomParsed = deductive.getProof(deductive.checkWithAntlr(axiom));
+      return deductive.compareExpressions(axiomParsed, currentExpr);
+    } catch (error) {
+      console.warn('Error parsing axiom:', axiom, error);
+      return false;
+    }
+  });
+
+  if (isInHypotheses || isRobinsonAxiom) {
     const closeBtn = createButton("Close branch", () => closeSide(side));
     closeBtn.style.minHeight = '80px';
     buttonContainer.appendChild(closeBtn);
@@ -735,11 +747,12 @@ function createProofTree(conclusions, container, hyp = null) {
   if (Array.isArray(conclusions.proof)) {
     conclusions.proof.forEach((proofElement, index) => {
       const proofDiv = document.createElement(`div`);
-      //вернутись бо не працюэ
+      //вернутись бо не працює
       const result = formulaToString(getProof(proofElement), 0);
       let text = `${deductive.convertToLogicalExpression(getProof(deductive.checkWithAntlr(result)))}`;
       //Заміна всіх s0 на s(0)
-      text = text.replace(/s0/g, 's(0)');
+      // text = text.replace(/s0/g, 's(0)');
+      text = text.replace(/s\(0\)/g, 's0');
       // console.log(text);
       proofDiv.id = 'divId-' + container.id;
       proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
@@ -766,7 +779,8 @@ function createProofTree(conclusions, container, hyp = null) {
         const result = formulaToString(getProof(conclusions.proof), 0);
       }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
-      text = text.replace(/s0/g, 's(0)');
+      // text = text.replace(/s0/g, 's(0)');
+      text = text.replace(/s\(0\)/g, 's0');
     }
 
 

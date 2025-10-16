@@ -396,6 +396,7 @@ export function extractTextBetweenParentheses(expression) {
 
 
 export function checkWithAntlr(text, er) {
+  text = text.replace(/s0/g, 's(0)');
   let chars = CharStreams.fromString(text);
   let lexer = new GrammarLexer(chars);
   lexer.addErrorListener({
