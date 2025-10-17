@@ -4,6 +4,7 @@ import {currentLevel, side} from "../GentzenProof";
 import * as deductive from "../deductiveEngine";
 import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../monacoEditor";
 import {has} from "mobx";
+import {checkWithAntlr} from "../deductiveEngine";
 
 /**
  * Creates a modal for Leibniz rule operations
@@ -20,6 +21,14 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       reject(new Error('No formula provided for Leibniz operation'));
       return;
     }
+
+    // Use enhanced conversion with format preservation
+    const conversionResult = convertWithFormatPreservation(formulaString);
+    formulaString = conversionResult.expression;
+    formula = checkWithAntlr(formulaString);
+
+    // Store original formats for smart conversion later
+    const originalFormats = conversionResult.originalFormats;
 
     // Create modal overlay with improved accessibility
     const modalOverlay = document.createElement('div');
@@ -451,26 +460,54 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
           editorContainer.classList.add('editor-error');
           return;
         }
+        // Detect user input format
+        const userInputFormat = detectInputFormat(replacement);
+        console.log('Detected user input format:', userInputFormat);
+
         // Parse the replacement text to get the replacement node
         const replacementNode = parseReplacementText(replacement);
 
         // Create a copy of the original formula and perform the replacement
         const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
 
-        // Convert the modified formula back to string
-        const modifiedFormulaString = getNodeText(modifiedFormula);
+        // Convert the modified formula back to string (raw format)
+        let modifiedFormulaString = getNodeText(modifiedFormula);
+
+        // Apply smart conversion based on user input
+        modifiedFormulaString = applySmartConversion(
+          modifiedFormulaString,
+          userInputFormat,
+          originalFormats,
+          selectedPath,
+          replacementNode
+        );
 
         // Get the original selected text
         const originalSelectedNode = getNodeAtPath(formula, selectedPath);
-        const originalSelectedText = getNodeText(originalSelectedNode);
+        let originalSelectedText = getNodeText(originalSelectedNode);
+
+        // Apply smart conversion to the original selected text too if needed
+        if (userInputFormat === 'numeric') {
+          originalSelectedText = convertSuccessorToNumeric(originalSelectedText);
+        }
+
+        // Apply smart conversion to replacement text for the right side
+        let smartReplacementText = replacement;
+        if (userInputFormat === 'numeric') {
+          // If user entered numeric format, show it as numeric in the equality
+          smartReplacementText = replacement; // Keep user input as-is
+        } else if (userInputFormat === 'successor') {
+          // If user entered successor notation, keep it as successor
+          smartReplacementText = replacement; // Keep user input as-is
+        }
 
         // Create the right side based on direction
         let rightSide;
         if (direction === 'b=a') {
-          rightSide = `${originalSelectedText}=${replacement}`;
+          rightSide = `${originalSelectedText}=${smartReplacementText}`;
         } else {
           // Default: 'a=b'
-          rightSide = `${replacement}=${originalSelectedText}`;
+          rightSide = `${smartReplacementText}=${originalSelectedText}`;
         }
 
         const result = {
@@ -984,4 +1021,211 @@ function getNodeAtPath(formula, path) {
   }
 
   return current;
+}
+
+/**
+ * Converts all numbers in a formula expression to successor notation
+ * Always converts numbers to their successor representation (e.g., 1 -> s(0), 2 -> s(s(0)))
+ * @param {string} expr - The input expression string
+ * @returns {string} The expression with numbers converted to successor notation
+ */
+export function convertToSuccessorNotation(expr) {
+  console.log('Converting to successor notation:', expr);
+
+  /**
+   * Encodes a number as successor notation
+   * @param {number} num - The number to encode
+   * @returns {string} The successor notation (e.g., 0 -> "0", 1 -> "s(0)", 2 -> "s(s(0))")
+   */
+  function encodeSNotation(num) {
+    if (num === 0) return '0';
+    return 's('.repeat(num) + '0' + ')'.repeat(num);
+  }
+
+  // Replace all numbers in the expression with successor notation
+  return expr.replace(/\d+/g, (match) => encodeSNotation(Number(match)));
+}
+
+/**
+ * Enhanced conversion system that preserves original formats and applies smart conversion
+ * @param {string} expr - The input expression string
+ * @returns {Object} Object containing converted expression and original format map
+ */
+export function convertWithFormatPreservation(expr) {
+  console.log('Converting with format preservation:', expr);
+
+  // Map to store original formats by position
+  const originalFormats = new Map();
+  let offset = 0;
+
+  /**
+   * Encodes a number as successor notation
+   * @param {number} num - The number to encode
+   * @returns {string} The successor notation
+   */
+  function encodeSNotation(num) {
+    if (num === 0) return '0';
+    return 's('.repeat(num) + '0' + ')'.repeat(num);
+  }
+
+  // Replace numbers while tracking original positions and formats
+  const convertedExpr = expr.replace(/\d+/g, (match, index) => {
+    const originalNum = match;
+    const convertedNum = encodeSNotation(Number(match));
+    const adjustedIndex = index + offset;
+
+    // Store original format at the converted position
+    originalFormats.set(adjustedIndex, {
+      original: originalNum,
+      converted: convertedNum,
+      type: 'number'
+    });
+
+    // Update offset for subsequent matches
+    offset += convertedNum.length - match.length;
+
+    return convertedNum;
+  });
+
+  return {
+    expression: convertedExpr,
+    originalFormats: originalFormats
+  };
+}
+
+/**
+ * Detects the format type of user input (numeric or successor notation)
+ * @param {string} input - The user input text
+ * @returns {string} 'numeric', 'successor', or 'mixed'
+ */
+function detectInputFormat(input) {
+  const trimmed = input.trim();
+
+  // Check for successor notation patterns
+  const hasSuccessorNotation = /s\s*\(/.test(trimmed);
+
+  // Check for direct numeric values (but exclude numbers that are inside successor functions)
+  // Remove successor patterns first, then check for remaining numbers
+  const withoutSuccessors = trimmed.replace(/s\s*\(\s*(?:s\s*\(\s*)*0(?:\s*\)\s*)*\s*\)/g, '');
+  const hasDirectNumbers = /\b\d+\b/.test(withoutSuccessors);
+
+  if (hasSuccessorNotation && !hasDirectNumbers) {
+    return 'successor';
+  } else if (hasDirectNumbers && !hasSuccessorNotation) {
+    return 'numeric';
+  } else if (hasSuccessorNotation && hasDirectNumbers) {
+    return 'mixed';
+  } else {
+    // Default to preserving original format for non-numeric expressions
+    return 'preserve';
+  }
+}
+
+/**
+ * Converts successor notation back to numeric format
+ * @param {string} successorExpr - Expression in successor notation
+ * @returns {string} Expression with successor notation converted to numbers
+ */
+function convertSuccessorToNumeric(successorExpr) {
+  /**
+   * Counts the depth of successor function nesting
+   * @param {string} sExpr - Successor expression like s(s(0))
+   * @returns {number} The numeric value
+   */
+  function countSuccessors(sExpr) {
+    const trimmed = sExpr.trim();
+    if (trimmed === '0') return 0;
+
+    let count = 0;
+    let current = trimmed;
+
+    while (current.startsWith('s(') && current.endsWith(')')) {
+      count++;
+      current = current.slice(2, -1).trim();
+    }
+
+    // If we end up with '0', return the count
+    if (current === '0') return count;
+
+    // If it doesn't resolve to 0, return the original expression
+    return sExpr;
+  }
+
+  // Replace successor notation patterns with numbers
+  return successorExpr.replace(/s\s*\(\s*(?:s\s*\(\s*)*0(?:\s*\)\s*)*\s*\)/g, (match) => {
+    const count = countSuccessors(match);
+    return typeof count === 'number' ? count.toString() : match;
+  });
+}
+
+/**
+ * Applies smart conversion based on user input type and replacement context
+ * @param {string} expression - The expression to convert
+ * @param {string} userInputFormat - The format type detected from user input
+ * @param {Map} originalFormats - Map of original formats
+ * @param {Array} replacedPath - Path of the replaced node
+ * @param {Object} replacementNode - The replacement node
+ * @returns {string} The smartly converted expression
+ */
+export function applySmartConversion(expression, userInputFormat, originalFormats, replacedPath, replacementNode) {
+  console.log('Applying smart conversion:', { expression, userInputFormat, replacedPath });
+
+  if (userInputFormat === 'numeric') {
+    // User entered numbers - convert successor notation back to numbers where appropriate
+    return convertSuccessorToNumeric(expression);
+  } else if (userInputFormat === 'successor') {
+    // User entered successor notation - keep successor notation
+    return expression;
+  } else if (userInputFormat === 'preserve') {
+    // Non-numeric input - preserve format but restore original numbers for untouched parts
+    return restoreOriginalFormats(expression, originalFormats, replacedPath);
+  }
+
+  // Default: return as-is
+  return expression;
+}
+
+/**
+ * Restores original number formats for untouched parts of the expression
+ * @param {string} expression - The expression with successor notation
+ * @param {Map} originalFormats - Map of original formats by position
+ * @param {Array} replacedPath - Path of the replaced node (to avoid restoring replaced parts)
+ * @returns {string} Expression with original formats restored where appropriate
+ */
+function restoreOriginalFormats(expression, originalFormats, replacedPath) {
+  // For now, implement a simple approach
+  // This could be enhanced to track exact positions and replacements
+
+  // If we have original formats, try to restore them
+  if (!originalFormats || originalFormats.size === 0) {
+    return expression;
+  }
+
+  // Simple replacement: convert obvious successor notation back to numbers
+  // This is a simplified implementation - could be made more sophisticated
+  return expression.replace(/s\s*\(\s*(?:s\s*\(\s*)*0(?:\s*\)\s*)*\s*\)/g, (match) => {
+    const count = countSuccessorsSimple(match);
+    return typeof count === 'number' ? count.toString() : match;
+  });
+}
+
+/**
+ * Simple successor counting helper
+ * @param {string} sExpr - Successor expression
+ * @returns {number|string} Numeric count or original expression
+ */
+function countSuccessorsSimple(sExpr) {
+  const trimmed = sExpr.trim();
+  if (trimmed === '0') return 0;
+
+  let count = 0;
+  let current = trimmed;
+
+  while (current.startsWith('s(') && current.endsWith(')')) {
+    count++;
+    current = current.slice(2, -1).trim();
+  }
+
+  if (current === '0') return count;
+  return sExpr;
 }

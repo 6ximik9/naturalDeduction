@@ -3,6 +3,8 @@ import {checkRule} from "../index";
 import {currentLevel, side} from "../GentzenProof";
 import * as deductive from "../deductiveEngine";
 import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../monacoEditor";
+import {convertToSuccessorNotation} from "./modalForLeibniz";
+import {checkWithAntlr} from "../deductiveEngine";
 
 /**
  * Creates an improved modal for universal quantifier elimination (∀-elimination)
@@ -26,6 +28,9 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       reject(new Error('No constants or formula provided for selection'));
       return;
     }
+
+    formulaString = convertToSuccessorNotation(formulaString);
+    formula = checkWithAntlr(formulaString);
 
     // Create modal overlay with improved accessibility
     const modalOverlay = document.createElement('div');
