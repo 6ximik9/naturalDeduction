@@ -92,6 +92,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
           transition: all 0.2s ease;
           display: inline-block;
           margin: 1px;
+          position: relative;
         }
         .formula-element:hover {
           background-color: #e3f2fd;
@@ -101,6 +102,34 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
           background-color: #2196f3;
           color: white;
           transform: scale(1.1);
+        }
+        .successor-annotation {
+          position: absolute;
+          bottom: -18px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 12px;
+          color: #666;
+          background-color: rgba(255, 255, 255, 0.9);
+          padding: 1px 4px;
+          border-radius: 3px;
+          border: 1px solid #ddd;
+          pointer-events: none;
+          font-weight: bold;
+          min-width: 16px;
+          text-align: center;
+        }
+        .formula-element.successor-element {
+          margin-bottom: 22px; /* Add space for annotation */
+          min-width: 60px; /* Ensure consistent spacing */
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+        }
+        .number-annotation {
+          pointer-events: none;
+          user-select: none;
         }
         .formula-container {
           font-size: 28px;
@@ -681,13 +710,100 @@ function generateClickableFormula(formula, formulaString, onElementClick) {
 }
 
 /**
+ * Creates an enhanced formula container with successor annotations
+ * This is a standalone function that can be used anywhere in the application
+ * @param {Object} formula - The parsed formula object
+ * @param {Function} onElementClick - Optional callback when elements are clicked
+ * @returns {HTMLElement} The enhanced formula container with annotations
+ */
+export function createEnhancedFormulaContainer(formula, onElementClick = null) {
+  const container = document.createElement('div');
+  container.className = 'formula-container enhanced-formula';
+
+  // Add required styles if not already present
+  if (!document.getElementById('enhanced-formula-styles')) {
+    const style = document.createElement('style');
+    style.id = 'enhanced-formula-styles';
+    style.textContent = `
+      .enhanced-formula .formula-element {
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        display: inline-block;
+        margin: 1px;
+        position: relative;
+      }
+      .enhanced-formula .formula-element:hover {
+        background-color: #e3f2fd;
+        transform: scale(1.05);
+      }
+      .enhanced-formula .formula-element.selected {
+        background-color: #2196f3;
+        color: white;
+        transform: scale(1.1);
+      }
+      .enhanced-formula .successor-annotation {
+        position: absolute;
+        bottom: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        color: #666;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 1px 4px;
+        border-radius: 3px;
+        border: 1px solid #ddd;
+        pointer-events: none;
+        font-weight: bold;
+        min-width: 16px;
+        text-align: center;
+      }
+      .enhanced-formula .formula-element.successor-element {
+        margin-bottom: 22px;
+        min-width: 60px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .enhanced-formula .number-annotation {
+        pointer-events: none;
+        user-select: none;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Create clickable formula with default handler if none provided
+  const defaultClickHandler = onElementClick || ((element, path, node) => {
+    // Remove previous selection
+    const prevSelected = container.querySelector('.selected');
+    if (prevSelected) {
+      prevSelected.classList.remove('selected');
+    }
+
+    // Add selection to clicked element
+    if (!element.classList.contains('number-annotation')) {
+      element.classList.add('selected');
+    }
+  });
+
+  const clickableElement = createClickableElement(formula, [], defaultClickHandler);
+  container.appendChild(clickableElement);
+
+  return container;
+}
+
+/**
  * Creates a clickable element for a formula node
  * @param {Object} node - The formula node
  * @param {Array} path - The path to this node in the formula tree
  * @param {Function} onElementClick - Callback function when an element is clicked
+ * @param {boolean} isNestedSuccessor - Whether this is a nested successor element
  * @returns {HTMLElement} The clickable element
  */
-function createClickableElement(node, path, onElementClick) {
+function createClickableElement(node, path, onElementClick, isNestedSuccessor = false) {
   if (!node) return document.createTextNode('');
 
   const element = document.createElement('span');
@@ -712,34 +828,52 @@ function createClickableElement(node, path, onElementClick) {
       break;
 
     case 'successor':
+      // Add successor-element class for proper spacing only if not nested
+      if (!isNestedSuccessor) {
+        element.classList.add('successor-element');
+      }
+
       childElements.push(document.createTextNode('s('));
       if (node.term) {
-        childElements.push(createClickableElement(node.term, [...path, 'term'], onElementClick));
+        // Mark nested successors so they don't get annotations
+        const childIsNestedSuccessor = node.term.type === 'successor';
+        childElements.push(createClickableElement(node.term, [...path, 'term'], onElementClick, childIsNestedSuccessor));
       }
       childElements.push(document.createTextNode(')'));
+
+      // Only add numeric annotation for outermost successor elements
+      if (!isNestedSuccessor) {
+        const numericValue = calculateSuccessorValue(node);
+        if (numericValue !== null) {
+          const annotation = document.createElement('span');
+          annotation.className = 'successor-annotation number-annotation';
+          annotation.textContent = numericValue.toString();
+          childElements.push(annotation);
+        }
+      }
       break;
 
     case 'addition':
       if (node.left && node.right) {
-        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick));
+        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick, false));
         childElements.push(document.createTextNode('+'));
-        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick));
+        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick, false));
       }
       break;
 
     case 'multiplication':
       if (node.left && node.right) {
-        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick));
+        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick, false));
         childElements.push(document.createTextNode('*'));
-        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick));
+        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick, false));
       }
       break;
 
     case 'equality':
       if (node.left && node.right) {
-        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick));
+        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick, false));
         childElements.push(document.createTextNode('='));
-        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick));
+        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick, false));
       }
       break;
 
@@ -748,7 +882,7 @@ function createClickableElement(node, path, onElementClick) {
       if (node.terms && Array.isArray(node.terms)) {
         node.terms.forEach((term, index) => {
           if (index > 0) childElements.push(document.createTextNode(', '));
-          childElements.push(createClickableElement(term, [...path, 'terms', index], onElementClick));
+          childElements.push(createClickableElement(term, [...path, 'terms', index], onElementClick, false));
         });
       }
       childElements.push(document.createTextNode(')'));
@@ -761,7 +895,7 @@ function createClickableElement(node, path, onElementClick) {
         if (Array.isArray(node.terms)) {
           node.terms.forEach((term, index) => {
             if (index > 0) childElements.push(document.createTextNode(', '));
-            childElements.push(createClickableElement(term, [...path, 'terms', index], onElementClick));
+            childElements.push(createClickableElement(term, [...path, 'terms', index], onElementClick, false));
           });
         }
         childElements.push(document.createTextNode(')'));
@@ -771,7 +905,7 @@ function createClickableElement(node, path, onElementClick) {
     case 'parenthesis':
       childElements.push(document.createTextNode('('));
       if (node.value) {
-        childElements.push(createClickableElement(node.value, [...path, 'value'], onElementClick));
+        childElements.push(createClickableElement(node.value, [...path, 'value'], onElementClick, false));
       }
       childElements.push(document.createTextNode(')'));
       break;
@@ -780,7 +914,7 @@ function createClickableElement(node, path, onElementClick) {
       const negSymbols = '¬'.repeat(node.count || 1);
       content = negSymbols;
       if (node.operand) {
-        childElements.push(createClickableElement(node.operand, [...path, 'operand'], onElementClick));
+        childElements.push(createClickableElement(node.operand, [...path, 'operand'], onElementClick, false));
       }
       break;
 
@@ -791,16 +925,16 @@ function createClickableElement(node, path, onElementClick) {
                  node.type === 'disjunction' ? '∨' : '⇒';
 
       if (node.left && node.right) {
-        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick));
+        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick, false));
         childElements.push(document.createTextNode(op));
-        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick));
+        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick, false));
       }
       break;
 
     case 'quantifier':
       childElements.push(document.createTextNode((node.quantifier || '') + (node.variable || '')));
       if (node.expression) {
-        childElements.push(createClickableElement(node.expression, [...path, 'expression'], onElementClick));
+        childElements.push(createClickableElement(node.expression, [...path, 'expression'], onElementClick, false));
       }
       break;
 
@@ -827,6 +961,33 @@ function createClickableElement(node, path, onElementClick) {
   });
 
   return element;
+}
+
+/**
+ * Calculates the numeric value of a successor expression
+ * @param {Object} node - The successor node
+ * @returns {number|null} The numeric value, or null if not a valid successor expression
+ */
+function calculateSuccessorValue(node) {
+  if (node.type !== 'successor') return null;
+
+  let count = 0;
+  let current = node;
+
+  // Count nested successors
+  while (current && current.type === 'successor') {
+    count++;
+    current = current.term;
+  }
+
+  // Check if we end up with 0 (number node with value '0')
+  if (current &&
+      ((current.type === 'number' && current.value === '0') ||
+       (current.type === 'constant' && current.value === '0'))) {
+    return count;
+  }
+
+  return null;
 }
 
 /**
