@@ -15,8 +15,6 @@ import {GENTZEN_BUTTONS, ruleGentzenHandlers, ROBINSON_AXIOMS} from './ruleGentz
 import {get} from "mobx";
 import {formulaToString} from "./formatter.js";
 
-
-// Структура для зберігання контексту дедукції
 export let deductionContext = {
   hypotheses: [], // Список гіпотез
   conclusions: [] // Список висновків
