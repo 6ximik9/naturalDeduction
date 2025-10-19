@@ -3,7 +3,7 @@ import {checkRule} from "../index";
 import {currentLevel, side} from "../GentzenProof";
 import * as deductive from "../deductiveEngine";
 import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../monacoEditor";
-import {convertToSuccessorNotation, convertWithFormatPreservation, applySmartConversion} from "./modalForLeibniz";
+import {convertToSuccessorNotation} from "./modalForLeibniz";
 import {checkWithAntlr} from "../deductiveEngine";
 
 /**
@@ -29,13 +29,8 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       return;
     }
 
-    // Use enhanced conversion with format preservation
-    const conversionResult = convertWithFormatPreservation(formulaString);
-    formulaString = conversionResult.expression;
+    formulaString = convertToSuccessorNotation(formulaString);
     formula = checkWithAntlr(formulaString);
-
-    // Store original formats for smart conversion later
-    const originalFormats = conversionResult.originalFormats;
 
     // Create modal overlay with improved accessibility
     const modalOverlay = document.createElement('div');
@@ -97,7 +92,6 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           transition: all 0.2s ease;
           display: inline-block;
           margin: 1px;
-          position: relative;
         }
         .formula-element:hover {
           background-color: #e3f2fd;
@@ -107,34 +101,6 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           background-color: #2196f3;
           color: white;
           transform: scale(1.1);
-        }
-        .successor-annotation {
-          position: absolute;
-          bottom: -18px;
-          left: 50%;
-          transform: translateX(-50%);
-          font-size: 12px;
-          color: #666;
-          background-color: rgba(255, 255, 255, 0.9);
-          padding: 1px 4px;
-          border-radius: 3px;
-          border: 1px solid #ddd;
-          pointer-events: none;
-          font-weight: bold;
-          min-width: 16px;
-          text-align: center;
-        }
-        .formula-element.successor-element {
-          margin-bottom: 22px; /* Add space for annotation */
-          min-width: 60px; /* Ensure consistent spacing */
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-        }
-        .number-annotation {
-          pointer-events: none;
-          user-select: none;
         }
         .formula-container {
           font-size: 28px;
@@ -413,73 +379,73 @@ export function createModalForReturn(constants, formula = null, formulaString = 
     // Generate buttons based on constants with improved interaction
     if (hasConstants) {
       constants.forEach((constant, index) => {
-      const button = document.createElement('button');
-      button.className = 'modal-button';
-      button.textContent = constant;
-      button.setAttribute('data-constant', constant);
-      button.setAttribute('tabindex', '0');
+        const button = document.createElement('button');
+        button.className = 'modal-button';
+        button.textContent = constant;
+        button.setAttribute('data-constant', constant);
+        button.setAttribute('tabindex', '0');
 
-      Object.assign(button.style, {
-        padding: '16px 20px',
-        fontSize: '20px',
-        fontWeight: '500',
-        cursor: 'pointer',
-        border: '2px solid #e0e0e0',
-        borderRadius: '8px',
-        backgroundColor: '#f8f9fa',
-        color: '#495057',
-        transition: 'all 0.2s ease',
-        minHeight: '60px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      });
+        Object.assign(button.style, {
+          padding: '16px 20px',
+          fontSize: '20px',
+          fontWeight: '500',
+          cursor: 'pointer',
+          border: '2px solid #e0e0e0',
+          borderRadius: '8px',
+          backgroundColor: '#f8f9fa',
+          color: '#495057',
+          transition: 'all 0.2s ease',
+          minHeight: '60px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        });
 
-      // Enhanced hover and focus effects using the shared updateButtonState function
+        // Enhanced hover and focus effects using the shared updateButtonState function
 
-      button.addEventListener('mouseenter', () => updateButtonState(button, button === activeButton, true));
-      button.addEventListener('mouseleave', () => updateButtonState(button, button === activeButton, false));
+        button.addEventListener('mouseenter', () => updateButtonState(button, button === activeButton, true));
+        button.addEventListener('mouseleave', () => updateButtonState(button, button === activeButton, false));
 
-      button.addEventListener('click', () => {
-        // In combined interface, do NOT clear formula selections when button is clicked
-        // We want to allow both button and formula selections simultaneously
-        // Only clear formula selections in formula-only mode
+        button.addEventListener('click', () => {
+          // In combined interface, do NOT clear formula selections when button is clicked
+          // We want to allow both button and formula selections simultaneously
+          // Only clear formula selections in formula-only mode
 
-        clearFormulaSelections();
+          clearFormulaSelections();
 
-        // If clicking the same button, deselect it
-        if (activeButton === button) {
-          updateButtonState(button, false);
-          activeButton = null;
-          selectedConstant = null;
+          // If clicking the same button, deselect it
+          if (activeButton === button) {
+            updateButtonState(button, false);
+            activeButton = null;
+            selectedConstant = null;
+            validateForm();
+            return;
+          }
+
+          // Deselect previous button if any
+          if (activeButton) {
+            const prevButton = activeButton;
+            updateButtonState(prevButton, false);
+          }
+
+          // Select current button
+          activeButton = button;
+          selectedConstant = constant;
+          updateButtonState(button, true);
+
+          // Validate form to update save button state
           validateForm();
-          return;
-        }
+        });
 
-        // Deselect previous button if any
-        if (activeButton) {
-          const prevButton = activeButton;
-          updateButtonState(prevButton, false);
-        }
+        // Keyboard navigation
+        button.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            button.click();
+          }
+        });
 
-        // Select current button
-        activeButton = button;
-        selectedConstant = constant;
-        updateButtonState(button, true);
-
-        // Validate form to update save button state
-        validateForm();
-      });
-
-      // Keyboard navigation
-      button.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          button.click();
-        }
-      });
-
-      buttonContainer.appendChild(button);
+        buttonContainer.appendChild(button);
       });
     }
 
@@ -1105,41 +1071,13 @@ function generateClickableFormula(formula, formulaString, onElementClick) {
 }
 
 /**
- * Calculates the numeric value of a successor expression
- * @param {Object} node - The successor node
- * @returns {number|null} The numeric value, or null if not a valid successor expression
- */
-function calculateSuccessorValue(node) {
-  if (node.type !== 'successor') return null;
-
-  let count = 0;
-  let current = node;
-
-  // Count nested successors
-  while (current && current.type === 'successor') {
-    count++;
-    current = current.term;
-  }
-
-  // Check if we end up with 0 (number node with value '0')
-  if (current &&
-      ((current.type === 'number' && current.value === '0') ||
-       (current.type === 'constant' && current.value === '0'))) {
-    return count;
-  }
-
-  return null;
-}
-
-/**
  * Creates a clickable element for a formula node
  * @param {Object} node - The formula node
  * @param {Array} path - The path to this node in the formula tree
  * @param {Function} onElementClick - Callback function when an element is clicked
- * @param {boolean} isNestedSuccessor - Whether this is a nested successor element
  * @returns {HTMLElement} The clickable element
  */
-function createClickableElement(node, path, onElementClick, isNestedSuccessor = false) {
+function createClickableElement(node, path, onElementClick) {
   if (!node) return document.createTextNode('');
 
   const element = document.createElement('span');
@@ -1168,52 +1106,34 @@ function createClickableElement(node, path, onElementClick, isNestedSuccessor = 
       break;
 
     case 'successor':
-      // Add successor-element class for proper spacing only if not nested
-      if (!isNestedSuccessor) {
-        element.classList.add('successor-element');
-      }
-
       childElements.push(document.createTextNode('s('));
       if (node.term) {
-        // Mark nested successors so they don't get annotations
-        const childIsNestedSuccessor = node.term.type === 'successor';
-        childElements.push(createClickableElement(node.term, [...path, 'term'], onElementClick, childIsNestedSuccessor));
+        childElements.push(createClickableElement(node.term, [...path, 'term'], onElementClick));
       }
       childElements.push(document.createTextNode(')'));
-
-      // Only add numeric annotation for outermost successor elements
-      if (!isNestedSuccessor) {
-        const numericValue = calculateSuccessorValue(node);
-        if (numericValue !== null) {
-          const annotation = document.createElement('span');
-          annotation.className = 'successor-annotation number-annotation';
-          annotation.textContent = numericValue.toString();
-          childElements.push(annotation);
-        }
-      }
       break;
 
     case 'addition':
       if (node.left && node.right) {
-        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick, false));
+        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick));
         childElements.push(document.createTextNode('+'));
-        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick, false));
+        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick));
       }
       break;
 
     case 'multiplication':
       if (node.left && node.right) {
-        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick, false));
+        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick));
         childElements.push(document.createTextNode('*'));
-        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick, false));
+        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick));
       }
       break;
 
     case 'equality':
       if (node.left && node.right) {
-        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick, false));
+        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick));
         childElements.push(document.createTextNode('='));
-        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick, false));
+        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick));
       }
       break;
 
@@ -1222,7 +1142,7 @@ function createClickableElement(node, path, onElementClick, isNestedSuccessor = 
       if (node.terms && Array.isArray(node.terms)) {
         node.terms.forEach((term, index) => {
           if (index > 0) childElements.push(document.createTextNode(', '));
-          childElements.push(createClickableElement(term, [...path, 'terms', index], onElementClick, false));
+          childElements.push(createClickableElement(term, [...path, 'terms', index], onElementClick));
         });
       }
       childElements.push(document.createTextNode(')'));
@@ -1235,7 +1155,7 @@ function createClickableElement(node, path, onElementClick, isNestedSuccessor = 
         if (Array.isArray(node.terms)) {
           node.terms.forEach((term, index) => {
             if (index > 0) childElements.push(document.createTextNode(', '));
-            childElements.push(createClickableElement(term, [...path, 'terms', index], onElementClick, false));
+            childElements.push(createClickableElement(term, [...path, 'terms', index], onElementClick));
           });
         }
         childElements.push(document.createTextNode(')'));
@@ -1245,7 +1165,7 @@ function createClickableElement(node, path, onElementClick, isNestedSuccessor = 
     case 'parenthesis':
       childElements.push(document.createTextNode('('));
       if (node.value) {
-        childElements.push(createClickableElement(node.value, [...path, 'value'], onElementClick, false));
+        childElements.push(createClickableElement(node.value, [...path, 'value'], onElementClick));
       }
       childElements.push(document.createTextNode(')'));
       break;
@@ -1254,7 +1174,7 @@ function createClickableElement(node, path, onElementClick, isNestedSuccessor = 
       const negSymbols = '¬'.repeat(node.count || 1);
       content = negSymbols;
       if (node.operand) {
-        childElements.push(createClickableElement(node.operand, [...path, 'operand'], onElementClick, false));
+        childElements.push(createClickableElement(node.operand, [...path, 'operand'], onElementClick));
       }
       break;
 
@@ -1262,12 +1182,12 @@ function createClickableElement(node, path, onElementClick, isNestedSuccessor = 
     case 'disjunction':
     case 'implication':
       const op = node.type === 'conjunction' ? '∧' :
-                 node.type === 'disjunction' ? '∨' : '⇒';
+        node.type === 'disjunction' ? '∨' : '⇒';
 
       if (node.left && node.right) {
-        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick, false));
+        childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick));
         childElements.push(document.createTextNode(op));
-        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick, false));
+        childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick));
       }
       break;
 
@@ -1276,14 +1196,14 @@ function createClickableElement(node, path, onElementClick, isNestedSuccessor = 
       const quantSymbol = node.type === 'forall' ? '∀' : '∃';
       childElements.push(document.createTextNode(quantSymbol + node.variable + ' '));
       if (node.operand) {
-        childElements.push(createClickableElement(node.operand, [...path, 'operand'], onElementClick, false));
+        childElements.push(createClickableElement(node.operand, [...path, 'operand'], onElementClick));
       }
       break;
 
     case 'quantifier':
       childElements.push(document.createTextNode((node.quantifier || '') + (node.variable || '') + ' '));
       if (node.expression) {
-        childElements.push(createClickableElement(node.expression, [...path, 'expression'], onElementClick, false));
+        childElements.push(createClickableElement(node.expression, [...path, 'expression'], onElementClick));
       }
       break;
 
@@ -1383,7 +1303,7 @@ function getNodeText(node) {
     case 'disjunction':
     case 'implication':
       const op = node.type === 'conjunction' ? '∧' :
-                 node.type === 'disjunction' ? '∨' : '⇒';
+        node.type === 'disjunction' ? '∨' : '⇒';
 
       if (node.left && node.right) {
         return `${getNodeText(node.left)}${op}${getNodeText(node.right)}`;
@@ -1597,7 +1517,7 @@ function replaceAllConstantOccurrences(node, oldConstant, replacementNode) {
 
   // If this is a constant/variable node that matches our target, replace it
   if ((node.type === 'constant' || node.type === 'variable') &&
-      (node.value === oldConstant || node.name === oldConstant)) {
+    (node.value === oldConstant || node.name === oldConstant)) {
     // Replace the properties of this node with the replacement node
     Object.keys(node).forEach(key => delete node[key]);
     Object.assign(node, JSON.parse(JSON.stringify(replacementNode)));
