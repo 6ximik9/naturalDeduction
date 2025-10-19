@@ -2,18 +2,18 @@ import {CharStreams, CommonTokenStream, ParseTreeWalker} from 'antlr4';
 import GrammarLexer from '../my_antlr/GrammarLexer.js';
 import GrammarParser from '../my_antlr/GrammarParser.js';
 import MyGrammarListener from '../my_antlr/MyGrammarListener.js';
-import * as editorMonaco from './monacoEditor';
-import * as deductive from './deductiveEngine';
-import * as controlState from './states';
-import {checkWithAntlr, convertToLogicalExpression, getProof, handleModalCancellation} from "./deductiveEngine";
-import {checkRule, typeProof} from "./index";
-import {shakeElement} from "./index";
-import {createTreeD3} from "./tree";
-import {addNextLastButtonClickGentzen} from "./states";
-import {latexGentzen} from "./latexGen";
-import {GENTZEN_BUTTONS, ruleGentzenHandlers, ROBINSON_AXIOMS} from './ruleGentzenHandlers';
+import * as editorMonaco from './monacoEditor.js'
+import * as deductive from './deductiveEngine.js';
+import * as controlState from './states.js';
+import {checkWithAntlr, convertToLogicalExpression, getProof, handleModalCancellation} from "./deductiveEngine.js";
+import {checkRule, typeProof} from "./index.js";
+import {shakeElement} from "./index.js";
+import {createTreeD3} from "./tree.js";
+import {addNextLastButtonClickGentzen} from "./states.js";
+import {latexGentzen} from "./latexGen.js";
+import {GENTZEN_BUTTONS, ruleGentzenHandlers, ROBINSON_AXIOMS} from './ruleGentzenHandlers.js';
 import {get} from "mobx";
-import {formulaToString} from "./formatter";
+import {formulaToString} from "./formatter.js";
 
 
 // Структура для зберігання контексту дедукції

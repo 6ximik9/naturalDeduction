@@ -1,6 +1,7 @@
 {
   "name": " ",
   "version": "0.0.1",
+  "type": "module",
   "description": "",
   "private": true,
   "keywords": [
@@ -13,7 +14,7 @@
     "test:grammar": "node tests/grammar-test.js",
     "test:robinson": "node tests/robinson-arithmetic-test.js",
     "test:formatter": "node tests/formatter-bracket-test.js && node tests/formatter-edge-cases-test.js",
-    "test:all": "npm run test:grammar && npm run test:robinson && npm run test:formatter",
+    "test:all": "node tests/*.js",
     "start": "webpack serve --open --config webpack.config.dev.js",
     "build": "webpack --config webpack.config.prod.js",
     "webpack": "cd my_antlr && antlr -Dlanguage=JavaScript Grammar.g4 && cd .. && webpack",

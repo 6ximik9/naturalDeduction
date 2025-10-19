@@ -307,7 +307,8 @@ export async function seventeenthRule() {
     const allHyp = deductive.getAllHypotheses(index.lastSide);
     const allHypArray = allHyp.map(constant => deductive.convertToLogicalExpression(constant));
 
-    const result = await createAdvancedModal(allHypArray);
+    console.log(allHypArray);
+    const result = await createAdvancedModal(allHypArray)
     const leftSide = getProof(deductive.checkWithAntlr(result[0]));
 
     createConclusion([leftSide, rightSide]);

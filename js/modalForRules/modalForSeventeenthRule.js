@@ -18,10 +18,10 @@ let customEditor = null;
 export function createAdvancedModal(formulas) {
   return new Promise((resolve, reject) => {
     // Validate input
-    if (!formulas || !Array.isArray(formulas) || formulas.length === 0) {
-      reject(new Error('No formulas provided for selection'));
-      return;
-    }
+    // if (!formulas || !Array.isArray(formulas) || formulas.length === 0) {
+    //   reject(new Error('No formulas provided for selection'));
+    //   return;
+    // }
 
     // Create modal overlay with improved accessibility
     const modalOverlay = document.createElement('div');

@@ -126,7 +126,7 @@ export const ruleGentzenHandlers = {
     requiresTree: true
   },
   "\\forall E": {
-    condition: (expr) => expr.type === 'relation' || expr.type === 'predicate' || expr.type === 'equality' || expr.type === 'forall' || expr.type === 'exists',
+    condition: (expr) => expr.type === 'relation' || expr.type === 'predicate' || expr.type === 'equality' || expr.type === 'forall' || expr.type === 'exists' || expr.type==="successor",
     action: async () => await rules.sixteenthRule(),
     requiresTree: true
   },
@@ -140,12 +140,12 @@ export const ruleGentzenHandlers = {
     returnsResult: true
   },
   "\\text{=E}_1": {
-    condition: (expr) => expr.type === 'relation' || expr.type === 'predicate' || expr.type === 'equality',
+    condition: (expr) => expr.type === 'relation' || expr.type === 'predicate' || expr.type === 'equality' || expr.type==="successor",
     action: async () => await rules.eighteenthRule(),
     requiresTree: true,
   },
   "\\text{=E}_2": {
-    condition: (expr) => expr.type === 'relation' || expr.type === 'predicate' || expr.type === 'equality',
+    condition: (expr) => expr.type === 'relation' || expr.type === 'predicate' || expr.type === 'equality' || expr.type==="successor",
     action: async () => rules.nineteenthRule(),
     requiresTree: true,
   },
