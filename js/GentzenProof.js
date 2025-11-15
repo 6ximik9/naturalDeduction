@@ -11,9 +11,10 @@ import {shakeElement} from "./index.js";
 import {createTreeD3} from "./tree.js";
 import {addNextLastButtonClickGentzen} from "./states.js";
 import {latexGentzen} from "./latexGen.js";
-import {GENTZEN_BUTTONS, ruleGentzenHandlers, ROBINSON_AXIOMS} from './ruleGentzenHandlers.js';
+import {GENTZEN_BUTTONS, ruleGentzenHandlers, ROBINSON_AXIOMS, AXIOM_HANDLERS} from './ruleGentzenHandlers.js';
 import {get} from "mobx";
 import {formulaToString} from "./formatter.js";
+import {initializeProofTextHover, addProofTextHoverEffects} from './proofTextHover.js';
 
 export let deductionContext = {
   hypotheses: [], // Список гіпотез
@@ -163,6 +164,9 @@ export function parseExpression(text) {
   latexGentzen();
   addOrRemoveParenthesesGentzen();
   addClickSwitchNotation();
+
+  // Ініціалізуємо hover ефекти для proofText елементів
+  initializeProofTextHover();
 
   try {
     // Парсинг виразу через ANTLR
@@ -354,42 +358,79 @@ function generateButtons(buttonCount, buttonTexts) {
   const buttonContainer = document.getElementById('button-container');
   buttonContainer.innerHTML = '';
 
-  const currentExpr = deductive.getProof(
-    deductive.checkWithAntlr(side.querySelector('#proofText').textContent)
-  );
+  // Check if this is for axioms - more specific detection
+  const isAxiomsTab = buttonTexts.length === ROBINSON_AXIOMS.length &&
+                      buttonTexts.every((text, index) => text.startsWith(`${index + 1}. `));
 
-  const hypotheses = deductive.getAllHypotheses(side).map(h =>
-    deductive.getProof(h)
-  );
+  if (isAxiomsTab) {
+    // Special styling for axioms - 2 columns layout
+    buttonContainer.style.display = 'grid';
+    buttonContainer.style.gridTemplateColumns = '1fr 1fr';
+    buttonContainer.style.gap = '8px';
+    buttonContainer.style.padding = '20px';
+    buttonContainer.style.justifyItems = 'center';
 
-  const isInHypotheses = hypotheses.some(h =>
-    deductive.compareExpressions(h, currentExpr)
-  );
+    // Add header for axioms
+    const header = document.createElement('h4');
+    header.textContent = 'Robinson Arithmetic Axioms';
+    header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 0 0 14px 0; color: #333; font-family: "Times New Roman", serif;';
+    buttonContainer.appendChild(header);
+  } else {
+    // Reset to default styling for other tabs
+    buttonContainer.style.display = '';
+    buttonContainer.style.gridTemplateColumns = '';
+    buttonContainer.style.gap = '';
+    buttonContainer.style.padding = '';
+  }
 
-  // Check if current expression matches any Robinson arithmetic axiom
-  const isRobinsonAxiom = ROBINSON_AXIOMS.some(axiom => {
-    try {
-      const axiomParsed = deductive.getProof(deductive.checkWithAntlr(axiom));
-      return deductive.compareExpressions(axiomParsed, currentExpr);
-    } catch (error) {
-      console.warn('Error parsing axiom:', axiom, error);
-      return false;
+  if (!isAxiomsTab) {
+    const currentExpr = deductive.getProof(
+      deductive.checkWithAntlr(side.querySelector('#proofText').textContent)
+    );
+
+    const hypotheses = deductive.getAllHypotheses(side).map(h =>
+      deductive.getProof(h)
+    );
+
+    const isInHypotheses = hypotheses.some(h =>
+      deductive.compareExpressions(h, currentExpr)
+    );
+
+    // Check if current expression matches any Robinson arithmetic axiom
+    const isRobinsonAxiom = ROBINSON_AXIOMS.some(axiom => {
+      try {
+        const axiomParsed = deductive.getProof(deductive.checkWithAntlr(axiom));
+        return deductive.compareExpressions(axiomParsed, currentExpr);
+      } catch (error) {
+        console.warn('Error parsing axiom:', axiom, error);
+        return false;
+      }
+    });
+
+    if (isInHypotheses || isRobinsonAxiom) {
+      const closeBtn = createButton("Close branch", () => closeSide(side));
+      closeBtn.style.minHeight = '80px';
+      buttonContainer.appendChild(closeBtn);
     }
-  });
-
-  if (isInHypotheses || isRobinsonAxiom) {
-    const closeBtn = createButton("Close branch", () => closeSide(side));
-    closeBtn.style.minHeight = '80px';
-    buttonContainer.appendChild(closeBtn);
   }
 
   for (let i = 0; i < buttonCount; i++) {
     const button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i]));
+
+    if (isAxiomsTab) {
+      // Override flex styles for axiom buttons to work properly with grid
+      button.style.flex = 'none';
+      button.style.width = '100%';
+      button.style.maxWidth = 'none';
+      button.style.minHeight = '60px';
+    }
+
     buttonContainer.appendChild(button);
   }
 
   MathJax.typesetPromise().catch(err => console.warn('MathJax помилка:', err));
 }
+
 
 /**
  * Створює HTML-кнопку з заданим текстом та обробником кліку.
@@ -439,6 +480,23 @@ async function buttonClicked(buttonText) {
 
   const ruleName = deductive.extractTextBetweenParentheses(buttonText.toString());
   nameRule = ruleName;
+  // Handle axiom clicks specially - check if it's a numbered axiom
+  const axiomMatch = buttonText.match(/^(\d+)\.\s(.+)$/);
+  // const axiomMatch = buttonText.match((text, index) => text.startsWith(`${index + 1}. `));
+  if (axiomMatch) {
+    const axiomNumber = parseInt(axiomMatch[1]);
+    const axiomHandler = AXIOM_HANDLERS[axiomNumber];
+
+    if (axiomHandler) {
+      // Execute the structured axiom handler
+      axiomHandler.action();
+    } else {
+      // Fallback for unknown axioms
+      const axiomText = axiomMatch[2];
+      console.log(`⚠️  Unknown Axiom ${axiomNumber}: ${axiomText}`);
+    }
+    return;
+  }
 
   let expr = getProof(checkWithAntlr(lastSide.querySelector('#proofText').textContent));
   const handler = ruleGentzenHandlers[ruleName];
@@ -880,6 +938,9 @@ function createProofTree(conclusions, container, hyp = null) {
     deductive.editPadding();
   }
 
+  // Додаємо hover ефекти до нових proofText елементів
+  addProofTextHoverEffects();
+
   oldUserInput = "";
 }
 
@@ -1011,7 +1072,17 @@ function addClickGentzenRules() {
           return;
         }
         processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 0);
-      } else {
+      } else if (tabId === 'tab3') {
+        // Axioms tab - show Robinson Arithmetic axioms
+        if (typeProof === 1) {
+          return;
+        }
+        // Format axioms for generateButtons
+        const formattedAxioms = ROBINSON_AXIOMS.map((axiom, index) =>
+          `${index + 1}. ${axiom}`
+        );
+        generateButtons(ROBINSON_AXIOMS.length, formattedAxioms);
+      } else if (tabId === 'tab4') {
         const buttonContainer = document.getElementById('button-container');
         buttonContainer.innerHTML = '';
 
