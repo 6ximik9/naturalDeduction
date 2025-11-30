@@ -189,13 +189,13 @@ export function parseExpression(text) {
         throw new Error(`Parse error at line ${line}, column ${column}: ${msg}`);
       },
       reportAmbiguity: function (recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs) {
-        console.warn('Grammar ambiguity detected in Gentzen proof parsing');
+        // console.warn('Grammar ambiguity detected in Gentzen proof parsing');
       },
       reportAttemptingFullContext: function (recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs) {
-        console.warn('Parser attempting full context in Gentzen proof parsing');
+        // console.warn('Parser attempting full context in Gentzen proof parsing');
       },
       reportContextSensitivity: function (recognizer, dfa, startIndex, stopIndex, prediction, configs) {
-        console.warn('Context sensitivity detected in Gentzen proof parsing');
+        // console.warn('Context sensitivity detected in Gentzen proof parsing');
       }
     });
 
@@ -732,7 +732,41 @@ async function buttonClicked(buttonText) {
         btn.innerHTML.includes(`${axiomNumber}.`)
       );
 
-      axiomHandler.action(currentFormula, axiomButton);
+      const result = axiomHandler.action(currentFormula, axiomButton);
+
+      // Створюємо дерево для аксіом, якщо вони вимагають цього і успішно застосувалися
+      if (axiomHandler.requiresTree && currentLevel !== -1 && result) {
+        const newConclusion = deductionContext.conclusions[size + 1];
+        // Check if a new conclusion was actually added
+        if (newConclusion) {
+          nameRule = "\\forall E";
+
+          createProofTree(newConclusion, side);
+
+          // Відразу закриваємо гілку для аксіоми
+          const axiomElement = document.querySelector(`.proof-element_level-${newConclusion.level}`);
+          if (axiomElement) {
+            const proofDiv = axiomElement.querySelector('div:not(.nameRule)');
+            if (proofDiv) {
+              closeSide(proofDiv);
+            }
+          }
+
+          controlState.saveState();
+
+          // Скидаємо стан help button після успішного застосування аксіоми
+          helpButtonToggleState.axioms = false;
+          helpButtonToggleState.allRules = false;
+        } else {
+          console.log("❌ No new conclusion was added for axiom");
+        }
+      } else if (!result) {
+        console.log(`❌ Axiom ${axiomNumber} validation failed, no tree created`);
+      } else if (!axiomHandler.requiresTree) {
+        console.log(`ℹ️ Axiom ${axiomNumber} doesn't require tree creation`);
+      } else if (currentLevel === -1) {
+        console.log("❌ Current level is -1, skipping axiom tree creation");
+      }
     } else {
       // Fallback for unknown axioms
       const axiomText = axiomMatch[2];
@@ -788,6 +822,10 @@ async function buttonClicked(buttonText) {
   // Очистка інтерфейсу
   document.getElementById('proof-menu').className = 'hidden';
   document.getElementById("tab1").checked = true;
+
+  // Скидаємо стан help button після успішного застосування правила
+  helpButtonToggleState.axioms = false;
+  helpButtonToggleState.allRules = false;
 
   const labels = document.getElementById('proof').querySelectorAll('label');
   labels.forEach(label => {
@@ -1160,6 +1198,17 @@ function createProofTree(conclusions, container, hyp = null) {
     console.log(childElements);
   }
 
+  //21 правило (Mathematical Induction)
+  if (currentLevel === 21 && hyp !== null) {
+    let childElements = levelDiv.children;
+
+    // Додаємо гіпотезу індукції P(x) до правої частини (інукційний крок)
+    childElements[2].id = lastSide.id + 'divId-' + convertToLogicalExpression(hyp);
+
+    deductionContext.hypotheses.push({level: level - 1, hyp: hyp});
+    console.log("Induction hypothesis added:", hyp);
+  }
+
   showAllHyp();
 
   if (container.id !== 'proof' && container.className !== 'closed') {
@@ -1338,6 +1387,14 @@ function addClickGentzenRules() {
         helpButtonToggleState.axioms = false;
         const buttonContainer = document.getElementById('button-container');
         buttonContainer.innerHTML = '';
+
+        // Reset button-container styles to original state (remove grid styles from Axioms tab)
+        buttonContainer.style.display = '';
+        buttonContainer.style.gridTemplateColumns = '';
+        buttonContainer.style.gap = '';
+        buttonContainer.style.padding = '';
+        buttonContainer.style.justifyItems = 'center';
+        buttonContainer.style.position = 'relative';
 
         let svgContainer = document.createElement("div");
         svgContainer.style.width = "100%"; // Або використовуйте фіксовану ширину, наприклад "1000px"

@@ -1379,7 +1379,7 @@ function createHighlightedElement(node, targetVariable) {
  * @param {string} replacementTerm - The replacement term
  * @returns {string} The formula string after substitution
  */
-function performSubstitution(operand, variable, replacementTerm) {
+export function performSubstitution(operand, variable, replacementTerm) {
   // Create a deep copy of the operand to avoid modifying the original
   const operandCopy = JSON.parse(JSON.stringify(operand));
 

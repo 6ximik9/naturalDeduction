@@ -356,7 +356,7 @@ export function getAllHypotheses(container) {
     let lexer = new GrammarLexer(chars);
     let tokens = new CommonTokenStream(lexer);
     let parser = new GrammarParser(tokens);
-    let tree = parser.implication();
+    let tree = parser.formula();
 
     const listener = new MyGrammarListener(); // Викликати конструктор вашого Лісенера
     ParseTreeWalker.DEFAULT.walk(listener, tree);
@@ -426,7 +426,7 @@ export function checkWithAntlr(text, er) {
     }
   });
 
-  let tree = parser.implication();
+  let tree = parser.formula();
 
   const listener = new MyGrammarListener(); // Викликати конструктор вашого Лісенера
   ParseTreeWalker.DEFAULT.walk(listener, tree);

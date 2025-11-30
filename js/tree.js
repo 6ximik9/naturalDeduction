@@ -105,7 +105,9 @@ export function createTreeD3(treeJ) {
 function transformToD3S(node) {
   function processNode(node) {
     if (node.type === "constant" || node.type === "variable" || node.type === "number") {
-      return { name: node.value || node.name };
+      // Variables use 'name' property, constants and numbers use 'value' property
+      const displayName = node.type === "variable" ? node.name : node.value;
+      return { name: displayName || node.name || node.value || "?" };
     }
 
     if (node.type === "atom") {
@@ -168,10 +170,16 @@ function transformToD3S(node) {
     }
 
     if (node.type === "successor") {
-      return {
-        name: "s",
-        children: [processNode(node.term)]
-      };
+      // Defensive handling of successor term
+      const term = node.term || node.operand || node.value;
+      if (term) {
+        return {
+          name: "s",
+          children: [processNode(term)]
+        };
+      } else {
+        return { name: "s(?)" }; // Fallback if no term found
+      }
     }
 
     if (node.type === "equality") {
@@ -186,10 +194,18 @@ function transformToD3S(node) {
 
     if (node.type === "addition" || node.type === "multiplication") {
       const symbol = node.type === "addition" ? "+" : "*";
-      const operands = node.operands || [];
+      // Support both operands array and left/right structure
+      let children = [];
+      if (node.operands && node.operands.length > 0) {
+        // Legacy operands array structure
+        children = node.operands.map(operand => processNode(operand));
+      } else if (node.left && node.right) {
+        // New left/right structure from MyGrammarListener
+        children = [processNode(node.left), processNode(node.right)];
+      }
       return {
         name: symbol,
-        children: operands.map(operand => processNode(operand))
+        children: children
       };
     }
 

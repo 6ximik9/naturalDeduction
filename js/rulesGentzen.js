@@ -1,15 +1,18 @@
 
 import * as index from "./GentzenProof";
 import * as deductive from "./deductiveEngine";
-import {createModal, createModalForQuantifierSubstitution} from "./modalForRules/modalForSubstitution";
-import {convertToLogicalExpression, getProof} from "./deductiveEngine";
+import {
+  createModal,
+  createModalForQuantifierSubstitution,
+  performSubstitution
+} from "./modalForRules/modalForSubstitution";
+import {checkWithAntlr, convertToLogicalExpression, getProof} from "./deductiveEngine";
 import {createAdvancedModal} from "./modalForRules/modalForSeventeenthRule";
 import {createModalForReturn} from "./modalForRules/modalForReturn";
 import { createModalForLeibniz } from './modalForRules/modalForLeibniz.js';
 
 // Утиліти
 function createConclusion(proof) {
-  console.log(proof);
   index.addConclusions({ level: index.level, proof });
   index.setLevel(index.level + 1);
 }
@@ -24,6 +27,14 @@ function parseProofFromLastSide() {
   const text = index.lastSide.querySelector('#proofText')?.textContent;
   const parsed = deductive.checkWithAntlr(text);
   return deductive.getProof(parsed);
+}
+
+export function createAxiomConclusion(axiomText, axiomLevel) {
+  console.log(`Creating axiom conclusion: ${axiomText}`);
+  index.setCurrentLevel(axiomLevel);
+  const parsed = deductive.checkWithAntlr(axiomText);
+  const proof = deductive.getProof(parsed);
+  createConclusion(proof);
 }
 
 // 1. ⊥-введення
@@ -387,12 +398,40 @@ export async function twentiethRule() {
   // Handle equality structure
   let leftSide, rightSide;
   if (proof.left && proof.right) {
-    leftSide = 'P('+ convertToLogicalExpression(proof.left) + ')';
-    rightSide = 'P('+ convertToLogicalExpression(proof.right) + ')';
+    leftSide = 'P(' + convertToLogicalExpression(proof.left) + ')';
+    rightSide = 'P(' + convertToLogicalExpression(proof.right) + ')';
   } else {
     console.error("Invalid equality structure:", proof);
     return;
   }
 
   createConclusion([getProof(deductive.checkWithAntlr(leftSide)), getProof(deductive.checkWithAntlr(rightSide))]);
+}
+
+// 21. Mathematical Induction
+export async function induction() {
+  index.setCurrentLevel(21);
+  const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+  const proof = getProof(deductive.checkWithAntlr(innerText));
+
+  console.log("Ind");
+  console.log(proof);
+
+  // Base case: P(0)
+  var leftSideText = performSubstitution(proof.operand, proof.variable, "0");
+  // Inductive step: P(s(x))
+  var rightSideText = performSubstitution(proof.operand, proof.variable, "s(x)");
+  var leftSide = getProof(checkWithAntlr(leftSideText));
+  var rightSide = getProof(checkWithAntlr(rightSideText));
+
+  createConclusion([leftSide, rightSide]);
+  console.log("Base case:", leftSide);
+  console.log("Inductive step:", rightSide);
+
+  // Повертаємо гіпотезу індукції P(x) для правої частини
+  const inductionHypothesisText = performSubstitution(proof.operand, proof.variable, "x");
+  const inductionHypothesis = getProof(checkWithAntlr(inductionHypothesisText));
+
+  console.log("Induction hypothesis:", inductionHypothesis);
+  return inductionHypothesis;
 }
