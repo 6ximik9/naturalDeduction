@@ -46,7 +46,8 @@ function createTooltip(element, convertedText) {
   const tooltip = document.createElement('div');
   tooltip.id = 'successor-tooltip-' + Date.now();
   tooltip.className = 'successor-tooltip';
-  tooltip.textContent = convertedText;
+  // Replace s(0) with s0 in tooltip text
+  tooltip.textContent = convertedText.replace(/s\(0\)/g, 's0');
 
   Object.assign(tooltip.style, {
     position: 'absolute',
@@ -68,21 +69,22 @@ function createTooltip(element, convertedText) {
     wordWrap: 'break-word'
   });
 
-  // Position tooltip below the element, starting from its right edge with extra offset
+  // Position tooltip close to the element
   const rect = element.getBoundingClientRect();
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
-  tooltip.style.left = (rect.left + scrollLeft + rect.width + 200) + 'px';
-  tooltip.style.top = (rect.top + scrollTop + rect.height + 5) + 'px';
-  tooltip.style.transform = 'translateX(-100%) translateY(0)';
+  // Position tooltip to the right of the element with a small offset
+  tooltip.style.left = (rect.right + scrollLeft + 10) + 'px';
+  tooltip.style.top = (rect.top + scrollTop - 5) + 'px';
+  tooltip.style.transform = 'translateY(0)';
 
   document.body.appendChild(tooltip);
 
   // Animate in
   requestAnimationFrame(() => {
     tooltip.style.opacity = '1';
-    tooltip.style.transform = 'translateX(-100%) translateY(5px)';
+    tooltip.style.transform = 'translateY(5px)';
   });
 
   return tooltip;
@@ -94,7 +96,7 @@ function createTooltip(element, convertedText) {
  */
 function removeTooltip(immediate = false) {
   // Remove all tooltips with the successor-tooltip class
-  const existingTooltips = document.querySelectorAll('.successor-tooltip');
+  const existingTooltips = Array.from(document.querySelectorAll('.successor-tooltip'));
   existingTooltips.forEach(tooltip => {
     if (immediate) {
       // Remove immediately without animation
@@ -104,7 +106,7 @@ function removeTooltip(immediate = false) {
     } else {
       // Remove with animation
       tooltip.style.opacity = '0';
-      tooltip.style.transform = 'translateX(-100%) translateY(-5px)';
+      tooltip.style.transform = 'translateY(-5px)';
       setTimeout(() => {
         if (tooltip.parentNode) {
           tooltip.parentNode.removeChild(tooltip);
@@ -123,7 +125,7 @@ function removeTooltip(immediate = false) {
         }
       } else {
         tooltip.style.opacity = '0';
-        tooltip.style.transform = 'translateX(-100%) translateY(-5px)';
+        tooltip.style.transform = 'translateY(-5px)';
         setTimeout(() => {
           if (tooltip.parentNode) {
             tooltip.parentNode.removeChild(tooltip);

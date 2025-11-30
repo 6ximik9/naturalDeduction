@@ -1,6 +1,16 @@
 import * as rules from './rulesGentzen';
-import {deductionContext} from "./GentzenProof";
+import {deductionContext, shakeButton} from "./GentzenProof";
 import {nineteenthRule, twentiethRule} from "./rulesGentzen";
+import {
+  validateAxiom1,
+  validateAxiom2,
+  validateAxiom3,
+  validateAxiom4,
+  validateAxiom5,
+  validateAxiom6,
+  validateAxiom7,
+  validateRobinsonAxioms
+} from "./robinsonAxiomValidator";
 
 // Robinson Arithmetic Axioms
 export const ROBINSON_AXIOMS = [
@@ -19,70 +29,119 @@ export const AXIOM_HANDLERS = {
     name: "Successor Injectivity",
     description: "The successor function is injective - if s(x) = s(y), then x = y",
     formula: "∀x ∀y (s(x) = s(y) ⇒ x = y)",
-    action: () => {
-      console.log("🔢 Axiom 1 (Successor Injectivity): ∀x ∀y (s(x) = s(y) ⇒ x = y)");
-      console.log("📝 This axiom states that the successor function is injective.");
-      console.log("💡 Use: Proves that different natural numbers have different successors.");
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateAxiom1(formula);
+        if (result) {
+          console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
     }
   },
   2: {
     name: "Zero is not a successor",
     description: "Zero is not the successor of any natural number",
     formula: "∀x (0 ≠ s(x))",
-    action: () => {
-      console.log("🔢 Axiom 2 (Zero is not a successor): ∀x (0 ≠ s(x))");
-      console.log("📝 This axiom states that 0 is not the successor of any number.");
-      console.log("💡 Use: Establishes that 0 is the unique minimal element.");
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateAxiom2(formula);
+        if (result) {
+          console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
     }
   },
   3: {
     name: "Predecessor existence",
     description: "Every non-zero number has a predecessor",
     formula: "∀x (x ≠ 0 ⇒ ∃y (x = s(y)))",
-    action: () => {
-      console.log("🔢 Axiom 3 (Predecessor existence): ∀x (x ≠ 0 ⇒ ∃y (x = s(y)))");
-      console.log("📝 This axiom states that every non-zero number has a predecessor.");
-      console.log("💡 Use: Allows reasoning about the structure of natural numbers.");
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateAxiom3(formula);
+        if (result) {
+          console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
     }
   },
   4: {
     name: "Addition identity",
     description: "Adding zero to any number gives the same number",
     formula: "∀x (x + 0 = x)",
-    action: () => {
-      console.log("🔢 Axiom 4 (Addition identity): ∀x (x + 0 = x)");
-      console.log("📝 This axiom defines the base case for addition.");
-      console.log("💡 Use: Fundamental property that 0 is the additive identity.");
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateAxiom4(formula);
+        if (result) {
+          console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
     }
   },
   5: {
     name: "Addition recursion",
     description: "Defines addition for successor numbers",
     formula: "∀x ∀y (x + s(y) = s(x + y))",
-    action: () => {
-      console.log("🔢 Axiom 5 (Addition recursion): ∀x ∀y (x + s(y) = s(x + y))");
-      console.log("📝 This axiom defines addition recursively.");
-      console.log("💡 Use: Shows how addition works with the successor function.");
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateAxiom5(formula);
+        if (result) {
+          console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
     }
   },
   6: {
     name: "Multiplication by zero",
     description: "Multiplying any number by zero gives zero",
     formula: "∀x (x * 0 = 0)",
-    action: () => {
-      console.log("🔢 Axiom 6 (Multiplication by zero): ∀x (x * 0 = 0)");
-      console.log("📝 This axiom defines the base case for multiplication.");
-      console.log("💡 Use: Fundamental property that multiplication by 0 yields 0.");
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateAxiom6(formula);
+        if (result) {
+          console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
     }
   },
   7: {
     name: "Multiplication recursion",
     description: "Defines multiplication for successor numbers",
     formula: "∀x ∀y (x * s(y) = (x * y) + x)",
-    action: () => {
-      console.log("🔢 Axiom 7 (Multiplication recursion): ∀x ∀y (x * s(y) = (x * y) + x)");
-      console.log("📝 This axiom defines multiplication recursively.");
-      console.log("💡 Use: Shows how multiplication builds on addition.");
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateAxiom7(formula);
+        if (result) {
+          console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
     }
   }
 };
