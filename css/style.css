@@ -331,7 +331,7 @@ h3 {
 
 .preview{
   /*align-items: center;*/
-  display: flex;
+  /*display: flex;*/
   cursor: text;
 }
 
@@ -1547,5 +1547,49 @@ span.choose {
   display: block;
 }
 
+/* ==========================================================================
+   GAMMA CONTEXT STYLING
+   ========================================================================== */
+
+.gamma-context {
+  color: #666;
+  font-weight: bold;
+  margin-right: 5px;
+  font-size: 0.6em;
+  display: inline-block;
+  vertical-align: baseline;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.gamma-context:hover {
+  background-color: #FFD700; /* Золотисто-жовтий фон при наведенні */
+}
+
+/* Ensure stable positioning when tree changes */
+#proof label {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  width: auto;
+  min-width: fit-content;
+}
+
+/* Keep proof elements stable during tree modifications */
+[class^="proof-element_level-"] {
+  position: relative;
+  transform: translateZ(0); /* Force GPU acceleration for stable positioning */
+}
+
+/* Ensure gamma context and proof text are always on the same line */
+.proof-content {
+  /*display: flex !important;*/
+  align-items: baseline;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
 
 

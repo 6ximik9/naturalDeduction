@@ -23,7 +23,7 @@ function createTestConclusion(proof) {
   btnSave?.addEventListener('click', index.saveTree);
 }
 
-function parseProofFromLastSide() {
+export function parseProofFromLastSide() {
   const text = index.lastSide.querySelector('#proofText')?.textContent;
   const parsed = deductive.checkWithAntlr(text);
   return deductive.getProof(parsed);
@@ -45,10 +45,15 @@ export function firstRule() {
 // 2. Введення заперечення
 export function secondRule() {
   index.setCurrentLevel(2);
-  const innerText = '¬(' + index.side.innerText + ')';
+  // const innerText = '¬(' + index.side.innerText + ')';
+  const innerText = '¬(' + index.lastSide.querySelector('#proofText')?.textContent+ ')';
+  console.log(index.side);
+  console.log(index.side.textContent);
+
   const hyp = deductive.checkWithAntlr(innerText);
 
-  index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
+  // index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
+
   index.addHypotheses({ level: index.level, hyp });
 
   createConclusion({ type: "atom", value: "⊥" });
@@ -63,11 +68,12 @@ export function thirdRule() {
 // 4. Виведення з ¬
 export function fourthRule() {
   index.setCurrentLevel(4);
-  const innerText = index.side.innerText.replace('¬', '');
+  // const innerText = index.side.innerText.replace('¬', '');
+  const innerText = index.lastSide.querySelector('#proofText')?.textContent.replace('¬', '');
   const hyp = deductive.checkWithAntlr(innerText);
 
-  index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
-  index.addHypotheses({ level: index.level, hyp });
+  // index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
+  // index.addHypotheses({ level: index.level, hyp });
 
   createConclusion({ type: "atom", value: "⊥" });
 }
@@ -164,15 +170,18 @@ export function twelfthRule() {
     return;
   }
 
-  index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
+  // index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
+  // const gammaSpan1 = index.lastSide.querySelector('.gamma-context');
+  // addHypothesesToGammaSpan(gammaSpan1, deductive.convertToLogicalExpression(hyp));
 
-  const alreadyExists = index.deductionContext.hypotheses.some(item =>
-    JSON.stringify(item.hyp) === JSON.stringify(hyp)
-  );
 
-  if (!alreadyExists) {
+  // const alreadyExists = index.deductionContext.hypotheses.some(item =>
+  //   JSON.stringify(item.hyp) === JSON.stringify(hyp)
+  // );
+
+  // if (!alreadyExists) {
     index.addHypotheses({ level: index.level, hyp });
-  }
+  // }
 
   createConclusion(conclusion);
 }
@@ -197,23 +206,6 @@ export async function fourteenthRule() {
     const proof = getProof(deductive.checkWithAntlr(result.formula));
     index.setReplaces(result.substitution);
     createConclusion(proof);
-    // const innerText = index.lastSide.querySelector('#proofText')?.textContent;
-    // const proof = getProof(deductive.checkWithAntlr(innerText)).operand;
-    // const allConst = deductive.extractConstantsOrVariables(proof);
-    //
-    // console.log("Test");
-    // console.log(proof);
-    //
-    // const result = await createModal(allConst);
-    // console.log(result);
-    // index.setReplaces(result[1] + "/" + result[0]);
-    //
-    // // Use precise replacement - replace only the selected term, not all occurrences
-    // const replacementCount = deductive.updateTermsFirst(proof, result[0], result[1]);
-    // console.log(`Replaced ${replacementCount} occurrence(s) of "${result[0]}" with "${result[1]}"`);
-    // console.log(proof);
-    //
-    // createConclusion(proof);
   } catch (error) {
     if (deductive.handleModalCancellation("Rule 14", error)) {
       index.setCurrentLevel(-1); // Restore previous level
@@ -237,19 +229,6 @@ export async function fifteenthRule() {
     const proof = getProof(deductive.checkWithAntlr(result.formula));
     index.setReplaces(result.substitution);
     createConclusion(proof);
-    // const innerText = index.lastSide.querySelector('#proofText')?.textContent;
-    // const proof = getProof(deductive.checkWithAntlr(innerText)).operand;
-    // const allConst = deductive.extractConstantsOrVariables(proof);
-    //
-    // const result = await createModal(allConst);
-    // console.log(result[0] + "/" + result[1]);
-    // index.setReplaces(result[0] + "/" + result[1]);
-    //
-    // // Use precise replacement - replace only the selected term, not all occurrences
-    // const replacementCount = deductive.updateTermsFirst(proof, result[0], result[1]);
-    // console.log(`Replaced ${replacementCount} occurrence(s) of "${result[0]}" with "${result[1]}"`);
-    // // console.log(proof);
-    // createConclusion(proof);
   } catch (error) {
     if (deductive.handleModalCancellation("Rule 15", error)) {
       index.setCurrentLevel(-1); // Restore previous level

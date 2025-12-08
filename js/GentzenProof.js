@@ -4,18 +4,17 @@ import GrammarParser from '../my_antlr/GrammarParser.js';
 import MyGrammarListener from '../my_antlr/MyGrammarListener.js';
 import * as editorMonaco from './monacoEditor.js'
 import * as deductive from './deductiveEngine.js';
+import {checkWithAntlr, convertToLogicalExpression, getProof} from './deductiveEngine.js';
 import * as controlState from './states.js';
-import {checkWithAntlr, convertToLogicalExpression, getProof, handleModalCancellation} from "./deductiveEngine.js";
-import {checkRule, typeProof} from "./index.js";
-import {shakeElement} from "./index.js";
+import {addNextLastButtonClickGentzen} from './states.js';
+import {checkRule, shakeElement, typeProof} from "./index.js";
 import {createTreeD3} from "./tree.js";
-import {addNextLastButtonClickGentzen} from "./states.js";
 import {latexGentzen} from "./latexGen.js";
-import {GENTZEN_BUTTONS, ruleGentzenHandlers, ROBINSON_AXIOMS, AXIOM_HANDLERS} from './ruleGentzenHandlers.js';
-import {get} from "mobx";
+import {AXIOM_HANDLERS, GENTZEN_BUTTONS, ROBINSON_AXIOMS, ruleGentzenHandlers} from './ruleGentzenHandlers.js';
 import {formulaToString} from "./formatter.js";
-import {initializeProofTextHover, addProofTextHoverEffects} from './proofTextHover.js';
+import {addProofTextHoverEffects, initializeProofTextHover} from './proofTextHover.js';
 import {validateRobinsonAxioms} from "./robinsonAxiomValidator.js";
+import {parseProofFromLastSide} from "./rulesGentzen";
 
 export let deductionContext = {
   hypotheses: [], // Список гіпотез
@@ -38,6 +37,9 @@ let helpButtonToggleState = {
   axioms: false,
   allRules: false
 };
+
+// Global object to track gamma context toggle state for each gamma element
+let gammaToggleState = new Map();
 
 export let state = 0;
 
@@ -98,6 +100,13 @@ document.getElementById('proof').addEventListener('click', function (event) {
   // Ігнорувати клік по вже закритому елементу
   if (clickedElement.className === "previous" || clickedElement.className.includes("proof-element_level-") || clickedElement.id === "proof") return;
 
+  // Обробка кліку на gamma-context елемент
+  if (clickedElement.classList.contains('gamma-context')) {
+    console.log('Gamma context clicked!', clickedElement);
+    toggleGammaContext(clickedElement);
+    return; // Виходимо, щоб не виконувати звичайну обробку кліку
+  }
+
   clearLabelHighlights();
 
   if (clickedElement.tagName === 'DIV') {
@@ -145,7 +154,6 @@ function handleClick() {
       oldUserInput = side.querySelector('#proofText').textContent;
       const parsed = deductive.checkWithAntlr(oldUserInput);
       processExpression(parsed, 1);
-      showAllHyp();
     } catch (error) {
       console.warn('Не вдалося обробити клік:', error);
     }
@@ -233,8 +241,6 @@ export function parseExpression(text) {
     controlState.saveState();
     processExpression(parsedProof, 1);
     document.getElementById('undo_redo').style.display = 'flex';
-
-    showAllHyp();
   } catch (error) {
     console.error("Помилка при парсингу виразу:", error);
     shakeElement('enter', 5);
@@ -407,13 +413,29 @@ function generateButtons(buttonCount, buttonTexts) {
       deductive.checkWithAntlr(side.querySelector('#proofText').textContent)
     );
 
-    const hypotheses = deductive.getAllHypotheses(side).map(h =>
-      deductive.getProof(h)
-    );
+    // Аналізуємо контекст з gamma-context span для поточного елемента
+    let isInLocalHypotheses = false;
+    const currentExprString = deductive.convertToLogicalExpression(currentExpr);
 
-    const isInHypotheses = hypotheses.some(h =>
-      deductive.compareExpressions(h, currentExpr)
-    );
+    try {
+      // Шукаємо gamma-context span в поточному елементі
+      const gammaSpan = side.querySelector('.gamma-context');
+
+      if (gammaSpan) {
+        const hypothesesData = gammaSpan.getAttribute('data-hypotheses');
+
+        if (hypothesesData) {
+          const hypotheses = JSON.parse(hypothesesData);
+          isInLocalHypotheses = hypotheses.includes(currentExprString);
+        } else {
+          console.log(`⚠️  No data-hypotheses found in gamma-context span`);
+        }
+      } else {
+        console.log(`⚠️  No gamma-context span found in current element`);
+      }
+    } catch (error) {
+      console.warn('Error reading gamma-context data:', error);
+    }
 
     // Check if current expression matches any Robinson arithmetic axiom
     const isRobinsonAxiom = ROBINSON_AXIOMS.some(axiom => {
@@ -426,10 +448,13 @@ function generateButtons(buttonCount, buttonTexts) {
       }
     });
 
-    if (isInHypotheses || isRobinsonAxiom) {
+    if (isInLocalHypotheses || isRobinsonAxiom) {
       const closeBtn = createButton("Close branch", () => closeSide(side));
       closeBtn.style.minHeight = '80px';
       buttonContainer.appendChild(closeBtn);
+      console.log(`🔒 Close branch available - formula found in local hypotheses or is Robinson axiom`);
+    } else {
+      console.log(`❌ Close branch not available - formula not in local hypotheses`);
     }
   }
 
@@ -693,12 +718,15 @@ function closeSide(container) {
   // Позначаємо гілку як закриту
   container.className = 'closed';
   const labelText = `[${container.textContent}]`;
-  container.innerHTML = `<label class="previous" id="proofText">${labelText}</label>`;
+
+  // Отримуємо рівень для закритої гілки
+  const containerLevel = extractLevelFromElement(container) + 1; // +1 бо це новий рівень
+  const gammaContextSpan = createGammaContextSpan(container, containerLevel);
+
+  container.innerHTML = `<div class="proof-content">${gammaContextSpan}<label class="previous" id="proofText">${labelText}</label></div>`;
 
   // Оновлюємо інтерфейс
   document.getElementById('proof-menu').className = 'hidden';
-  document.getElementById('currentHypotheses').style.display = 'none';
-  document.getElementById('currentLabelHypotheses').style.display = 'none';
 
   controlState.saveState();
 }
@@ -1092,11 +1120,17 @@ function createProofTree(conclusions, container, hyp = null) {
       text = text.replace(/s\(0\)/g, 's0');
       // console.log(text);
       proofDiv.id = 'divId-' + container.id;
-      proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
+
+      // Створюємо gamma-context span з data-hypotheses
+      const proofLevel = conclusions.level;
+      const gammaContextSpan = createGammaContextSpan(container, proofLevel);
+
+      proofDiv.innerHTML = `<div class="proof-content">${gammaContextSpan}<label id="proofText">${text}</label></div>`;
       proofDiv.style.alignSelf = 'flex-end';
       proofDiv.addEventListener('click', handleClick);
+      // addUserHyp(conclusions, proofDiv);
+      // console.log(levelDiv);
 
-      addUserHyp(conclusions, proofDiv);
       levelDiv.appendChild(proofDiv);
 
       // Додавання роздільника, якщо це не останній елемент
@@ -1123,12 +1157,16 @@ function createProofTree(conclusions, container, hyp = null) {
 
     proofDiv.id = 'divId-' + container.id;
     if (text !== " ") {
+      // Створюємо gamma-context span з data-hypotheses
+      const proofLevel = conclusions.level;
+      const gammaContextSpan = createGammaContextSpan(container, proofLevel);
+
       if (mainReplaces !== "") {
-        proofDiv.innerHTML = '<label id="proofText">' + text + '</label>' +
+        proofDiv.innerHTML = `<div class="proof-content">${gammaContextSpan}<label id="proofText">${text}</label></div>` +
           '<span id="repl" style="display: none;">' + mainReplaces + '</span>';
         mainReplaces = "";
       } else {
-        proofDiv.innerHTML = '<label id="proofText">' + text + '</label>';
+        proofDiv.innerHTML = `<div class="proof-content">${gammaContextSpan}<label id="proofText">${text}</label></div>`;
       }
     } else {
       if (mainReplaces !== "") {
@@ -1144,17 +1182,56 @@ function createProofTree(conclusions, container, hyp = null) {
       closeSide(side);
     }
     proofDiv.style.fontFamily = "'Times New Roman', sans-serif";
-    addUserHyp(conclusions, proofDiv);
+    // addUserHyp(conclusions, proofDiv);
     levelDiv.appendChild(proofDiv);
 
+  }
+
+  if (currentLevel === 2 || currentLevel === 4 || currentLevel === 12) {
+    let childElements = levelDiv.children;
+
+    let hyp = "";
+
+    if(currentLevel ===2 )
+    {
+      hyp = '¬(' + lastSide.querySelector('#proofText')?.textContent+ ')';
+    }
+    else if(currentLevel===4)
+    {
+      hyp = '¬(' + lastSide.querySelector('#proofText')?.textContent.replace('¬', '');
+    }
+    else if(currentLevel===12)
+    {
+      const pr = parseProofFromLastSide();
+      console.log(pr);
+      if (pr.left && pr.right) {
+        hyp = deductive.convertToLogicalExpression(pr.left);
+      } else if (pr.operands && pr.operands.length >= 2) {
+        hyp = deductive.convertToLogicalExpression(pr.operands[0]);
+      } else {
+        console.error("Invalid implication structure:", pr);
+        return;
+      }
+    }
+    const gammaSpan1 = childElements[1].querySelector('.gamma-context');
+    addHypothesesToGammaSpan(gammaSpan1, hyp);
   }
 
   //11 правило гіпотези
   if (conclusions.proof.length === 3 && currentLevel === 11) {
     let childElements = levelDiv.children;
 
-    childElements[2].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].left);
-    childElements[3].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].right);
+    // childElements[2].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].left);
+    // childElements[3].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].right);
+    //
+    // console.log("tut");
+    // console.log(childElements[2]);
+    // console.log(childElements[3]);
+    const gammaSpan1 = childElements[2].querySelector('.gamma-context');
+    const gammaSpan12 = childElements[3].querySelector('.gamma-context');
+
+    addHypothesesToGammaSpan(gammaSpan1, deductive.convertToLogicalExpression(conclusions.proof[0].left));
+    addHypothesesToGammaSpan(gammaSpan12, deductive.convertToLogicalExpression(conclusions.proof[0].right));
 
     deductionContext.hypotheses.push({level: level - 1, hyp: conclusions.proof[0].left});
     deductionContext.hypotheses.push({level: level - 1, hyp: conclusions.proof[0].right});
@@ -1179,7 +1256,10 @@ function createProofTree(conclusions, container, hyp = null) {
   if (currentLevel === 17 && hyp !== null) {
     let childElements = levelDiv.children;
 
-    childElements[2].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(hyp);
+    const gammaSpan1 = childElements[2].querySelector('.gamma-context');
+    addHypothesesToGammaSpan(gammaSpan1, deductive.convertToLogicalExpression(hyp));
+
+    // childElements[2].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(hyp);
 
     deductionContext.hypotheses.push({level: level - 1, hyp: hyp});
   }
@@ -1189,9 +1269,15 @@ function createProofTree(conclusions, container, hyp = null) {
 
     const firstChildText = childElements[1]?.querySelector('#proofText')?.textContent;
     const secondChildText = childElements[2]?.querySelector('#proofText')?.textContent;
+    //
+    // childElements[1].id = lastSide.id + 'divId-' + secondChildText;
+    // childElements[2].id = lastSide.id + 'divId-' + firstChildText;
 
-    childElements[1].id = lastSide.id + 'divId-' + secondChildText;
-    childElements[2].id = lastSide.id + 'divId-' + firstChildText;
+    const gammaSpan1 = childElements[1].querySelector('.gamma-context');
+    const gammaSpan2 = childElements[2].querySelector('.gamma-context');
+
+    addHypothesesToGammaSpan(gammaSpan1, secondChildText);
+    addHypothesesToGammaSpan(gammaSpan2, firstChildText);
 
     deductionContext.hypotheses.push({level: level - 1, hyp: getProof(checkWithAntlr(secondChildText))});
     deductionContext.hypotheses.push({level: level - 1, hyp: getProof(checkWithAntlr(firstChildText))});
@@ -1209,11 +1295,26 @@ function createProofTree(conclusions, container, hyp = null) {
     console.log("Induction hypothesis added:", hyp);
   }
 
-  showAllHyp();
+  if (container.id !== 'proof' && !container.classList.contains('closed')) {
+    container.classList.add('previous');
 
-  if (container.id !== 'proof' && container.className !== 'closed') {
-    container.className = 'previous';
-    container.querySelector('#proofText').className = 'previous';
+    // Перевіряємо, чи має контейнер нову структуру з .proof-content
+    const proofContent = container.querySelector('.proof-content');
+
+    if (proofContent) {
+      // Якщо є нова структура - додаємо previous до .proof-content
+      proofContent.classList.add('previous');
+      const proofText = proofContent.querySelector('#proofText');
+      if (proofText) {
+        proofText.classList.add('previous');
+      }
+    } else {
+      // Якщо старої структури - знаходимо proofText безпосередньо
+      const proofText = container.querySelector('#proofText');
+      if (proofText) {
+        proofText.classList.add('previous');
+      }
+    }
   }
 
   // Вставити на початок контейнера
@@ -1223,8 +1324,6 @@ function createProofTree(conclusions, container, hyp = null) {
     container.appendChild(levelDiv);
   }
 
-  document.getElementById('currentHypotheses').style.display = 'none';
-  document.getElementById('currentLabelHypotheses').style.display = 'none';
 
   if (conclusions.level !== 0) {
     deductive.editPadding();
@@ -1238,58 +1337,8 @@ function createProofTree(conclusions, container, hyp = null) {
 
 
 function showAllHyp() {
-  //uniqueHypotheses
-  let seenValues = new Set();
-  let hypothesesAll = deductionContext.hypotheses.filter(item => {
-    if (!seenValues.has(item.hyp)) {
-      seenValues.add(item.hyp);
-      return true;
-    }
-    return false;
-  });
-
-  document.getElementById('hypotheses-container').style.display = "flex";
-  if (hypothesesAll.length !== 0) {
-    let allHypotheses = document.getElementById('allHypotheses');
-    allHypotheses.innerHTML = '';
-    for (let i = 0; i < hypothesesAll.length; i++) {
-      let index = String.fromCharCode(97 + i); // 97 відповідає коду символа 'a'
-      let text1 = deductive.convertToLogicalExpression(hypothesesAll[i].hyp);
-
-      let element = document.createElement('div');
-      element.className = 'hyp';
-      element.innerHTML = '[' + text1 + ']' + '<sup>' + index + '</sup>';
-      element.style.fontFamily = "'Times New Roman', sans-serif";
-      element.style.textWrap = 'nowrap';
-      allHypotheses.appendChild(element);
-    }
-  } else {
-    document.getElementById('hypotheses-container').style.display = "none";
-    let myDivHyp = document.getElementById('allHypotheses');
-    myDivHyp.innerHTML = '';
-  }
-
-  try {
-    let currentHypotheses = document.getElementById('currentHypotheses');
-    document.getElementById('currentLabelHypotheses').style.display = 'flex';
-    currentHypotheses.style.display = 'block';
-    currentHypotheses.innerHTML = '';
-    let all = deductive.getAllHypotheses(side);
-    let hypothesesCur = Array.from(new Set(all.map(JSON.stringify))).map(JSON.parse);
-    for (let y = 0; y < hypothesesCur.length; y++) {
-      let index = String.fromCharCode(97 + y); // 97 відповідає коду символа 'a'
-      let text1 = deductive.convertToLogicalExpression(hypothesesCur[y]);
-
-      let element = document.createElement('div');
-      element.className = 'hyp';
-      element.innerHTML = '[' + text1 + ']' + '<sup>' + index + '</sup>';
-      element.style.fontFamily = "'Times New Roman', sans-serif";
-      element.style.textWrap = 'nowrap';
-      currentHypotheses.appendChild(element);
-    }
-  } catch (error) {
-
-  }
+  // Функція більше не використовується, оскільки hypotheses-container контейнери прибрані
+  // Гіпотези тепер зберігаються і відображаються через gamma-context spans
 }
 
 
@@ -1361,14 +1410,14 @@ function addClickGentzenRules() {
         // Reset All rules toggle state when switching to tab1
         helpButtonToggleState.allRules = false;
         processExpression(checkWithAntlr(oldUserInput), 1);
-      // } else if (tabId === 'tab2') {
-      //   if (typeProof === 1) {
-      //     return;
-      //   }
-      //   // Reset toggle states when switching to recommended rules tab
-      //   helpButtonToggleState.allRules = false;
-      //   helpButtonToggleState.axioms = false;
-      //   processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 0);
+        // } else if (tabId === 'tab2') {
+        //   if (typeProof === 1) {
+        //     return;
+        //   }
+        //   // Reset toggle states when switching to recommended rules tab
+        //   helpButtonToggleState.allRules = false;
+        //   helpButtonToggleState.axioms = false;
+        //   processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 0);
       } else if (tabId === 'tab3') {
         // Axioms tab - show Robinson Arithmetic axioms
         if (typeProof === 1) {
@@ -1465,6 +1514,412 @@ function convertExpression(expr) {
     }
 
     return expr.replace(/\d+/g, (match) => encodeSNotation(Number(match)));
+  }
+}
+
+/**
+ * Генерує унікальний ідентифікатор для гама-елемента на основі його позиції в DOM
+ * @param {HTMLElement} gammaElement - Гама-елемент
+ * @returns {string} - Унікальний ідентифікатор
+ */
+function getGammaId(gammaElement) {
+  // Знаходимо контейнер доказу, до якого належить цей гама-елемент
+  let proofDiv = gammaElement.closest('[id*="divId-"]');
+  if (!proofDiv) {
+    // Якщо не знайшли за divId, шукаємо по класу proof-element
+    proofDiv = gammaElement.closest('[class*="proof-element_level-"]');
+  }
+
+  if (!proofDiv) return 'gamma-unknown';
+
+  // Використовуємо id контейнера як базу для ідентифікатора
+  const baseId = proofDiv.id || proofDiv.className;
+  const position = Array.from(proofDiv.parentNode?.children || []).indexOf(proofDiv);
+
+  return `gamma-${baseId}-${position}`;
+}
+
+/**
+ * Витягує номер рівня з класу елемента або шукає найближчий батьківський елемент з рівнем
+ * @param {HTMLElement} element - Елемент дерева доказу
+ * @returns {number} - Номер рівня або -1 якщо не знайдено
+ */
+function extractLevelFromElement(element) {
+  if (!element) {
+    return -1;
+  }
+
+  // Спочатку перевіряємо поточний елемент
+  if (element.className) {
+    const match = element.className.match(/proof-element_level-(\d+)/);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+  }
+
+  // Якщо не знайдено на поточному елементі, шукаємо у батьківських елементах
+  let current = element.parentNode;
+  while (current && current.id !== 'proof') {
+    if (current.className) {
+      const match = current.className.match(/proof-element_level-(\d+)/);
+      if (match) {
+        return parseInt(match[1], 10);
+      }
+    }
+    current = current.parentNode;
+  }
+
+  return -1;
+}
+
+/**
+ * Отримує локальні гіпотези для конкретного елемента дерева доказу
+ * Враховує ієрархію та локальність гіпотез з правильною областю видимості на рівнях
+ * @param {HTMLElement} element - Елемент дерева доказу
+ * @returns {Array<string>} - Масив рядків локальних гіпотез
+ */
+function getLocalHypothesesForElement(element) {
+  const localHypotheses = [];
+
+  try {
+    // Визначаємо рівень поточного елемента
+    const currentLevel = extractLevelFromElement(element);
+
+    console.log('Current element level:', currentLevel);
+    console.log('Element details:', {
+      id: element.id,
+      className: element.className,
+      tagName: element.tagName
+    });
+
+    // Якщо не вдалося визначити рівень, використовуємо максимальний рівень як fallback
+    const effectiveLevel = currentLevel !== -1 ? currentLevel : 999;
+
+    // Знаходимо всі батьківські елементи до кореня дерева доказу
+    const ancestors = [];
+    let current = element;
+
+    while (current && current.id !== 'proof') {
+      // Додаємо елемент до списку предків, якщо він має id з гіпотезами
+      if (current.id && current.id.includes('divId-')) {
+        ancestors.unshift(current); // додаємо на початок, щоб мати правильний порядок ієрархії
+      }
+      current = current.parentNode;
+    }
+
+    console.log('Found ancestors:', ancestors.length);
+
+    // Проходимо по всім предкам і збираємо гіпотези ТІЛЬКИ з тих, що на поточному рівні та вище (менші номери рівнів)
+    ancestors.forEach((ancestor, index) => {
+      const ancestorLevel = extractLevelFromElement(ancestor);
+
+      // Гіпотеза доступна тільки якщо вона з рівня вище або того ж самого (менший або рівний номер рівня)
+      // Це означає: рівень 0 доступний всім, рівень 1 доступний тільки 1+, рівень 2 доступний тільки 2+
+      if (ancestorLevel !== -1 && ancestorLevel < effectiveLevel) {
+        const ancestorHypotheses = extractHypothesesFromId(ancestor.id);
+
+        // Для кожного дозволеного предка додаємо його гіпотези до загального списку
+        ancestorHypotheses.forEach(hyp => {
+          // Перевіряємо, чи ця гіпотеза ще не додана (уникаємо дублікатів)
+          const hypString = JSON.stringify(hyp);
+          if (!localHypotheses.some(existingHyp => JSON.stringify(existingHyp) === hypString)) {
+            localHypotheses.push(hyp);
+          }
+        });
+
+        console.log(`Level ${ancestorLevel} (index ${index}): Added ${ancestorHypotheses.length} hypotheses from ${ancestor.id}`);
+      } else {
+        console.log(`Level ${ancestorLevel} (index ${index}): Skipped - hypothesis from same or deeper level not accessible (ancestorLevel: ${ancestorLevel}, currentLevel: ${effectiveLevel})`);
+      }
+    });
+
+  } catch (error) {
+    console.error('Error getting local hypotheses:', error);
+  }
+
+  console.log('Total local hypotheses found:', localHypotheses.length);
+  return localHypotheses;
+}
+
+/**
+ * Обчислює гіпотези для елемента при створенні gamma-context span
+ * Використовується для статичного зберігання в data-hypotheses атрибуті
+ * @param {HTMLElement|string} elementContext - Елемент або його ID для обчислення гіпотез
+ * @param {number} level - Рівень елемента в доказі
+ * @returns {Array<string>} - Масив рядків гіпотез для зберігання в data-hypotheses
+ */
+function computeHypothesesForGammaContext(elementContext, level) {
+  const hypotheses = [];
+
+  try {
+    if (level === 0 && userHypotheses && Array.isArray(userHypotheses) && userHypotheses.length > 0) {
+      console.log(`Found userHypotheses for level 0:`, userHypotheses);
+
+      // Парсимо кожну гіпотезу користувача і конвертуємо в текст
+      userHypotheses.forEach(hypText => {
+        if (hypText && hypText.trim().length > 0) {
+          try {
+            const chars = CharStreams.fromString(hypText.trim());
+            const lexer = new GrammarLexer(chars);
+            const tokens = new CommonTokenStream(lexer);
+            const parser = new GrammarParser(tokens);
+            const tree = parser.formula();
+
+            const listener = new MyGrammarListener();
+            ParseTreeWalker.DEFAULT.walk(listener, tree);
+
+            const parsedHyp = listener.stack.pop();
+            if (parsedHyp) {
+              // Конвертуємо AST в текстове представлення
+              const hypText = deductive.convertToLogicalExpression(parsedHyp);
+              hypotheses.push(hypText);
+            }
+          } catch (error) {
+            console.warn('Error parsing user hypothesis:', hypText, error);
+          }
+        }
+      });
+    }
+    else{
+      const gammaSpan = elementContext.querySelector(':scope > .gamma-context');
+      const rawHypotheses = gammaSpan.dataset?.hypotheses;
+      return JSON.parse(rawHypotheses);
+    }
+  } catch (error) {
+    console.error('Error computing hypotheses for gamma context:', error);
+  }
+
+  return hypotheses;
+}
+
+/**
+ * Створює gamma-context span з data-hypotheses атрибутом
+ * @param {HTMLElement|string} elementContext - Контекст елемента для обчислення гіпотез
+ * @param {number} level - Рівень елемента в доказі
+ * @returns {string} - HTML рядок для gamma-context span
+ */
+function createGammaContextSpan(elementContext, level) {
+  try {
+    // Обчислюємо гіпотези для цього контексту
+    const hypotheses = computeHypothesesForGammaContext(elementContext, level);
+
+    // Конвертуємо гіпотези в JSON для зберігання в data атрибуті
+    const hypothesesJson = JSON.stringify(hypotheses);
+
+    // Створюємо span з data-hypotheses атрибутом
+    return `<span class="gamma-context" data-hypotheses='${hypothesesJson}' data-level="${level}">Γ⊢</span>`;
+  } catch (error) {
+    console.error('Error creating gamma context span:', error);
+    // Fallback до звичайного span без data атрибутів
+    return `<span class="gamma-context">Γ⊢</span>`;
+  }
+}
+
+/**
+ * Витягує гіпотези з id елемента (аналогічно до getAllHypotheses, але без парсингу всього контейнера)
+ * @param {string} elementId - ID елемента
+ * @returns {Array<string>} - Масив рядків гіпотез
+ */
+function extractHypothesesFromId(elementId) {
+  if (!elementId || !elementId.includes('divId-')) {
+    return [];
+  }
+
+  const hypothesesStrings = elementId
+    .replaceAll('divId-', ' ')
+    .split(' ')
+    .filter(word => word !== 'proof' && Boolean(word));
+
+  const hypotheses = [];
+
+  for (const hypString of hypothesesStrings) {
+    try {
+      const chars = CharStreams.fromString(hypString.toString());
+      const lexer = new GrammarLexer(chars);
+      const tokens = new CommonTokenStream(lexer);
+      const parser = new GrammarParser(tokens);
+      const tree = parser.formula();
+
+      const listener = new MyGrammarListener();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+
+      const parsedHyp = listener.stack.pop();
+      if (parsedHyp) {
+        // Конвертуємо AST в текстове представлення
+        const hypText = deductive.convertToLogicalExpression(parsedHyp);
+        hypotheses.push(hypText);
+      }
+    } catch (error) {
+      console.warn('Error parsing hypothesis:', hypString, error);
+    }
+  }
+
+  return hypotheses;
+}
+
+/**
+ * Форматує гіпотези для відображення в гама-контексті
+ * @param {Array<string>} hypotheses - Масив рядків гіпотез
+ * @returns {string} - Форматований рядок гіпотез
+ */
+function formatHypothesesForGamma(hypotheses) {
+  if (!hypotheses || hypotheses.length === 0) {
+    return '{}'; // Показуємо порожній набір замість Γ
+  }
+
+  // Гіпотези вже є рядками, просто видаляємо дублікати
+  const uniqueHyps = [...new Set(hypotheses)];
+
+  if (uniqueHyps.length === 0) {
+    return '{}'; // Показуємо порожній набір замість Γ
+  }
+
+  // Форматуємо як {ψ, φ}
+  return `{${uniqueHyps.join(', ')}}`;
+}
+
+/**
+ * Додає нові гіпотези до існуючого gamma-context span
+ * @param {HTMLElement|string} gammaSpan - DOM елемент span або селектор
+ * @param {string|string[]} newHypotheses - Нова гіпотеза як рядок або масив гіпотез
+ * @returns {boolean} - true якщо успішно додано, false якщо помилка
+ */
+function addHypothesesToGammaSpan(gammaSpan, newHypotheses) {
+  try {
+    // Отримуємо DOM елемент, якщо передано селектор
+    let spanElement;
+    if (typeof gammaSpan === 'string') {
+      spanElement = document.querySelector(gammaSpan);
+    } else {
+      spanElement = gammaSpan;
+    }
+
+    // Перевіряємо, що елемент існує та має правильний клас
+    if (!spanElement || !spanElement.classList.contains('gamma-context')) {
+      console.error('Element is not a valid gamma-context span');
+      return false;
+    }
+
+    // Отримуємо існуючі гіпотези з data-hypotheses атрибута (тепер це прості рядки)
+    let existingHypotheses = [];
+    const hypothesesData = spanElement.getAttribute('data-hypotheses');
+
+    if (hypothesesData) {
+      try {
+        existingHypotheses = JSON.parse(hypothesesData);
+      } catch (parseError) {
+        console.error('Error parsing existing hypotheses:', parseError);
+        existingHypotheses = [];
+      }
+    }
+
+    // Нормалізуємо нові гіпотези до масиву
+    let hypothesesToAdd = [];
+    if (typeof newHypotheses === 'string') {
+      hypothesesToAdd = [newHypotheses.trim()];
+    } else if (Array.isArray(newHypotheses)) {
+      hypothesesToAdd = newHypotheses.map(h => h.trim()).filter(h => h.length > 0);
+    }
+
+    // Перевіряємо, що є що додавати
+    if (hypothesesToAdd.length === 0) {
+      console.warn('No valid hypotheses to add');
+      return false;
+    }
+
+    // Додаємо нові гіпотези як прості рядки (без ANTLR парсингу)
+    hypothesesToAdd.forEach(hypothesis => {
+      if (hypothesis && hypothesis.trim().length > 0) {
+        // Перевіряємо чи немає дублікату (порівнюємо рядки)
+        if (!existingHypotheses.includes(hypothesis.trim())) {
+          existingHypotheses.push(hypothesis.trim());
+        } else {
+          console.log(`Hypothesis "${hypothesis}" already exists, skipping`);
+        }
+      }
+    });
+
+    // Оновлюємо data-hypotheses атрибут
+    const updatedHypothesesJson = JSON.stringify(existingHypotheses);
+    spanElement.setAttribute('data-hypotheses', updatedHypothesesJson);
+
+    console.log(`Successfully added ${hypothesesToAdd.length} new hypotheses to gamma context`);
+    console.log('Current hypotheses:', existingHypotheses);
+
+    return true;
+
+  } catch (error) {
+    console.error('Error adding hypotheses to gamma span:', error);
+    return false;
+  }
+}
+
+/**
+ * Перемикає відображення гама-контексту між Γ⊢ та {ψ, φ}⊢
+ * @param {HTMLElement} gammaElement - Гама-елемент, на який клікнули
+ */
+function toggleGammaContext(gammaElement) {
+  try {
+    // Отримуємо унікальний ідентифікатор для цього гама-елемента
+    const gammaId = getGammaId(gammaElement);
+
+    // Перевіряємо поточний стан (розкритий чи ні)
+    const isExpanded = gammaToggleState.get(gammaId) || false;
+
+    // Знаходимо контейнер, до якого належить цей гама-елемент
+    let proofContainer = gammaElement.closest('[id*="divId-"]');
+    if (!proofContainer) {
+      proofContainer = gammaElement.closest('[class*="proof-element_level-"]');
+    }
+
+    if (!proofContainer) {
+      console.warn('Could not find proof container for gamma element');
+      return;
+    }
+
+    if (isExpanded) {
+      // Згортаємо: повертаємо до Γ⊢
+      gammaElement.textContent = 'Γ⊢';
+      gammaToggleState.set(gammaId, false);
+      console.log(`Gamma context collapsed for ${gammaId}`);
+    } else {
+      // Розкриваємо: показуємо {ψ, φ}⊢
+      try {
+        // Спочатку намагаємося прочитати гіпотези з data-hypotheses атрибуту
+        let hypotheses = [];
+        const hypothesesData = gammaElement.getAttribute('data-hypotheses');
+
+        if (hypothesesData) {
+          try {
+            hypotheses = JSON.parse(hypothesesData);
+            console.log(`Read ${hypotheses.length} hypotheses from data-hypotheses for ${gammaId}`);
+          } catch (parseError) {
+            console.warn('Error parsing data-hypotheses, falling back to dynamic computation:', parseError);
+            // Fallback до динамічного обчислення
+            hypotheses = getLocalHypothesesForElement(proofContainer);
+          }
+        } else {
+          console.log('No data-hypotheses found, using dynamic computation for:', gammaId);
+          // Fallback до динамічного обчислення
+          hypotheses = getLocalHypothesesForElement(proofContainer);
+        }
+
+        // Форматуємо гіпотези
+        const formattedContext = formatHypothesesForGamma(hypotheses);
+
+        // Оновлюємо відображення
+        gammaElement.textContent = `${formattedContext}⊢`;
+        gammaToggleState.set(gammaId, true);
+        console.log(`Gamma context expanded for ${gammaId}:`, formattedContext);
+      } catch (error) {
+        console.error('Error expanding gamma context:', error);
+        // У випадку помилки залишаємо Γ⊢
+        gammaElement.textContent = 'Γ⊢';
+        gammaToggleState.set(gammaId, false);
+      }
+    }
+  } catch (error) {
+    console.error('Error in toggleGammaContext:', error);
   }
 }
 
