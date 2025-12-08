@@ -41,11 +41,54 @@ let helpButtonToggleState = {
 // Global object to track gamma context toggle state for each gamma element
 let gammaToggleState = new Map();
 
+// Global objects for tracking gamma context indexing
+let gammaContextHistory = new Map(); // Maps context hash to index
+let gammaCurrentIndex = 0; // Current index counter
+
 export let state = 0;
 
 let nameRule;
 
 let oldUserInput = "";
+
+/**
+ * Создает хэш для массива гипотез для отслеживания изменений контекста
+ * @param {Array<string>} hypotheses - Массив гипотез
+ * @returns {string} - Хэш контекста
+ */
+function createContextHash(hypotheses) {
+  if (!hypotheses || hypotheses.length === 0) {
+    return 'empty';
+  }
+  // Сортируем для консистентного хэширования
+  const sorted = [...hypotheses].sort();
+  return sorted.join('|');
+}
+
+/**
+ * Получает индекс для данного контекста, создавая новый если нужно
+ * @param {Array<string>} hypotheses - Массив гипотез
+ * @returns {number} - Индекс контекста
+ */
+function getContextIndex(hypotheses) {
+  const hash = createContextHash(hypotheses);
+
+  if (gammaContextHistory.has(hash)) {
+    return gammaContextHistory.get(hash);
+  } else {
+    const newIndex = gammaCurrentIndex++;
+    gammaContextHistory.set(hash, newIndex);
+    return newIndex;
+  }
+}
+
+/**
+ * Сбрасывает состояние индексации контекстов (для новых доказательств)
+ */
+function resetContextIndexing() {
+  gammaContextHistory.clear();
+  gammaCurrentIndex = 0;
+}
 
 export function setState(newValue) {
   state = newValue;
@@ -184,6 +227,9 @@ export function parseExpression(text) {
   initializeProofTextHover();
 
   try {
+    // Сбрасываем состояние индексации для нового доказательства
+    resetContextIndexing();
+
     // Парсинг виразу через ANTLR
     const chars = CharStreams.fromString(text);
     const lexer = new GrammarLexer(chars);
@@ -1703,11 +1749,17 @@ function createGammaContextSpan(elementContext, level) {
     // Обчислюємо гіпотези для цього контексту
     const hypotheses = computeHypothesesForGammaContext(elementContext, level);
 
+    // Получаем индекс для этого контекста
+    const contextIndex = getContextIndex(hypotheses);
+
     // Конвертуємо гіпотези в JSON для зберігання в data атрибуті
     const hypothesesJson = JSON.stringify(hypotheses);
 
-    // Створюємо span з data-hypotheses атрибутом
-    return `<span class="gamma-context" data-hypotheses='${hypothesesJson}' data-level="${level}">Γ⊢</span>`;
+    // Формируем отображение Gamma с индексом
+    const gammaDisplay = contextIndex === 0 ? 'Γ' : `Γ<sub>${contextIndex}</sub>`;
+
+    // Створюємо span з data-hypotheses атрибутом та индексом
+    return `<span class="gamma-context" data-hypotheses='${hypothesesJson}' data-level="${level}" data-context-index="${contextIndex}">${gammaDisplay}⊢</span>`;
   } catch (error) {
     console.error('Error creating gamma context span:', error);
     // Fallback до звичайного span без data атрибутів
@@ -1839,12 +1891,29 @@ function addHypothesesToGammaSpan(gammaSpan, newHypotheses) {
       }
     });
 
-    // Оновлюємо data-hypotheses атрибут
+    // Получаем новый индекс для обновленного контекста
+    const newContextIndex = getContextIndex(existingHypotheses);
+
+    // Формируем новое отображение Gamma с индексом
+    const newGammaDisplay = newContextIndex === 0 ? 'Γ' : `Γ<sub>${newContextIndex}</sub>`;
+
+    // Оновлюємо data-hypotheses атрибут и индекс
     const updatedHypothesesJson = JSON.stringify(existingHypotheses);
     spanElement.setAttribute('data-hypotheses', updatedHypothesesJson);
+    spanElement.setAttribute('data-context-index', newContextIndex.toString());
+
+    // Обновляем отображение, если элемент не развернут (показывает Gamma, а не список гипотез)
+    const gammaId = getGammaId(spanElement);
+    const isExpanded = gammaToggleState.get(gammaId) || false;
+
+    if (!isExpanded) {
+      // Обновляем отображение только если элемент свернут
+      spanElement.innerHTML = `${newGammaDisplay}⊢`;
+    }
 
     console.log(`Successfully added ${hypothesesToAdd.length} new hypotheses to gamma context`);
     console.log('Current hypotheses:', existingHypotheses);
+    console.log(`Updated context index: ${newContextIndex}`);
 
     return true;
 
@@ -1878,8 +1947,10 @@ function toggleGammaContext(gammaElement) {
     }
 
     if (isExpanded) {
-      // Згортаємо: повертаємо до Γ⊢
-      gammaElement.textContent = 'Γ⊢';
+      // Згортаємо: повертаємо до Γ⊢ з індексом
+      const contextIndex = parseInt(gammaElement.getAttribute('data-context-index') || '0');
+      const gammaDisplay = contextIndex === 0 ? 'Γ' : `Γ<sub>${contextIndex}</sub>`;
+      gammaElement.innerHTML = `${gammaDisplay}⊢`;
       gammaToggleState.set(gammaId, false);
       console.log(`Gamma context collapsed for ${gammaId}`);
     } else {
