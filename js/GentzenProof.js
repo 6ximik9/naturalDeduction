@@ -758,18 +758,19 @@ function createButton(text, clickHandler) {
  * @param {HTMLElement} container - DOM-елемент гілки.
  */
 function closeSide(container) {
-  // Видаляємо всі span-елементи (заміни)
+  // 1. Шукаємо елемент
+  const existingElement = container.querySelector('.gamma-context');
+
+  let gammaHtml = existingElement.outerHTML;
+  // 3. Видаляємо всі span-елементи
   container.querySelectorAll('span').forEach(span => span.remove());
 
   // Позначаємо гілку як закриту
   container.className = 'closed';
   const labelText = `[${container.textContent}]`;
 
-  // Отримуємо рівень для закритої гілки
-  const containerLevel = extractLevelFromElement(container) + 1; // +1 бо це новий рівень
-  const gammaContextSpan = createGammaContextSpan(container, containerLevel);
-
-  container.innerHTML = `<div class="proof-content">${gammaContextSpan}<label class="previous" id="proofText">${labelText}</label></div>`;
+  // 4. Вставляємо вже готовий рядок gammaHtml
+  container.innerHTML = `<div class="proof-content">${gammaHtml}<label class="previous" id="proofText">${labelText}</label></div>`;
 
   // Оновлюємо інтерфейс
   document.getElementById('proof-menu').className = 'hidden';
