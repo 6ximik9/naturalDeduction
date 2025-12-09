@@ -11,7 +11,8 @@ formula: (atomList '⊢')? implication EOF;
 atomList: implication (',' implication)*;
 
 // Implication has lowest precedence (except quantifiers bind tighter)
-implication: disjunction (IMPL disjunction)*;
+// RIGHT-ASSOCIATIVE: a=>b=>c means a=>(b=>c)
+implication: disjunction (IMPL implication)?;
 
 // Disjunction
 disjunction: conjunction (DIS conjunction)*;
