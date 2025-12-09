@@ -461,7 +461,6 @@ function generateButtons(buttonCount, buttonTexts) {
 
     // Аналізуємо контекст з gamma-context span для поточного елемента
     let isInLocalHypotheses = false;
-    const currentExprString = deductive.convertToLogicalExpression(currentExpr);
 
     try {
       // Шукаємо gamma-context span в поточному елементі
@@ -472,7 +471,17 @@ function generateButtons(buttonCount, buttonTexts) {
 
         if (hypothesesData) {
           const hypotheses = JSON.parse(hypothesesData);
-          isInLocalHypotheses = hypotheses.includes(currentExprString);
+
+          // Використовуємо compareExpressions для порівняння
+          isInLocalHypotheses = hypotheses.some(hypText => {
+            try {
+              const hypParsed = deductive.getProof(deductive.checkWithAntlr(hypText));
+              return deductive.compareExpressions(hypParsed, currentExpr);
+            } catch (error) {
+              console.warn('Error parsing hypothesis:', hypText, error);
+              return false;
+            }
+          });
         } else {
           console.log(`⚠️  No data-hypotheses found in gamma-context span`);
         }
