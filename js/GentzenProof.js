@@ -644,7 +644,9 @@ function showFilteredAxioms() {
   if (!side) return;
 
   try {
+    console.log(side.querySelector('#proofText').textContent);
     const currentFormula = checkWithAntlr(side.querySelector('#proofText').textContent);
+    console.log(currentFormula);
     const matchingAxioms = [];
 
     // Check each axiom individually using the main validator
