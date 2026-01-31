@@ -17,7 +17,8 @@ import {
   clickedProofs,
   fitchStates, setBranchIndex, setClickedBranch, setClickedProofs,
   setStateFitch,
-  setUserHypothesesFitch
+  setUserHypothesesFitch,
+  processExpression
 } from "./FitchProof";
 
 
@@ -146,7 +147,7 @@ export function saveStateFitch() {
 
 
 function getStateFitch(id) {
-  document.getElementById('proof-menu').className = 'hidden';
+  document.getElementById('proof-menu').className = 'proof-menu';
   document.getElementById('hypotheses-container').style.display = "none";
 
   // Отримуємо останній елемент масиву
@@ -166,6 +167,7 @@ function getStateFitch(id) {
   setClickedBranch(JSON.parse(JSON.stringify(variables.clickedBranch)));
   setBranchIndex(variables.branchIndex);
   clearItems();
+  processExpression("AllRules", 1);
 }
 
 function getState(id) {

@@ -10,6 +10,10 @@ import {
 } from "./deductiveEngine";
 import {saveStateFitch} from "./states";
 import {formulaToString} from "./formatter";
+import {createModalForReturn} from "./modalForRules/modalForReturn";
+import {createAdvancedModal} from "./modalForRules/modalForSeventeenthRule";
+import {createModalForLeibniz} from "./modalForRules/modalForLeibniz";
+import {createInputModal} from "./modalForRules/modalForInput";
 
 
 export function firstRule(proofs, branches) {
@@ -571,4 +575,192 @@ export function twelfthRule(proofs, branches) {
   let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
 
   fitchMain.addRowToBranch(firstPart, 'R ' + (proofs[0].index + 1));
+}
+
+// Rule 13: Universal Elimination (\forall E)
+export async function thirteenthRule(proofs, branches) {
+  if (proofs.length !== 1 || branches.length > 0) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+  let rule = proofs[0].element.textContent.replaceAll(" ", "");
+  
+  let parsed = getProof(checkWithAntlr(rule));
+  
+  if (parsed.type !== "forall") {
+    alert("Selected formula must be a universal quantifier (∀)");
+    return -1;
+  }
+  
+  try {
+    const result = await createModalForReturn([], parsed, rule);
+    if (result && result.modifiedFormula) {
+      fitchMain.addRowToBranch(result.modifiedFormula, "∀E " + (proofs[0].index + 1));
+      return 0;
+    }
+  } catch (error) {
+    console.log("Modal cancelled:", error);
+  }
+  return -1;
+}
+
+// Rule 14: Universal Introduction (\forall I)
+export async function fourteenthRule(proofs, branches) {
+  if (branches.length !== 1 || proofs.length > 0) {
+    return -1;
+  }
+
+  let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
+  let firstLine = allFormula[0].textContent;
+  let lastLine = allFormula[allFormula.length - 1].textContent;
+  
+  try {
+    const variable = await createInputModal('Universal Quantifier', 'Enter variable (e.g. x):');
+    
+    if (variable) {
+      let constant = firstLine.trim();
+      let newBody = lastLine.split(constant).join(variable);
+      let newFormula = "∀" + variable + " (" + newBody + ")";
+      
+      newFormula = formulaToString(checkWithAntlr(newFormula), 0);
+
+      const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
+      const indexStart = allFitchFormulas.indexOf(allFormula[0]);
+      const indexFinish = allFitchFormulas.indexOf(allFormula[allFormula.length - 1]);
+
+      fitchMain.addRowToBranch(newFormula, "∀I " + (indexStart + 1) + "-" + (indexFinish + 1));
+      return 0;
+    }
+  } catch (error) {
+    console.log("Modal cancelled:", error);
+  }
+  return -1;
+}
+
+// Rule 15: Existential Introduction (\exists I)
+export async function fifteenthRule(proofs, branches) {
+  if (proofs.length !== 1 || branches.length > 0) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+  let rule = proofs[0].element.textContent.replaceAll(" ", "");
+  
+  try {
+    const result = await createAdvancedModal([rule]);
+    
+    if (result && result.length >= 3) {
+      const [formulaValue, selectedConstant, termValue] = result;
+      
+      // Perform substitution: replace constant with variable
+      let newBody = formulaValue.split(selectedConstant).join(termValue);
+      let newFormula = "∃" + termValue + " (" + newBody + ")";
+      
+      newFormula = formulaToString(checkWithAntlr(newFormula), 0);
+      fitchMain.addRowToBranch(newFormula, "∃I " + (proofs[0].index + 1));
+      return 0;
+    }
+  } catch (error) {
+    console.log("Modal cancelled:", error);
+  }
+  return -1;
+}
+
+// Rule 16: Existential Elimination (\exists E)
+export function sixteenthRule(proofs, branches) {
+  if (proofs.length !== 1 || branches.length !== 1) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+  
+  let existFormula = proofs[0].element.textContent.replaceAll(" ", "");
+  let parsedExist = getProof(checkWithAntlr(existFormula));
+  
+  if (parsedExist.type !== "exists") {
+    alert("Selected formula must be an existential quantifier (∃)");
+    return -1;
+  }
+  
+  let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
+  let conclusion = allFormula[allFormula.length - 1].textContent;
+  
+  const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
+  const indexStart = allFitchFormulas.indexOf(allFormula[0]);
+  const indexFinish = allFitchFormulas.indexOf(allFormula[allFormula.length - 1]);
+  
+  fitchMain.addRowToBranch(conclusion, "∃E " + (proofs[0].index + 1) + ", " + (indexStart + 1) + "-" + (indexFinish + 1));
+  return 0;
+}
+
+// Rule 17: Identity Introduction (= I)
+export async function seventeenthRule(proofs, branches) {
+  if (proofs.length > 0) {
+     proofs.forEach(p => p.element.querySelector('span.indexC')?.remove());
+  }
+  
+  try {
+    const term = await createInputModal('Identity Introduction', 'Enter term (e.g. c):');
+    
+    if (term) {
+      let newFormula = term + " = " + term;
+      fitchMain.addRowToBranch(newFormula, "= I");
+      return 0;
+    }
+  } catch (error) {
+    console.log("Modal cancelled:", error);
+  }
+  return -1;
+}
+
+// Rule 18: Identity Elimination (= E)
+export async function eighteenthRule(proofs, branches) {
+  if (proofs.length !== 2 || branches.length > 0) {
+    return -1;
+  }
+
+  proofs[0].element.querySelector('span.indexC').remove();
+  proofs[1].element.querySelector('span.indexC').remove();
+  
+  let f1 = proofs[0].element.textContent.replaceAll(" ", "");
+  let f2 = proofs[1].element.textContent.replaceAll(" ", "");
+  
+  let parsed1 = getProof(checkWithAntlr(f1));
+  let parsed2 = getProof(checkWithAntlr(f2));
+  
+  let equality = null;
+  let target = null;
+  let targetString = null;
+  let targetIndex = -1;
+  let eqIndex = -1;
+  
+  if (parsed1.type === 'equality') {
+    equality = parsed1;
+    target = parsed2;
+    targetString = f2;
+    eqIndex = proofs[0].index;
+    targetIndex = proofs[1].index;
+  } else if (parsed2.type === 'equality') {
+    equality = parsed2;
+    target = parsed1;
+    targetString = f1;
+    eqIndex = proofs[1].index;
+    targetIndex = proofs[0].index;
+  } else {
+    alert("One of the formulas must be an equality (=)");
+    return -1;
+  }
+  
+  try {
+    const result = await createModalForLeibniz(target, targetString);
+    
+    if (result && result.left) {
+      fitchMain.addRowToBranch(result.left, "= E " + (eqIndex + 1) + ", " + (targetIndex + 1));
+      return 0;
+    }
+  } catch (error) {
+    console.log("Modal cancelled:", error);
+  }
+  return -1;
 }

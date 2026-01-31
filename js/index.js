@@ -133,7 +133,10 @@ function fitchProof()
     fitch.fitchStart(lineArray[1]);
   }
   else{
-    alert("Please enter the premises.")
+    // Allow start without premises (e.g. for axioms)
+    let userText = editorMonaco.editor.getValue();
+    fitch.setUserHypothesesFitch([]); 
+    fitch.fitchStart(userText);
   }
 }
 
