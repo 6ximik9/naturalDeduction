@@ -1430,27 +1430,50 @@ function addUserHyp(conclusions, proofDiv) {
 
 
 function addOrRemoveParenthesesGentzen() {
+  const addBtn = document.getElementById('addParentheses');
+  const delBtn = document.getElementById('deleteParentheses');
+  const retBtn = document.getElementById('returnUserInput');
 
-  document.getElementById('addParentheses').addEventListener('click', function () {
+  // Set initial state: Original Proof is disabled by default (as we are already viewing it)
+  retBtn.disabled = true;
+  retBtn.classList.add('disabled-action-btn');
+
+  // Helper to manage button states
+  function updateButtons(clickedBtn) {
+    // Enable all first
+    [addBtn, delBtn, retBtn].forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove('disabled-action-btn');
+    });
+
+    // Disable the active one
+    if (clickedBtn) {
+      clickedBtn.disabled = true;
+      clickedBtn.classList.add('disabled-action-btn');
+    }
+  }
+
+  addBtn.addEventListener('click', function () {
     const inProof = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
-    // side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.deleteHeadBack(inProof));
     side.querySelector('#proofText').textContent = formulaToString(inProof, 1);
+    updateButtons(addBtn);
   });
 
-  document.getElementById('deleteParentheses').addEventListener('click', function () {
+  delBtn.addEventListener('click', function () {
     const expression = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
-    // side.querySelector('#proofText').textContent = deductive.convertToLogicalExpression(deductive.getProof(deductive.checkWithAntlr(deductive.removeRedundantParentheses(expression))));
     side.querySelector('#proofText').textContent = formulaToString(getProof(expression), 0);
+    updateButtons(delBtn);
   });
 
-  document.getElementById('returnUserInput').addEventListener('click', function () {
+  retBtn.addEventListener('click', function () {
     if (oldUserInput !== "") {
       side.querySelector('#proofText').textContent = oldUserInput;
+      updateButtons(retBtn);
     } else {
-      shakeButton(document.getElementById('returnUserInput'));
+      shakeButton(retBtn);
+      // Ensure others are not disabled if this action failed/shook
     }
   });
-
 }
 
 function addClickGentzenRules() {

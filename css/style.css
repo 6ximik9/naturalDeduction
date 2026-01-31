@@ -122,6 +122,14 @@ h3 {
   outline: none;
 }
 
+.disabled-action-btn {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  box-shadow: none;
+  background: rgba(200, 200, 200, 0.3);
+}
+
 .buttonsSym {
   display: flex;
   align-content: center;
