@@ -21,6 +21,27 @@ export const ROBINSON_AXIOMS = [
 
 const unwrap = (node) => getProof(node);
 
+// Отримати глибину саксесора або число
+// Повертає: { type: 'number', value: 5 } АБО { type: 'term', base: node, depth: 3 }
+const getSuccessorDepth = (node) => {
+  let current = unwrap(node);
+  let depth = 0;
+
+  while (current && current.type === 'successor') {
+    depth++;
+    current = unwrap(current.term);
+  }
+
+  if (current && (current.type === 'constant' || current.type === 'number')) {
+    const val = parseInt(current.value, 10);
+    if (!isNaN(val)) {
+      return { type: 'number', value: val + depth };
+    }
+  }
+
+  return { type: 'term', base: current, depth: depth };
+};
+
 // Глибоке порівняння вузлів (ВИПРАВЛЕНЕ)
 const areNodesEqual = (n1, n2) => {
   if (!n1 || !n2) return n1 === n2;
@@ -30,6 +51,20 @@ const areNodesEqual = (n1, n2) => {
   // але для надійності рекурсії залишаємо перевірку типів
   if (n1.type === 'parenthesis') return areNodesEqual(n1.value, n2);
   if (n2.type === 'parenthesis') return areNodesEqual(n1, n2.value);
+
+  // Спеціальна перевірка для змішаних типів (число проти successor)
+  // Наприклад: 1 vs s(0)
+  if (
+    (n1.type === 'number' || n1.type === 'constant' || n1.type === 'successor') &&
+    (n2.type === 'number' || n2.type === 'constant' || n2.type === 'successor')
+  ) {
+    const d1 = getSuccessorDepth(n1);
+    const d2 = getSuccessorDepth(n2);
+
+    if (d1.type === 'number' && d2.type === 'number') {
+      return d1.value === d2.value;
+    }
+  }
 
   if (n1.type !== n2.type) return false;
 
@@ -69,24 +104,6 @@ const isSuccessorLike = (node) => {
   if (n.type === 'successor') return true;
   if ((n.type === 'constant' || n.type === 'number') && n.value !== '0') return true;
   return false;
-};
-
-// Отримати глибину саксесора або число
-// Повертає: { type: 'number', value: 5 } АБО { type: 'term', base: node, depth: 3 }
-const getSuccessorDepth = (node) => {
-  let current = unwrap(node);
-  let depth = 0;
-
-  while (current.type === 'successor') {
-    depth++;
-    current = unwrap(current.term);
-  }
-
-  if (current.type === 'constant' || current.type === 'number') {
-    return { type: 'number', value: parseInt(current.value, 10) + depth };
-  }
-
-  return { type: 'term', base: current, depth: depth };
 };
 
 // Зняти один шар саксесора (для Ax1)
