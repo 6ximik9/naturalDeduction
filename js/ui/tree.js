@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
-import {processExpression, side} from "./GentzenProof";
-import {checkWithAntlr} from "./deductiveEngine";
-import {typeProof} from './index';
+import {processExpression, side} from "../proofs/gentzen/GentzenProof";
+import {checkWithAntlr} from "../core/deductiveEngine";
+import {typeProof} from '../index';
 
 
 function getMaxDepth(node) {

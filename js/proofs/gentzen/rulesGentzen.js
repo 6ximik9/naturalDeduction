@@ -1,15 +1,15 @@
 
 import * as index from "./GentzenProof";
-import * as deductive from "./deductiveEngine";
+import * as deductive from "../../core/deductiveEngine";
 import {
   createModal,
   createModalForQuantifierSubstitution,
   performSubstitution
-} from "./modalForRules/modalForSubstitution";
-import {checkWithAntlr, convertToLogicalExpression, getProof} from "./deductiveEngine";
-import {createAdvancedModal} from "./modalForRules/modalForSeventeenthRule";
-import {createModalForReturn} from "./modalForRules/modalForReturn";
-import { createModalForLeibniz } from './modalForRules/modalForLeibniz.js';
+} from "../../ui/modals/substitution";
+import {checkWithAntlr, convertToLogicalExpression, getProof} from "../../core/deductiveEngine";
+import {createAdvancedModal} from "../../ui/modals/existentialIntro";
+import {createModalForReturn} from "../../ui/modals/quantifierReturn";
+import { createModalForLeibniz } from '../../ui/modals/leibniz.js';
 
 // Утиліти
 function createConclusion(proof) {

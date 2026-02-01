@@ -10,7 +10,7 @@ import {
   validateAxiom6,
   validateAxiom7,
   validateRobinsonAxioms
-} from "./robinsonAxiomValidator";
+} from "../../core/robinsonAxiomValidator";
 
 // Robinson Arithmetic Axioms
 export const ROBINSON_AXIOMS = [

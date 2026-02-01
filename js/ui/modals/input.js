@@ -1,7 +1,7 @@
 import * as monaco from 'monaco-editor';
-import * as editorMonaco from '../ui/monacoEditor';
-import {checkRule} from "../index";
-import * as deductive from "../core/deductiveEngine";
+import * as editorMonaco from '../monacoEditor';
+import {checkRule} from "../../index";
+import * as deductive from "../../core/deductiveEngine";
 
 /**
  * Creates a simple modal for inputting a term

@@ -1,10 +1,10 @@
 import * as monaco from 'monaco-editor';
-import {checkRule} from "../index";
-import {currentLevel, side} from "../GentzenProof";
-import * as deductive from "../core/deductiveEngine";
-import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../ui/monacoEditor";
+import {checkRule} from "../../index";
+import {currentLevel, side} from "../../proofs/gentzen/GentzenProof";
+import * as deductive from "../../core/deductiveEngine";
+import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../monacoEditor";
 import {has} from "mobx";
-import {checkWithAntlr} from "../core/deductiveEngine";
+import {checkWithAntlr} from "../../core/deductiveEngine";
 
 /**
  * Creates a modal for Leibniz rule operations

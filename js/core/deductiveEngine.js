@@ -1,9 +1,9 @@
 import {CharStreams, CommonTokenStream, ParseTreeWalker} from "antlr4";
-import GrammarLexer from "../my_antlr/GrammarLexer.js";
-import GrammarParser from "../my_antlr/GrammarParser.js";
-import MyGrammarListener from "../my_antlr/MyGrammarListener.js";
+import GrammarLexer from "../../my_antlr/GrammarLexer.js";
+import GrammarParser from "../../my_antlr/GrammarParser.js";
+import MyGrammarListener from "../../my_antlr/MyGrammarListener.js";
 // import {currentLevel} from "./index";
-import {currentLevel, deductionContext} from "./GentzenProof.js";
+import {currentLevel, deductionContext} from "../proofs/gentzen/GentzenProof.js";
 
 // export function removeRedundantParentheses(expression, parentType = null, isLeftChild = false) {
 //   function isParenthesesRedundant(expr, parentType, isLeftChild) {

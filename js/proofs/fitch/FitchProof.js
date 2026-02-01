@@ -1,20 +1,20 @@
-import * as editorMonaco from './monacoEditor';
-import * as deductive from "./deductiveEngine";
-import {currentLevel, deductionContext, lastSide, level, saveTree, side, state, userHypotheses} from "./GentzenProof";
+import * as editorMonaco from '../../ui/monacoEditor';
+import * as deductive from "../../core/deductiveEngine";
+import {currentLevel, deductionContext, lastSide, level, saveTree, side, state, userHypotheses} from "../gentzen/GentzenProof";
 import {
   checkWithAntlr,
   convertToLogicalExpression,
   getProof
-} from "./deductiveEngine";
+} from "../../core/deductiveEngine";
 import * as rulesFitch from "./rulesFitch";
-import * as controlState from "./states";
-import {createTreeD3} from "./tree";
-import {checkRule, shakeElement} from "./index";
+import * as controlState from "../../state/stateManager";
+import {createTreeD3} from "../../ui/tree";
+import {checkRule, shakeElement} from "../../index";
 import {ninthRule, seventhRule} from "./rulesFitch";
-import {addNextLastButtonClickFitch, saveStateFitch} from "./states";
-import {latexFitch} from "./latexGen";
-import {formulaToString} from "./formatter";
-import {ROBINSON_AXIOMS} from "./robinsonAxiomValidator";
+import {addNextLastButtonClickFitch, saveStateFitch} from "../../state/stateManager";
+import {latexFitch} from "../../ui/latexGen";
+import {formulaToString} from "../../core/formatter";
+import {ROBINSON_AXIOMS} from "../../core/robinsonAxiomValidator";
 
 
 let fitchProof = [];
@@ -111,7 +111,7 @@ export function processExpression(expression, countRules) {
 
   // Recommended Rules Logic
   let recommendedIndices = [];
-  
+
   // Parse selected formulas
   const proofs = clickedProofs.map(p => {
     try {
@@ -119,7 +119,7 @@ export function processExpression(expression, countRules) {
       const clone = p.element.cloneNode(true);
       const indexSpan = clone.querySelector('.indexC');
       if (indexSpan) indexSpan.remove();
-      
+
       const cleanText = clone.textContent.replaceAll(" ", "");
       return getProof(checkWithAntlr(cleanText));
     } catch (e) {
@@ -135,25 +135,25 @@ export function processExpression(expression, countRules) {
       if (f.type === 'conjunction') recommendedIndices.push(2); // AND E
       if (f.type === 'negation' && f.value && f.value.type === 'negation') recommendedIndices.push(11); // NOT NOT E
       if (f.type === 'forall' || (f.type === 'quantifier' && f.quantifier === '∀')) recommendedIndices.push(13); // Forall E
-      
+
       const isBottom = f.value === '⊥' || f.name === '⊥' || f.type === 'bottom' || (f.type==='atom' && f.value==='⊥');
       if (isBottom) recommendedIndices.push(9); // Bottom E
-      
+
       // Always valid with 1 premise
       recommendedIndices.push(3); // OR I
       recommendedIndices.push(12); // R
       recommendedIndices.push(15); // Exists I
       recommendedIndices.push(17); // = I (Global)
     }
-  } 
+  }
   else if (clickedProofs.length === 2 && clickedBranch.length === 0) {
     recommendedIndices.push(1); // AND I
     recommendedIndices.push(18); // = E
-    
+
     if (proofs.length >= 2) {
       const f1 = proofs[0];
       const f2 = proofs[1];
-      
+
       if (f1.type === 'implication' || f2.type === 'implication') recommendedIndices.push(6); // IMP E
       if (f1.type === 'negation' || f2.type === 'negation') recommendedIndices.push(8); // NOT E
     }
@@ -190,7 +190,7 @@ function generateButtons(buttonCount, buttonTexts) {
   buttonContainer.style.minHeight = '150px';
 
   // Check if this is for axioms - detection by text format
-  const isAxiomsTab = buttonTexts.length > 0 && 
+  const isAxiomsTab = buttonTexts.length > 0 &&
                       buttonTexts.length === ROBINSON_AXIOMS.length &&
                       buttonTexts.every((text, index) => text.startsWith(`${index + 1}. `));
 
@@ -214,7 +214,7 @@ function generateButtons(buttonCount, buttonTexts) {
     buttonContainer.style.gap = '8px';
     buttonContainer.style.padding = '20px';
     buttonContainer.style.justifyItems = 'center';
-    
+
     // Add header
     const header = document.createElement('h4');
     header.textContent = 'Robinson Arithmetic Axioms';
@@ -230,14 +230,14 @@ function generateButtons(buttonCount, buttonTexts) {
 
   for (let i = 0; i < buttonCount; i++) {
     let button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i], button));
-    
+
     if (isAxiomsTab) {
        button.style.flex = 'none';
        button.style.width = '100%';
        button.style.maxWidth = 'none';
        button.style.minHeight = '60px';
     }
-    
+
     buttonContainer.appendChild(button);
   }
 
@@ -828,9 +828,9 @@ function addClickFitchRules() {
 
         const spanElement = clickedProofs[0].element.querySelector('span.indexC');
         if (spanElement) spanElement.remove();
-        
+
         let size = createTreeD3(getProof(checkWithAntlr(clickedProofs[0].element.textContent)));
-        
+
         if (spanElement) clickedProofs[0].element.appendChild(spanElement);
 
         svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());

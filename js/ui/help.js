@@ -1,7 +1,7 @@
 import * as treeLevel from "./tree";
-import {side} from './index';
-import {processExpression} from './index';
-import {checkWithAntlr} from './deductiveEngine';
+import {side} from '../index';
+import {processExpression} from '../index';
+import {checkWithAntlr} from '../core/deductiveEngine';
 
 
 let fontSize = 32;

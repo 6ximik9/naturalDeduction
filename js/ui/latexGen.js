@@ -1,5 +1,5 @@
-import {typeProof} from "./index";
-import {clearItems} from "./FitchProof";
+import {typeProof} from "../index";
+import {clearItems} from "../proofs/fitch/FitchProof";
 
 
 function getLate(element) {

@@ -1,19 +1,19 @@
 import {CharStreams, CommonTokenStream, ParseTreeWalker} from 'antlr4';
-import GrammarLexer from '../my_antlr/GrammarLexer.js';
-import GrammarParser from '../my_antlr/GrammarParser.js';
-import MyGrammarListener from '../my_antlr/MyGrammarListener.js';
-import * as editorMonaco from './monacoEditor.js'
-import * as deductive from './deductiveEngine.js';
-import {checkWithAntlr, convertToLogicalExpression, getProof} from './deductiveEngine.js';
-import * as controlState from './states.js';
-import {addNextLastButtonClickGentzen} from './states.js';
-import {checkRule, shakeElement, typeProof} from "./index.js";
-import {createTreeD3} from "./tree.js";
-import {latexGentzen} from "./latexGen.js";
+import GrammarLexer from '../../../my_antlr/GrammarLexer.js';
+import GrammarParser from '../../../my_antlr/GrammarParser.js';
+import MyGrammarListener from '../../../my_antlr/MyGrammarListener.js';
+import * as editorMonaco from '../../ui/monacoEditor.js'
+import * as deductive from '../../core/deductiveEngine.js';
+import {checkWithAntlr, convertToLogicalExpression, getProof} from '../../core/deductiveEngine.js';
+import * as controlState from '../../state/stateManager.js';
+import {addNextLastButtonClickGentzen} from '../../state/stateManager.js';
+import {checkRule, shakeElement, typeProof} from "../../index.js";
+import {createTreeD3} from "../../ui/tree.js";
+import {latexGentzen} from "../../ui/latexGen.js";
 import {AXIOM_HANDLERS, GENTZEN_BUTTONS, ROBINSON_AXIOMS, ruleGentzenHandlers} from './ruleGentzenHandlers.js';
-import {formulaToString} from "./formatter.js";
-import {addProofTextHoverEffects, initializeProofTextHover} from './proofTextHover.js';
-import {validateRobinsonAxioms} from "./robinsonAxiomValidator.js";
+import {formulaToString} from "../../core/formatter.js";
+import {addProofTextHoverEffects, initializeProofTextHover} from '../../ui/proofTextHover.js';
+import {validateRobinsonAxioms} from "../../core/robinsonAxiomValidator.js";
 import {parseProofFromLastSide} from "./rulesGentzen";
 
 export let deductionContext = {

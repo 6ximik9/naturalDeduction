@@ -1,10 +1,10 @@
 import * as monaco from 'monaco-editor';
-import {checkRule} from "../index";
-import {currentLevel, side} from "../GentzenProof";
-import * as deductive from "../core/deductiveEngine";
-import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../ui/monacoEditor";
-import {convertToSuccessorNotation} from "./modalForLeibniz";
-import {checkWithAntlr} from "../core/deductiveEngine";
+import {checkRule} from "../../index";
+import {currentLevel, side} from "../../proofs/gentzen/GentzenProof";
+import * as deductive from "../../core/deductiveEngine";
+import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../monacoEditor";
+import {convertToSuccessorNotation} from "./leibniz";
+import {checkWithAntlr} from "../../core/deductiveEngine";
 
 /**
  * Creates an improved modal for universal quantifier elimination (∀-elimination)

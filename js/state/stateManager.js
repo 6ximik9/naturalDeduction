@@ -1,16 +1,16 @@
-import {side} from "./GentzenProof";
-import {currentLevel} from "./GentzenProof";
-import {state} from "./GentzenProof";
-import {deductionContext} from "./GentzenProof";
-import {level} from "./GentzenProof";
-import {userHypotheses} from "./GentzenProof";
-import {lastSide} from "./GentzenProof";
-import {setState} from "./GentzenProof";
-import {setLevel} from "./GentzenProof";
-import {setSide} from "./GentzenProof";
-import {setCurrentLevel} from "./GentzenProof";
-import {setUserHypotheses} from "./GentzenProof";
-import {setLastSide} from "./GentzenProof";
+import {side} from "../proofs/gentzen/GentzenProof";
+import {currentLevel} from "../proofs/gentzen/GentzenProof";
+import {state} from "../proofs/gentzen/GentzenProof";
+import {deductionContext} from "../proofs/gentzen/GentzenProof";
+import {level} from "../proofs/gentzen/GentzenProof";
+import {userHypotheses} from "../proofs/gentzen/GentzenProof";
+import {lastSide} from "../proofs/gentzen/GentzenProof";
+import {setState} from "../proofs/gentzen/GentzenProof";
+import {setLevel} from "../proofs/gentzen/GentzenProof";
+import {setSide} from "../proofs/gentzen/GentzenProof";
+import {setCurrentLevel} from "../proofs/gentzen/GentzenProof";
+import {setUserHypotheses} from "../proofs/gentzen/GentzenProof";
+import {setLastSide} from "../proofs/gentzen/GentzenProof";
 import {
   branchIndex, clearItems,
   clickedBranch,
@@ -19,7 +19,7 @@ import {
   setStateFitch,
   setUserHypothesesFitch,
   processExpression
-} from "./FitchProof";
+} from "../proofs/fitch/FitchProof";
 
 
 let backwardButton = document.getElementById('backwardButton');

@@ -1,11 +1,11 @@
 
 import * as monaco from 'monaco-editor';
-import * as editorMonaco from '../ui/monacoEditor';
-import { checkRule } from "../index";
-import { hasEditorErrors } from "../ui/monacoEditor";
-import { currentLevel, side } from "../GentzenProof";
-import * as deductive from "../core/deductiveEngine";
-import {getProof} from "../core/deductiveEngine";
+import * as editorMonaco from '../monacoEditor';
+import { checkRule } from "../../index";
+import { hasEditorErrors } from "../monacoEditor";
+import { currentLevel, side } from "../../proofs/gentzen/GentzenProof";
+import * as deductive from "../../core/deductiveEngine";
+import {getProof} from "../../core/deductiveEngine";
 
 let customEditor = null;
 

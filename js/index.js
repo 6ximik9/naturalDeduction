@@ -1,12 +1,12 @@
 import antlr4, {CharStreams, CommonTokenStream} from 'antlr4';
 import GrammarLexer from '../my_antlr/GrammarLexer';
 import GrammarParser from '../my_antlr/GrammarParser';
-import * as editorMonaco from './monacoEditor';
-import * as gentzen from './GentzenProof'
-import * as deductive from './deductiveEngine';
-import * as fitch from "./FitchProof";
-import * as help from './help';
-import {setEditorError} from "./monacoEditor";
+import * as editorMonaco from './ui/monacoEditor';
+import * as gentzen from './proofs/gentzen/GentzenProof'
+import * as deductive from './core/deductiveEngine';
+import * as fitch from "./proofs/fitch/FitchProof";
+import * as help from './ui/help';
+import {setEditorError} from "./ui/monacoEditor";
 
 let hasError = false;
 let inputText = "";
@@ -135,7 +135,7 @@ function fitchProof()
   else{
     // Allow start without premises (e.g. for axioms)
     let userText = editorMonaco.editor.getValue();
-    fitch.setUserHypothesesFitch([]); 
+    fitch.setUserHypothesesFitch([]);
     fitch.fitchStart(userText);
   }
 }

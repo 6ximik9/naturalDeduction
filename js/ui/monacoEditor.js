@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor';
-import {checkRule} from './index';
+import {checkRule} from '../index';
 
 
 monaco.languages.register({
