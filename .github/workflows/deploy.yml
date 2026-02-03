@@ -27,6 +27,20 @@ jobs:
           node-version: "20"
           cache: 'npm'
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup ANTLR
+        run: |
+          curl -O https://www.antlr.org/download/antlr-4.13.2-complete.jar
+          echo '#!/bin/bash' > antlr
+          echo 'java -jar '$PWD'/antlr-4.13.2-complete.jar "$@"' >> antlr
+          chmod +x antlr
+          sudo mv antlr /usr/local/bin/
+
       - name: Install dependencies
         run: npm ci
 
