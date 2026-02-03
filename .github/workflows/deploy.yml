@@ -42,7 +42,9 @@ jobs:
           sudo mv antlr /usr/local/bin/
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
+          npm install hasown --no-save
 
       - name: Generate Grammar
         run: npm run antlr
