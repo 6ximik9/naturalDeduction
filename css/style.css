@@ -347,21 +347,88 @@ h3 {
    PROOF DISPLAY
    ========================================================================== */
 
+/* Container for the proof with resize capability */
+#proof-container {
+  display: none; /* Hidden by default, shown via JS when proof starts */
+  position: relative;
+  width: 65%;
+  min-height: 60px;
+  height: auto;
+  margin: 1% auto;
+  overflow: hidden; /* Hide overflow from zoomed content */
+  /* resize: both; Removed to use custom handle */
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Custom Resize Handle */
+#proof-resize-handle {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, #0061a1 50%);
+  z-index: 1001;
+  border-bottom-right-radius: 2px;
+}
+#proof-resize-handle:hover {
+  background: linear-gradient(135deg, transparent 50%, #004672 50%);
+}
+
+/* Updated #proof to work inside the container */
 #proof {
   display: flex;
   flex-direction: column;
+  justify-content: center; /* Center content vertically */
   align-items: center;
   align-content: center;
   text-align: center;
-  margin-top: 1%;
-  width: 80%;
-  min-width: 80%;
-  overflow: scroll;
-  scrollbar-width: none; /* для Firefox */
+  margin-top: 0;
+  width: fit-content;
+  min-width: 100%;
+  min-height: 100%;
+  overflow: visible;
+  transform-origin: 0 0; /* Zoom from top-left for easier math */
+  cursor: grab;
 }
 
-#proof::-webkit-scrollbar {
-  display: none; /* приховуємо скрол */
+#proof:active {
+  cursor: grabbing;
+}
+
+/* Controls for zoom */
+.proof-controls {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+  z-index: 1000;
+}
+
+.proof-controls button {
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  padding: 0;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #333;
+}
+
+.proof-controls button:hover {
+  background: #f0f0f0;
+}
+
+#resetZoomBtn {
+  width: auto;
+  font-size: 16px;
+  padding: 0 10px;
 }
 
 #proof label

@@ -7,6 +7,7 @@ import * as deductive from './core/deductiveEngine';
 import * as fitch from "./proofs/fitch/FitchProof";
 import * as help from './ui/help';
 import {setEditorError} from "./ui/monacoEditor";
+import {initProofView} from "./ui/proofView";
 
 let hasError = false;
 let inputText = "";
@@ -14,6 +15,9 @@ let inputText = "";
 export let typeProof = 0;
 
 document.addEventListener("DOMContentLoaded", function() {
+  // Initialize Proof View (Pan/Zoom/Resize)
+  initProofView();
+
   // Вибираємо батьківський елемент, що містить наші радіо-кнопки
   var myDict = document.querySelector('.mydict');
 
@@ -104,6 +108,10 @@ enterButton.addEventListener('click', function () {
     shakeElement('enter', 5);
     return;
   }
+
+  // Show the proof container
+  const proofContainer = document.getElementById('proof-container');
+  if (proofContainer) proofContainer.style.display = 'block';
 
   if(typeProof===1)
   {
