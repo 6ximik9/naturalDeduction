@@ -43,8 +43,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          rm -f package-lock.json
           npm install
-          npm install hasown --no-save
 
       - name: Generate Grammar
         run: npm run antlr
