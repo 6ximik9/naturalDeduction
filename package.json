@@ -15,7 +15,7 @@
     "test:formatter": "node tests/formatter-bracket-test.js && node tests/formatter-edge-cases-test.js",
     "test:all": "npm run test:grammar && npm run test:robinson && npm run test:formatter",
     "start": "webpack serve --open --config webpack.config.dev.js",
-    "build": "webpack --config webpack.config.prod.js",
+    "build": "webpack --config webpack.config.js --mode production",
     "webpack": "cd my_antlr && antlr -Dlanguage=JavaScript Grammar.g4 && cd .. && webpack",
     "antlr": "cd my_antlr && antlr -Dlanguage=JavaScript Grammar.g4",
     "watch:antlr": "chokidar 'my_antlr/**/*.g4' -c 'npm run antlr'",
