@@ -361,6 +361,23 @@ export default class MyGrammarListener extends GrammarListener {
     this.stack.push(successor);
   }
 
+  // Arithmetic function handling: +(t1, t2), *(t1, t2)
+  exitArithmeticFunc(ctx) {
+    this.logExit("arithmeticFunc", ctx);
+    const right = this.stack.pop();
+    const left = this.stack.pop();
+    const operator = ctx.getChild(0).getText(); // + or *
+
+    const type = operator === '+' ? 'addition' : 'multiplication';
+
+    const arithmetic = {
+      type: type,
+      left: left,
+      right: right
+    };
+    this.stack.push(arithmetic);
+  }
+
   // Variable handling
   exitVariable(ctx) {
     this.logExit("variable", ctx);
