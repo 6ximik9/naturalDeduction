@@ -96,7 +96,7 @@ export function formulaToString(node, useParens = 1) {
     case 'equality': {
       const left = maybeWrap(node.left, formulaToString(node.left, useParens), 'equality', useParens, 'left');
       const right = maybeWrap(node.right, formulaToString(node.right, useParens), 'equality', useParens, 'right');
-      return `${left}${node.operator}${right}`;
+      return `${left}${node.operator || '='}${right}`;
     }
 
     case 'addition': {

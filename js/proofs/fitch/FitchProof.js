@@ -15,6 +15,7 @@ import {addNextLastButtonClickFitch, saveStateFitch} from "../../state/stateMana
 import {latexFitch} from "../../ui/latexGen";
 import {formulaToString} from "../../core/formatter";
 import {ROBINSON_AXIOMS} from "../../core/robinsonAxiomValidator";
+import {ORDER_AXIOMS} from "../../core/orderAxiomValidator";
 
 
 let fitchProof = [];
@@ -191,7 +192,7 @@ function generateButtons(buttonCount, buttonTexts) {
 
   // Check if this is for axioms - detection by text format
   const isAxiomsTab = buttonTexts.length > 0 &&
-                      buttonTexts.length === ROBINSON_AXIOMS.length &&
+                      buttonTexts.length === (ROBINSON_AXIOMS.length + ORDER_AXIOMS.length) &&
                       buttonTexts.every((text, index) => text.startsWith(`${index + 1}. `));
 
   if (branchIndex !== 0 && !isAxiomsTab) {
@@ -229,6 +230,12 @@ function generateButtons(buttonCount, buttonTexts) {
   }
 
   for (let i = 0; i < buttonCount; i++) {
+    if (isAxiomsTab && i === ROBINSON_AXIOMS.length) {
+      const header = document.createElement('h4');
+      header.textContent = 'Linear Order Axioms';
+      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 20px 0 14px 0; color: #333; font-family: "Times New Roman", serif;';
+      buttonContainer.appendChild(header);
+    }
     let button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i], button));
 
     if (isAxiomsTab) {
@@ -838,10 +845,14 @@ function addClickFitchRules() {
       } else if (tabId === 'tab3') {
         helpButtonToggleState = false;
         // Format axioms for generateButtons
-        const formattedAxioms = ROBINSON_AXIOMS.map((axiom, index) =>
+        const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) =>
           `${index + 1}. ${axiom}`
         );
-        generateButtons(ROBINSON_AXIOMS.length, formattedAxioms);
+        const formattedOrder = ORDER_AXIOMS.map((axiom, index) =>
+          `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`
+        );
+        const formattedAxioms = [...formattedRobinson, ...formattedOrder];
+        generateButtons(formattedAxioms.length, formattedAxioms);
       }
     });
   });

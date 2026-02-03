@@ -19,11 +19,11 @@ export const ROBINSON_AXIOMS = [
 // 🛠️ СПІЛЬНІ HELPER ФУНКЦІЇ (Щоб не дублювати код)
 // ==========================================
 
-const unwrap = (node) => getProof(node);
+export const unwrap = (node) => getProof(node);
 
 // Отримати глибину саксесора або число
 // Повертає: { type: 'number', value: 5 } АБО { type: 'term', base: node, depth: 3 }
-const getSuccessorDepth = (node) => {
+export const getSuccessorDepth = (node) => {
   let current = unwrap(node);
   let depth = 0;
 
@@ -43,7 +43,7 @@ const getSuccessorDepth = (node) => {
 };
 
 // Глибоке порівняння вузлів (ВИПРАВЛЕНЕ)
-const areNodesEqual = (n1, n2) => {
+export const areNodesEqual = (n1, n2) => {
   if (!n1 || !n2) return n1 === n2;
 
   // Якщо це обгортки (parenthesis), знімаємо їх

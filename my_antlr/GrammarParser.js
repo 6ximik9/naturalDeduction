@@ -2,7 +2,7 @@
 // jshint ignore: start
 import antlr4 from 'antlr4';
 import GrammarListener from './GrammarListener.js';
-const serializedATN = [4,1,25,225,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
+const serializedATN = [4,1,29,226,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,
 2,13,7,13,2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,
 20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,24,1,0,1,0,1,0,3,0,54,8,0,1,
@@ -13,63 +13,63 @@ const serializedATN = [4,1,25,225,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,
 1,8,1,8,1,8,1,8,1,8,1,8,3,8,124,8,8,1,9,1,9,1,9,1,9,1,9,1,9,1,9,3,9,133,
 8,9,1,10,1,10,1,10,1,10,1,11,1,11,1,11,5,11,142,8,11,10,11,12,11,145,9,11,
 1,12,1,12,1,12,5,12,150,8,12,10,12,12,12,153,9,12,1,13,1,13,1,13,1,13,1,
-13,1,13,1,13,1,13,1,13,1,13,3,13,165,8,13,1,14,1,14,1,14,1,14,1,14,1,14,
-3,14,173,8,14,1,15,1,15,1,15,5,15,178,8,15,10,15,12,15,181,9,15,1,16,1,16,
-1,17,1,17,1,17,1,17,1,17,1,18,1,18,1,19,1,19,1,20,1,20,1,21,1,21,1,21,1,
-21,1,21,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,
-1,22,3,22,215,8,22,1,23,1,23,1,24,1,24,1,24,1,24,3,24,223,8,24,1,24,0,0,
-25,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,
-0,4,1,0,19,20,2,0,10,10,12,12,2,0,9,9,11,11,2,0,6,6,23,23,227,0,53,1,0,0,
-0,2,58,1,0,0,0,4,66,1,0,0,0,6,71,1,0,0,0,8,79,1,0,0,0,10,94,1,0,0,0,12,99,
-1,0,0,0,14,111,1,0,0,0,16,123,1,0,0,0,18,132,1,0,0,0,20,134,1,0,0,0,22,138,
-1,0,0,0,24,146,1,0,0,0,26,164,1,0,0,0,28,172,1,0,0,0,30,174,1,0,0,0,32,182,
-1,0,0,0,34,184,1,0,0,0,36,189,1,0,0,0,38,191,1,0,0,0,40,193,1,0,0,0,42,195,
-1,0,0,0,44,214,1,0,0,0,46,216,1,0,0,0,48,222,1,0,0,0,50,51,3,2,1,0,51,52,
-5,1,0,0,52,54,1,0,0,0,53,50,1,0,0,0,53,54,1,0,0,0,54,55,1,0,0,0,55,56,3,
-4,2,0,56,57,5,0,0,1,57,1,1,0,0,0,58,63,3,4,2,0,59,60,5,2,0,0,60,62,3,4,2,
-0,61,59,1,0,0,0,62,65,1,0,0,0,63,61,1,0,0,0,63,64,1,0,0,0,64,3,1,0,0,0,65,
-63,1,0,0,0,66,69,3,6,3,0,67,68,5,13,0,0,68,70,3,4,2,0,69,67,1,0,0,0,69,70,
-1,0,0,0,70,5,1,0,0,0,71,76,3,8,4,0,72,73,5,14,0,0,73,75,3,8,4,0,74,72,1,
-0,0,0,75,78,1,0,0,0,76,74,1,0,0,0,76,77,1,0,0,0,77,7,1,0,0,0,78,76,1,0,0,
-0,79,84,3,10,5,0,80,81,5,15,0,0,81,83,3,10,5,0,82,80,1,0,0,0,83,86,1,0,0,
-0,84,82,1,0,0,0,84,85,1,0,0,0,85,9,1,0,0,0,86,84,1,0,0,0,87,89,5,16,0,0,
-88,87,1,0,0,0,89,90,1,0,0,0,90,88,1,0,0,0,90,91,1,0,0,0,91,92,1,0,0,0,92,
-95,3,12,6,0,93,95,3,12,6,0,94,88,1,0,0,0,94,93,1,0,0,0,95,11,1,0,0,0,96,
-100,3,14,7,0,97,100,3,16,8,0,98,100,3,18,9,0,99,96,1,0,0,0,99,97,1,0,0,0,
-99,98,1,0,0,0,100,13,1,0,0,0,101,102,5,3,0,0,102,103,5,17,0,0,103,104,3,
-36,18,0,104,105,5,4,0,0,105,106,3,12,6,0,106,112,1,0,0,0,107,108,5,17,0,
-0,108,109,3,36,18,0,109,110,3,12,6,0,110,112,1,0,0,0,111,101,1,0,0,0,111,
-107,1,0,0,0,112,15,1,0,0,0,113,114,5,3,0,0,114,115,5,18,0,0,115,116,3,36,
-18,0,116,117,5,4,0,0,117,118,3,12,6,0,118,124,1,0,0,0,119,120,5,18,0,0,120,
-121,3,36,18,0,121,122,3,12,6,0,122,124,1,0,0,0,123,113,1,0,0,0,123,119,1,
-0,0,0,124,17,1,0,0,0,125,126,5,3,0,0,126,127,3,4,2,0,127,128,5,4,0,0,128,
-133,1,0,0,0,129,133,3,20,10,0,130,133,3,28,14,0,131,133,3,48,24,0,132,125,
-1,0,0,0,132,129,1,0,0,0,132,130,1,0,0,0,132,131,1,0,0,0,133,19,1,0,0,0,134,
-135,3,22,11,0,135,136,7,0,0,0,136,137,3,22,11,0,137,21,1,0,0,0,138,143,3,
-24,12,0,139,140,5,21,0,0,140,142,3,24,12,0,141,139,1,0,0,0,142,145,1,0,0,
-0,143,141,1,0,0,0,143,144,1,0,0,0,144,23,1,0,0,0,145,143,1,0,0,0,146,151,
-3,26,13,0,147,148,5,22,0,0,148,150,3,26,13,0,149,147,1,0,0,0,150,153,1,0,
-0,0,151,149,1,0,0,0,151,152,1,0,0,0,152,25,1,0,0,0,153,151,1,0,0,0,154,155,
-5,3,0,0,155,156,3,22,11,0,156,157,5,4,0,0,157,165,1,0,0,0,158,165,3,42,21,
-0,159,165,3,34,17,0,160,165,3,36,18,0,161,165,3,38,19,0,162,165,3,46,23,
-0,163,165,3,40,20,0,164,154,1,0,0,0,164,158,1,0,0,0,164,159,1,0,0,0,164,
-160,1,0,0,0,164,161,1,0,0,0,164,162,1,0,0,0,164,163,1,0,0,0,165,27,1,0,0,
-0,166,167,3,40,20,0,167,168,5,3,0,0,168,169,3,30,15,0,169,170,5,4,0,0,170,
-173,1,0,0,0,171,173,3,40,20,0,172,166,1,0,0,0,172,171,1,0,0,0,173,29,1,0,
-0,0,174,179,3,32,16,0,175,176,5,2,0,0,176,178,3,32,16,0,177,175,1,0,0,0,
-178,181,1,0,0,0,179,177,1,0,0,0,179,180,1,0,0,0,180,31,1,0,0,0,181,179,1,
-0,0,0,182,183,3,22,11,0,183,33,1,0,0,0,184,185,5,12,0,0,185,186,5,3,0,0,
-186,187,3,30,15,0,187,188,5,4,0,0,188,35,1,0,0,0,189,190,7,1,0,0,190,37,
-1,0,0,0,191,192,3,46,23,0,192,39,1,0,0,0,193,194,7,2,0,0,194,41,1,0,0,0,
-195,196,5,5,0,0,196,197,5,3,0,0,197,198,3,22,11,0,198,199,5,4,0,0,199,43,
-1,0,0,0,200,201,5,21,0,0,201,202,5,3,0,0,202,203,3,22,11,0,203,204,5,2,0,
-0,204,205,3,22,11,0,205,206,5,4,0,0,206,215,1,0,0,0,207,208,5,22,0,0,208,
-209,5,3,0,0,209,210,3,22,11,0,210,211,5,2,0,0,211,212,3,22,11,0,212,213,
-5,4,0,0,213,215,1,0,0,0,214,200,1,0,0,0,214,207,1,0,0,0,215,45,1,0,0,0,216,
-217,7,3,0,0,217,47,1,0,0,0,218,223,5,7,0,0,219,223,5,8,0,0,220,223,3,26,
-13,0,221,223,3,40,20,0,222,218,1,0,0,0,222,219,1,0,0,0,222,220,1,0,0,0,222,
-221,1,0,0,0,223,49,1,0,0,0,18,53,63,69,76,84,90,94,99,111,123,132,143,151,
-164,172,179,214,222];
+13,1,13,1,13,1,13,1,13,1,13,1,13,3,13,166,8,13,1,14,1,14,1,14,1,14,1,14,
+1,14,3,14,174,8,14,1,15,1,15,1,15,5,15,179,8,15,10,15,12,15,182,9,15,1,16,
+1,16,1,17,1,17,1,17,1,17,1,17,1,18,1,18,1,19,1,19,1,20,1,20,1,21,1,21,1,
+21,1,21,1,21,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,1,22,
+1,22,1,22,3,22,216,8,22,1,23,1,23,1,24,1,24,1,24,1,24,3,24,224,8,24,1,24,
+0,0,25,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,
+48,0,4,1,0,19,24,2,0,10,10,12,12,2,0,9,9,11,11,2,0,6,6,27,27,229,0,53,1,
+0,0,0,2,58,1,0,0,0,4,66,1,0,0,0,6,71,1,0,0,0,8,79,1,0,0,0,10,94,1,0,0,0,
+12,99,1,0,0,0,14,111,1,0,0,0,16,123,1,0,0,0,18,132,1,0,0,0,20,134,1,0,0,
+0,22,138,1,0,0,0,24,146,1,0,0,0,26,165,1,0,0,0,28,173,1,0,0,0,30,175,1,0,
+0,0,32,183,1,0,0,0,34,185,1,0,0,0,36,190,1,0,0,0,38,192,1,0,0,0,40,194,1,
+0,0,0,42,196,1,0,0,0,44,215,1,0,0,0,46,217,1,0,0,0,48,223,1,0,0,0,50,51,
+3,2,1,0,51,52,5,1,0,0,52,54,1,0,0,0,53,50,1,0,0,0,53,54,1,0,0,0,54,55,1,
+0,0,0,55,56,3,4,2,0,56,57,5,0,0,1,57,1,1,0,0,0,58,63,3,4,2,0,59,60,5,2,0,
+0,60,62,3,4,2,0,61,59,1,0,0,0,62,65,1,0,0,0,63,61,1,0,0,0,63,64,1,0,0,0,
+64,3,1,0,0,0,65,63,1,0,0,0,66,69,3,6,3,0,67,68,5,13,0,0,68,70,3,4,2,0,69,
+67,1,0,0,0,69,70,1,0,0,0,70,5,1,0,0,0,71,76,3,8,4,0,72,73,5,14,0,0,73,75,
+3,8,4,0,74,72,1,0,0,0,75,78,1,0,0,0,76,74,1,0,0,0,76,77,1,0,0,0,77,7,1,0,
+0,0,78,76,1,0,0,0,79,84,3,10,5,0,80,81,5,15,0,0,81,83,3,10,5,0,82,80,1,0,
+0,0,83,86,1,0,0,0,84,82,1,0,0,0,84,85,1,0,0,0,85,9,1,0,0,0,86,84,1,0,0,0,
+87,89,5,16,0,0,88,87,1,0,0,0,89,90,1,0,0,0,90,88,1,0,0,0,90,91,1,0,0,0,91,
+92,1,0,0,0,92,95,3,12,6,0,93,95,3,12,6,0,94,88,1,0,0,0,94,93,1,0,0,0,95,
+11,1,0,0,0,96,100,3,14,7,0,97,100,3,16,8,0,98,100,3,18,9,0,99,96,1,0,0,0,
+99,97,1,0,0,0,99,98,1,0,0,0,100,13,1,0,0,0,101,102,5,3,0,0,102,103,5,17,
+0,0,103,104,3,36,18,0,104,105,5,4,0,0,105,106,3,10,5,0,106,112,1,0,0,0,107,
+108,5,17,0,0,108,109,3,36,18,0,109,110,3,10,5,0,110,112,1,0,0,0,111,101,
+1,0,0,0,111,107,1,0,0,0,112,15,1,0,0,0,113,114,5,3,0,0,114,115,5,18,0,0,
+115,116,3,36,18,0,116,117,5,4,0,0,117,118,3,10,5,0,118,124,1,0,0,0,119,120,
+5,18,0,0,120,121,3,36,18,0,121,122,3,10,5,0,122,124,1,0,0,0,123,113,1,0,
+0,0,123,119,1,0,0,0,124,17,1,0,0,0,125,126,5,3,0,0,126,127,3,4,2,0,127,128,
+5,4,0,0,128,133,1,0,0,0,129,133,3,20,10,0,130,133,3,28,14,0,131,133,3,48,
+24,0,132,125,1,0,0,0,132,129,1,0,0,0,132,130,1,0,0,0,132,131,1,0,0,0,133,
+19,1,0,0,0,134,135,3,22,11,0,135,136,7,0,0,0,136,137,3,22,11,0,137,21,1,
+0,0,0,138,143,3,24,12,0,139,140,5,25,0,0,140,142,3,24,12,0,141,139,1,0,0,
+0,142,145,1,0,0,0,143,141,1,0,0,0,143,144,1,0,0,0,144,23,1,0,0,0,145,143,
+1,0,0,0,146,151,3,26,13,0,147,148,5,26,0,0,148,150,3,26,13,0,149,147,1,0,
+0,0,150,153,1,0,0,0,151,149,1,0,0,0,151,152,1,0,0,0,152,25,1,0,0,0,153,151,
+1,0,0,0,154,155,5,3,0,0,155,156,3,22,11,0,156,157,5,4,0,0,157,166,1,0,0,
+0,158,166,3,42,21,0,159,166,3,44,22,0,160,166,3,34,17,0,161,166,3,36,18,
+0,162,166,3,38,19,0,163,166,3,46,23,0,164,166,3,40,20,0,165,154,1,0,0,0,
+165,158,1,0,0,0,165,159,1,0,0,0,165,160,1,0,0,0,165,161,1,0,0,0,165,162,
+1,0,0,0,165,163,1,0,0,0,165,164,1,0,0,0,166,27,1,0,0,0,167,168,3,40,20,0,
+168,169,5,3,0,0,169,170,3,30,15,0,170,171,5,4,0,0,171,174,1,0,0,0,172,174,
+3,40,20,0,173,167,1,0,0,0,173,172,1,0,0,0,174,29,1,0,0,0,175,180,3,32,16,
+0,176,177,5,2,0,0,177,179,3,32,16,0,178,176,1,0,0,0,179,182,1,0,0,0,180,
+178,1,0,0,0,180,181,1,0,0,0,181,31,1,0,0,0,182,180,1,0,0,0,183,184,3,22,
+11,0,184,33,1,0,0,0,185,186,5,12,0,0,186,187,5,3,0,0,187,188,3,30,15,0,188,
+189,5,4,0,0,189,35,1,0,0,0,190,191,7,1,0,0,191,37,1,0,0,0,192,193,3,46,23,
+0,193,39,1,0,0,0,194,195,7,2,0,0,195,41,1,0,0,0,196,197,5,5,0,0,197,198,
+5,3,0,0,198,199,3,22,11,0,199,200,5,4,0,0,200,43,1,0,0,0,201,202,5,25,0,
+0,202,203,5,3,0,0,203,204,3,22,11,0,204,205,5,2,0,0,205,206,3,22,11,0,206,
+207,5,4,0,0,207,216,1,0,0,0,208,209,5,26,0,0,209,210,5,3,0,0,210,211,3,22,
+11,0,211,212,5,2,0,0,212,213,3,22,11,0,213,214,5,4,0,0,214,216,1,0,0,0,215,
+201,1,0,0,0,215,208,1,0,0,0,216,45,1,0,0,0,217,218,7,3,0,0,218,47,1,0,0,
+0,219,224,5,7,0,0,220,224,5,8,0,0,221,224,3,26,13,0,222,224,3,40,20,0,223,
+219,1,0,0,0,223,220,1,0,0,0,223,221,1,0,0,0,223,222,1,0,0,0,224,49,1,0,0,
+0,18,53,63,69,76,84,90,94,99,111,123,132,143,151,165,173,180,215,223];
 
 
 const atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
@@ -84,13 +84,14 @@ export default class GrammarParser extends antlr4.Parser {
     static literalNames = [ null, "'\\u22A2'", "','", "'('", "')'", "'s'", 
                             "'0'", "'\\u22A4'", "'\\u22A5'", null, null, 
                             null, null, null, null, null, null, null, null, 
-                            "'='", null, "'+'", "'*'" ];
+                            "'<'", "'>'", "'<='", "'>='", "'='", null, "'+'", 
+                            "'*'" ];
     static symbolicNames = [ null, null, null, null, null, null, null, "TRUE", 
                              "FALSE", "UPPERCASE_GREEK_LETTER", "LOWERCASE_GREEK_LETTER", 
                              "UPPERCASE_LETTER", "LOWERCASE_LETTER", "IMPL", 
-                             "DIS", "CON", "NEG", "FORALL", "EXISTS", "EQUAL", 
-                             "NOTEQUAL", "PLUS", "MULT", "NUMBER", "COMMENT", 
-                             "WS" ];
+                             "DIS", "CON", "NEG", "FORALL", "EXISTS", "LT", 
+                             "GT", "LE", "GE", "EQUAL", "NOTEQUAL", "PLUS", 
+                             "MULT", "NUMBER", "COMMENT", "WS" ];
     static ruleNames = [ "formula", "atomList", "implication", "disjunction", 
                          "conjunction", "negation", "quantified", "forallQuant", 
                          "existQuant", "atomic", "equality", "addExpr", 
@@ -320,7 +321,9 @@ export default class GrammarParser extends antlr4.Parser {
 	        case 12:
 	        case 17:
 	        case 18:
-	        case 23:
+	        case 25:
+	        case 26:
+	        case 27:
 	            this.enterOuterAlt(localctx, 2);
 	            this.state = 93;
 	            this.quantified();
@@ -405,7 +408,7 @@ export default class GrammarParser extends antlr4.Parser {
 	            this.state = 104;
 	            this.match(GrammarParser.T__3);
 	            this.state = 105;
-	            this.quantified();
+	            this.negation();
 	            break;
 	        case 17:
 	            this.enterOuterAlt(localctx, 2);
@@ -414,7 +417,7 @@ export default class GrammarParser extends antlr4.Parser {
 	            this.state = 108;
 	            this.variable();
 	            this.state = 109;
-	            this.quantified();
+	            this.negation();
 	            break;
 	        default:
 	            throw new antlr4.error.NoViableAltException(this);
@@ -453,7 +456,7 @@ export default class GrammarParser extends antlr4.Parser {
 	            this.state = 116;
 	            this.match(GrammarParser.T__3);
 	            this.state = 117;
-	            this.quantified();
+	            this.negation();
 	            break;
 	        case 18:
 	            this.enterOuterAlt(localctx, 2);
@@ -462,7 +465,7 @@ export default class GrammarParser extends antlr4.Parser {
 	            this.state = 120;
 	            this.variable();
 	            this.state = 121;
-	            this.quantified();
+	            this.negation();
 	            break;
 	        default:
 	            throw new antlr4.error.NoViableAltException(this);
@@ -546,7 +549,7 @@ export default class GrammarParser extends antlr4.Parser {
 	        this.addExpr();
 	        this.state = 135;
 	        _la = this._input.LA(1);
-	        if(!(_la===19 || _la===20)) {
+	        if(!((((_la) & ~0x1f) === 0 && ((1 << _la) & 33030144) !== 0))) {
 	        this._errHandler.recoverInline(this);
 	        }
 	        else {
@@ -582,7 +585,7 @@ export default class GrammarParser extends antlr4.Parser {
 	        this.state = 143;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        while(_la===21) {
+	        while(_la===25) {
 	            this.state = 139;
 	            this.match(GrammarParser.PLUS);
 	            this.state = 140;
@@ -618,7 +621,7 @@ export default class GrammarParser extends antlr4.Parser {
 	        this.state = 151;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
-	        while(_la===22) {
+	        while(_la===26) {
 	            this.state = 147;
 	            this.match(GrammarParser.MULT);
 	            this.state = 148;
@@ -647,7 +650,7 @@ export default class GrammarParser extends antlr4.Parser {
 	    let localctx = new BasicTermContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 26, GrammarParser.RULE_basicTerm);
 	    try {
-	        this.state = 164;
+	        this.state = 165;
 	        this._errHandler.sync(this);
 	        var la_ = this._interp.adaptivePredict(this._input,13,this._ctx);
 	        switch(la_) {
@@ -670,30 +673,36 @@ export default class GrammarParser extends antlr4.Parser {
 	        case 3:
 	            this.enterOuterAlt(localctx, 3);
 	            this.state = 159;
-	            this.functionApp();
+	            this.arithmeticFunc();
 	            break;
 
 	        case 4:
 	            this.enterOuterAlt(localctx, 4);
 	            this.state = 160;
-	            this.variable();
+	            this.functionApp();
 	            break;
 
 	        case 5:
 	            this.enterOuterAlt(localctx, 5);
 	            this.state = 161;
-	            this.constant();
+	            this.variable();
 	            break;
 
 	        case 6:
 	            this.enterOuterAlt(localctx, 6);
 	            this.state = 162;
-	            this.numberSymb();
+	            this.constant();
 	            break;
 
 	        case 7:
 	            this.enterOuterAlt(localctx, 7);
 	            this.state = 163;
+	            this.numberSymb();
+	            break;
+
+	        case 8:
+	            this.enterOuterAlt(localctx, 8);
+	            this.state = 164;
 	            this.relationSymb();
 	            break;
 
@@ -718,25 +727,25 @@ export default class GrammarParser extends antlr4.Parser {
 	    let localctx = new PredicateContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 28, GrammarParser.RULE_predicate);
 	    try {
-	        this.state = 172;
+	        this.state = 173;
 	        this._errHandler.sync(this);
 	        var la_ = this._interp.adaptivePredict(this._input,14,this._ctx);
 	        switch(la_) {
 	        case 1:
 	            this.enterOuterAlt(localctx, 1);
-	            this.state = 166;
-	            this.relationSymb();
 	            this.state = 167;
-	            this.match(GrammarParser.T__2);
+	            this.relationSymb();
 	            this.state = 168;
-	            this.termList();
+	            this.match(GrammarParser.T__2);
 	            this.state = 169;
+	            this.termList();
+	            this.state = 170;
 	            this.match(GrammarParser.T__3);
 	            break;
 
 	        case 2:
 	            this.enterOuterAlt(localctx, 2);
-	            this.state = 171;
+	            this.state = 172;
 	            this.relationSymb();
 	            break;
 
@@ -763,17 +772,17 @@ export default class GrammarParser extends antlr4.Parser {
 	    var _la = 0;
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 174;
+	        this.state = 175;
 	        this.term();
-	        this.state = 179;
+	        this.state = 180;
 	        this._errHandler.sync(this);
 	        _la = this._input.LA(1);
 	        while(_la===2) {
-	            this.state = 175;
-	            this.match(GrammarParser.T__1);
 	            this.state = 176;
+	            this.match(GrammarParser.T__1);
+	            this.state = 177;
 	            this.term();
-	            this.state = 181;
+	            this.state = 182;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
 	        }
@@ -798,7 +807,7 @@ export default class GrammarParser extends antlr4.Parser {
 	    this.enterRule(localctx, 32, GrammarParser.RULE_term);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 182;
+	        this.state = 183;
 	        this.addExpr();
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -821,13 +830,13 @@ export default class GrammarParser extends antlr4.Parser {
 	    this.enterRule(localctx, 34, GrammarParser.RULE_functionApp);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 184;
-	        this.match(GrammarParser.LOWERCASE_LETTER);
 	        this.state = 185;
-	        this.match(GrammarParser.T__2);
+	        this.match(GrammarParser.LOWERCASE_LETTER);
 	        this.state = 186;
-	        this.termList();
+	        this.match(GrammarParser.T__2);
 	        this.state = 187;
+	        this.termList();
+	        this.state = 188;
 	        this.match(GrammarParser.T__3);
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -851,7 +860,7 @@ export default class GrammarParser extends antlr4.Parser {
 	    var _la = 0;
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 189;
+	        this.state = 190;
 	        _la = this._input.LA(1);
 	        if(!(_la===10 || _la===12)) {
 	        this._errHandler.recoverInline(this);
@@ -881,7 +890,7 @@ export default class GrammarParser extends antlr4.Parser {
 	    this.enterRule(localctx, 38, GrammarParser.RULE_constant);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 191;
+	        this.state = 192;
 	        this.numberSymb();
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -905,7 +914,7 @@ export default class GrammarParser extends antlr4.Parser {
 	    var _la = 0;
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 193;
+	        this.state = 194;
 	        _la = this._input.LA(1);
 	        if(!(_la===9 || _la===11)) {
 	        this._errHandler.recoverInline(this);
@@ -935,13 +944,13 @@ export default class GrammarParser extends antlr4.Parser {
 	    this.enterRule(localctx, 42, GrammarParser.RULE_successorFunc);
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 195;
-	        this.match(GrammarParser.T__4);
 	        this.state = 196;
-	        this.match(GrammarParser.T__2);
+	        this.match(GrammarParser.T__4);
 	        this.state = 197;
-	        this.addExpr();
+	        this.match(GrammarParser.T__2);
 	        this.state = 198;
+	        this.addExpr();
+	        this.state = 199;
 	        this.match(GrammarParser.T__3);
 	    } catch (re) {
 	    	if(re instanceof antlr4.error.RecognitionException) {
@@ -963,37 +972,37 @@ export default class GrammarParser extends antlr4.Parser {
 	    let localctx = new ArithmeticFuncContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 44, GrammarParser.RULE_arithmeticFunc);
 	    try {
-	        this.state = 214;
+	        this.state = 215;
 	        this._errHandler.sync(this);
 	        switch(this._input.LA(1)) {
-	        case 21:
+	        case 25:
 	            this.enterOuterAlt(localctx, 1);
-	            this.state = 200;
-	            this.match(GrammarParser.PLUS);
 	            this.state = 201;
-	            this.match(GrammarParser.T__2);
+	            this.match(GrammarParser.PLUS);
 	            this.state = 202;
-	            this.addExpr();
+	            this.match(GrammarParser.T__2);
 	            this.state = 203;
-	            this.match(GrammarParser.T__1);
-	            this.state = 204;
 	            this.addExpr();
+	            this.state = 204;
+	            this.match(GrammarParser.T__1);
 	            this.state = 205;
+	            this.addExpr();
+	            this.state = 206;
 	            this.match(GrammarParser.T__3);
 	            break;
-	        case 22:
+	        case 26:
 	            this.enterOuterAlt(localctx, 2);
-	            this.state = 207;
-	            this.match(GrammarParser.MULT);
 	            this.state = 208;
-	            this.match(GrammarParser.T__2);
+	            this.match(GrammarParser.MULT);
 	            this.state = 209;
-	            this.addExpr();
+	            this.match(GrammarParser.T__2);
 	            this.state = 210;
-	            this.match(GrammarParser.T__1);
-	            this.state = 211;
 	            this.addExpr();
+	            this.state = 211;
+	            this.match(GrammarParser.T__1);
 	            this.state = 212;
+	            this.addExpr();
+	            this.state = 213;
 	            this.match(GrammarParser.T__3);
 	            break;
 	        default:
@@ -1021,9 +1030,9 @@ export default class GrammarParser extends antlr4.Parser {
 	    var _la = 0;
 	    try {
 	        this.enterOuterAlt(localctx, 1);
-	        this.state = 216;
+	        this.state = 217;
 	        _la = this._input.LA(1);
-	        if(!(_la===6 || _la===23)) {
+	        if(!(_la===6 || _la===27)) {
 	        this._errHandler.recoverInline(this);
 	        }
 	        else {
@@ -1050,31 +1059,31 @@ export default class GrammarParser extends antlr4.Parser {
 	    let localctx = new AtomContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 48, GrammarParser.RULE_atom);
 	    try {
-	        this.state = 222;
+	        this.state = 223;
 	        this._errHandler.sync(this);
 	        var la_ = this._interp.adaptivePredict(this._input,17,this._ctx);
 	        switch(la_) {
 	        case 1:
 	            this.enterOuterAlt(localctx, 1);
-	            this.state = 218;
+	            this.state = 219;
 	            this.match(GrammarParser.TRUE);
 	            break;
 
 	        case 2:
 	            this.enterOuterAlt(localctx, 2);
-	            this.state = 219;
+	            this.state = 220;
 	            this.match(GrammarParser.FALSE);
 	            break;
 
 	        case 3:
 	            this.enterOuterAlt(localctx, 3);
-	            this.state = 220;
+	            this.state = 221;
 	            this.basicTerm();
 	            break;
 
 	        case 4:
 	            this.enterOuterAlt(localctx, 4);
-	            this.state = 221;
+	            this.state = 222;
 	            this.relationSymb();
 	            break;
 
@@ -1115,13 +1124,17 @@ GrammarParser.CON = 15;
 GrammarParser.NEG = 16;
 GrammarParser.FORALL = 17;
 GrammarParser.EXISTS = 18;
-GrammarParser.EQUAL = 19;
-GrammarParser.NOTEQUAL = 20;
-GrammarParser.PLUS = 21;
-GrammarParser.MULT = 22;
-GrammarParser.NUMBER = 23;
-GrammarParser.COMMENT = 24;
-GrammarParser.WS = 25;
+GrammarParser.LT = 19;
+GrammarParser.GT = 20;
+GrammarParser.LE = 21;
+GrammarParser.GE = 22;
+GrammarParser.EQUAL = 23;
+GrammarParser.NOTEQUAL = 24;
+GrammarParser.PLUS = 25;
+GrammarParser.MULT = 26;
+GrammarParser.NUMBER = 27;
+GrammarParser.COMMENT = 28;
+GrammarParser.WS = 29;
 
 GrammarParser.RULE_formula = 0;
 GrammarParser.RULE_atomList = 1;
@@ -1497,8 +1510,8 @@ class ForallQuantContext extends antlr4.ParserRuleContext {
 	    return this.getTypedRuleContext(VariableContext,0);
 	};
 
-	quantified() {
-	    return this.getTypedRuleContext(QuantifiedContext,0);
+	negation() {
+	    return this.getTypedRuleContext(NegationContext,0);
 	};
 
 	enterRule(listener) {
@@ -1540,8 +1553,8 @@ class ExistQuantContext extends antlr4.ParserRuleContext {
 	    return this.getTypedRuleContext(VariableContext,0);
 	};
 
-	quantified() {
-	    return this.getTypedRuleContext(QuantifiedContext,0);
+	negation() {
+	    return this.getTypedRuleContext(NegationContext,0);
 	};
 
 	enterRule(listener) {
@@ -1639,6 +1652,22 @@ class EqualityContext extends antlr4.ParserRuleContext {
 
 	NOTEQUAL() {
 	    return this.getToken(GrammarParser.NOTEQUAL, 0);
+	};
+
+	LT() {
+	    return this.getToken(GrammarParser.LT, 0);
+	};
+
+	GT() {
+	    return this.getToken(GrammarParser.GT, 0);
+	};
+
+	LE() {
+	    return this.getToken(GrammarParser.LE, 0);
+	};
+
+	GE() {
+	    return this.getToken(GrammarParser.GE, 0);
 	};
 
 	enterRule(listener) {
@@ -1786,6 +1815,10 @@ class BasicTermContext extends antlr4.ParserRuleContext {
 
 	successorFunc() {
 	    return this.getTypedRuleContext(SuccessorFuncContext,0);
+	};
+
+	arithmeticFunc() {
+	    return this.getTypedRuleContext(ArithmeticFuncContext,0);
 	};
 
 	functionApp() {

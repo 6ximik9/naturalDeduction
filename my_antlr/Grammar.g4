@@ -31,12 +31,12 @@ quantified: forallQuant
 
 
 // Universal quantifier: (∀x)φ or ∀x φ
-forallQuant: '(' FORALL variable ')' quantified
-           | FORALL variable quantified;
+forallQuant: '(' FORALL variable ')' negation
+           | FORALL variable negation;
 
 // Existential quantifier: (∃x)φ or ∃x φ
-existQuant: '(' EXISTS variable ')' quantified
-          | EXISTS variable quantified;
+existQuant: '(' EXISTS variable ')' negation
+          | EXISTS variable negation;
 
 // Atomic expressions - highest precedence
 atomic: '(' implication ')'           // Parenthesized formula
@@ -45,7 +45,7 @@ atomic: '(' implication ')'           // Parenthesized formula
       | atom;                         // Simple atoms (includes variables, constants, etc.)
 
 // Equality and relational expressions
-equality: addExpr (EQUAL | NOTEQUAL) addExpr;
+equality: addExpr (EQUAL | NOTEQUAL | LT | GT | LE | GE) addExpr;
 
 // Arithmetic expressions - fixed to avoid left recursion
 addExpr: multExpr (PLUS multExpr)*;
@@ -55,6 +55,7 @@ multExpr: basicTerm (MULT basicTerm)*;
 // Basic terms - no recursion issues
 basicTerm: '(' addExpr ')'            // Parenthesized arithmetic
          | successorFunc              // s(t)
+         | arithmeticFunc             // +(t1, t2), *(t1, t2)
          | functionApp                // f(t1, t2, ...)
          | variable                   // x, y, z
          | constant                   // a, b, c, 0, 1, 2
@@ -123,6 +124,10 @@ FORALL: '∀' | 'forall' | 'ALL';
 EXISTS: '∃' | 'exists' | 'EX';
 
 // Equality
+LT: '<';
+GT: '>';
+LE: '<=';
+GE: '>=';
 EQUAL: '=';
 NOTEQUAL: '≠' | '!=' | '<>' | '/=';
 

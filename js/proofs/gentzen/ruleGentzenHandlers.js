@@ -11,6 +11,12 @@ import {
   validateAxiom7,
   validateRobinsonAxioms
 } from "../../core/robinsonAxiomValidator";
+import {
+  validateOrderAxiom1,
+  validateOrderAxiom2,
+  validateOrderAxiom3,
+  validateOrderAxiom4
+} from "../../core/orderAxiomValidator";
 
 // Robinson Arithmetic Axioms
 export const ROBINSON_AXIOMS = [
@@ -21,6 +27,13 @@ export const ROBINSON_AXIOMS = [
   "∀x ∀y (x + s(y) = s(x + y))", // ax5
   "∀x (x * 0 = 0)", // ax6
   "∀x ∀y (x * s(y) = (x * y) + x)" // ax7
+];
+
+export const ORDER_AXIOMS = [
+  "∀x ¬(x < x)",                         // Irreflexivity (Іррефлексивність)
+  "∀x ∀y ∀z ((x < y ∧ y < z) ⇒ x < z)",  // Transitivity (Транзитивність)
+  "∀x ∀y (x < y ∨ x = y ∨ y < x)",       // Trichotomy (Трихотомія)
+  "∀x ∀y ∀z (x < y ⇒ x + z < y + z)"     // Compatibility with addition (Сумісність з додаванням)
 ];
 
 // Axiom click handlers
@@ -157,6 +170,78 @@ export const AXIOM_HANDLERS = {
           console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
           // Створюємо вузол дерева з текстом аксіоми
           createAxiomConclusion(ROBINSON_AXIOMS[6], 27);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
+    }
+  },
+  8: {
+    name: "Irreflexivity",
+    description: "Irreflexivity of strict order: ¬(x < x)",
+    formula: ORDER_AXIOMS[0],
+    requiresTree: true,
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateOrderAxiom1(formula);
+        if (result) {
+          createAxiomConclusion(ORDER_AXIOMS[0], 28);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
+    }
+  },
+  9: {
+    name: "Transitivity",
+    description: "Transitivity of strict order",
+    formula: ORDER_AXIOMS[1],
+    requiresTree: true,
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateOrderAxiom2(formula);
+        if (result) {
+          createAxiomConclusion(ORDER_AXIOMS[1], 29);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
+    }
+  },
+  10: {
+    name: "Trichotomy",
+    description: "Trichotomy of strict order",
+    formula: ORDER_AXIOMS[2],
+    requiresTree: true,
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateOrderAxiom3(formula);
+        if (result) {
+          createAxiomConclusion(ORDER_AXIOMS[2], 30);
+          return result;
+        } else {
+          shakeButton(button);
+          return null;
+        }
+      }
+    }
+  },
+  11: {
+    name: "Compatibility with Addition",
+    description: "Order is preserved under addition",
+    formula: ORDER_AXIOMS[3],
+    requiresTree: true,
+    action: (formula, button) => {
+      if (formula) {
+        const result = validateOrderAxiom4(formula);
+        if (result) {
+          createAxiomConclusion(ORDER_AXIOMS[3], 31);
           return result;
         } else {
           shakeButton(button);
@@ -305,7 +390,7 @@ export const ruleGentzenHandlers = {
     requiresTree: true,
   },
   "\\text{=I}": {
-    condition: (expr) => expr.type === 'equality',
+    condition: (expr) => expr.type === 'equality' && (!expr.operator || expr.operator === '=' || expr.operator === 'EQUAL'),
     action: () => rules.twentiethRule(),
     requiresTree: true,
   },

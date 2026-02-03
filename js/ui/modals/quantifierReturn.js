@@ -1132,7 +1132,7 @@ function createClickableElement(node, path, onElementClick) {
     case 'equality':
       if (node.left && node.right) {
         childElements.push(createClickableElement(node.left, [...path, 'left'], onElementClick));
-        childElements.push(document.createTextNode('='));
+        childElements.push(document.createTextNode(node.operator || '='));
         childElements.push(createClickableElement(node.right, [...path, 'right'], onElementClick));
       }
       break;
@@ -1275,7 +1275,7 @@ function getNodeText(node) {
 
     case 'equality':
       if (node.left && node.right) {
-        return `${getNodeText(node.left)}=${getNodeText(node.right)}`;
+        return `${getNodeText(node.left)}${node.operator || '='}${getNodeText(node.right)}`;
       }
       break;
 

@@ -233,7 +233,7 @@ export function convertToLogicalExpression(conclusion) {
     case "equality": {
       const left = convertToLogicalExpression(conclusion.left);
       const right = convertToLogicalExpression(conclusion.right);
-      return `${left}${conclusion.operator}${right}`;
+      return `${left}${conclusion.operator || '='}${right}`;
     }
 
     case "predicate": {
@@ -578,7 +578,9 @@ export function compareExpressions(expr1, expr2) {
 
   // Обробка рівності
   if (expr1.type === 'equality') {
-    return expr1.operator === expr2.operator &&
+    const op1 = expr1.operator || '=';
+    const op2 = expr2.operator || '=';
+    return op1 === op2 &&
       compareExpressions(expr1.left, expr2.left) &&
       compareExpressions(expr1.right, expr2.right);
   }

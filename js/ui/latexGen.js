@@ -264,7 +264,11 @@ function latexEdit(str, mode) {
     '∨': ' \\lor ', 'OR': ' \\lor ', 'or': ' \\lor ', '|': ' \\lor ', '||': ' \\lor ',
     '∧': ' \\land ', 'AND': ' \\land ', 'and': ' \\land ', '&': ' \\land ', '&&': ' \\land ',
     '~': ' \\neg ', ' ¬': ' \\neg ', '!': ' \\neg ',
-    '∀': ' \\forall ', '∃': ' \\exists '
+    '∀': ' \\forall ', '∃': ' \\exists ',
+    '⊤': ' \\top ', '⊥': ' \\bot ',
+    '<=': ' \\le ', '>=': ' \\ge ',
+    '≠': ' \\neq ', '!=': ' \\neq ',
+    '*': ' \\cdot '
 
   };
 

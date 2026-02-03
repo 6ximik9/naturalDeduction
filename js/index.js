@@ -210,3 +210,4 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
   });
   fileInput.click(); // Спрацьовуємо клік на прихованому input для вибору файлу
 });
+// Force rebuild

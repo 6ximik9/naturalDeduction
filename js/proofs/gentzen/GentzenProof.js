@@ -10,7 +10,7 @@ import {addNextLastButtonClickGentzen} from '../../state/stateManager.js';
 import {checkRule, shakeElement, typeProof} from "../../index.js";
 import {createTreeD3} from "../../ui/tree.js";
 import {latexGentzen} from "../../ui/latexGen.js";
-import {AXIOM_HANDLERS, GENTZEN_BUTTONS, ROBINSON_AXIOMS, ruleGentzenHandlers} from './ruleGentzenHandlers.js';
+import {AXIOM_HANDLERS, GENTZEN_BUTTONS, ROBINSON_AXIOMS, ORDER_AXIOMS, ruleGentzenHandlers} from './ruleGentzenHandlers.js';
 import {formulaToString} from "../../core/formatter.js";
 import {addProofTextHoverEffects, initializeProofTextHover} from '../../ui/proofTextHover.js';
 import {validateRobinsonAxioms} from "../../core/robinsonAxiomValidator.js";
@@ -382,7 +382,11 @@ export function processExpression(expression, countRules) {
       break;
 
     case "equality":
-      generateButtons(4, [GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[19]]);
+      const eqButtons = [GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]];
+      if (!expr.operator || expr.operator === '=' || expr.operator === 'EQUAL') {
+        eqButtons.push(GENTZEN_BUTTONS[19]);
+      }
+      generateButtons(eqButtons.length, eqButtons);
       break;
 
     case "addition":
@@ -421,7 +425,7 @@ function generateButtons(buttonCount, buttonTexts) {
   buttonContainer.style.position = 'relative';
 
   // Check if this is for axioms - more specific detection
-  const isAxiomsTab = buttonTexts.length === ROBINSON_AXIOMS.length &&
+  const isAxiomsTab = buttonTexts.length === (ROBINSON_AXIOMS.length + ORDER_AXIOMS.length) &&
     buttonTexts.every((text, index) => text.startsWith(`${index + 1}. `));
 
   // Check if this is the "All rules" tab (when all GENTZEN_BUTTONS are shown)
@@ -503,7 +507,18 @@ function generateButtons(buttonCount, buttonTexts) {
       }
     });
 
-    if (isInLocalHypotheses || isRobinsonAxiom) {
+    // Check if current expression matches any Order axiom
+    const isOrderAxiom = ORDER_AXIOMS.some(axiom => {
+      try {
+        const axiomParsed = deductive.getProof(deductive.checkWithAntlr(axiom));
+        return deductive.compareExpressions(axiomParsed, currentExpr);
+      } catch (error) {
+        console.warn('Error parsing axiom:', axiom, error);
+        return false;
+      }
+    });
+
+    if (isInLocalHypotheses || isRobinsonAxiom || isOrderAxiom) {
       const closeBtn = createButton("Close branch", () => closeSide(side));
       closeBtn.style.minHeight = '80px';
       buttonContainer.appendChild(closeBtn);
@@ -514,6 +529,12 @@ function generateButtons(buttonCount, buttonTexts) {
   }
 
   for (let i = 0; i < buttonCount; i++) {
+    if (isAxiomsTab && i === ROBINSON_AXIOMS.length) {
+      const header = document.createElement('h4');
+      header.textContent = 'Linear Order Axioms';
+      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 20px 0 14px 0; color: #333; font-family: "Times New Roman", serif;';
+      buttonContainer.appendChild(header);
+    }
     const button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i]));
 
     if (isAxiomsTab) {
@@ -590,10 +611,14 @@ function generateButtons(buttonCount, buttonTexts) {
         } else {
           console.log('Showing all axioms');
           // Show all axioms
-          const formattedAxioms = ROBINSON_AXIOMS.map((axiom, index) =>
+          const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) =>
             `${index + 1}. ${axiom}`
           );
-          generateButtons(ROBINSON_AXIOMS.length, formattedAxioms);
+          const formattedOrder = ORDER_AXIOMS.map((axiom, index) =>
+            `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`
+          );
+          const formattedAxioms = [...formattedRobinson, ...formattedOrder];
+          generateButtons(formattedAxioms.length, formattedAxioms);
         }
 
       } else {
@@ -778,7 +803,8 @@ function closeSide(container) {
 
   // Позначаємо гілку як закриту
   container.className = 'closed';
-  const labelText = `[${container.textContent}]`;
+  let labelText = `[${container.textContent}]`;
+  labelText = labelText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   // 4. Вставляємо вже готовий рядок gammaHtml
   container.innerHTML = `<div class="proof-content">${gammaHtml}<label class="previous" id="proofText">${labelText}</label></div>`;
@@ -1176,6 +1202,7 @@ function createProofTree(conclusions, container, hyp = null) {
       //Заміна всіх s0 на s(0)
       // text = text.replace(/s0/g, 's(0)');
       text = text.replace(/s\(0\)/g, 's0');
+      text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       // console.log(text);
       proofDiv.id = 'divId-' + container.id;
 
@@ -1210,6 +1237,7 @@ function createProofTree(conclusions, container, hyp = null) {
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
       // text = text.replace(/s0/g, 's(0)');
       text = text.replace(/s\(0\)/g, 's0');
+      text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
 
@@ -1500,17 +1528,21 @@ function addClickGentzenRules() {
         //   helpButtonToggleState.axioms = false;
         //   processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 0);
       } else if (tabId === 'tab3') {
-        // Axioms tab - show Robinson Arithmetic axioms
+        // Axioms tab - show Robinson Arithmetic axioms and Order Axioms
         if (typeProof === 1) {
           return;
         }
         // Reset Axioms toggle state when switching to tab3
         helpButtonToggleState.axioms = false;
         // Format axioms for generateButtons
-        const formattedAxioms = ROBINSON_AXIOMS.map((axiom, index) =>
+        const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) =>
           `${index + 1}. ${axiom}`
         );
-        generateButtons(ROBINSON_AXIOMS.length, formattedAxioms);
+        const formattedOrder = ORDER_AXIOMS.map((axiom, index) =>
+          `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`
+        );
+        const formattedAxioms = [...formattedRobinson, ...formattedOrder];
+        generateButtons(formattedAxioms.length, formattedAxioms);
       } else if (tabId === 'tab4') {
         // Reset toggle states when switching to tree view tab
         helpButtonToggleState.allRules = false;
