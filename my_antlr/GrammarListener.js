@@ -176,15 +176,6 @@ export default class GrammarListener extends antlr4.tree.ParseTreeListener {
 	}
 
 
-	// Enter a parse tree produced by GrammarParser#constant.
-	enterConstant(ctx) {
-	}
-
-	// Exit a parse tree produced by GrammarParser#constant.
-	exitConstant(ctx) {
-	}
-
-
 	// Enter a parse tree produced by GrammarParser#relationSymb.
 	enterRelationSymb(ctx) {
 	}

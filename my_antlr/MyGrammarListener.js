@@ -366,9 +366,14 @@ export default class MyGrammarListener extends GrammarListener {
     this.logExit("arithmeticFunc", ctx);
     const right = this.stack.pop();
     const left = this.stack.pop();
-    const operator = ctx.getChild(0).getText(); // + or *
+    const operator = ctx.getChild(0).getText().toLowerCase(); // Normalize to handle ADD, Add, add
 
-    const type = operator === '+' ? 'addition' : 'multiplication';
+    let type = 'multiplication'; // Default
+    if (['+', 'add', 'sum', 'plus'].includes(operator)) {
+      type = 'addition';
+    } else if (['*', 'mult', 'prod', 'times'].includes(operator)) {
+      type = 'multiplication';
+    }
 
     const arithmetic = {
       type: type,
@@ -386,18 +391,6 @@ export default class MyGrammarListener extends GrammarListener {
       name: ctx.getText()
     };
     this.stack.push(variable);
-  }
-
-  // Constant handling
-  exitConstant(ctx) {
-    this.logExit("constant", ctx);
-    // The numberSymb is already on the stack, just change its type to 'constant'
-    if (this.stack.length > 0) {
-      const top = this.stack[this.stack.length - 1];
-      if (top.type === 'number') {
-        top.type = 'constant';
-      }
-    }
   }
 
   // Relation symbol handling

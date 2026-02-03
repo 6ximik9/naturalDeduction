@@ -908,6 +908,13 @@ export function extractConstantsOrVariables(proof) {
       }
     }
 
+    // Handle numbers (new grammar type)
+    if (node.type === 'number') {
+      if (node.value !== undefined) {
+        result.push(node.value.toString());
+      }
+    }
+
     // Handle atoms (TRUE/FALSE and relation symbols like P, Q, R)
     if (node.type === 'atom') {
       if (node.value && node.value !== '⊤' && node.value !== '⊥') {
