@@ -5,6 +5,7 @@ import * as editorMonaco from './ui/monacoEditor';
 import * as gentzen from './proofs/gentzen/GentzenProof'
 import * as deductive from './core/deductiveEngine';
 import * as fitch from "./proofs/fitch/FitchProof";
+import * as sequent from "./proofs/sequent/SequentProof";
 import * as help from './ui/help';
 import {setEditorError} from "./ui/monacoEditor";
 import {initProofView} from "./ui/proofView";
@@ -28,6 +29,8 @@ document.addEventListener("DOMContentLoaded", function() {
     if (target.type === 'radio' && target.name === 'radio') {
       if (target.nextElementSibling.textContent === "Fitch") {
         typeProof = 1;
+      } else if (target.nextElementSibling.textContent === "Sequent") {
+        typeProof = 2;
       } else
       {
         typeProof = 0;
@@ -117,6 +120,9 @@ enterButton.addEventListener('click', function () {
   {
     fitchProof();
   }
+  else if (typeProof === 2) {
+    sequentProof();
+  }
   else
   {
     gentzenProof();
@@ -145,6 +151,20 @@ function fitchProof()
     let userText = editorMonaco.editor.getValue();
     fitch.setUserHypothesesFitch([]);
     fitch.fitchStart(userText);
+  }
+}
+
+function sequentProof() {
+  if (editorMonaco.editor.getValue().includes('⊢')) {
+    // Якщо користувач вводить цілу секвенцію
+    let userText = editorMonaco.editor.getValue();
+    sequent.parseExpression(userText);
+  } else {
+    // Якщо користувач вводить тільки формулу (як в Gentzen)
+    // Ми інтерпретуємо це як "Довести цю формулу" (⊢ A)
+    // Тобто порожній антецедент і одна формула в сукцеденті
+    gentzen.setUserHypotheses([]); // Clear Gentzen context just in case
+    sequent.parseExpression(inputText);
   }
 }
 

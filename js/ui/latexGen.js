@@ -1,5 +1,9 @@
 import {typeProof} from "../index";
 import {clearItems} from "../proofs/fitch/FitchProof";
+import * as deductive from '../core/deductiveEngine';
+
+let sequentContextRef = { treeRoot: null };
+let latexSequentListenerAdded = false;
 
 
 function getLate(element) {
@@ -138,6 +142,68 @@ export function latexFitch() {
     level = "";
     outputArray = [];
   });
+}
+
+export function latexSequent(context) {
+  sequentContextRef = context;
+  if (latexSequentListenerAdded) return;
+  latexSequentListenerAdded = true;
+
+  document.getElementById('latex').addEventListener('click', function () {
+    if (typeProof !== 2) return;
+    setProofDef();
+
+    if (!sequentContextRef.treeRoot) return;
+
+    const latexStr = generateSequentLatex(sequentContextRef.treeRoot);
+    const wrapped = `\\begin{prooftree}
+${latexStr}
+\\end{prooftree}`;
+
+    info.textContent = wrapped;
+    latexModal.style.display = 'flex';
+    document.querySelector('#latexCode').style.height = '600px';
+  });
+}
+
+function generateSequentLatex(node) {
+  let result = "";
+
+  if (node.children) {
+    node.children.forEach(child => {
+      result += generateSequentLatex(child);
+    });
+  }
+
+  const left = node.antecedent.map(f => deductive.convertToLogicalExpression(f)).join(', ');
+  const right = node.succedent.map(f => deductive.convertToLogicalExpression(f)).join(', ');
+  const content = `$${latexEdit(left + ' \\vdash ' + right, 0)}$`;
+
+  if (!node.children || node.children.length === 0) {
+    result += `\\AxiomC{${content}}
+`;
+  } else {
+    if (node.ruleApplied) {
+      result += `\\RightLabel{$${latexEdit(node.ruleApplied, 1)}$}
+`;
+    }
+
+    if (node.children.length === 1) {
+      result += `\\UnaryInfC{${content}}
+`;
+    } else if (node.children.length === 2) {
+      result += `\\BinaryInfC{${content}}
+`;
+    } else if (node.children.length === 3) {
+      result += `\\TrinaryInfC{${content}}
+`;
+    } else {
+      result += `\\UnaryInfC{${content}}
+`;
+    }
+  }
+
+  return result;
 }
 
 let level = ""
@@ -308,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
           info.textContent = transformArray(proofTexts).join('\n');
           latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
           document.querySelector('#latexCode').style.height = '600px';
-        } else {
+        } else if (typeProof === 1) {
           clearItems();
 
           const branch = document.querySelectorAll('.fitch_branch');
@@ -323,6 +389,16 @@ document.addEventListener('DOMContentLoaded', function () {
           indexTest = 0;
           level = "";
           outputArray = [];
+        } else {
+          // Sequent
+          if (!sequentContextRef.treeRoot) return;
+
+          const latexStr = generateSequentLatex(sequentContextRef.treeRoot);
+          const wrapped = `\\begin{prooftree}\n${latexStr}\n\\end{prooftree}`;
+
+          info.textContent = wrapped;
+          latexModal.style.display = 'flex';
+          document.querySelector('#latexCode').style.height = '600px';
         }
       } else if (this.innerText === "Document") {
         if (typeProof === 0) {
@@ -337,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function () {
           info.textContent = startDoc + "\n" + transformArray(proofTexts).join('\n') + "\n\n\\end{document}";
           latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
           document.querySelector('#latexCode').style.height = '600px';
-        } else {
+        } else if (typeProof === 1) {
           info.textContent = "";
           const startDoc = "\\documentclass{article}\n" +
             "\\usepackage{fitch} %http://www.actual.world/resources/tex/sty/kluwer/edited/fitch.sty \n\n" +
@@ -356,6 +432,21 @@ document.addEventListener('DOMContentLoaded', function () {
           indexTest = 0;
           level = "";
           outputArray = [];
+        } else {
+          // Sequent
+          info.textContent = "";
+          const startDoc = "\\documentclass{article}\n" +
+            "\\usepackage{bussproofs} %https://ctan.org/pkg/bussproofs \n\n" +
+            "\\begin{document}\n";
+
+          if (!sequentContextRef.treeRoot) {
+            info.textContent = startDoc + "\n\n\\end{document}";
+          } else {
+            const latexStr = generateSequentLatex(sequentContextRef.treeRoot);
+            info.textContent = startDoc + `\\begin{prooftree}\n${latexStr}\n\\end{prooftree}` + "\n\n\\end{document}";
+          }
+          latexModal.style.display = 'flex';
+          document.querySelector('#latexCode').style.height = '600px';
         }
       }
 
