@@ -28,8 +28,18 @@ function getMaxWidth(node) {
 
 
 export function createTreeD3(treeJ) {
-  var svg = d3.select("svg"),
-    width = +svg.attr("width"),
+  var svg = d3.select("#sequentTreeSvg");
+  if (svg.empty()) {
+      svg = d3.select("#button-container svg");
+  }
+  if (svg.empty()) {
+      svg = d3.select("svg");
+  }
+
+  // Clear previous content to avoid overlapping trees
+  svg.selectAll("*").remove();
+
+  var width = +svg.attr("width"),
     height = +svg.attr("height"),
     g = svg.append("g").attr("transform", "translate(0,40)");
 
@@ -223,11 +233,22 @@ function transformToD3S(node) {
     if (node.type === "sequent") {
       const children = [];
       // Add premises
-      node.premises.forEach(premise => children.push(processNode(premise)));
+      if (Array.isArray(node.premises)) {
+          node.premises.forEach(premise => children.push(processNode(premise)));
+      } else {
+          children.push(processNode(node.premises));
+      }
+      
       // Add turnstile
       children.push({ name: "⊢" });
+      
       // Add conclusion
-      children.push(processNode(node.conclusion));
+      if (Array.isArray(node.conclusion)) {
+          node.conclusion.forEach(concl => children.push(processNode(concl)));
+      } else {
+          children.push(processNode(node.conclusion));
+      }
+      
       return {
         name: "sequent",
         children: children

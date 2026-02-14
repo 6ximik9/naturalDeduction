@@ -9,6 +9,7 @@ import {shakeElement, typeProof} from "../../index.js";
 import {SEQUENT_CALCULUS_RULES, getRuleName, ruleSequentHandlers} from "./ruleSequentHandlers.js";
 import {latexSequent} from "../../ui/latexGen.js";
 import {saveStateSequent, addNextLastButtonClickSequent, clearStateHistory} from "../../state/stateManager.js";
+import {createTreeD3} from "../../ui/tree.js";
 
 
 // Context for Sequent Calculus
@@ -105,6 +106,7 @@ export function parseExpression(text) {
         selectSequent(rootSequent.domElement, rootSequent);
     }
 
+    setupTabListeners();
     generateSequentButtons();
     addNextLastButtonClickSequent();
     addOrRemoveParenthesesSequent();
@@ -541,9 +543,19 @@ function handleFormulaClick(element, sequentNode) {
         retBtn.disabled = true;
         retBtn.classList.add('disabled-action-btn');
     }
+
+    const treeTab = document.getElementById('tab4');
+    if (treeTab && treeTab.checked && typeProof === 2) {
+        renderTreeView();
+    }
 }
 
 function generateSequentButtons() {
+    const treeTab = document.getElementById('tab4');
+    if (treeTab && treeTab.checked && typeProof === 2) {
+        return;
+    }
+
     const buttonContainer = document.getElementById('button-container');
     buttonContainer.innerHTML = '';
 
@@ -650,4 +662,79 @@ function addOrRemoveParenthesesSequent() {
              // shakeButton(newRetBtn); // Need to import shakeButton or define it
         }
     });
+}
+
+let tabListenersInitialized = false;
+
+function setupTabListeners() {
+    if (tabListenersInitialized) return;
+    tabListenersInitialized = true;
+
+    const tabToggles = document.querySelectorAll('input[name="tab-toggle"]');
+    tabToggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            if (typeProof !== 2) return;
+            const tabId = this.id;
+            
+            if (tabId === 'tab4') {
+                renderTreeView();
+            } else {
+                generateSequentButtons();
+            }
+        });
+    });
+}
+
+function renderTreeView() {
+    const buttonContainer = document.getElementById('button-container');
+    buttonContainer.innerHTML = '';
+    
+    if (!side) {
+        buttonContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Select a formula or sequent in the proof tree to view its structure.</div>';
+        return;
+    }
+    
+    const currentSeq = domToSequentMap.get(side);
+    if (!currentSeq) return;
+    
+    let formula;
+    
+    if (selectedFormulaIndex.index !== -1) {
+        // A specific formula is selected
+        const formulas = selectedFormulaIndex.side === 'left' ? currentSeq.antecedent : currentSeq.succedent;
+        formula = formulas[selectedFormulaIndex.index];
+    } else {
+        // The whole sequent is selected
+        formula = {
+            type: 'sequent',
+            premises: currentSeq.antecedent,
+            conclusion: currentSeq.succedent
+        };
+    }
+    
+    // Container for SVG
+    let svgContainer = document.createElement("div");
+    svgContainer.style.width = "100%";
+    svgContainer.style.maxWidth = "1000px";
+    svgContainer.style.overflow = "auto";
+    svgContainer.style.height = "auto";
+    svgContainer.style.margin = "0 auto";
+    svgContainer.style.display = "block";
+
+    let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgElement.setAttribute("id", "sequentTreeSvg"); // Add specific ID for D3 selection
+    svgElement.setAttribute("width", "1000");
+    svgElement.setAttribute("height", "1000");
+
+    svgContainer.appendChild(svgElement);
+    buttonContainer.appendChild(svgContainer);
+    
+    try {
+        let size = createTreeD3(formula);
+        svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
+        svgElement.setAttribute("height", (size[1] + 100).toString());
+    } catch (e) {
+        console.error("Tree render error:", e);
+        buttonContainer.innerHTML = '<div style="padding: 20px; color: red;">Error rendering tree. Select a formula to view.</div>';
+    }
 }

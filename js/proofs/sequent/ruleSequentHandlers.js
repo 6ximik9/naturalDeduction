@@ -35,7 +35,13 @@ export const SEQUENT_CALCULUS_RULES = [
   "$$\\frac{\\Gamma, \\phi, \\phi \\vdash \\Delta}{\\Gamma, \\phi \\vdash \\Delta} \\; (cl)$$ ",
   "$$\\frac{\\Gamma \\vdash \\Delta, \\phi, \\phi}{\\Gamma \\vdash \\Delta, \\phi} \\; (cr)$$ ",
   "$$\\frac{\\Gamma, \\psi, \\phi \\vdash \\Delta}{\\Gamma, \\phi, \\psi \\vdash \\Delta} \\; (exl)$$ ",
-  "$$\\frac{\\Gamma \\vdash \\Delta, \\psi, \\phi}{\\Gamma \\vdash \\Delta, \\phi, \\psi} \\; (exr)$$ "
+  "$$\\frac{\\Gamma \\vdash \\Delta, \\psi, \\phi}{\\Gamma \\vdash \\Delta, \\phi, \\psi} \\; (exr)$$ ",
+
+  // Квантори
+  "$$\\frac{\\Gamma, \\phi[t/x] \\vdash \\Delta}{\\Gamma, \\forall x \\phi \\vdash \\Delta} \\; (\\forall l)$$ ",
+  "$$\\frac{\\Gamma \\vdash \\Delta, \\phi[y/x]}{\\Gamma \\vdash \\Delta, \\forall x \\phi} \\; (\\forall r)$$ ",
+  "$$\\frac{\\Gamma, \\phi[y/x] \\vdash \\Delta}{\\Gamma, \\exists x \\phi \\vdash \\Delta} \\; (\\exists l)$$ ",
+  "$$\\frac{\\Gamma \\vdash \\Delta, \\phi[t/x]}{\\Gamma \\vdash \\Delta, \\exists x \\phi} \\; (\\exists r)$$ "
 ];
 
 // Helper to extract rule name (e.g., "(id)" -> "id") from LaTeX string
@@ -96,5 +102,10 @@ export const ruleSequentHandlers = {
     "cr": { action: () => RULES.contrRight() },
     
     "exl": { action: () => RULES.exchLeft() },
-    "exr": { action: () => RULES.exchRight() }
+    "exr": { action: () => RULES.exchRight() },
+
+    "foralll": { action: () => RULES.forallLeft() },
+    "forallr": { action: () => RULES.forallRight() },
+    "existsl": { action: () => RULES.existsLeft() },
+    "existsr": { action: () => RULES.existsRight() }
 };

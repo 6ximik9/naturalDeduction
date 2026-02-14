@@ -58,7 +58,8 @@ WS: [ \t\r\n]+ -> skip;
 // ==========================================
 
 // Main formula rule - supports sequent notation (premises ⊢ conclusion)
-formula: (atomList '⊢')? implication EOF;
+formula: atomList? '⊢' atomList? EOF
+       | atomList EOF;
 
 // List of premises separated by commas
 atomList: implication (',' implication)*;

@@ -29,15 +29,37 @@ document.addEventListener("DOMContentLoaded", function() {
     if (target.type === 'radio' && target.name === 'radio') {
       if (target.nextElementSibling.textContent === "Fitch") {
         typeProof = 1;
+        updateAxiomTabVisibility(false);
       } else if (target.nextElementSibling.textContent === "Sequent") {
         typeProof = 2;
+        updateAxiomTabVisibility(true);
       } else
       {
         typeProof = 0;
+        updateAxiomTabVisibility(false);
       }
     }
   });
 });
+
+function updateAxiomTabVisibility(isSequent) {
+  const axiomTabLabel = document.querySelector('label[for="tab3"]');
+  if (axiomTabLabel) {
+    const axiomTabLi = axiomTabLabel.closest('li');
+    if (axiomTabLi) {
+      axiomTabLi.style.display = isSequent ? 'none' : 'block';
+    }
+  }
+  
+  if (isSequent) {
+      const axiomRadio = document.getElementById('tab3');
+      if (axiomRadio && axiomRadio.checked) {
+          const firstTab = document.getElementById('tab1');
+          if (firstTab) firstTab.checked = true;
+      }
+  }
+}
+
 
 
 export function checkRule(index, text, editorInstance = editorMonaco.editor) {

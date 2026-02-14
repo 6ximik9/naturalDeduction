@@ -14,27 +14,77 @@ export default class MyGrammarListener extends GrammarListener {
   // Formula handling - supports sequent notation (premises ⊢ conclusion)
   exitFormula(ctx) {
     this.logExit("formula", ctx);
-    // Check if this is actually a sequent by looking for the ⊢ symbol
-    let hasSequentSymbol = false;
+    
+    let isSequent = false;
+    // Check if it's a sequent
     for (let i = 0; i < ctx.getChildCount(); i++) {
       if (ctx.getChild(i).getText() === '⊢') {
-        hasSequentSymbol = true;
+        isSequent = true;
         break;
       }
     }
 
-    if (hasSequentSymbol) {
-      // Sequent: premises ⊢ conclusion (atomList '⊢' implication EOF)
-      const conclusion = this.stack.pop(); // implication
-      const premises = this.stack.pop();   // atomList
-      const sequent = {
-        type: 'sequent',
-        premises: premises,
-        conclusion: conclusion
-      };
-      this.stack.push(sequent);
+    if (isSequent) {
+        // Count how many rule contexts (atomList) are children
+        let atomListsCount = 0;
+        for (let i = 0; i < ctx.getChildCount(); i++) {
+            // Rule contexts typically have children or a specific rule index
+            // TerminalNodes do not have ruleIndex usually
+            const child = ctx.getChild(i);
+            if (child.symbol) { // It's a TerminalNode
+                continue;
+            }
+            atomListsCount++;
+        }
+
+        // Pop that many items from stack (in reverse order)
+        const stackItems = [];
+        for (let k = 0; k < atomListsCount; k++) {
+            stackItems.unshift(this.stack.pop());
+        }
+
+        let premises = [];
+        let conclusion = [];
+        let turnstilePassed = false;
+        let itemIndex = 0;
+
+        for (let i = 0; i < ctx.getChildCount(); i++) {
+            const child = ctx.getChild(i);
+            const text = child.getText();
+
+            if (text === '⊢') {
+                turnstilePassed = true;
+            } else if (text === '<EOF>') {
+                break;
+            } else {
+                // Assume it is an atomList
+                if (itemIndex < stackItems.length) {
+                    if (turnstilePassed) {
+                        conclusion = stackItems[itemIndex];
+                    } else {
+                        premises = stackItems[itemIndex];
+                    }
+                    itemIndex++;
+                }
+            }
+        }
+
+        const sequent = {
+            type: 'sequent',
+            premises: premises || [],
+            conclusion: conclusion || []
+        };
+        this.stack.push(sequent);
+
+    } else {
+       // Just atomList
+       const list = this.stack.pop();
+       if (Array.isArray(list) && list.length === 1) {
+           this.stack.push(list[0]);
+       } else {
+           this.stack.push(list);
+       }
     }
-    // If no sequent symbol, the implication is already on the stack
   }
 
   // Atom list handling for sequent premises
