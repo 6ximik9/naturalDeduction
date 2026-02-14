@@ -134,6 +134,11 @@ enterButton.addEventListener('click', function () {
     return;
   }
 
+  if (!validateInputForStyle(text, typeProof)) {
+    shakeElement('enter', 5);
+    return;
+  }
+
   // Show the proof container
   const proofContainer = document.getElementById('proof-container');
   if (proofContainer) proofContainer.style.display = 'block';
@@ -151,6 +156,53 @@ enterButton.addEventListener('click', function () {
   }
 
 });
+
+function validateInputForStyle(input, style) {
+  try {
+    // We reuse the parsing logic to check structure
+    let ast = deductive.checkWithAntlr(input);
+    
+    // checkWithAntlr might return an array if the input is a list 'A, B' (which matches atomList)
+    // or a 'sequent' object if it contains '⊢'
+    // or a simple formula object (which might be wrapped or not, depending on listeners)
+
+    // Style 0: Gentzen, 1: Fitch
+    if (style === 0 || style === 1) {
+      if (ast.type === 'sequent') {
+        // Check conclusion (succedent)
+        // In our modified listener, conclusion is an array of formulas
+        if (Array.isArray(ast.conclusion)) {
+          if (ast.conclusion.length > 1) {
+            alert("Gentzen and Fitch styles require a single formula in the conclusion (right side of ⊢).");
+            return false;
+          }
+          if (ast.conclusion.length === 0) {
+            alert("Gentzen and Fitch styles require a conclusion.");
+            return false;
+          }
+        } else {
+           // Should be array, but if single object, it's length 1 essentially
+        }
+      } 
+      else if (Array.isArray(ast)) {
+        // It's a list of formulas without turnstile, e.g. "A, B"
+        // Gentzen/Fitch treat non-sequent input as the goal formula.
+        // It should be a single formula.
+        if (ast.length > 1) {
+          alert("Gentzen and Fitch styles expect a single formula as input (or a single-conclusion sequent).");
+          return false;
+        }
+      }
+    }
+    
+    // Style 2: Sequent (allows multi-conclusion and lists)
+    return true;
+
+  } catch (e) {
+    console.warn("Validation check failed parsing, but checkRule passed?", e);
+    return true; // Let the proof handler deal with edge cases if standard parse fails here
+  }
+}
 
 function fitchProof()
 {
