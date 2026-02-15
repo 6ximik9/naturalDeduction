@@ -83,6 +83,10 @@ navbarItems.forEach(function (item) {
       info.innerHTML = '';
       helpDiv.style.height = '600px';
       info.appendChild(createMathTable());
+    } else if (clickedItem.textContent === 'Axioms') {
+      info.innerHTML = '';
+      helpDiv.style.height = '600px';
+      setAxioms();
     } else {
       info.innerHTML = '';
       helpDiv.style.height = '600px';
@@ -93,6 +97,48 @@ navbarItems.forEach(function (item) {
 
   });
 });
+
+function setAxioms() {
+    var robinsonHeader = document.createElement('div');
+    robinsonHeader.textContent = 'Robinson Arithmetic';
+    robinsonHeader.style.fontSize = fontSize + 'px';
+    robinsonHeader.style.fontWeight = 'bold';
+    robinsonHeader.style.marginBottom = '10px';
+    robinsonHeader.style.marginTop = '10px';
+    
+    var ax1 = createHelpItem('Axiom 1', 's(x) ≠ 0', 'Zero is not a successor of any number.', '');
+    var ax2 = createHelpItem('Axiom 2', 's(x) = s(y) ⇒ x = y', 'Successor function is injective.', '');
+    var ax3 = createHelpItem('Axiom 3', 'x + 0 = x', 'Identity element for addition.', '');
+    var ax4 = createHelpItem('Axiom 4', 'x + s(y) = s(x + y)', 'Recursive definition of addition.', '');
+    var ax5 = createHelpItem('Axiom 5', 'x * 0 = 0', 'Multiplication by zero.', '');
+    var ax6 = createHelpItem('Axiom 6', 'x * s(y) = (x * y) + x', 'Recursive definition of multiplication.', '');
+    var ax7 = createHelpItem('Axiom 7', 'x = x', 'Reflexivity of equality.', '');
+
+    var orderHeader = document.createElement('div');
+    orderHeader.textContent = 'Linear Order';
+    orderHeader.style.fontSize = fontSize + 'px';
+    orderHeader.style.fontWeight = 'bold';
+    orderHeader.style.marginBottom = '10px';
+    orderHeader.style.marginTop = '20px';
+
+    var ord1 = createHelpItem('Order 1', '¬(x < x)', 'Irreflexivity of strict order.', '');
+    var ord2 = createHelpItem('Order 2', 'x < y ∧ y < z ⇒ x < z', 'Transitivity of order.', '');
+    var ord3 = createHelpItem('Order 3', 'x < y ∨ x = y ∨ y < x', 'Trichotomy law (linearity).', '');
+
+    info.appendChild(robinsonHeader);
+    info.appendChild(ax1);
+    info.appendChild(ax2);
+    info.appendChild(ax3);
+    info.appendChild(ax4);
+    info.appendChild(ax5);
+    info.appendChild(ax6);
+    info.appendChild(ax7);
+
+    info.appendChild(orderHeader);
+    info.appendChild(ord1);
+    info.appendChild(ord2);
+    info.appendChild(ord3);
+}
 
 function setGeneral() {
   helpDiv.style.height = '600px';
@@ -271,23 +317,39 @@ function createMathTable() {
 
 
   const logicalSymbols = [
-    { symbol: '⇒', code: '\\Rightarrow' },
-    { symbol: '∨', code: '\\lor' },
-    { symbol: '∧', code: '\\land' },
-    { symbol: '¬', code: '\\neg' },
-    { symbol: '∀', code: '\\forall' },
-    { symbol: '∃', code: '\\exists' },
-    { symbol: '=', code: '\\eq' },
-    { symbol: '⊤', code: '\\verum' },
-    { symbol: '⊥', code: '\\absurdum' },
-    { symbol: '——————', code: '\\-' },
-    { symbol: '⊢', code: '\\proves' }
+    { symbol: '⇒', code: '\\Rightarrow', input: '->, =>' },
+    { symbol: '∨', code: '\\lor', input: '|, or' },
+    { symbol: '∧', code: '\\land', input: '&, and' },
+    { symbol: '¬', code: '\\neg', input: '!, ~' },
+    { symbol: '∀', code: '\\forall', input: 'forall, ALL' },
+    { symbol: '∃', code: '\\exists', input: 'exists, EX' },
+    { symbol: '=', code: '=', input: '=' },
+    { symbol: '≠', code: '\\neq', input: '!=, <>' },
+    { symbol: '⊤', code: '\\top', input: 'TRUE' },
+    { symbol: '⊥', code: '\\bot', input: 'FALSE' },
+    { symbol: 's(x)', code: 's(x)', input: 's(0)' },
+    { symbol: '+', code: '+', input: '+, add' },
+    { symbol: '*', code: '*', input: '*, mult' },
+    { symbol: '⊢', code: '\\vdash', input: '|-' }
   ];
 
 
 
   const tableLogic = document.createElement('table');
   tableLogic.classList.add('wikitable');
+
+  // Header row for Logic table
+  const logicHead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  ['Symbol', 'Latex', 'Keyboard Input'].forEach(text => {
+      const th = document.createElement('th');
+      th.textContent = text;
+      th.style.textAlign = 'left';
+      th.style.padding = '8px';
+      headRow.appendChild(th);
+  });
+  logicHead.appendChild(headRow);
+  tableLogic.appendChild(logicHead);
 
   // Create table body
   const tbodyLogic = document.createElement('tbody');
@@ -296,6 +358,7 @@ function createMathTable() {
   for (let i = 0; i < logicalSymbols.length; i++) {
     const symbol1 = logicalSymbols[i].symbol;
     const code1 = logicalSymbols[i].code;
+    const input1 = logicalSymbols[i].input;
 
     const row = document.createElement('tr');
 
@@ -310,12 +373,18 @@ function createMathTable() {
     codeCode1.textContent = code1;
     codeCell1.appendChild(codeCode1);
     row.appendChild(codeCell1);
+    
+    const inputCell1 = document.createElement('td');
+    const inputCode1 = document.createElement('code');
+    inputCode1.textContent = input1;
+    inputCell1.appendChild(inputCode1);
+    row.appendChild(inputCell1);
 
     tbodyLogic.appendChild(row);
   }
 
   const operationHeader = document.createElement('div');
-  operationHeader.textContent = 'Operations';
+  operationHeader.textContent = 'Operations & Syntax';
   operationHeader.id = 'operationHeader';
   operationHeader.style.fontSize = fontSize + 'px';
   operationHeader.style.fontWeight = 'bold';
@@ -336,13 +405,16 @@ function createMathTable() {
 }
 
 function helpInput() {
-  var inline = createHelpItem('Inline', '(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)', 'The user can enter logical formulas in a single line. The program will automatically identify the formula and allow you to make operations on it.', '');
-  var multiline = createHelpItem('Multiline', 'φ⇒ψ<br>ψ⇒θ<br>θ<br>————————<br>(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)',
+  // Case sensitivity note
+  var caseNote = createHelpItem('Case Sensitivity', 'P(x) vs x', 'Use UPPERCASE letters for Predicates/Relations (e.g., P, Q, R) and lowercase letters for Variables/Functions (e.g., x, y, f, g).', '');
+  
+  var inline = createHelpItem('Inline', '(A⇒B)∧(B⇒C)⇒(A⇒C)', 'The user can enter logical formulas in a single line. The program will automatically identify the formula and allow you to make operations on it.', '');
+  var multiline = createHelpItem('Multiline', 'A⇒B<br>B⇒C<br>C<br>————————<br>(A⇒B)∧(B⇒C)⇒(A⇒C)',
     'In this mode, the user can enter logical formulas one per line. All hypotheses are entered above the line, and the result or proven statement is entered below the line', '');
-  var proves = createHelpItem('Formal proof', 'φ⇒ψ,θ ⊢ (ψ⇒θ)⇒(φ⇒θ)',
+  var proves = createHelpItem('Formal proof', 'A⇒B, C ⊢ (B⇒C)⇒(A⇒C)',
     'In this mode, the user can enter logical formulas one by one, separated a comma. All hypotheses are entered before the symbol ⊢, and the result or proven statement is entered after', '');
 
-
+  info.appendChild(caseNote);
   info.appendChild(inline);
   info.appendChild(multiline);
   info.appendChild(proves);
