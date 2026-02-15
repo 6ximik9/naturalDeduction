@@ -7,6 +7,7 @@ import * as deductive from '../../core/deductiveEngine.js';
 import {formulaToString} from "../../core/formatter.js";
 import {shakeElement, typeProof} from "../../index.js";
 import {SEQUENT_CALCULUS_RULES, getRuleName, ruleSequentHandlers} from "./ruleSequentHandlers.js";
+import {RULE_CHECKS} from "./rulesSequent.js";
 import {latexSequent} from "../../ui/latexGen.js";
 import {saveStateSequent, addNextLastButtonClickSequent, clearStateHistory} from "../../state/stateManager.js";
 import {createTreeD3} from "../../ui/tree.js";
@@ -360,8 +361,26 @@ export function addChildrenToTree(parentSequent, newSequents, ruleName) {
 
     currentLevel++;
 
-    if (newSequents.length > 0) {
-        selectSequent(newSequents[0].domElement, newSequents[0]);
+    // Clear selection after rule application
+    if (side) {
+        // Remove highlight from formulas
+        document.querySelectorAll('.sequent-formula').forEach(el => {
+            el.classList.remove('selected');
+            el.style.backgroundColor = '';
+        });
+        // Remove highlight from sequent label
+        const label = side.querySelector('#proofText');
+        if (label) {
+            label.style.background = '';
+        }
+        
+        side = null;
+        selectedFormulaIndex = { side: null, index: -1 };
+        
+        // Hide menu as nothing is selected
+        document.getElementById('proof-menu').className = 'hidden';
+        const buttonContainer = document.getElementById('button-container');
+        if (buttonContainer) buttonContainer.innerHTML = '';
     }
 
     saveStateSequent();
@@ -375,12 +394,33 @@ export function closeBranch(sequentNode, ruleName) {
 
     sequentNode.isClosed = true;
 
-    // Clear selection
+    // Clear selection of formulas
     document.querySelectorAll('.sequent-formula').forEach(el => {
         el.classList.remove('selected');
         el.style.backgroundColor = '';
     });
+    
+    // Clear selection of the whole sequent
+    if (sequentNode.domElement) {
+        const label = sequentNode.domElement.querySelector('#proofText');
+        if (label) {
+            label.style.background = '';
+        }
+    }
+
     selectedFormulaIndex = { side: null, index: -1 };
+    
+    // Clear global side selection
+    if (side === sequentNode.domElement) {
+        side = null;
+        // Clear buttons as nothing is selected
+        const buttonContainer = document.getElementById('button-container');
+        if (buttonContainer) {
+            buttonContainer.innerHTML = '';
+        }
+        // Hide the proof menu (buttons and tabs)
+        document.getElementById('proof-menu').className = 'hidden';
+    }
 
     const parentLevelDiv = sequentNode.domElement.parentNode;
 
@@ -430,6 +470,11 @@ export function getActiveSequent() {
 }
 
 function selectSequent(domElement, sequentNode) {
+    if (sequentNode.isClosed || sequentNode.children.length > 0) return;
+
+    // Ensure menu is visible
+    document.getElementById('proof-menu').className = 'proof-menu';
+
     side = domElement;
 
     // Clear all highlights (both formulas and whole labels)
@@ -459,6 +504,11 @@ function selectSequent(domElement, sequentNode) {
     if (addBtn) addBtn.classList.add('disabled-action-btn');
     if (delBtn) delBtn.classList.add('disabled-action-btn');
     if (retBtn) retBtn.classList.add('disabled-action-btn');
+
+    if (hintToggleState) {
+        hintToggleState = false;
+    }
+    generateSequentButtons();
 }
 
 function parseFormula(text) {
@@ -504,7 +554,7 @@ function formatFormula(formulaObj) {
 }
 
 function handleFormulaClick(element, sequentNode) {
-    if (sequentNode.isClosed) return;
+    if (sequentNode.isClosed || sequentNode.children.length > 0) return;
 
     if (sequentNode.domElement !== side) {
         selectSequent(sequentNode.domElement, sequentNode);
@@ -549,6 +599,11 @@ function handleFormulaClick(element, sequentNode) {
     if (treeTab && treeTab.checked && typeProof === 2) {
         renderTreeView();
     }
+    
+    if (hintToggleState) {
+        hintToggleState = false;
+        generateSequentButtons();
+    }
 }
 
 function generateSequentButtons() {
@@ -562,7 +617,24 @@ function generateSequentButtons() {
     // Set position relative for absolute positioning of hint button
     buttonContainer.style.position = 'relative';
 
-    SEQUENT_CALCULUS_RULES.forEach(ruleLatex => {
+    let rulesToDisplay = SEQUENT_CALCULUS_RULES;
+
+    if (hintToggleState) {
+        const currentSeq = getActiveSequent();
+        rulesToDisplay = SEQUENT_CALCULUS_RULES.filter(ruleLatex => {
+            const ruleName = getRuleName(ruleLatex);
+            const check = RULE_CHECKS[ruleName];
+            try {
+                // If check exists, run it. If not, default to false (hide) in hint mode.
+                return check ? check(currentSeq, selectedFormulaIndex) : false;
+            } catch (e) {
+                console.warn(`Error checking rule ${ruleName}:`, e);
+                return false;
+            }
+        });
+    }
+
+    rulesToDisplay.forEach(ruleLatex => {
         const btn = document.createElement('button');
         btn.className = 'button';
         btn.innerHTML = ruleLatex;
@@ -788,6 +860,7 @@ function generateHintButton(container) {
     helpButton.onclick = () => {
         hintToggleState = !hintToggleState;
         updateHintButtonAppearance(helpButton);
+        generateSequentButtons();
         console.log("Hint button clicked (Sequent)");
     };
 

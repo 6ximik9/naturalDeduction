@@ -385,6 +385,226 @@ export const RULES = {
     botRight: () => {},
 };
 
+// --- Rule Applicability Checks (for Hints) ---
+
+export const RULE_CHECKS = {
+    // Identity: Valid if there is an intersection between antecedent and succedent
+    id: (sequent, selection) => {
+        if (!sequent) return false;
+        // Check for common formula
+        return sequent.antecedent.some(a => 
+            sequent.succedent.some(s => areFormulasEqual(a, s))
+        );
+    },
+
+    cut: (sequent, selection) => {
+        // Cut is theoretically always applicable, but usually relevant when nothing specific is selected
+        // or as a general strategy. We'll mark it available always for now.
+        return true; 
+    },
+
+    // --- Logical Rules ---
+
+    // Left AND 1: Selected formula must be on Left and be a Conjunction
+    wedgel1: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'conjunction';
+    },
+    // Alias
+    landl1: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'conjunction';
+    },
+
+    // Left AND 2
+    wedgel2: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'conjunction';
+    },
+    landl2: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'conjunction';
+    },
+
+    // Right AND: Selected formula must be on Right and be a Conjunction
+    wedger: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'conjunction';
+    },
+    landr: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'conjunction';
+    },
+
+    // Left OR: Selected formula on Left, Disjunction
+    veel: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'disjunction';
+    },
+    lorl: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'disjunction';
+    },
+
+    // Right OR 1: Selected formula on Right, Disjunction
+    veer1: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'disjunction';
+    },
+    lorr1: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'disjunction';
+    },
+
+    // Right OR 2
+    veer2: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'disjunction';
+    },
+    lorr2: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'disjunction';
+    },
+
+    // Negation Left: Selected on Left, Negation
+    negl: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'negation';
+    },
+    lnotl: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'negation';
+    },
+
+    // Negation Right: Selected on Right, Negation
+    negr: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'negation';
+    },
+    lnotr: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'negation';
+    },
+
+    // Implication Right: Selected on Right, Implication
+    Rightarrowr: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'implication';
+    },
+    to_r: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'implication';
+    },
+
+    // Implication Left: Selected on Left, Implication
+    Rightarrowl: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'implication';
+    },
+    to_l: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'implication';
+    },
+
+    // --- Structural ---
+
+    wl: (sequent, selection) => {
+        // Weakening Left: Removes selected formula from antecedent (in bottom-up view)
+        return selection && selection.side === 'left' && selection.index !== -1;
+    },
+    wr: (sequent, selection) => {
+        // Weakening Right: Removes selected formula from succedent
+        return selection && selection.side === 'right' && selection.index !== -1;
+    },
+
+    cl: (sequent, selection) => {
+        // Contraction left: Needs a formula on left
+        return selection && selection.side === 'left' && selection.index !== -1;
+    },
+    cr: (sequent, selection) => {
+        // Contraction right: Needs a formula on right
+        return selection && selection.side === 'right' && selection.index !== -1;
+    },
+
+    exl: (sequent, selection) => {
+        // Exchange Left: Show only if focused on Left side (formula selected)
+        return selection && selection.side === 'left' && sequent.antecedent.length > 1;
+    },
+    exr: (sequent, selection) => {
+        // Exchange Right: Show only if focused on Right side (formula selected)
+        return selection && selection.side === 'right' && sequent.succedent.length > 1;
+    },
+
+    // --- Quantifiers ---
+
+    foralll: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'forall' || (f.type === 'quantifier' && (f.quantifier === 'forall' || f.quantifier === '∀'));
+    },
+    
+    forallr: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'forall' || (f.type === 'quantifier' && (f.quantifier === 'forall' || f.quantifier === '∀'));
+    },
+
+    existsl: (sequent, selection) => {
+        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
+        const f = unwrap(sequent.antecedent[selection.index]);
+        return f.type === 'exists' || (f.type === 'quantifier' && (f.quantifier === 'exists' || f.quantifier === '∃'));
+    },
+
+    existsr: (sequent, selection) => {
+        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
+        const f = unwrap(sequent.succedent[selection.index]);
+        return f.type === 'exists' || (f.type === 'quantifier' && (f.quantifier === 'exists' || f.quantifier === '∃'));
+    },
+
+    // Constants
+    topl: (sequent, selection) => false, // Not implemented in RULES
+    
+    topr: (sequent, selection) => {
+        // Axiom: |- Top. Applicable if Top is in succedent. Global rule (closes branch).
+        return sequent && sequent.succedent.some(f => {
+            const u = unwrap(f);
+            return (u.type === 'atom' && (u.value === 'T' || u.value === '⊤' || u.value === 'true')) ||
+                   (u.type === 'constant' && (u.value === 'T' || u.value === '⊤'));
+        });
+    },
+
+    botl: (sequent, selection) => {
+        // Axiom: Bot |- . Applicable if Bot is in antecedent. Global rule (closes branch).
+        return sequent && sequent.antecedent.some(f => {
+            const u = unwrap(f);
+            return (u.type === 'atom' && (u.value === 'F' || u.value === '⊥' || u.value === 'false')) ||
+                   (u.type === 'constant' && (u.value === 'F' || u.value === '⊥'));
+        });
+    },
+
+    botr: (sequent, selection) => false, // Not implemented in RULES
+};
+
 
 // --- Helper Wrapper for Single-Premise Rules ---
 
