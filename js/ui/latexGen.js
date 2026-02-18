@@ -91,7 +91,12 @@ function setProofDef()
 }
 
 export function latexGentzen() {
-  document.getElementById('latex').addEventListener('click', function () {
+  const btn = document.getElementById('sb-latex') || document.getElementById('latex');
+  if (!btn) return;
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+
+  newBtn.addEventListener('click', function () {
 
     var allProofLabels = document.querySelectorAll('label#proofText');
     var previousLabels = document.querySelectorAll('label.previous');
@@ -116,7 +121,12 @@ export function latexGentzen() {
 }
 
 export function latexFitch() {
-  document.getElementById('latex').addEventListener('click', function () {
+  const btn = document.getElementById('sb-latex') || document.getElementById('latex');
+  if (!btn) return;
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+
+  newBtn.addEventListener('click', function () {
 
     const fitchBranchElements = document.querySelectorAll('.fitch_branch:not(.finished)');
     if (fitchBranchElements.length > 0) {
@@ -149,7 +159,12 @@ export function latexSequent(context) {
   if (latexSequentListenerAdded) return;
   latexSequentListenerAdded = true;
 
-  document.getElementById('latex').addEventListener('click', function () {
+  const btn = document.getElementById('sb-latex') || document.getElementById('latex');
+  if (!btn) return;
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+
+  newBtn.addEventListener('click', function () {
     if (typeProof !== 2) return;
     setProofDef();
 

@@ -1,266 +1,893 @@
-<!doctype html>
-<html class="no-js" lang="">
+<!DOCTYPE html>
+<html lang="uk">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogicProof</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+  <!-- Load project styles first -->
   <link rel="stylesheet" href="css/style.css">
+  <!-- Load design styles to override layout -->
+  <link rel="stylesheet" href="css/design.css">
+
+  <!-- Scripts -->
   <script defer src="dist/bundle.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-chtml.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-</head>
 
+  <style>
+    /* Critical Layout Overrides to fix conflicts between style.css and design.css */
+    html, body {
+      width: 100% !important;
+      height: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important; /* Design relies on internal scrolling */
+    }
+
+    body {
+      display: flex !important;
+      flex-direction: row !important; /* Sidebar layout requires row */
+      align-items: stretch !important; /* Fix 'center' from style.css */
+      background-color: var(--col-bg-main) !important;
+      font-family: 'Inter', sans-serif !important; /* Override global font */
+    }
+
+    /* Reset global font pollution from style.css */
+    * {
+      font-family: inherit;
+    }
+
+    /* Ensure icons and specific elements can use their own fonts */
+    .ri-text, .ri-arrow-down-s-line, .ri-play-fill, .ri-sun-fill, .ri-moon-clear-line, .ri-refresh-line, [class^="ri-"] {
+      font-family: 'remixicon' !important;
+    }
+
+    /* Sidebar fix */
+    .sidebar {
+      height: 100% !important;
+      overflow-y: auto !important;
+    }
+
+    /* Main Wrapper fix - min-width: 0 is CRITICAL for flex children to shrink */
+    .main-wrapper {
+      flex-grow: 1 !important;
+      width: auto !important;
+      min-width: 0 !important;
+      height: 100% !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    /* Top Header fix */
+    .top-header {
+      flex-shrink: 0 !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Content Area fix */
+    .content-area {
+      flex-grow: 1 !important;
+      padding: 24px 32px !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      margin: 0 !important; /* Override style.css margin-top */
+    }
+
+    /* Fix Proof Container to fit new design */
+    #proof-container {
+      display: block !important; /* Override style.css display:none */
+      background: white !important;
+      border: 1px solid var(--col-border) !important;
+      border-radius: 12px !important;
+      box-shadow: none !important;
+      padding: 20px !important;
+      box-sizing: border-box !important;
+      height: 100% !important;
+    }
+
+    #proof {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Fix Editor Container */
+    #enterFormula .editorPanel {
+      width: 100% !important;
+      height: auto !important; /* Let flex grow handle it */
+      flex-grow: 1;
+      min-height: 200px; /* Ensure some height */
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex !important;
+    }
+
+    #editor {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Fix buttons that might inherit bad styles */
+    button {
+      font-family: 'Inter', sans-serif !important;
+    }
+
+    /* Compatibility fixes */
+    .hidden-compatibility {
+      display: none;
+    }
+
+    /* Dropdown styling for sidebar integration */
+    .dropdown-content-sidebar {
+      list-style: none;
+      padding-left: 20px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .dropdown-content-sidebar.show {
+      display: block;
+    }
+
+    .dropdown-content-sidebar li {
+      color: #9ca3af;
+      cursor: pointer;
+      padding: 5px 0;
+      font-size: 13px;
+      background: transparent !important; /* Override style.css */
+      text-align: left !important;
+      width: 100% !important;
+    }
+
+    .dropdown-content-sidebar li:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* Font options */
+    .font-options-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      width: 100%;
+      z-index: 100;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .font-option {
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .font-option:hover {
+      background: #f3f4f6;
+    }
+
+    /* Editor card specific overrides */
+    .editor-card {
+      display: flex;
+      flex-direction: row; /* Ensure gutters and editor are side-by-side */
+    }
+
+    /* Proof controls positioning */
+    .proof-controls {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      display: flex;
+      gap: 5px;
+      z-index: 1000;
+    }
+
+    /* Hide old elements that might pop up */
+    #menu, .allBtn, .returnMain {
+      display: none !important;
+    }
+
+    /* Ensure modals are on top */
+    .helpModal {
+      z-index: 99999 !important;
+    }
+
+    /* Utility class for hiding elements */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Layout Splitter */
+    .layout-divider {
+      width: 12px;
+      cursor: col-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background-color 0.2s;
+    }
+
+    .layout-divider::after {
+      content: '';
+      width: 4px;
+      height: 100%;
+      background-color: #e5e7eb;
+      border-radius: 2px;
+      transition: background-color 0.2s;
+    }
+
+    .layout-divider:hover::after, .layout-divider.active::after {
+      background-color: var(--col-accent);
+    }
+
+    /* Modern Tabs Styling Override */
+    .containerTabs {
+      width: 100% !important;
+      margin: 0 !important;
+      font-family: 'Inter', sans-serif !important;
+    }
+
+    .box {
+      box-shadow: none !important;
+      border: 1px solid var(--col-border);
+      border-radius: 8px;
+    }
+
+    .tab-list {
+      border-bottom: 1px solid var(--col-border);
+    }
+
+    .tab-list::before {
+      background-color: var(--col-accent) !important;
+      height: 2px !important;
+      bottom: -1px !important;
+    }
+
+    .tab-trigger {
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      color: var(--col-text-main) !important;
+      padding: 12px 0 !important;
+    }
+
+    .button-container button {
+      font-family: 'Times New Roman', serif !important; /* Keep logic symbols in serif */
+      font-size: 22px !important;
+      background: white !important;
+      border: 1px solid var(--col-border) !important;
+      border-radius: 8px !important;
+      margin: 0 !important; /* Gap handles spacing */
+      padding: 8px 16px !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+      max-width: 100% !important;
+      flex: 1 1 auto !important; /* Grow to fill gaps, shrink if needed */
+      min-width: max-content !important; /* Ensure text is visible */
+      height: auto !important;
+    }
+
+    #button-container {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 10px !important;
+      justify-content: center !important;
+      width: 100% !important;
+    }
+
+    .button-container button:hover {
+      background: #f9fafb !important;
+      border-color: var(--col-accent) !important;
+      color: var(--col-accent) !important;
+    }
+
+    /* OVERRIDE style.css MEDIA QUERIES for small screens */
+    @media (max-width: 700px) {
+      .content {
+        margin-top: 0 !important;
+        width: 100% !important;
+      }
+
+      .editorPanel {
+        width: 100% !important;
+      }
+
+      body {
+        width: 100% !important;
+        overflow-x: hidden !important;
+      }
+    }
+
+    /* --- DARK MODE VARIABLES --- */
+    body.dark-mode {
+        --col-bg-main: #0f172a;      /* Slate 900 */
+        --col-bg-white: #1e293b;     /* Slate 800 */
+        --col-text-main: #f3f4f6;    /* Gray 100 */
+        --col-text-muted: #9ca3af;   /* Gray 400 */
+        --col-border: #334155;       /* Slate 700 */
+    }
+
+    /* Dark Mode Specific Overrides */
+    body.dark-mode .sidebar {
+        border-right-color: #334155;
+    }
+
+    body.dark-mode .top-header {
+        background-color: var(--col-bg-white) !important;
+        border-bottom-color: var(--col-border) !important;
+    }
+
+    body.dark-mode .custom-select select {
+        color: var(--col-text-main) !important;
+    }
+
+    body.dark-mode .custom-select i {
+        color: var(--col-text-main) !important;
+    }
+
+    /* Sidebar Links in Dark Mode */
+    body.dark-mode .nav-link {
+        color: #cbd5e1;
+    }
+    body.dark-mode .nav-link:hover {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+    }
+    body.dark-mode .nav-link.active {
+        background-color: var(--col-accent);
+        color: white;
+    }
+
+    /* Buttons in Dark Mode */
+    body.dark-mode .btn-secondary,
+    body.dark-mode .button-container button {
+        background-color: var(--col-bg-white) !important;
+        border-color: var(--col-border) !important;
+        color: var(--col-text-main) !important;
+    }
+    body.dark-mode .btn-secondary:hover,
+    body.dark-mode .button-container button:hover {
+        background-color: #334155 !important;
+    }
+
+    /* D3 Tree Dark Mode */
+    body.dark-mode .node circle {
+        fill: var(--col-bg-white) !important;
+        stroke: var(--col-text-main) !important;
+    }
+    body.dark-mode .node text {
+        fill: var(--col-text-main) !important;
+    }
+    body.dark-mode .link {
+        stroke: #64748b !important; /* Slate 500 */
+    }
+
+    /* Layout Divider */
+    body.dark-mode .layout-divider::after {
+        background-color: #475569;
+    }
+
+    /* Theme Toggle Animation state */
+    .theme-toggle.dark::after {
+        left: 22px; /* Move circle to right */
+        background-color: #1f2937; /* Dark circle */
+    }
+
+    /* Hypotheses borders */
+    body.dark-mode .hypotheses-block {
+        border-color: var(--col-border);
+    }
+
+    /* Font dropdown */
+    body.dark-mode #font-size-select {
+        color: var(--col-text-main) !important;
+    }
+    body.dark-mode .custom-select {
+        border-color: var(--col-border) !important;
+    }
+
+    /* General containers in Dark Mode */
+    body.dark-mode #proof-container,
+    body.dark-mode #hypotheses-container,
+    body.dark-mode .proof-menu,
+    body.dark-mode .editor-card,
+    body.dark-mode .box {
+        background-color: var(--col-bg-white) !important;
+        border-color: var(--col-border) !important;
+        color: var(--col-text-main) !important;
+    }
+
+    body.dark-mode .help,
+    body.dark-mode #latexCode {
+        background-color: var(--col-bg-white) !important;
+        color: var(--col-text-main) !important;
+    }
+
+    body.dark-mode .helpNavbarItem {
+        color: var(--col-text-main) !important;
+    }
+
+    body.dark-mode #proof label {
+        color: var(--col-text-main) !important;
+    }
+
+    body.dark-mode .gamma-context {
+        color: var(--col-text-muted) !important;
+    }
+
+    /* Scrollbars */
+    body.dark-mode ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    body.dark-mode ::-webkit-scrollbar-track {
+        background: var(--col-bg-main);
+    }
+    body.dark-mode ::-webkit-scrollbar-thumb {
+        background: var(--col-border);
+        border-radius: 5px;
+    }
+    body.dark-mode ::-webkit-scrollbar-thumb:hover {
+        background: #475569;
+    }
+  </style>
+</head>
 <body>
 
-
-<button id="redirectButton" class="corner-button">
-  Feedback
-  <div class="buttonIcon" style="margin: 12px 0px 0px 12px; height: 100%; width: 50px;">
-    <img src="img/feedback.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-  </div>
-</button>
-
-
-<div class="content" id="enterFormula">
-  <div id="menu">
-    <input type="checkbox" id="dropdown-btnMenu" checked/>
-    <label id="showMenu" for="dropdown-btnMenu">
-      <span>Menu</span>
-      <span>
-        <div class="buttonIcon" style="margin: 5px 0px 0px 10px; height: 100%; width: 24px;">
-          <img src="img/menu.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-        </div>
-      </span>
-    </label>
-    <div id="menuItems">
-      <button class="base-button buttonMain" id="uploadBtn">
-        Upload
-        <div class="buttonIcon" style="margin: 5px 0px 0px 10px; height: 100%; width: 24px;">
-          <img src="img/upload.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-        </div>
-      </button>
-      <div class="dropdown">
-        <input type="checkbox" id="dropdown"/>
-        <label for="dropdown" class="dropdown-btn">
-          <span>Paste example</span>
-          <span class="arrow"></span>
-        </label>
-
-        <ul class="dropdown-content" role="menu">
-          <li data-value="φ⇒φ">φ⇒φ</li>
-          <li data-value="φ⇒¬¬φ">φ⇒¬¬φ</li>
-          <li data-value="(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)">(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)</li>
-          <li data-value="ψ,φ⊢(φ⇒ψ)∧(ψ⇒θ)">ψ,φ⊢(φ⇒ψ)∧(ψ⇒θ)</li>
-          <li data-value="multiline">
-            (φ⇒θ)
-            <br>
-            (ψ⇒θ)
-            <br>
-            (φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)
-          </li>
-        </ul>
-      </div>
-      <button class="base-button buttonMain" id="helpBtn">
-        Help
-        <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
-          <img src="img/help.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-        </div>
-      </button>
-      </button>
+<aside class="sidebar" id="sidebar-home">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+           stroke-linejoin="round">
+        <path d="M7 8h10M7 12h4m-4 4h10M4 6v12"/>
+      </svg>
     </div>
-  </div>
-  <div class="allBtn">
-    <div class="row">
-      <div class="mainButtons" id="left">
-
-        <div class="dropdownFont">
-          <input type="checkbox" id="dropdownFont"/>
-          <label for="dropdownFont" class="dropdown-btnFont">
-            <span>Font size</span>
-            <span class="arrowFont"></span>
-          </label>
-
-          <ul class="dropdown-contentFont" role="menu">
-            <li data-value="32">32</li>
-            <li data-value="38">38</li>
-            <li data-value="44">44</li>
-            <li data-value="50">50</li>
-          </ul>
-        </div>
-
-      </div>
-    </div>
-    <div class="mainButtons" id="center">
-      <div class="mydict">
-        <div>
-          <label>
-            <input type="radio" name="radio" checked="">
-            <span>Gentzen</span>
-          </label>
-          <label>
-            <input type="radio" name="radio">
-            <span>Fitch</span>
-          </label>
-          <label>
-            <input type="radio" name="radio">
-            <span>Sequent</span>
-          </label>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="mainButtons" id="right">
-        <button class="base-button buttonMain" id="enter">
-          Proof
-          <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
-            <img src="img/play.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-          </div>
-        </button>
-      </div>
-    </div>
+    LogicProof
   </div>
 
-  <div class="editorPanel" id="editorPanel">
-    <div id="editorComponent">
-      <div id="editor"></div>
-      <div class="editorResize" id="editorResize"
-           style="top: 100%; background: rgba(0, 70, 114, 0.66); touch-action: none;">
-        <div class="horizontalLine" style="background: rgb(255, 255, 255);"></div>
-      </div>
-    </div>
+  <div class="menu-group">
+    <div class="menu-title">System</div>
 
-    <div class="divider" style="left: calc(100% + 8px); background: rgb(243, 243, 243);">
-      <div class="dots">
-        <span class="dot" style="background: rgb(80, 80, 80);"></span>
-        <span class="dot" style="background: rgb(80, 80, 80);"></span>
-        <span class="dot" style="background: rgb(80, 80, 80);"></span>
-      </div>
-    </div>
+    <a href="#" class="nav-link active" id="nav-gentzen">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 7h4"/>
+        <path d="M15 7h4"/>
+        <path d="M3 12h18"/>
+        <path d="M9 17h6"/>
+      </svg>
+      Gentzen
+    </a>
+
+    <a href="#" class="nav-link" id="nav-fitch">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 4V20"/>
+        <path d="M6 8H18"/>
+        <path d="M10 12V18"/>
+        <path d="M10 12H16"/>
+      </svg>
+      Fitch
+    </a>
+
+    <a href="#" class="nav-link" id="nav-sequent">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 6V18"/>
+        <path d="M8 12H18"/>
+      </svg>
+      Sequent
+    </a>
   </div>
-</div>
 
-
-<br>
-<br>
-<br>
-
-<div class="returnMain">
-  <button class="base-button" id="home">
-    <div class="buttonIcon" style="margin: 0px 8px 0px 0px; height: 100%; width: 30px;">
-      <img src="img/home.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-    </div>
-    Main page
-  </button>
-</div>
-
-<div class="undoRedo" id="undo_redo">
-  <button class="base-button" id="backwardButton">
-    <div class="buttonIcon" style="margin: 0px 8px 0px 0px; height: 100%; width: 30px;">
-      <img src="img/back-svgrepo-com.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-    </div>
-    New formula
-  </button>
-  <button class="base-button" id="latex">
-    Latex
-    <div class="buttonIcon" style="margin: 0px 0px 0px 12px; height: 100%; width: 40px;">
-      <img src="img/latex.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-    </div>
-  </button>
-  <button class="base-button" id="forwardButton">
-    Next
-    <div class="buttonIcon" style="margin: 0px 0px 0px 8px; height: 100%; width: 30px;">
-      <img src="img/go-svgrepo-com.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-    </div>
-  </button>
-</div>
-
-<div id="inputFitch">
-  <label id="userText">a->b->c</label>
-</div>
-
-<div id="proof-container">
-  <div id="proof">
+  <div class="menu-group">
+    <div class="menu-title">Data</div>
+    <a href="#" class="nav-link" id="uploadBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      Upload
+    </a>
+    <a href="#" class="nav-link" id="pasteExampleBtn"
+       onclick="document.getElementById('exampleList').classList.toggle('show'); return false;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+      </svg>
+      Paste Example
+    </a>
+    <!-- Dropdown content for Paste Example (Backward compatibility class .dropdown-content for JS) -->
+    <ul id="exampleList" class="dropdown-content-sidebar dropdown-content"
+        style="position:static; visibility:visible; transform:none; background:transparent; width:100%;">
+      <li data-value="φ⇒φ">φ⇒φ</li>
+      <li data-value="φ⇒¬¬φ">φ⇒¬¬φ</li>
+      <li data-value="(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)">(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)</li>
+      <li data-value="ψ,φ⊢(φ⇒ψ)∧(ψ⇒θ)">ψ,φ⊢(φ⇒ψ)∧(ψ⇒θ)</li>
+      <li data-value="multiline">
+        (φ⇒θ)
+        (ψ⇒θ)
+        (φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)
+      </li>
+    </ul>
   </div>
-  <div class="proof-controls">
-    <button id="zoomInBtn" class="base-button" title="Zoom In">+</button>
-    <button id="zoomOutBtn" class="base-button" title="Zoom Out">-</button>
-    <button id="resetZoomBtn" class="base-button" title="Reset Zoom">Reset</button>
-  </div>
-  <div id="proof-resize-handle" title="Resize"></div>
-</div>
 
-<div id="hypotheses-container">
-  <div class="hypotheses-block">
-    <label class="labelHypotheses" id="labelHypotheses">All Hypotheses</label>
-    <div id="allHypotheses"></div>
-  </div>
-  <div class="hypotheses-block">
-    <label class="labelHypotheses" id="currentLabelHypotheses">Current Hypotheses</label>
-    <div id="currentHypotheses" class="leftBorder"></div>
-  </div>
-</div>
+  <div class="menu-group" style="margin-top: auto;">
+    <div class="menu-title">Support</div>
 
+    <a href="#" class="nav-link" id="helpBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      Help
+    </a>
 
-<div class="proof-menu hidden" id="proof-menu">
-  <div id="parentheses">
-    <button class="base-button" id="addParentheses">
+    <a href="#" class="nav-link" id="redirectButton">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path
+          d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+      </svg>
+      Feedback
+    </a>
+  </div>
+</aside>
+
+<aside class="sidebar" id="sidebar-proof" style="display: none;">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+           stroke-linejoin="round">
+        <path d="M7 8h10M7 12h4m-4 4h10M4 6v12"/>
+      </svg>
+    </div>
+    LogicProof
+  </div>
+
+  <div class="menu-group">
+    <div class="menu-title">System</div>
+    <a href="#" id="sb-home" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      Main Page
+    </a>
+  </div>
+
+  <div class="menu-group">
+    <div class="menu-title">Data</div>
+
+    <a href="#" id="sb-smart-mode" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+      </svg>
+      Smart Mode
+    </a>
+
+    <a href="#" id="sb-rules" class="nav-link active">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg>
+      Rules
+    </a>
+
+    <a href="#" id="sb-axiom" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path
+          d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+      </svg>
+      Axiom
+    </a>
+
+    <a href="#" id="sb-tree" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="5" r="3"></circle>
+        <path d="M12 8v5"></path>
+        <path d="M12 13l-5 5"></path>
+        <path d="M12 13l5 5"></path>
+      </svg>
+      Tree
+    </a>
+  </div>
+
+  <div class="menu-group">
+    <div class="menu-title">Live Control</div>
+
+    <a id="backwardButton" href="#" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 7v6h6"></path>
+        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+      </svg>
+      Undo Step
+    </a>
+
+    <a id="forwardButton" href="#" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 7v6h-6"></path>
+        <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path>
+      </svg>
+      Redo Step
+    </a>
+
+    <div style="height: 1px; background: #374151; margin: 8px 12px;"></div>
+
+    <a href="#" id="sb-plus" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <line x1="11" y1="8" x2="11" y2="14"></line>
+        <line x1="8" y1="11" x2="14" y2="11"></line>
+      </svg>
+      Zoom In
+    </a>
+
+    <a href="#" id="sb-minus" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <line x1="8" y1="11" x2="14" y2="11"></line>
+      </svg>
+      Zoom Out
+    </a>
+
+    <a href="#" id="sb-reset" class="nav-link" style="color: #fca5a5;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+      </svg>
+      Fit View
+    </a>
+
+    <div style="height: 1px; background: #374151; margin: 8px 12px;"></div>
+
+    <a href="#" id="sb-show-parens" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 4a8 8 0 0 0 0 16"></path>
+        <path d="M16 4a8 8 0 0 1 0 16"></path>
+        <circle cx="12" cy="12" r="1" fill="currentColor"></circle>
+      </svg>
       Show parentheses
-      <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 30px;">
-        <img src="img/show.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-      </div>
-    </button>
-    <button class="base-button" id="returnUserInput">
-      Original proof
-    </button>
-<!--    <button id="switchNotationBtn">-->
-<!--      Switch Notation-->
-<!--    </button>-->
-    <button class="base-button" id="deleteParentheses">
+    </a>
+
+    <a href="#" id="sb-original" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+      </svg>
+      Original
+    </a>
+
+    <a href="#" id="sb-hide-parens" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 4a8 8 0 0 0 0 16"></path>
+        <path d="M16 4a8 8 0 0 1 0 16"></path>
+        <line x1="3" y1="3" x2="21" y2="21"></line>
+      </svg>
       Remove parentheses
-      <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 30px;">
-        <img src="img/hide.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
-      </div>
-    </button>
+    </a>
   </div>
-  <div class="containerTabs">
-    <div class="box">
-      <input type="radio" class="tab-toggle" name="tab-toggle" id="tab1" checked>
-      <!-- <input type="radio" class="tab-toggle" name="tab-toggle" id="tab2"> -->
-      <input type="radio" class="tab-toggle" name="tab-toggle" id="tab3">
-      <input type="radio" class="tab-toggle" name="tab-toggle" id="tab4">
 
-      <ul class="tab-list">
-        <li class="tab-item">
-          <label class="tab-trigger" for="tab1">All rules</label>
-        </li>
-        <!-- <li class="tab-item">
-          <label class="tab-trigger" for="tab2">Recommended rules</label>
-        </li> -->
-        <li class="tab-item">
-          <label class="tab-trigger" for="tab3">Axioms</label>
-        </li>
-        <li class="tab-item">
-          <label class="tab-trigger" for="tab4">Tree</label>
-        </li>
-      </ul>
+  <div class="menu-group">
+    <div class="menu-title">Export</div>
 
-      <div class="tab-container">
-        <div class="tab-content">
-          <div id="button-container" class="button-container"></div>
-        </div>
+    <a href="#" id="sb-latex" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"></polyline>
+        <polyline points="8 6 2 12 8 18"></polyline>
+      </svg>
+      LaTeX Source
+    </a>
+  </div>
+
+  <div class="menu-group" style="margin-top: auto;">
+    <div class="menu-title">Support</div>
+
+    <a href="#" id="sb-help" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      Help
+    </a>
+
+    <a href="#" id="sb-feedback" class="nav-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path
+          d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+      </svg>
+      Feedback
+    </a>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+
+  <header class="top-header">
+    <div class="header-left">
+      <div class="custom-select" style="position: relative; padding: 0; display: block; width: 180px;">
+        <i class="ri-text"
+           style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;"></i>
+        <select id="font-size-select" style="
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 100%;
+            height: 38px;
+            background: transparent;
+            border: none;
+            padding: 0 30px 0 36px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--col-text-main);
+            cursor: pointer;
+            outline: none;
+        ">
+          <option value="20" selected>Font Size: 20px</option>
+          <option value="26">Font Size: 26px</option>
+          <option value="32">Font Size: 32px</option>
+          <option value="38">Font Size: 38px</option>
+          <option value="44">Font Size: 44px</option>
+          <option value="50">Font Size: 50px</option>
+        </select>
+        <i class="ri-arrow-down-s-line"
+           style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #9ca3af; z-index: 1;"></i>
       </div>
     </div>
+
+    <div class="header-right">
+      <div style="width: 1px; height: 24px; background: #e5e7eb; margin: 0 8px;"></div>
+
+      <div class="lang-switcher">
+        <div class="lang-opt active">SK</div>
+        <div class="lang-opt">EN</div>
+        <div class="lang-opt">UA</div>
+      </div>
+
+      <div class="theme-toggle" title="Switch Theme">
+        <i class="ri-sun-fill" style="color: #f59e0b; margin-left: 5px;"></i>
+        <i class="ri-moon-clear-line" style="margin-right: 5px;"></i>
+      </div>
+
+      <button class="btn btn-primary" style="margin-left: 12px;" id="enter">
+        <i class="ri-play-fill"></i> Proof
+      </button>
+    </div>
+  </header>
+
+  <div class="content-area">
+    <div id="enterFormula" style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
+      <div id="editorPanel" class="editor-card editorPanel" style="position:relative;">
+        <!-- Editor Container (ID matches JS) -->
+        <div id="editor" class="code-area" style="padding: 0;"></div>
+
+        <!-- Resize handle (optional, kept for JS compatibility) -->
+        <div class="editorResize"
+             style="position:absolute; bottom:0; left:0; width:100%; height:5px; cursor:n-resize; opacity:0;"></div>
+      </div>
+    </div>
+
+    <!-- Split View for Proof Phase -->
+    <div id="proof-split-layout"
+         style="display: none; flex-direction: row; height: 100%; width: 100%; margin-top: 20px; overflow: hidden;">
+
+      <!-- Left Panel: Rules, Axioms, Context -->
+      <div id="proof-tools"
+           style="width: 45%; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden;">
+
+        <!-- Hypotheses (Context) -->
+        <div id="hypotheses-container"
+             style="background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 15px; flex-shrink: 0;">
+          <div class="hypotheses-block">
+            <label class="labelHypotheses" id="labelHypotheses">All Hypotheses</label>
+            <div id="allHypotheses"></div>
+          </div>
+          <div class="hypotheses-block">
+            <label class="labelHypotheses" id="currentLabelHypotheses">Current Hypotheses</label>
+            <div id="currentHypotheses" class="leftBorder"></div>
+          </div>
+        </div>
+
+                        <!-- Proof Menu (Tabs/Rules) -->
+
+                        <div class="proof-menu" id="proof-menu" style="background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 15px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; box-sizing: border-box;">
+
+
+
+                          <div class="containerTabs" style="width:100%; display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+            <div class="box"
+                 style="border: none; display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+              <input type="radio" class="tab-toggle" name="tab-toggle" id="tab1" checked>
+              <input type="radio" class="tab-toggle" name="tab-toggle" id="tab3">
+              <input type="radio" class="tab-toggle" name="tab-toggle" id="tab4">
+
+                                    <ul class="tab-list" style="display: none;">
+                                      <li class="tab-item">
+                                        <label class="tab-trigger" for="tab1">Rules</label>
+                                      </li>
+                                      <li class="tab-item">
+                                        <label class="tab-trigger" for="tab3">Axioms</label>
+                                      </li>
+                                      <li class="tab-item">
+                                        <label class="tab-trigger" for="tab4">Tree</label>
+                                      </li>
+                                    </ul>
+              <div class="tab-container" style="padding: 15px 0; flex-grow: 1; overflow-y: auto;">
+                <div class="tab-content">
+                  <div id="button-container" class="button-container"
+                       style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resizer Splitter -->
+      <div id="proof-layout-divider" class="layout-divider"></div>
+
+      <!-- Right Panel: Proof Tree -->
+                  <div id="proof-container" style="width: 55%; background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; height: 100%;">
+                      <div id="proof" style="transform-origin: 0 0; width: 100%; height: 100%;"></div>
+
+                      <div id="proof-resize-handle" title="Resize"></div>
+                  </div>
+    </div>
+    <!-- Old Proof Container (Renamed/Replaced but keeping ID references valid by moving logic) -->
+    <!-- Note: JS looks for 'proof-container'. I'll rename the right panel wrapper to 'proof-container'
+         so existing JS zoom logic works, but I need to ensure it doesn't break layout.
+         Actually, the Right Panel wrapper should BE #proof-container.
+    -->
+
+    <!-- Legacy Inputs (Hidden) -->
+    <div id="inputFitch" style="display:none;">
+      <label id="userText">a->b->c</label>
+    </div>
+
   </div>
 </div>
 
-
-<!--<svg width="500" height="500"></svg>-->
-
-<!-- Модальне вікно Help -->
+<!-- Modals -->
 <div id="helpModal" class="helpModal">
   <div class="help" style="background: rgb(255, 255, 255);">
-
     <div class="helpNavbar" style="margin-bottom: 16px;">
       <button class="closeHelp">
         <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="36px" width="36px"
@@ -280,8 +907,6 @@
   </div>
 </div>
 
-
-<!-- Модальне вікно Latex -->
 <div id="latexModal" class="helpModal">
   <div class="help" id="latexCode" style="background: rgb(255, 255, 255);">
     <div class="helpNavbar" style="margin-bottom: 16px;">
@@ -305,11 +930,16 @@
     </button>
   </div>
 </div>
+
+<div class="returnMain" style="display:none;">
+  <button class="base-button" id="home">
+    <div class="buttonIcon" style="margin: 0px 8px 0px 0px; height: 100%; width: 30px;">
+      <img src="img/home.svg" alt="SVG Icon" style="height: 100%; width: 100%;">
+    </div>
+    Main page
+  </button>
 </div>
 
-
 <script src="js/app.js" defer></script>
-
 </body>
-
 </html>

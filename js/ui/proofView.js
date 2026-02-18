@@ -2,9 +2,16 @@
 export function initProofView() {
     const proofContainer = document.getElementById('proof-container');
     const proof = document.getElementById('proof');
-    const zoomInBtn = document.getElementById('zoomInBtn');
-    const zoomOutBtn = document.getElementById('zoomOutBtn');
-    const resetZoomBtn = document.getElementById('resetZoomBtn');
+    
+    // Zoom Controls (Sidebar)
+    const zoomInBtn = document.getElementById('sb-plus');
+    const zoomOutBtn = document.getElementById('sb-minus');
+    const resetZoomBtn = document.getElementById('sb-reset');
+    
+    // Legacy Controls (fallback if sidebar not present)
+    const legacyZoomIn = document.getElementById('zoomInBtn');
+    const legacyZoomOut = document.getElementById('zoomOutBtn');
+    const legacyReset = document.getElementById('resetZoomBtn');
 
     if (!proofContainer || !proof) return;
 
@@ -118,15 +125,27 @@ export function initProofView() {
     }, true);
 
 
-    // Button Listeners
-    if (zoomInBtn) zoomInBtn.addEventListener('click', () => zoom(-100));
-    if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => zoom(100));
-    if (resetZoomBtn) resetZoomBtn.addEventListener('click', () => {
+    // Button Listeners (Sidebar)
+    if (zoomInBtn) zoomInBtn.addEventListener('click', (e) => { e.preventDefault(); zoom(-100); });
+    if (zoomOutBtn) zoomOutBtn.addEventListener('click', (e) => { e.preventDefault(); zoom(100); });
+    if (resetZoomBtn) resetZoomBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         scale = 1;
         translateX = 0;
         translateY = 0;
         updateTransform();
-        // Reset container size to content size (remove inline styles added by manual resize)
+        proofContainer.style.width = '';
+        proofContainer.style.height = '';
+    });
+    
+    // Legacy Button Listeners
+    if (legacyZoomIn) legacyZoomIn.addEventListener('click', () => zoom(-100));
+    if (legacyZoomOut) legacyZoomOut.addEventListener('click', () => zoom(100));
+    if (legacyReset) legacyReset.addEventListener('click', () => {
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+        updateTransform();
         proofContainer.style.width = '';
         proofContainer.style.height = '';
     });

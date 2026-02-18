@@ -64,7 +64,7 @@ export function fitchStart(formula) {
   //   return;
   // }
   document.getElementById('enterFormula').className = 'hidden';
-  document.getElementById('undo_redo').style.display = 'flex';
+  // document.getElementById('undo_redo').style.display = 'flex'; // Removed legacy
   document.getElementById('inputFitch').style.display = 'flex';
   document.getElementById('userText').textContent = convertToLogicalExpression(getProof(checkWithAntlr(formula)));
   addClickFitchRules();
@@ -251,84 +251,24 @@ function generateButtons(buttonCount, buttonTexts) {
   MathJax.typesetPromise().then(() => {
     // Код тут виконається після того, як MathJax закінчить форматування формул
   }).catch((err) => console.log('Помилка MathJax:', err));
-
-  // Help Button Logic (Only show for standard rules, not axioms for now)
-  if (!isAxiomsTab) {
-    const helpButton = document.createElement('button');
-    helpButton.style.cssText = `
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 4px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color 0.2s;
-        z-index: 10;
-        width: 48px;
-        height: 48px;
-      `;
-    helpButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 40 40">
-            <path fill="#b6dcfe" d="M14.5,29.833V28c0-1.914-1.168-3.76-2.52-5.897C10.349,19.525,8.5,16.603,8.5,13 C8.5,6.659,13.659,1.5,20,1.5S31.5,6.659,31.5,13c0,3.603-1.849,6.525-3.48,9.103C26.668,24.24,25.5,26.086,25.5,28v1.833H14.5z"></path>
-            <path fill="#4788c7" d="M20,2c6.065,0,11,4.935,11,11c0,3.458-1.808,6.315-3.402,8.835C26.262,23.947,25,25.941,25,28v1.333 h-5h-5V28c0-2.059-1.262-4.053-2.598-6.165C10.808,19.315,9,16.458,9,13C9,6.935,13.935,2,20,2 M20,1C13.373,1,8,6.373,8,13 c0,6.667,6,10.958,6,15v2.333h6h6V28c0-4.042,6-8.333,6-15C32,6.373,26.627,1,20,1L20,1z"></path>
-            <path fill="#fff" d="M22.714,11.335c0.502,0,0.974,0.195,1.329,0.55c0.733,0.733,0.733,1.925,0,2.657l-1.75,1.75 L22,16.586V17v12h-4V17v-0.414l-0.293-0.293l-1.75-1.75c-0.733-0.733-0.733-1.925,0-2.657c0.355-0.355,0.827-0.55,1.329-0.55 c0.502,0,0.974,0.195,1.329,0.55l0.679,0.679L20,13.271l0.707-0.707l0.679-0.679C21.741,11.531,22.212,11.335,22.714,11.335 M22.714,10.335c-0.737,0-1.474,0.281-2.036,0.843L20,11.857l-0.679-0.679c-0.562-0.562-1.299-0.843-2.036-0.843 c-0.737,0-1.474,0.281-2.036,0.843c-1.124,1.124-1.124,2.947,0,4.071L17,17v13h6V17l1.75-1.75c1.124-1.124,1.124-2.947,0-4.071 C24.188,10.616,23.451,10.335,22.714,10.335L22.714,10.335z"></path>
-            <path fill="#4788c7" d="M20 31A4 4 0 1 0 20 39A4 4 0 1 0 20 31Z"></path>
-            <path fill="#dff0fe" d="M17,36.5c-1.378,0-2.5-1.122-2.5-2.5v-5.5h11V34c0,1.378-1.122,2.5-2.5,2.5H17z"></path>
-            <path fill="#4788c7" d="M25,29v5c0,1.103-0.897,2-2,2h-6c-1.103,0-2-0.897-2-2v-5H25 M26,28H14v6c0,1.657,1.343,3,3,3h6 c1.657,0,3-1.343,3-3V28L26,28z"></path>
-            <path fill="#4788c7" d="M25.5 31h-6c-.275 0-.5-.225-.5-.5l0 0c0-.275.225-.5.5-.5h6c.275 0 .5.225.5.5l0 0C26 30.775 25.775 31 25.5 31zM25.5 33h-6c-.275 0-.5-.225-.5-.5l0 0c0-.275.225-.5.5-.5h6c.275 0 .5.225.5.5l0 0C26 32.775 25.775 33 25.5 33zM25.5 35h-6c-.275 0-.5-.225-.5-.5l0 0c0-.275.225-.5.5-.5h6c.275 0 .5.225.5.5l0 0C26 34.775 25.775 35 25.5 35zM16.5 33h-2c-.275 0-.5-.225-.5-.5l0 0c0-.275.225-.5.5-.5h2c.275 0 .5.225.5.5l0 0C17 32.775 16.775 33 16.5 33zM16.5 35H15c-.55 0-1-.45-1-1l0 0h2.5c.275 0 .5.225.5.5l0 0C17 34.775 16.775 35 16.5 35zM16.5 31h-2c-.275 0-.5-.225-.5-.5l0 0c0-.275.225-.5.5-.5h2c.275 0 .5.225.5.5l0 0C17 30.775 16.775 31 16.5 31z"></path>
-        </svg>
-    `;
-
-    helpButton.onmouseenter = () => {
-      if (!helpButtonToggleState) {
-        helpButton.style.backgroundColor = 'rgba(0, 97, 161, 0.1)';
-      }
-    };
-    helpButton.onmouseleave = () => {
-      updateHelpButtonAppearance(helpButton);
-    };
-
-    helpButton.onclick = () => {
-      // Check if any lines are selected before enabling recommendations
-      if (!helpButtonToggleState && clickedProofs.length === 0 && clickedBranch.length === 0) {
-        alert("Please select lines to get recommendations");
-        return;
-      }
-
-      helpButtonToggleState = !helpButtonToggleState;
-      console.log(`Help button toggle: ${helpButtonToggleState ? 'ON' : 'OFF'}`);
-
-      if (helpButtonToggleState) {
-        // Show Recommended Rules
-        processExpression("HelpToggle", 0);
-      } else {
-        // Show All Rules
-        processExpression("HelpToggle", 1);
-      }
-    };
-
-    updateHelpButtonAppearance(helpButton);
-    buttonContainer.appendChild(helpButton);
-  }
 }
 
-function updateHelpButtonAppearance(helpButton) {
+export function toggleSmartMode() {
+  // if (clickedProofs.length === 0 && clickedBranch.length === 0) {
+  //   alert("Please select lines to get recommendations");
+  //   return false;
+  // }
+
+  helpButtonToggleState = !helpButtonToggleState;
+  
   if (helpButtonToggleState) {
-    // Active state - show as pressed/highlighted
-    helpButton.style.backgroundColor = 'rgba(0, 97, 161, 0.2)';
-    helpButton.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.2)';
-    helpButton.style.transform = 'scale(0.95)';
+    // Show Recommended Rules
+    processExpression("HelpToggle", 0);
   } else {
-    // Normal state
-    helpButton.style.backgroundColor = 'transparent';
-    helpButton.style.boxShadow = 'none';
-    helpButton.style.transform = 'scale(1)';
+    // Show All Rules
+    processExpression("HelpToggle", 1);
   }
+  return helpButtonToggleState;
 }
 
 function closeAsp() {
@@ -337,8 +277,8 @@ function closeAsp() {
   const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
   fitchBranches[fitchBranches.length - 1].style.paddingBottom = '0px';
   fitchBranches[fitchBranches.length - 1].className += " finished";
-  helpButtonToggleState = false;
-  processExpression("AllRules", 1);
+  // helpButtonToggleState = false;
+  processExpression("AllRules", helpButtonToggleState ? 0 : 1);
   saveStateFitch();
 }
 
@@ -703,8 +643,8 @@ function saveAsp() {
   div.textContent = convertToLogicalExpression(getProof(checkWithAntlr(inp)));
   div.style.borderBottom = '1px solid black';
   par.appendChild(div);
-  helpButtonToggleState = false;
-  processExpression("AllRules", 1);
+  // helpButtonToggleState = false;
+  processExpression("AllRules", helpButtonToggleState ? 0 : 1);
   saveStateFitch();
 }
 
@@ -800,8 +740,8 @@ function addClickFitchRules() {
     trigger.addEventListener('click', function (event) {
       const tabId = this.getAttribute('for');
       if (tabId === 'tab1') {
-        helpButtonToggleState = false;
-        processExpression("AllRules", 1);
+        // helpButtonToggleState = false;
+        processExpression("AllRules", helpButtonToggleState ? 0 : 1);
       } else if (tabId === 'tab4') {
         if (clickedProofs.length !== 1) {
           event.preventDefault(); // Prevent tab switch
@@ -843,7 +783,7 @@ function addClickFitchRules() {
         svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
         svgElement.setAttribute("height", (size[1] + 100).toString());
       } else if (tabId === 'tab3') {
-        helpButtonToggleState = false;
+        // helpButtonToggleState = false;
         // Format axioms for generateButtons
         const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) =>
           `${index + 1}. ${axiom}`
@@ -919,29 +859,34 @@ export function clearItems() {
 
 
 function addOrRemoveParenthesesFitch() {
-  const addBtn = document.getElementById('addParentheses');
-  const delBtn = document.getElementById('deleteParentheses');
-  const retBtn = document.getElementById('returnUserInput');
+  const addBtn = document.getElementById('sb-show-parens') || document.getElementById('addParentheses');
+  const delBtn = document.getElementById('sb-hide-parens') || document.getElementById('deleteParentheses');
+  const retBtn = document.getElementById('sb-original') || document.getElementById('returnUserInput');
+
+  if (!addBtn || !delBtn || !retBtn) return;
 
   // Set initial state
-  retBtn.disabled = true;
-  retBtn.classList.add('disabled-action-btn');
+  toggleButtonState(retBtn, false);
 
-  function updateButtons(clickedBtn) {
-    // Enable all first
-    [addBtn, delBtn, retBtn].forEach(btn => {
-      btn.disabled = false;
-      btn.classList.remove('disabled-action-btn');
-    });
-
-    // Disable the active one
-    if (clickedBtn) {
-      clickedBtn.disabled = true;
-      clickedBtn.classList.add('disabled-action-btn');
-    }
+  function toggleButtonState(btn, enabled) {
+      if (enabled) {
+          btn.style.opacity = '1';
+          btn.style.pointerEvents = 'auto';
+          btn.classList.remove('disabled');
+      } else {
+          btn.style.opacity = '0.5';
+          btn.style.pointerEvents = 'none';
+          btn.classList.add('disabled');
+      }
   }
 
-  addBtn.addEventListener('click', function () {
+  function updateButtons(clickedBtn) {
+    [addBtn, delBtn, retBtn].forEach(btn => toggleButtonState(btn, true));
+    if (clickedBtn) toggleButtonState(clickedBtn, false);
+  }
+
+  addBtn.addEventListener('click', function (e) {
+    e.preventDefault();
     clickedProofs.forEach(function (item) {
       const spanElement = item.element.querySelector('span.indexC');
       if (spanElement) spanElement.remove();
@@ -959,7 +904,8 @@ function addOrRemoveParenthesesFitch() {
     updateButtons(addBtn);
   });
 
-  delBtn.addEventListener('click', function () {
+  delBtn.addEventListener('click', function (e) {
+    e.preventDefault();
     clickedProofs.forEach(function (item) {
       const spanElement = item.element.querySelector('span.indexC');
       if (spanElement) spanElement.remove();
@@ -977,7 +923,8 @@ function addOrRemoveParenthesesFitch() {
     updateButtons(delBtn);
   });
 
-  retBtn.addEventListener('click', function () {
+  retBtn.addEventListener('click', function (e) {
+    e.preventDefault();
     let anyRestored = false;
     clickedProofs.forEach(function (item) {
       if (item.element.dataset.original) {
@@ -996,8 +943,6 @@ function addOrRemoveParenthesesFitch() {
 
     if (anyRestored) {
         updateButtons(retBtn);
-    } else {
-        shakeElement('returnUserInput', 5);
     }
   });
 

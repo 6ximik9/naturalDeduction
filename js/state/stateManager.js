@@ -56,16 +56,7 @@ export function addNextLastButtonClickGentzen() {
       setState(state - 1);
     }
     setState(state - 1);
-    if (state < 0) {
-      location.reload(true);
-      return;
-    }
     getState(state);
-
-    if (state === 0) {
-      backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
-      homeButton.parentElement.style.display = 'none';
-    }
   });
 
 
@@ -180,14 +171,14 @@ export function saveStateSequent() {
     backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
     homeButton.parentElement.style.display = 'flex';
   }
-  
+
   elementsAndVariablesArray.push({data: elementData, index: index});
   setSequentState(index + 1);
 }
 
 function getStateSequent(id) {
   document.getElementById('proof-menu').className = 'proof-menu';
-  
+
   var lastElementData = elementsAndVariablesArray[id].data;
 
   // Відновлюємо контекст

@@ -120,7 +120,7 @@ function suggestions(position, range) {
 export let editor = monaco.editor.create(document.getElementById('editor'), {
   value: '',
   language: 'proofLanguage',
-  fontSize: 32, // Більший розмір шрифту
+  fontSize: 20, // Більший розмір шрифту
   automaticLayout: true, // <<== the important part
   scrollbar: {
     vertical: 'auto', // Спочатку ховаємо вертикальний скролбар
@@ -225,61 +225,65 @@ const editorPanel = document.querySelector('.editorPanel');
 const divider = document.querySelector('.divider');
 
 // Додаємо обробник події для переміщення
-divider.addEventListener('mousedown', function (event) {
-  // Початкова позиція курсора
-  const startX = event.clientX;
-  const startWidth = parseInt(getComputedStyle(editorPanel).width, 10);
+if (divider && editorPanel) {
+  divider.addEventListener('mousedown', function (event) {
+    // Початкова позиція курсора
+    const startX = event.clientX;
+    const startWidth = parseInt(getComputedStyle(editorPanel).width, 10);
 
-  // Обробник переміщення миші
-  function onMouseMove(event) {
-    // Розрахунок нової ширини
-    const newWidth = startWidth + event.clientX - startX;
+    // Обробник переміщення миші
+    function onMouseMove(event) {
+      // Розрахунок нової ширини
+      const newWidth = startWidth + event.clientX - startX;
 
-    // if(newWidth>600) {
-      // Встановлюємо новий розмір для editorPanel, editorComponent та overflowGuard
-      editorPanel.style.width = newWidth + 'px';
-    // }
-  }
+      // if(newWidth>600) {
+        // Встановлюємо новий розмір для editorPanel, editorComponent та overflowGuard
+        editorPanel.style.width = newWidth + 'px';
+      // }
+    }
 
-  // Обробник відпускання кнопки миші
-  function onMouseUp() {
-    // Відключаємо обробники подій
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-  }
+    // Обробник відпускання кнопки миші
+    function onMouseUp() {
+      // Відключаємо обробники подій
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    }
 
-  // Додаємо обробники подій переміщення миші
-  window.addEventListener('mousemove', onMouseMove);
-  window.addEventListener('mouseup', onMouseUp);
-});
+    // Додаємо обробники подій переміщення миші
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  });
+}
 
 
 const editorResize = document.querySelector('.editorResize');
-editorResize.addEventListener('mousedown', function (event) {
-  // Початкова позиція курсора
-  const startY = event.clientY;
-  const startHeight = parseInt(getComputedStyle(editorPanel).height, 10);
+if (editorResize && editorPanel) {
+  editorResize.addEventListener('mousedown', function (event) {
+    // Початкова позиція курсора
+    const startY = event.clientY;
+    const startHeight = parseInt(getComputedStyle(editorPanel).height, 10);
 
-  // Обробник переміщення миші
-  function onMouseMove(event) {
-    // Розрахунок нової висоти
-    const newHeight = startHeight + event.clientY - startY;
+    // Обробник переміщення миші
+    function onMouseMove(event) {
+      // Розрахунок нової висоти
+      const newHeight = startHeight + event.clientY - startY;
 
-    // Встановлюємо нову висоту для editorPanel
-    editorPanel.style.height = newHeight + 'px';
-  }
+      // Встановлюємо нову висоту для editorPanel
+      editorPanel.style.height = newHeight + 'px';
+    }
 
-  // Обробник відпускання кнопки миші
-  function onMouseUp() {
-    // Відключаємо обробники подій
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-  }
+    // Обробник відпускання кнопки миші
+    function onMouseUp() {
+      // Відключаємо обробники подій
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    }
 
-  // Додаємо обробники подій переміщення миші
-  window.addEventListener('mousemove', onMouseMove);
-  window.addEventListener('mouseup', onMouseUp);
-});
+    // Додаємо обробники подій переміщення миші
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  });
+}
 
 
 const dropdownItems = document.querySelectorAll('.dropdown-content li');
@@ -300,14 +304,36 @@ dropdownItems.forEach(item => {
 
 const dropdownItemsFont = document.querySelectorAll('.dropdown-contentFont li');
 const checkboxFont = document.querySelector('.dropdownFont input[type="checkbox"]');
-// Додаємо обробник події для кожного елемента
-dropdownItemsFont.forEach(item => {
-  item.addEventListener('click', function () {
-    const selectedValue = this.getAttribute('data-value'); // Отримуємо значення data-value атрибуту
-    editor.updateOptions({fontSize: selectedValue});
-    checkboxFont.click();
+if (checkboxFont && dropdownItemsFont.length > 0) {
+  // Додаємо обробник події для кожного елемента
+  dropdownItemsFont.forEach(item => {
+    item.addEventListener('click', function () {
+      const selectedValue = this.getAttribute('data-value'); // Отримуємо значення data-value атрибуту
+      editor.updateOptions({fontSize: selectedValue});
+      checkboxFont.click();
+    });
   });
-});
+}
+
+// Support for new design Font Size selection
+export function initFontSelectors() {
+  const fontSelect = document.getElementById('font-size-select');
+
+  if (fontSelect) {
+    // Remove existing listeners by cloning (if any)
+    const newFontSelect = fontSelect.cloneNode(true);
+    fontSelect.parentNode.replaceChild(newFontSelect, fontSelect);
+
+    newFontSelect.addEventListener('change', function(e) {
+      const size = this.value;
+      if (editor) editor.updateOptions({fontSize: parseInt(size)});
+    });
+  }
+}
+
+// Call it immediately if DOM is already parsed (backward compat), but mainly intended for external call
+// const newFontOptions = document.querySelectorAll('.font-option');
+// ... legacy code removed, moved to function above
 
 
 export function createEditor(container) {

@@ -96,13 +96,13 @@ function createButton(text, id) {
   let button = document.createElement('button');
   button.classList.add('buttonWithIcon');
   button.style.cssText = `
-        background: rgb(255, 255, 255);
-        color: rgb(33, 33, 33);
         box-shadow: rgba(0, 0, 0, 0.25) 0px 2px 5px 0px;
         font-size: 28px;
-        margin-left: 20px;
-        margin-top: 15px;
         height: 50px;
+        padding: 0 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        border: none;
     `;
   button.id = id;
   button.innerHTML = `<span class="buttonText">${text}</span>`;
@@ -163,13 +163,13 @@ export function thirdRule(proofs, branches) {
   // Створюємо кнопку
   let button = document.createElement('button');
   button.classList.add('buttonWithIcon');
-  button.style.background = 'rgb(255, 255, 255)';
-  button.style.color = 'rgb(33, 33, 33)';
   button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
   button.style.fontSize = '28px';
-  button.style.marginLeft = '20px';
-  button.style.marginTop = '15px';
   button.style.height = '50px';
+  button.style.padding = '0 20px';
+  button.style.cursor = 'pointer';
+  button.style.borderRadius = '5px';
+  button.style.border = 'none';
   button.id = 'saveBtn';
 
   button.innerHTML = `
@@ -449,13 +449,13 @@ export function ninthRule(proofs, branches) {
   // Створюємо кнопку
   let button = document.createElement('button');
   button.classList.add('buttonWithIcon');
-  button.style.background = 'rgb(255, 255, 255)';
-  button.style.color = 'rgb(33, 33, 33)';
   button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
   button.style.fontSize = '28px';
-  button.style.marginLeft = '20px';
-  button.style.marginTop = '15px';
   button.style.height = '50px';
+  button.style.padding = '0 20px';
+  button.style.cursor = 'pointer';
+  button.style.borderRadius = '5px';
+  button.style.border = 'none';
   button.id = 'saveBtn';
 
   button.innerHTML = `

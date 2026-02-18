@@ -505,9 +505,9 @@ function selectSequent(domElement, sequentNode) {
     if (delBtn) delBtn.classList.add('disabled-action-btn');
     if (retBtn) retBtn.classList.add('disabled-action-btn');
 
-    if (hintToggleState) {
-        hintToggleState = false;
-    }
+    // if (hintToggleState) {
+    //     hintToggleState = false;
+    // }
     generateSequentButtons();
 }
 
@@ -600,10 +600,11 @@ function handleFormulaClick(element, sequentNode) {
         renderTreeView();
     }
     
-    if (hintToggleState) {
-        hintToggleState = false;
-        generateSequentButtons();
-    }
+    // if (hintToggleState) {
+    //     hintToggleState = false;
+    //     generateSequentButtons();
+    // }
+    generateSequentButtons();
 }
 
 function generateSequentButtons() {
@@ -660,7 +661,13 @@ function generateSequentButtons() {
         window.MathJax.typesetPromise([buttonContainer]).catch(err => console.warn('MathJax error:', err));
     }
 
-    generateHintButton(buttonContainer);
+    // generateHintButton(buttonContainer); // Removed in favor of sidebar toggle
+}
+
+export function toggleSmartMode() {
+    hintToggleState = !hintToggleState;
+    generateSequentButtons();
+    return hintToggleState;
 }
 
 function addOrRemoveParenthesesSequent() {

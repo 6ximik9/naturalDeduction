@@ -1,4 +1,5 @@
 import antlr4, {CharStreams, CommonTokenStream} from 'antlr4';
+import * as monaco from 'monaco-editor';
 import GrammarLexer from '../my_antlr/GrammarLexer';
 import GrammarParser from '../my_antlr/GrammarParser';
 import * as editorMonaco from './ui/monacoEditor';
@@ -7,7 +8,7 @@ import * as deductive from './core/deductiveEngine';
 import * as fitch from "./proofs/fitch/FitchProof";
 import * as sequent from "./proofs/sequent/SequentProof";
 import * as help from './ui/help';
-import {setEditorError} from "./ui/monacoEditor";
+import {setEditorError, initFontSelectors} from "./ui/monacoEditor";
 import {initProofView} from "./ui/proofView";
 
 let hasError = false;
@@ -18,31 +19,148 @@ export let typeProof = 0;
 document.addEventListener("DOMContentLoaded", function() {
   // Initialize Proof View (Pan/Zoom/Resize)
   initProofView();
+  
+  // Initialize Font Selectors
+  initFontSelectors();
 
-  // Вибираємо батьківський елемент, що містить наші радіо-кнопки
-  var myDict = document.querySelector('.mydict');
-
-  // Перевіряємо, чи міститься клікнутий елемент в цьому батьківському елементі
-  myDict.addEventListener('click', function(event) {
-    // Переконуємось, що клік був зроблений саме по елементу <input type="radio"> і цей елемент належить до нашого контейнера .mydict
-    var target = event.target;
-    if (target.type === 'radio' && target.name === 'radio') {
-      if (target.nextElementSibling.textContent === "Fitch") {
-        typeProof = 1;
-        updateAxiomTabVisibility(false);
-      } else if (target.nextElementSibling.textContent === "Sequent") {
-        typeProof = 2;
-        updateAxiomTabVisibility(true);
-      } else
-      {
-        typeProof = 0;
-        updateAxiomTabVisibility(false);
+  // Theme Toggle Logic
+  const themeToggle = document.querySelector('.theme-toggle');
+  if (themeToggle) {
+    // Check for saved preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeToggle.classList.add('dark');
+      if (typeof monaco !== 'undefined') {
+        monaco.editor.setTheme('vs-dark');
       }
     }
-  });
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      themeToggle.classList.toggle('dark');
+      
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      
+      // Update Monaco theme
+      if (typeof monaco !== 'undefined') {
+        monaco.editor.setTheme(isDark ? 'vs-dark' : 'vs');
+      }
+    });
+  }
+  
+  // Setup Proxy for new Sidebar Buttons
+  setupSidebarProxy();
+
+  // Split View Resizing Logic
+  const splitter = document.getElementById('proof-layout-divider');
+  const leftPanel = document.getElementById('proof-tools');
+  const rightPanel = document.getElementById('proof-container');
+  const container = document.getElementById('proof-split-layout');
+
+  if (splitter && leftPanel && rightPanel && container) {
+    let isDragging = false;
+
+    splitter.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      splitter.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none'; // Disable text selection while dragging
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      
+      const containerRect = container.getBoundingClientRect();
+      const newLeftWidth = e.clientX - containerRect.left - (splitter.offsetWidth / 2);
+      
+      // Constraints (20% min width for each side)
+      const minWidth = containerRect.width * 0.2;
+      const maxWidth = containerRect.width * 0.8;
+      
+      if (newLeftWidth > minWidth && newLeftWidth < maxWidth) {
+        const leftPercent = (newLeftWidth / containerRect.width) * 100;
+        const rightPercent = 100 - leftPercent; // Splitter width is negligible or handled by flex-shrink
+        
+        leftPanel.style.width = `${leftPercent}%`;
+        rightPanel.style.width = `calc(${rightPercent}% - ${splitter.offsetWidth}px)`;
+      }
+    });
+
+    document.addEventListener('mouseup', function() {
+      if (isDragging) {
+        isDragging = false;
+        splitter.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+    });
+  }
+
+  // New Logic: Handle navigation links for proof types
+  const navGentzen = document.getElementById('nav-gentzen');
+  const navFitch = document.getElementById('nav-fitch');
+  const navSequent = document.getElementById('nav-sequent');
+
+  function setActiveNav(activeNav) {
+    [navGentzen, navFitch, navSequent].forEach(nav => {
+      if (nav) nav.classList.remove('active');
+    });
+    if (activeNav) activeNav.classList.add('active');
+  }
+
+  if (navGentzen) {
+    navGentzen.addEventListener('click', function(e) {
+      e.preventDefault();
+      typeProof = 0;
+      updateAxiomTabVisibility(false);
+      setActiveNav(navGentzen);
+    });
+  }
+
+  if (navFitch) {
+    navFitch.addEventListener('click', function(e) {
+      e.preventDefault();
+      typeProof = 1;
+      updateAxiomTabVisibility(false);
+      setActiveNav(navFitch);
+    });
+  }
+
+  if (navSequent) {
+    navSequent.addEventListener('click', function(e) {
+      e.preventDefault();
+      typeProof = 2;
+      updateAxiomTabVisibility(true);
+      setActiveNav(navSequent);
+    });
+  }
+
+  // Fallback / Backward Compatibility for old radio buttons if they still exist (hidden)
+  var myDict = document.querySelector('.mydict');
+  if (myDict) {
+    myDict.addEventListener('click', function(event) {
+      var target = event.target;
+      if (target.type === 'radio' && target.name === 'radio') {
+        if (target.nextElementSibling.textContent === "Fitch") {
+          typeProof = 1;
+          updateAxiomTabVisibility(false);
+        } else if (target.nextElementSibling.textContent === "Sequent") {
+          typeProof = 2;
+          updateAxiomTabVisibility(true);
+        } else {
+          typeProof = 0;
+          updateAxiomTabVisibility(false);
+        }
+      }
+    });
+  }
 });
 
 function updateAxiomTabVisibility(isSequent) {
+  // Update old tab visibility (hidden but functional)
   const axiomTabLabel = document.querySelector('label[for="tab3"]');
   if (axiomTabLabel) {
     const axiomTabLi = axiomTabLabel.closest('li');
@@ -51,11 +169,23 @@ function updateAxiomTabVisibility(isSequent) {
     }
   }
   
+  // Update sidebar link visibility
+  const sbAxiom = document.getElementById('sb-axiom');
+  if (sbAxiom) {
+      sbAxiom.style.display = isSequent ? 'none' : 'flex';
+  }
+  
   if (isSequent) {
       const axiomRadio = document.getElementById('tab3');
       if (axiomRadio && axiomRadio.checked) {
           const firstTab = document.getElementById('tab1');
           if (firstTab) firstTab.checked = true;
+          // Also update active state in sidebar
+          const sbRules = document.getElementById('sb-rules');
+          if (sbRules) {
+             document.querySelectorAll('.menu-group .nav-link').forEach(el => el.classList.remove('active'));
+             sbRules.classList.add('active');
+          }
       }
   }
 }
@@ -117,7 +247,7 @@ export function checkRule(index, text, editorInstance = editorMonaco.editor) {
 
   if (!hasError) {
     inputText = text;
-    enterButton.style.backgroundColor = 'white';
+    enterButton.style.backgroundColor = '#10b981';
     return 0;
   }
 
@@ -140,8 +270,23 @@ enterButton.addEventListener('click', function () {
   }
 
   // Show the proof container
-  const proofContainer = document.getElementById('proof-container');
-  if (proofContainer) proofContainer.style.display = 'block';
+  const splitLayout = document.getElementById('proof-split-layout');
+  if (splitLayout) {
+      splitLayout.style.display = 'flex';
+  } else {
+      const proofContainer = document.getElementById('proof-container');
+      if (proofContainer) proofContainer.style.display = 'block';
+  }
+  
+  // Hide the enter button as we transition to proof mode
+  enterButton.style.display = 'none';
+  
+  // Switch Sidebar to Proof Mode
+  const homeSidebar = document.getElementById('sidebar-home');
+  const proofSidebar = document.getElementById('sidebar-proof');
+  if (homeSidebar) homeSidebar.style.display = 'none';
+  if (proofSidebar) proofSidebar.style.display = 'flex';
+  if (proofSidebar) proofSidebar.style.flexDirection = 'column';
 
   if(typeProof===1)
   {
@@ -296,20 +441,89 @@ export function shakeElement(elementId, times) {
 
 
 
-document.getElementById('uploadBtn').addEventListener('click', function() {
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.addEventListener('change', function(event) {
-    const file = event.target.files[0]; // Отримуємо файл з об'єкта події
-    if (file) {
-      const reader = new FileReader(); // Створюємо об'єкт для читання файлу
-      reader.onload = function(e) {
-        const fileContents = e.target.result; // Отримуємо вміст файлу
-        editorMonaco.editor.setValue(fileContents.toString());
-      };
-      reader.readAsText(file); // Читаємо файл як текст
+function setupSidebarProxy() {
+  const proxy = (id, targetId) => {
+    const el = document.getElementById(id);
+    const target = document.getElementById(targetId);
+    if (el && target) {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        target.click();
+      });
+    }
+  };
+
+  // Map sidebar buttons to hidden/existing controls
+  const homeBtn = document.getElementById('sb-home');
+  if (homeBtn) {
+    homeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if(confirm("Are you sure you want to return to the main page? Progress will be lost.")) {
+        location.reload();
+      }
+    });
+  }
+
+  proxy('sb-prev', 'backwardButton');
+  proxy('sb-next', 'forwardButton');
+  // Zoom buttons handled directly by proofView.js
+  // proxy('sb-plus', 'zoomInBtn');
+  // proxy('sb-minus', 'zoomOutBtn');
+  // proxy('sb-reset', 'resetZoomBtn');
+  // proxy('sb-latex', 'latex');
+  proxy('sb-help', 'helpBtn');
+  proxy('sb-feedback', 'redirectButton');
+  
+  // Parentheses proxies removed (handled directly in GentzenProof/FitchProof)
+
+  // Smart Mode Toggle
+  const smartBtn = document.getElementById('sb-smart-mode');
+  if (smartBtn) {
+    smartBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      let isActive = false;
+      if (typeProof === 0) { // Gentzen
+         isActive = gentzen.toggleSmartMode();
+      } else if (typeProof === 1) { // Fitch
+         isActive = fitch.toggleSmartMode();
+      } else if (typeProof === 2) { // Sequent
+         isActive = sequent.toggleSmartMode();
+      }
+      
+      if (isActive) {
+        smartBtn.classList.add('active');
+        smartBtn.style.color = '#f59e0b';
+      } else {
+        smartBtn.classList.remove('active');
+        smartBtn.style.color = '';
+      }
+    });
+  }
+
+  // Tab switching with active state toggle
+  const tabs = [
+    { sb: 'sb-rules', target: 'tab1', labelTarget: 'tab1' }, // tab1 is radio
+    { sb: 'sb-axiom', target: 'tab3', labelTarget: 'tab3' }, 
+    { sb: 'sb-tree', target: 'tab4', labelTarget: 'tab4' }
+  ];
+
+  tabs.forEach(t => {
+    const sbEl = document.getElementById(t.sb);
+    if (sbEl) {
+      sbEl.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Click the corresponding label to trigger radio change
+        const label = document.querySelector(`label[for="${t.target}"]`);
+        if (label) label.click();
+        
+        // Update active class on sidebar
+        tabs.forEach(x => {
+           const el = document.getElementById(x.sb);
+           if (el) el.classList.remove('active');
+        });
+        sbEl.classList.add('active');
+      });
     }
   });
-  fileInput.click(); // Спрацьовуємо клік на прихованому input для вибору файлу
-});
-// Force rebuild
+}
+

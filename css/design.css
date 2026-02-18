@@ -1,0 +1,265 @@
+    /* --- Змінні --- */
+    :root {
+      --sidebar-width: 260px;
+      --header-height: 70px;
+
+      --col-bg-sidebar: #111827;     /* Майже чорний */
+      --col-bg-main: #f3f4f6;        /* Світло-сірий */
+      --col-bg-white: #ffffff;
+
+      --col-accent: #3b82f6;         /* Синій бренд */
+      --col-accent-hover: #2563eb;
+      --col-danger: #ef4444;         /* Червоний Proof */
+      --col-danger-hover: #dc2626;
+
+      --col-text-main: #1f2937;
+      --col-text-muted: #9ca3af;
+      --col-border: #e5e7eb;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--col-bg-main);
+      color: var(--col-text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- 1. Sidebar --- */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--col-bg-sidebar);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      border-right: 1px solid #1f2937;
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 40px;
+      padding-left: 10px;
+      color: #f9fafb;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--col-accent), #60a5fa);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-group { margin-bottom: 24px; }
+    .menu-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #6b7280;
+      font-weight: 600;
+      margin-bottom: 8px;
+      padding-left: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      color: #d1d5db;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+
+    .nav-link:hover { background-color: rgba(255,255,255,0.08); color: white; }
+    .nav-link.active { background-color: var(--col-accent); color: white; }
+    .nav-link i { font-size: 18px; opacity: 0.8; }
+
+    /* --- 2. Main Layout --- */
+    .main-wrapper {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- 3. Header --- */
+    .top-header {
+      height: var(--header-height);
+      background-color: var(--col-bg-white);
+      border-bottom: 1px solid var(--col-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 20px; }
+
+    .header-title {
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--col-text-main);
+    }
+
+    /* Стилізований Dropdown */
+    .custom-select {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--col-border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .custom-select:hover { border-color: #bfa5a5; background-color: #f9fafb; }
+
+    .header-right { display: flex; align-items: center; gap: 16px; }
+
+    /* Перемикач мов (Segmented Control) */
+    .lang-switcher {
+      background-color: #f3f4f6;
+      padding: 3px;
+      border-radius: 8px;
+      display: flex;
+      gap: 2px;
+    }
+
+    .lang-opt {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #6b7280;
+      transition: all 0.2s ease;
+    }
+
+    .lang-opt.active {
+      background-color: white;
+      color: var(--col-text-main);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    /* Перемикач теми */
+    .theme-toggle {
+      width: 44px;
+      height: 24px;
+      background-color: #e5e7eb;
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .theme-toggle::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: 0.3s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    /* Приклад активного стану теми (можна додавати клас через JS) */
+    .theme-toggle.dark::after { left: 23px; background: #1f2937; }
+
+    /* Кнопки */
+    .btn {
+      height: 40px;
+      padding: 0 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--col-danger);
+      color: white;
+      box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
+    }
+    .btn-primary:hover { background-color: var(--col-danger-hover); transform: translateY(-1px); }
+
+    .btn-secondary {
+      background-color: white;
+      border: 1px solid var(--col-border);
+      color: var(--col-text-main);
+    }
+    .btn-secondary:hover { background-color: #f9fafb; border-color: #d1d5db; }
+
+    /* --- 4. Content Area --- */
+    .content-area {
+      flex-grow: 1;
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--col-border);
+      flex-grow: 1;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .line-gutters {
+      width: 48px;
+      background-color: #fafafa;
+      border-right: 1px solid var(--col-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 24px;
+      color: #d1d5db;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      user-select: none;
+    }
+
+    .code-area {
+      flex-grow: 1;
+      padding: 24px;
+      outline: none;
+      border: none;
+      resize: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #374151;
+    }
+
