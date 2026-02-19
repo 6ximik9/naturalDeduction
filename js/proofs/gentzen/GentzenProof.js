@@ -150,6 +150,21 @@ document.getElementById('proof').addEventListener('click', function (event) {
     return; // Виходимо, щоб не виконувати звичайну обробку кліку
   }
 
+  let potentialSide = null;
+  if (clickedElement.tagName === 'DIV') {
+    potentialSide = clickedElement;
+  } else if (clickedElement.tagName === 'LABEL') {
+    potentialSide = clickedElement.parentNode;
+  }
+
+  // Якщо клікнули по вже активному елементу - знімаємо виділення
+  if (side && potentialSide === side) {
+      clearLabelHighlights();
+      side = null;
+      disableAllButtons();
+      return;
+  }
+
   clearLabelHighlights();
 
   if (clickedElement.tagName === 'DIV') {
@@ -168,9 +183,6 @@ document.getElementById('proof').addEventListener('click', function (event) {
   if (document.getElementsByClassName("preview").length === 0) {
     setTimeout(handleClick, 100);
   }
-
-  // Перемикаємося на вкладку 1
-  document.getElementById('tab1').checked = true;
 });
 
 /**
@@ -196,7 +208,44 @@ function handleClick() {
     try {
       oldUserInput = side.querySelector('#proofText').textContent;
       const parsed = deductive.checkWithAntlr(oldUserInput);
-      processExpression(parsed, helpButtonToggleState.allRules ? 0 : 1);
+      
+      // Determine active tab and update accordingly
+      if (document.getElementById('tab3').checked) {
+          // Axioms Tab
+          if (helpButtonToggleState.axioms) {
+               showFilteredAxioms();
+          } else {
+              const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) => `${index + 1}. ${axiom}`);
+              const formattedOrder = ORDER_AXIOMS.map((axiom, index) => `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`);
+              generateButtons(formattedRobinson.length + formattedOrder.length, [...formattedRobinson, ...formattedOrder]);
+          }
+      } else if (document.getElementById('tab4').checked) {
+          // Tree View Tab
+          const buttonContainer = document.getElementById('button-container');
+          buttonContainer.innerHTML = '';
+          
+          let svgContainer = document.createElement("div");
+          svgContainer.style.width = "100%";
+          svgContainer.style.maxWidth = "1000px";
+          svgContainer.style.overflow = "auto";
+          svgContainer.style.height = "auto";
+          svgContainer.style.margin = "0 auto";
+          svgContainer.style.display = "block";
+
+          let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svgElement.setAttribute("width", "1000");
+          svgElement.setAttribute("height", "1000");
+
+          svgContainer.appendChild(svgElement);
+          buttonContainer.appendChild(svgContainer);
+
+          let size = createTreeD3(parsed);
+          svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
+          svgElement.setAttribute("height", (size[1] + 100).toString());
+      } else {
+          // Default to Rules (Tab 1 or others)
+          processExpression(parsed, helpButtonToggleState.allRules ? 0 : 1);
+      }
     } catch (error) {
       console.warn('Не вдалося обробити клік:', error);
     }
@@ -467,7 +516,7 @@ function generateButtons(buttonCount, buttonTexts) {
   }
 
 
-  if (!isAxiomsTab) {
+  if (!isAxiomsTab && side) {
     const currentExpr = deductive.getProof(
       deductive.checkWithAntlr(side.querySelector('#proofText').textContent)
     );
@@ -562,13 +611,20 @@ function generateButtons(buttonCount, buttonTexts) {
 
 // Exported function for Sidebar "Smart Mode"
 export function toggleSmartMode() {
+  if (!side) {
+      shakeElement('helpBtn', 5);
+      return false;
+  }
+
+  // Toggle state globally for both modes
+  const newState = !helpButtonToggleState.allRules; // Using allRules as master state
+  helpButtonToggleState.allRules = newState;
+  helpButtonToggleState.axioms = newState;
+
   const isAxiomsTab = document.getElementById('tab3').checked;
 
   if (isAxiomsTab) {
-    // Toggle state for Axioms tab
-    helpButtonToggleState.axioms = !helpButtonToggleState.axioms;
-
-    if (helpButtonToggleState.axioms) {
+    if (newState) {
       // Smart Mode ON: Show filtered
       showFilteredAxioms();
     } else {
@@ -577,11 +633,8 @@ export function toggleSmartMode() {
       const formattedOrder = ORDER_AXIOMS.map((axiom, index) => `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`);
       generateButtons(formattedRobinson.length + formattedOrder.length, [...formattedRobinson, ...formattedOrder]);
     }
-    return helpButtonToggleState.axioms;
   } else {
-    // Toggle state for Rules tab
-    helpButtonToggleState.allRules = !helpButtonToggleState.allRules;
-
+    // Rules tab
     // Get content from active side or fallback to oldUserInput
     let content = "";
     if (side) {
@@ -590,19 +643,13 @@ export function toggleSmartMode() {
         content = oldUserInput;
     } else {
         console.warn("No active formula selected for Smart Mode");
-        return false;
+        return newState;
     }
 
-    // If Smart Mode ON (allRules=true in this logic context), show Recommended (0). Else show All (1).
-    // Note: The variable name 'allRules' in helpButtonToggleState actually tracks the TOGGLE state.
-    // If it was named 'isRecommendedActive', it would be clearer.
-    // Based on previous logic:
-    // helpButton.onclick: if (allRules) -> processExpression(..., 0) [Recommended]
-    // So helpButtonToggleState.allRules = TRUE means "Show Recommended".
-    processExpression(checkWithAntlr(content), helpButtonToggleState.allRules ? 0 : 1);
-
-    return helpButtonToggleState.allRules;
+    processExpression(checkWithAntlr(content), newState ? 0 : 1);
   }
+  
+  return newState;
 }
 
 // Function to show only axioms that match the current formula
@@ -725,6 +772,7 @@ function createButton(text, clickHandler) {
   const button = document.createElement('button');
   button.className = 'button';
   button.innerHTML = text;
+  button.setAttribute('data-original-text', text);
   button.addEventListener('click', clickHandler);
   return button;
 }
@@ -735,23 +783,38 @@ function createButton(text, clickHandler) {
  * @param {HTMLElement} container - DOM-елемент гілки.
  */
 function closeSide(container) {
-  // 1. Шукаємо елемент
+  // Normalize to the main proof element (outer div) if we passed the inner proof-content
+  if (container.classList.contains('proof-content')) {
+    container = container.parentNode;
+  }
+
+  disableAllButtons();
+  side = null;
+  clearLabelHighlights();
+
+  // 1. Шукаємо елемент gamma
   const existingElement = container.querySelector('.gamma-context');
+  
+  if (!existingElement) {
+    console.warn("Could not find gamma-context in element to close", container);
+    return;
+  }
 
   let gammaHtml = existingElement.outerHTML;
-  // 3. Видаляємо всі span-елементи
+  
+  // 3. Видаляємо всі span-елементи для отримання чистого тексту формули
   container.querySelectorAll('span').forEach(span => span.remove());
 
   // Позначаємо гілку як закриту
   container.className = 'closed';
-  let labelText = `[${container.textContent}]`;
+  
+  // Очищаємо текст від зайвих пробілів
+  let rawText = container.textContent.trim();
+  let labelText = `[${rawText}]`;
   labelText = labelText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  // 4. Вставляємо вже готовий рядок gammaHtml
+  // 4. Вставляємо нову структуру
   container.innerHTML = `<div class="proof-content">${gammaHtml}<label class="previous" id="proofText">${labelText}</label></div>`;
-
-  // Оновлюємо інтерфейс
-  document.getElementById('proof-menu').className = 'hidden';
 
   controlState.saveState();
 }
@@ -838,8 +901,15 @@ async function buttonClicked(buttonText) {
 
   // Перевірка умови застосування правила
   if (!handler.condition(expr)) {
-    const index = Object.keys(ruleGentzenHandlers).indexOf(ruleName);
-    if (allButtons[index]) shakeButton(allButtons[index]);
+    const targetButton = Array.from(allButtons).find(btn => 
+      btn.getAttribute('data-original-text') === buttonText
+    );
+    
+    if (targetButton) {
+      shakeButton(targetButton);
+    } else {
+      console.warn("Could not find button for rule:", ruleName);
+    }
     return;
   }
 
@@ -872,18 +942,96 @@ async function buttonClicked(buttonText) {
     // alert(`An error occurred while applying the rule: ${error.message}`);
   }
 
-  // Очистка інтерфейсу
-  document.getElementById('proof-menu').className = 'hidden';
-  document.getElementById("tab1").checked = true;
+  // Очистка старого виділення
+  clearLabelHighlights();
 
-  // Persist Smart Mode state
-  // helpButtonToggleState.axioms = false;
-  // helpButtonToggleState.allRules = false;
+  side = null;
+  disableAllButtons();
+}
 
-  const labels = document.getElementById('proof').querySelectorAll('label');
-  labels.forEach(label => {
-    label.style.background = '';
-  });
+function disableAllButtons() {
+    // Determine which tab is active to know what to show
+    const isAxiomsTab = document.getElementById('tab3') && document.getElementById('tab3').checked;
+    const isTreeTab = document.getElementById('tab4') && document.getElementById('tab4').checked;
+    
+    if (isTreeTab) {
+        const buttonContainer = document.getElementById('button-container');
+        buttonContainer.innerHTML = '';
+        
+        if (side) {
+            // Reset styles for tree view
+            buttonContainer.style.display = '';
+            buttonContainer.style.gridTemplateColumns = '';
+            buttonContainer.style.gap = '';
+            buttonContainer.style.padding = '';
+            
+            let svgContainer = document.createElement("div");
+            svgContainer.style.width = "100%";
+            svgContainer.style.maxWidth = "1000px";
+            svgContainer.style.overflow = "auto";
+            svgContainer.style.height = "auto";
+            svgContainer.style.margin = "0 auto";
+            svgContainer.style.display = "block";
+
+            let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svgElement.setAttribute("width", "1000");
+            svgElement.setAttribute("height", "1000");
+
+            svgContainer.appendChild(svgElement);
+            buttonContainer.appendChild(svgContainer);
+            
+             try {
+                const parsed = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
+                let size = createTreeD3(parsed);
+                svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
+                svgElement.setAttribute("height", (size[1] + 100).toString());
+             } catch (e) {
+                 console.warn("Error rendering tree in disabled state", e);
+             }
+        } else {
+             // Show message when no side selected
+             buttonContainer.style.display = 'grid';
+             buttonContainer.style.gridTemplateColumns = '1fr';
+             buttonContainer.style.gap = '8px';
+             buttonContainer.style.padding = '20px';
+             buttonContainer.style.justifyItems = 'center';
+
+             const message = document.createElement('div');
+             message.style.cssText = `
+                grid-column: 1 / -1;
+                text-align: center;
+                margin: 20px 0;
+                color: #666;
+                font-family: "Times New Roman", serif;
+                font-size: 18px;
+                padding: 20px;
+                background: rgba(0, 97, 161, 0.05);
+                border-radius: 8px;
+                border: 1px dashed rgba(0, 97, 161, 0.3);
+             `;
+             message.textContent = 'Select a branch to see the tree structure';
+             buttonContainer.appendChild(message);
+        }
+        return; // Exit early for tree tab
+    }
+    
+    // Regenerate full lists so user sees all options (disabled) instead of just filtered ones
+    if (isAxiomsTab) {
+         const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) => `${index + 1}. ${axiom}`);
+         const formattedOrder = ORDER_AXIOMS.map((axiom, index) => `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`);
+         generateButtons(formattedRobinson.length + formattedOrder.length, [...formattedRobinson, ...formattedOrder]);
+    } else {
+         // Default to rules (Tab 1) logic
+         generateButtons(GENTZEN_BUTTONS.length, GENTZEN_BUTTONS);
+    }
+
+    const buttons = document.querySelectorAll('#button-container button');
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        btn.title = 'Select a branch to prove';
+    });
 }
 
 export function shakeButton(button) {
@@ -1500,6 +1648,7 @@ function addClickGentzenRules() {
     trigger.addEventListener('click', function () {
       const tabId = this.getAttribute('for');
       if (!side) {
+        setTimeout(disableAllButtons, 0);
         return;
       }
       if (tabId === 'tab1') {
