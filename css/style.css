@@ -94,13 +94,7 @@ h3 {
   border-bottom: black 2px solid;
 }
 
-.nameRule {
-  font-size: 32px;
-  position: absolute;
-  bottom: -15px;
-  left: calc(100% + 10px);
-  width: 100px;
-}
+
 
 /* ==========================================================================
    BUTTONS & CONTROLS
@@ -381,11 +375,12 @@ h3 {
 #proof {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center content vertically */
+  justify-content: flex-start; /* Center content vertically */
   align-items: center;
   align-content: center;
   text-align: center;
   margin-top: 0;
+  padding: 20px;
   width: fit-content;
   min-width: 100%;
   min-height: 100%;
@@ -446,6 +441,7 @@ h3 {
   align-items: center;
   align-content: center;
   text-align: center;
+  margin: auto;
 }
 
 [class^="proof-element_level-"], #proofText {
@@ -1017,7 +1013,10 @@ span.choose {
   position: absolute;
   bottom: -15px;
   left: calc(100% + 10px);
-  width: 100px;
+  width: auto;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
 }
 
 /* ==========================================================================
@@ -1125,97 +1124,7 @@ span.choose {
   pointer-events: none; /* Забезпечує, що текст не впливає на взаємодію з курсором */
 }
 
-/* ==========================================================================
-   LATEX MODAL
-   ========================================================================== */
 
-#parentheses
-{
-  display: flex;
-  justify-content: center;
-}
-
-#parentheses button{
-  margin-right: 10px;
-}
-
-#latexCode{
-  font-family: 'Times New Roman', sans-serif;
-  display: flex;
-  flex-direction: column;
-}
-
-#latexInfo {
-  white-space: pre-line;
-  font-size: 32px;
-  overflow-y: scroll;
-  width: 95%;
-  height: 65%;
-  margin-left: 3%;
-  scrollbar-width: none; /* для Firefox */
-}
-
-#latexInfo::-webkit-scrollbar {
-  display: none; /* приховуємо скрол */
-}
-
-#latexModal .helpNavbarItem
-{
-  font-size: 32px;
-  color: rgb(80, 80, 80);
-}
-
-#copyLatexCode{
-  margin-top: 2%;
-  font-size: 48px;
-  background: rgb(255, 255, 255);
-  cursor: pointer;
-  padding: 11px 16px;
-  display: flex;
-  border-radius: 5px;
-  justify-content: center;
-  align-items: center;
-  color: rgb(33, 33, 33);
-  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
-  border: none;
-  outline: none;
-  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-#copyLatexCode:hover {
-  background-color: rgba(241, 241, 241, 0.85);
-  animation: none; /* Скасовуємо анімацію при наведенні, щоб не перервати анімацію кнопки */
-}
-
-@keyframes changeIcon {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(0deg); }
-  100% { transform: rotate(0deg); }
-}
-
-#copyLatexCode .buttonIcon img {
-  transition: transform 0.3s ease;
-}
-
-.corner-button {
-  /*width: auto;*/
-  position: fixed;
-  bottom: 10%; /* Відступ знизу */
-  right: 5%; /* Відступ справа */
-  background-color: white; /* Колір фону */
-  border: none;
-  cursor: pointer;
-  z-index: 9999; /* Забезпечує, що кнопка буде поверх інших елементів */
-  font-size: 26px;
-  padding: 1px 12px;
-  /*justify-content: center;*/
-  display: flex;
-  border-radius: 5px;
-  align-items: center;
-  color: rgb(33, 33, 33);
-  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
-  outline: none;
-}
 
 /* ==========================================================================
    MOBILE RESPONSIVE (max-width: 700px)
@@ -1255,7 +1164,10 @@ span.choose {
     position: absolute;
     bottom: -10px;
     left: calc(100% - 5px);
-    width: 100px;
+    width: auto;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
   }
 
   .button-container button {

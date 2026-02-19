@@ -283,6 +283,15 @@ export function parseExpression(text) {
     side = document.querySelector('.proof-element_level-0').children[0];
     oldUserInput = side.querySelector('#proofText').textContent;
 
+    setTimeout(() => {
+        if (side) {
+            const label = side.querySelector('label');
+            if (label) {
+                label.style.background = 'rgba(136,190,213,0.78)';
+            }
+        }
+    }, 0);
+
     // Зберігаємо стан і показуємо кнопки
     controlState.saveState();
     processExpression(parsedProof, 1);
@@ -554,11 +563,11 @@ function generateButtons(buttonCount, buttonTexts) {
 // Exported function for Sidebar "Smart Mode"
 export function toggleSmartMode() {
   const isAxiomsTab = document.getElementById('tab3').checked;
-  
+
   if (isAxiomsTab) {
     // Toggle state for Axioms tab
     helpButtonToggleState.axioms = !helpButtonToggleState.axioms;
-    
+
     if (helpButtonToggleState.axioms) {
       // Smart Mode ON: Show filtered
       showFilteredAxioms();
@@ -572,7 +581,7 @@ export function toggleSmartMode() {
   } else {
     // Toggle state for Rules tab
     helpButtonToggleState.allRules = !helpButtonToggleState.allRules;
-    
+
     // Get content from active side or fallback to oldUserInput
     let content = "";
     if (side) {
@@ -583,15 +592,15 @@ export function toggleSmartMode() {
         console.warn("No active formula selected for Smart Mode");
         return false;
     }
-    
+
     // If Smart Mode ON (allRules=true in this logic context), show Recommended (0). Else show All (1).
     // Note: The variable name 'allRules' in helpButtonToggleState actually tracks the TOGGLE state.
     // If it was named 'isRecommendedActive', it would be clearer.
-    // Based on previous logic: 
+    // Based on previous logic:
     // helpButton.onclick: if (allRules) -> processExpression(..., 0) [Recommended]
     // So helpButtonToggleState.allRules = TRUE means "Show Recommended".
     processExpression(checkWithAntlr(content), helpButtonToggleState.allRules ? 0 : 1);
-    
+
     return helpButtonToggleState.allRules;
   }
 }
@@ -1109,6 +1118,8 @@ editorMonaco.editor.onKeyDown(function (e) {
 function createProofElement(level) {
   const proofElement = document.createElement('div');
   proofElement.className = `proof-element_level-${level}`;
+  // Set z-index equal to level so higher levels stack on top of lower ones
+  proofElement.style.zIndex = level;
   return proofElement;
 }
 
@@ -1118,14 +1129,56 @@ function createProofTree(conclusions, container, hyp = null) {
   }
   const levelDiv = createProofElement(conclusions.level);
 
+  // Use a container for nodes to allow flexible layout (inference row vs direct append)
+  let nodesContainer = levelDiv;
+
   if (conclusions.level !== 0) {
     let lvl = document.querySelector(`.proof-element_level-${conclusions.level - 1}`);
-    if (lvl.childElementCount === 0) {
+    if (lvl && lvl.childElementCount === 0) {
       lvl.style.borderTop = '2px solid #000000';
     }
-    levelDiv.appendChild(deductive.createLineLevel(nameRule));
-    levelDiv.style.borderBottom = '2px solid #000000';
+
+    // Create Flex Structure for Rule Name and Line (same as Sequent)
+    const inferenceRow = document.createElement('div');
+    inferenceRow.style.display = 'flex';
+    inferenceRow.style.flexDirection = 'row';
+    inferenceRow.style.alignItems = 'flex-end';
+    inferenceRow.style.justifyContent = 'center';
+    inferenceRow.style.gap = '0px';
+    inferenceRow.style.position = 'relative';
+    inferenceRow.style.marginLeft = '45px';
+    inferenceRow.style.marginRight = '45px';
+
+    const premisesGroup = document.createElement('div');
+    premisesGroup.style.display = 'flex';
+    premisesGroup.style.flexDirection = 'column';
+    premisesGroup.style.alignItems = 'center';
+
+    nodesContainer = document.createElement('div');
+    nodesContainer.style.display = 'flex';
+    nodesContainer.style.flexDirection = 'row';
+    nodesContainer.style.gap = '80px';
+    nodesContainer.style.justifyContent = 'center';
+    nodesContainer.style.alignItems = 'flex-end';
+    nodesContainer.style.borderBottom = '2px solid black';
+    nodesContainer.style.paddingBottom = '3px';
+    nodesContainer.style.marginBottom = '0px';
+
+    const ruleLabel = deductive.createLineLevel(nameRule);
+    ruleLabel.style.position = 'absolute';
+    ruleLabel.style.right = '-45px';
+    ruleLabel.style.bottom = '-10px';
+    ruleLabel.style.width = '45px';
+    ruleLabel.style.textAlign = 'left';
+    ruleLabel.style.whiteSpace = 'nowrap';
+
+    premisesGroup.appendChild(nodesContainer);
+    inferenceRow.appendChild(premisesGroup);
+    inferenceRow.appendChild(ruleLabel);
+
+    levelDiv.appendChild(inferenceRow);
   }
+
   // Обробка conclusions.proof як масиву, якщо це масив
   if (Array.isArray(conclusions.proof)) {
     conclusions.proof.forEach((proofElement, index) => {
@@ -1150,10 +1203,10 @@ function createProofTree(conclusions, container, hyp = null) {
       // addUserHyp(conclusions, proofDiv);
       // console.log(levelDiv);
 
-      levelDiv.appendChild(proofDiv);
+      nodesContainer.appendChild(proofDiv);
 
       // Додавання роздільника, якщо це не останній елемент
-      if (index < conclusions.proof.length - 1) {
+      if (conclusions.level === 0 && index < conclusions.proof.length - 1) {
         proofDiv.style.marginRight = '130px';
       }
 
@@ -1203,13 +1256,14 @@ function createProofTree(conclusions, container, hyp = null) {
     }
     proofDiv.style.fontFamily = "'Times New Roman', sans-serif";
     // addUserHyp(conclusions, proofDiv);
-    levelDiv.appendChild(proofDiv);
+    nodesContainer.appendChild(proofDiv);
 
   }
 
-  if (currentLevel === 2 || currentLevel === 4 || currentLevel === 12) {
-    let childElements = levelDiv.children;
+  // Helper to get child elements from the correct container
+  let childElements = nodesContainer.children;
 
+  if (currentLevel === 2 || currentLevel === 4 || currentLevel === 12) {
     let hyp = "";
 
     if(currentLevel ===2 )
@@ -1233,22 +1287,16 @@ function createProofTree(conclusions, container, hyp = null) {
         return;
       }
     }
-    const gammaSpan1 = childElements[1].querySelector('.gamma-context');
+    // Using index 0 instead of 1 because nameRule is no longer a sibling
+    const gammaSpan1 = childElements[0].querySelector('.gamma-context');
     addHypothesesToGammaSpan(gammaSpan1, hyp);
   }
 
   //11 правило гіпотези
   if (conclusions.proof.length === 3 && currentLevel === 11) {
-    let childElements = levelDiv.children;
-
-    // childElements[2].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].left);
-    // childElements[3].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(conclusions.proof[0].right);
-    //
-    // console.log("tut");
-    // console.log(childElements[2]);
-    // console.log(childElements[3]);
-    const gammaSpan1 = childElements[2].querySelector('.gamma-context');
-    const gammaSpan12 = childElements[3].querySelector('.gamma-context');
+    // Indices shifted by -1 (original 2, 3 -> 1, 2)
+    const gammaSpan1 = childElements[1].querySelector('.gamma-context');
+    const gammaSpan12 = childElements[2].querySelector('.gamma-context');
 
     addHypothesesToGammaSpan(gammaSpan1, deductive.convertToLogicalExpression(conclusions.proof[0].left));
     addHypothesesToGammaSpan(gammaSpan12, deductive.convertToLogicalExpression(conclusions.proof[0].right));
@@ -1260,8 +1308,7 @@ function createProofTree(conclusions, container, hyp = null) {
   //14 правило(запамятати заміни)
   const spansRepl = container.querySelectorAll('span#repl'); // Знаходимо всі span з id="repl"
   if (spansRepl.length > 0) {
-    const childElements = levelDiv.children; // Отримуємо всі дочірні елементи levelDiv
-
+    // const childElements = levelDiv.children; // Replaced by nodesContainer.children logic
     spansRepl.forEach(spanRepl => {
       const clonedSpan = spanRepl.cloneNode(true); // Клонуємо кожен span
       Array.from(childElements).forEach(child => {
@@ -1274,27 +1321,25 @@ function createProofTree(conclusions, container, hyp = null) {
 
   //17 правило
   if (currentLevel === 17 && hyp !== null) {
-    let childElements = levelDiv.children;
-
-    const gammaSpan1 = childElements[2].querySelector('.gamma-context');
+    // Index shifted by -1 (original 2 -> 1)
+    const gammaSpan1 = childElements[1].querySelector('.gamma-context');
     addHypothesesToGammaSpan(gammaSpan1, deductive.convertToLogicalExpression(hyp));
 
-    // childElements[2].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(hyp);
+    // childElements[1].id = lastSide.id + 'divId-' + deductive.convertToLogicalExpression(hyp);
 
     deductionContext.hypotheses.push({level: level - 1, hyp: hyp});
   }
 
   if (currentLevel === 20) {
-    let childElements = levelDiv.children;
-
-    const firstChildText = childElements[1]?.querySelector('#proofText')?.textContent;
-    const secondChildText = childElements[2]?.querySelector('#proofText')?.textContent;
+    // Indices shifted by -1 (original 1, 2 -> 0, 1)
+    const firstChildText = childElements[0]?.querySelector('#proofText')?.textContent;
+    const secondChildText = childElements[1]?.querySelector('#proofText')?.textContent;
     //
-    // childElements[1].id = lastSide.id + 'divId-' + secondChildText;
-    // childElements[2].id = lastSide.id + 'divId-' + firstChildText;
+    // childElements[0].id = lastSide.id + 'divId-' + secondChildText;
+    // childElements[1].id = lastSide.id + 'divId-' + firstChildText;
 
-    const gammaSpan1 = childElements[1].querySelector('.gamma-context');
-    const gammaSpan2 = childElements[2].querySelector('.gamma-context');
+    const gammaSpan1 = childElements[0].querySelector('.gamma-context');
+    const gammaSpan2 = childElements[1].querySelector('.gamma-context');
 
     addHypothesesToGammaSpan(gammaSpan1, secondChildText);
     addHypothesesToGammaSpan(gammaSpan2, firstChildText);
@@ -1306,10 +1351,9 @@ function createProofTree(conclusions, container, hyp = null) {
 
   //21 правило (Mathematical Induction)
   if (currentLevel === 21 && hyp !== null) {
-    let childElements = levelDiv.children;
-
+    // Index shifted by -1 (original 2 -> 1)
     // Додаємо гіпотезу індукції P(x) до правої частини (інукційний крок)
-    childElements[2].id = lastSide.id + 'divId-' + convertToLogicalExpression(hyp);
+    childElements[1].id = lastSide.id + 'divId-' + convertToLogicalExpression(hyp);
 
     deductionContext.hypotheses.push({level: level - 1, hyp: hyp});
     console.log("Induction hypothesis added:", hyp);
@@ -1399,7 +1443,7 @@ function addOrRemoveParenthesesGentzen() {
   if (!addBtn || !delBtn || !retBtn) return;
 
   // Set initial state: Original Proof is disabled by default
-  toggleButtonState(retBtn, false); 
+  toggleButtonState(retBtn, false);
 
   // Helper to manage button states
   function toggleButtonState(btn, enabled) {
@@ -1477,7 +1521,7 @@ function addClickGentzenRules() {
         if (typeProof === 1) {
           return;
         }
-        
+
         if (helpButtonToggleState.axioms) {
              showFilteredAxioms();
         } else {

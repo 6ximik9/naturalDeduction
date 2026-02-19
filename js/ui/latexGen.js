@@ -2,25 +2,35 @@ import {typeProof} from "../index";
 import {clearItems} from "../proofs/fitch/FitchProof";
 import * as deductive from '../core/deductiveEngine';
 
+// Global reference for Sequent Context
 let sequentContextRef = { treeRoot: null };
 let latexSequentListenerAdded = false;
 
+// --- Modal Elements ---
+const latexModal = document.getElementById('latexModal');
+const latexInfo = document.getElementById('latexInfo');
+const closeBtn = document.querySelector('.closeLatex');
+const navbarItems = document.querySelectorAll('#latexModal .helpNavbarItem');
+const copyBtn = document.getElementById('copyLatexCode');
 
+// --- Helper Functions ---
+
+/**
+ * Traverses the proof tree in the DOM to extract proof steps.
+ * Used for Gentzen mode.
+ */
 function getLate(element) {
   let results = [];
 
-  // Рекурсивна функція для обходу
   function traverse(node) {
-
     const childDivs = Array.from(node.children);
-
+    
+    // Filter useful children
     const divElements = childDivs.filter(child =>
       child.tagName.toLowerCase() === 'div' &&
       !child.className.includes('nameRule')
     );
-
     const labelElements = childDivs.filter(child => child.tagName.toLowerCase() === 'label');
-
     const rule = childDivs.filter(child =>
       child.tagName.toLowerCase() === 'div' &&
       child.className.includes('nameRule')
@@ -29,6 +39,7 @@ function getLate(element) {
     if (labelElements.length > 0) {
       results.push(labelElements[0].textContent);
     }
+
     if (divElements.length === 1) {
       if (rule.length > 0) {
         results.push('unary');
@@ -54,252 +65,19 @@ function getLate(element) {
       results.push('axiom');
       traverse(divElements[0]);
     }
-
   }
 
   traverse(element);
-
   results.push('axiom');
-
   return results;
 }
 
-// Знаходимо модальне вікно
-var latexModal = document.getElementById('latexModal');
-var info = document.getElementById('latexInfo');
-
-
-function setProofDef()
-{
-  const container = document.querySelector('#latexModal');
-  const items = container.querySelectorAll('.helpNavbarItem');
-
-  let documentItem = null;
-  let proofItem = null;
-
-// Перебір усіх елементів для знаходження відповідних "Document" та "Proof"
-  items.forEach(item => {
-    if (item.textContent.trim() === "Document") {
-      documentItem = item;
-    } else if (item.textContent.trim() === "Proof") {
-      proofItem = item;
-    }
-  });
-
-  documentItem.style.color = ''; // Видалення кольору елемента "Document"
-  proofItem.style.color = 'rgba(0, 97, 161, 0.66)'; // Задання кольору елемента "Proof"
-}
-
-export function latexGentzen() {
-  const btn = document.getElementById('sb-latex') || document.getElementById('latex');
-  if (!btn) return;
-  const newBtn = btn.cloneNode(true);
-  btn.parentNode.replaceChild(newBtn, btn);
-
-  newBtn.addEventListener('click', function () {
-
-    var allProofLabels = document.querySelectorAll('label#proofText');
-    var previousLabels = document.querySelectorAll('label.previous');
-
-    if (allProofLabels.length !== previousLabels.length) {
-      var result = window.confirm("Not all branches complete. Latex code generated may be incorrect. Continue?");
-      if (!result) {
-        return;
-      }
-    }
-
-
-    setProofDef();
-
-    const proofContainer = document.querySelector('.proof-element_level-0');
-    const proofTexts = getLate(proofContainer).reverse();
-    // console.log(proofTexts.join('\n'));
-    info.textContent = transformArray(proofTexts).join('\n');
-    latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
-    document.querySelector('#latexCode').style.height = '600px';
-  });
-}
-
-export function latexFitch() {
-  const btn = document.getElementById('sb-latex') || document.getElementById('latex');
-  if (!btn) return;
-  const newBtn = btn.cloneNode(true);
-  btn.parentNode.replaceChild(newBtn, btn);
-
-  newBtn.addEventListener('click', function () {
-
-    const fitchBranchElements = document.querySelectorAll('.fitch_branch:not(.finished)');
-    if (fitchBranchElements.length > 0) {
-      let result = window.confirm("The proof is not finished, do you want to continue?");
-      if (!result) {
-        return;
-      }
-    }
-
-    setProofDef();
-    clearItems();
-
-    const branch = document.querySelectorAll('.fitch_branch');
-    outputArray.push("\\begin{fitch}");
-    printElementAndChildren(branch[0]);
-    outputArray.push("\\end{fitch}");
-
-    info.textContent = outputArray.join('\n');
-    latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
-    document.querySelector('#latexCode').style.height = '600px';
-
-    indexTest = 0;
-    level = "";
-    outputArray = [];
-  });
-}
-
-export function latexSequent(context) {
-  sequentContextRef = context;
-  if (latexSequentListenerAdded) return;
-  latexSequentListenerAdded = true;
-
-  const btn = document.getElementById('sb-latex') || document.getElementById('latex');
-  if (!btn) return;
-  const newBtn = btn.cloneNode(true);
-  btn.parentNode.replaceChild(newBtn, btn);
-
-  newBtn.addEventListener('click', function () {
-    if (typeProof !== 2) return;
-    setProofDef();
-
-    if (!sequentContextRef.treeRoot) return;
-
-    const latexStr = generateSequentLatex(sequentContextRef.treeRoot);
-    const wrapped = `\\begin{prooftree}
-${latexStr}
-\\end{prooftree}`;
-
-    info.textContent = wrapped;
-    latexModal.style.display = 'flex';
-    document.querySelector('#latexCode').style.height = '600px';
-  });
-}
-
-function generateSequentLatex(node) {
-  let result = "";
-
-  if (node.children) {
-    node.children.forEach(child => {
-      result += generateSequentLatex(child);
-    });
-  }
-
-  const left = node.antecedent.map(f => deductive.convertToLogicalExpression(f)).join(', ');
-  const right = node.succedent.map(f => deductive.convertToLogicalExpression(f)).join(', ');
-  const content = `$${latexEdit(left + ' \\vdash ' + right, 0)}$`;
-
-  if (!node.children || node.children.length === 0) {
-    result += `\\AxiomC{${content}}
-`;
-  } else {
-    if (node.ruleApplied) {
-      result += `\\RightLabel{$${latexEdit(node.ruleApplied, 1)}$}
-`;
-    }
-
-    if (node.children.length === 1) {
-      result += `\\UnaryInfC{${content}}
-`;
-    } else if (node.children.length === 2) {
-      result += `\\BinaryInfC{${content}}
-`;
-    } else if (node.children.length === 3) {
-      result += `\\TrinaryInfC{${content}}
-`;
-    } else {
-      result += `\\UnaryInfC{${content}}
-`;
-    }
-  }
-
-  return result;
-}
-
-let level = ""
-let indexTest = 0;
-let outputArray = [];
-
-function printElementAndChildren(element) {
-  if (indexTest !== 0) {
-    level += "\\fa"
-  }
-  var outJustDiv = document.getElementById('out_just').children;
-
-  const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
-
-  const children = Array.from(element.children);
-  children.forEach((child, index) => {
-    if (child.classList.contains('fitch_branch')) {
-      indexTest++;
-      printElementAndChildren(child); // Recursively handle nested fitch_branch
-    } else {
-      let output;
-      let rule;
-      if (child.style.borderBottom === '1px solid black') {
-        const elementIndex = allFitchFormulas.indexOf(child);
-        rule = outJustDiv[elementIndex].textContent;
-        output = level + "\\fj $$" + latexEdit(child.textContent.replaceAll("", " "), 0) + "$$";
-      } else {
-        const elementIndex = allFitchFormulas.indexOf(child);
-        rule = outJustDiv[elementIndex].textContent;
-        output = level + "\\fa $$" + latexEdit(child.textContent.replaceAll("", " "), 0) + "$$";
-      }
-      outputArray.push(output + " & $" + latexEdit(rule.replace(" ", " \\quad "), 1) + "$\\\\");
-    }
-  });
-
-  level = level.replace("\\fa", "")
-}
-
-
-document.querySelector('.closeLatex').addEventListener('click', function () {
-  latexModal.style.display = 'none'; // Закриваємо модальне вікно
-});
-
-latexModal.addEventListener('click', function (event) {
-  if (event.target === latexModal) {
-    latexModal.style.display = 'none'; // Закриваємо модальне вікно
-  }
-});
-
-
-document.getElementById('copyLatexCode').addEventListener('click', function () {
-
-  var textToCopy = document.getElementById('latexInfo').textContent;
-
-  var textarea = document.createElement("textarea");
-  textarea.textContent = textToCopy;
-  textarea.style.position = "fixed";  // Зберігає положення користувача на сторінці
-  document.body.appendChild(textarea);
-
-  textarea.select();
-  document.execCommand('copy');
-
-  document.body.removeChild(textarea);
-
-  // Змінюємо іконку на кнопці на декілька секунд
-  var buttonIcon = document.querySelector('#copyLatexCode .buttonIcon img');
-  buttonIcon.src = "../img/copyOk.svg"; // Припустимо, що це шлях до зображення успішного копіювання
-  buttonIcon.style.transform = "rotate(360deg)"; // Додаємо обертання іконки
-
-  // Після певного часу повертаємо оригінальну іконку
-  setTimeout(function () {
-    buttonIcon.src = "../img/copy.svg";
-    buttonIcon.style.transform = "rotate(0deg)"; // Повертаємо іконку в початкове положення
-  }, 2000); // 3000 мілісекунд (3 секунди)
-
-});
-
-
+/**
+ * Transforms the extracted proof array into bussproofs LaTeX commands.
+ */
 function transformArray(inputArray) {
   const transformed = [];
-  transformed.push('\\begin{prooftree}')
+  transformed.push('\\begin{prooftree}');
   let i = 0;
   while (i < inputArray.length) {
     const type = inputArray[i];
@@ -321,12 +99,13 @@ function transformArray(inputArray) {
       i += 2;
     }
   }
-
-  transformed.push('\\end{prooftree}')
+  transformed.push('\\end{prooftree}');
   return transformed;
 }
 
-
+/**
+ * Replaces symbols with their LaTeX equivalents.
+ */
 function latexEdit(str, mode) {
   const replacements = {
     'α': '\\alpha', 'β': '\\beta', 'γ': '\\gamma', 'δ': '\\delta',
@@ -350,16 +129,11 @@ function latexEdit(str, mode) {
     '<=': ' \\le ', '>=': ' \\ge ',
     '≠': ' \\neq ', '!=': ' \\neq ',
     '*': ' \\cdot '
-
   };
 
-  // Порядок важливий для запобігання неправильній заміні підрядків
-  // Спочатку замінюємо довші ключі, а потім коротші
   const sortedKeys = Object.keys(replacements).sort((a, b) => b.length - a.length);
 
   sortedKeys.forEach(key => {
-    // Використовуємо глобальний пошук та заміну з "g" флагом для RegExp
-
     const regex = new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
     if (mode === 0) {
       str = str.replace(regex, replacements[key]);
@@ -371,103 +145,266 @@ function latexEdit(str, mode) {
   return str;
 }
 
+// --- Content Generation Logic ---
 
-document.addEventListener('DOMContentLoaded', function () {
-  // Отримуємо всі елементи з класом 'helpNavbarItem'
-  const container = document.querySelector('#latexModal');
-  const items = container.querySelectorAll('.helpNavbarItem');
+function generateGentzenContent(isDocument) {
+    const proofContainer = document.querySelector('.proof-element_level-0');
+    if (!proofContainer) return "";
+    
+    const proofTexts = getLate(proofContainer).reverse();
+    const proofBody = transformArray(proofTexts).join('\n');
 
-  // Додаємо обробник кліків для кожного елемента
-  items.forEach(function (item) {
-    item.addEventListener('click', function () {
-      // Виводимо в консоль текст елемента, по якому було зроблено клік
-      if (this.innerText === "Proof") {
-        if (typeProof === 0) {
-          const proofContainer = document.querySelector('.proof-element_level-0');
-          const proofTexts = getLate(proofContainer).reverse();
-          // console.log(proofTexts.join('\n'));
-          info.textContent = transformArray(proofTexts).join('\n');
-          latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
-          document.querySelector('#latexCode').style.height = '600px';
-        } else if (typeProof === 1) {
-          clearItems();
+    if (isDocument) {
+        return "\\documentclass{article}\n" +
+               "\\usepackage{bussproofs} %https://ctan.org/pkg/bussproofs \n\n" +
+               "\\begin{document}\n\n" +
+               proofBody + 
+               "\n\n\\end{document}";
+    }
+    return proofBody;
+}
 
-          const branch = document.querySelectorAll('.fitch_branch');
-          outputArray.push("\\begin{fitch}");
-          printElementAndChildren(branch[0]);
-          outputArray.push("\\end{fitch}");
+// Global vars for Fitch recursion
+let level = "";
+let indexTest = 0;
+let outputArray = [];
 
-          info.textContent = outputArray.join('\n');
-          latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
-          document.querySelector('#latexCode').style.height = '600px';
-
-          indexTest = 0;
-          level = "";
-          outputArray = [];
-        } else {
-          // Sequent
-          if (!sequentContextRef.treeRoot) return;
-
-          const latexStr = generateSequentLatex(sequentContextRef.treeRoot);
-          const wrapped = `\\begin{prooftree}\n${latexStr}\n\\end{prooftree}`;
-
-          info.textContent = wrapped;
-          latexModal.style.display = 'flex';
-          document.querySelector('#latexCode').style.height = '600px';
-        }
-      } else if (this.innerText === "Document") {
-        if (typeProof === 0) {
-          info.textContent = "";
-          const startDoc = "\\documentclass{article}\n" +
-            "\\usepackage{bussproofs} %https://ctan.org/pkg/bussproofs \n\n" +
-            "\\begin{document}\n";
-
-          const proofContainer = document.querySelector('.proof-element_level-0');
-          const proofTexts = getLate(proofContainer).reverse();
-          // console.log(proofTexts.join('\n'));
-          info.textContent = startDoc + "\n" + transformArray(proofTexts).join('\n') + "\n\n\\end{document}";
-          latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
-          document.querySelector('#latexCode').style.height = '600px';
-        } else if (typeProof === 1) {
-          info.textContent = "";
-          const startDoc = "\\documentclass{article}\n" +
-            "\\usepackage{fitch} %http://www.actual.world/resources/tex/sty/kluwer/edited/fitch.sty \n\n" +
-            "\\begin{document}\n";
-
-          clearItems();
-          const branch = document.querySelectorAll('.fitch_branch');
-          outputArray.push("\\begin{fitch}");
-          printElementAndChildren(branch[0]);
-          outputArray.push("\\end{fitch}");
-
-          info.textContent = startDoc + "\n" + outputArray.join('\n') + "\n\n\\end{document}";
-          latexModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
-          document.querySelector('#latexCode').style.height = '600px';
-
-          indexTest = 0;
-          level = "";
-          outputArray = [];
-        } else {
-          // Sequent
-          info.textContent = "";
-          const startDoc = "\\documentclass{article}\n" +
-            "\\usepackage{bussproofs} %https://ctan.org/pkg/bussproofs \n\n" +
-            "\\begin{document}\n";
-
-          if (!sequentContextRef.treeRoot) {
-            info.textContent = startDoc + "\n\n\\end{document}";
-          } else {
-            const latexStr = generateSequentLatex(sequentContextRef.treeRoot);
-            info.textContent = startDoc + `\\begin{prooftree}\n${latexStr}\n\\end{prooftree}` + "\n\n\\end{document}";
-          }
-          latexModal.style.display = 'flex';
-          document.querySelector('#latexCode').style.height = '600px';
-        }
+function printElementAndChildren(element) {
+  if (indexTest !== 0) {
+    level += "\\fa"
+  }
+  var outJustDiv = document.getElementById('out_just').children;
+  const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
+  const children = Array.from(element.children);
+  
+  children.forEach((child, index) => {
+    if (child.classList.contains('fitch_branch')) {
+      indexTest++;
+      printElementAndChildren(child); 
+    } else {
+      let output;
+      let rule;
+      if (child.style.borderBottom === '1px solid black') {
+        const elementIndex = allFitchFormulas.indexOf(child);
+        rule = outJustDiv[elementIndex].textContent;
+        output = level + "\\fj $$" + latexEdit(child.textContent.replaceAll("", " "), 0) + "$$";
+      } else {
+        const elementIndex = allFitchFormulas.indexOf(child);
+        rule = outJustDiv[elementIndex].textContent;
+        output = level + "\\fa $$" + latexEdit(child.textContent.replaceAll("", " "), 0) + "$$";
       }
-
-    });
+      outputArray.push(output + " & $" + latexEdit(rule.replace(" ", " \\quad "), 1) + "$\\\\");
+    }
   });
+  level = level.replace("\\fa", "");
+}
+
+function generateFitchContent(isDocument) {
+    clearItems();
+    indexTest = 0;
+    level = "";
+    outputArray = [];
+
+    const branch = document.querySelectorAll('.fitch_branch');
+    if (branch.length === 0) return "";
+
+    outputArray.push("\\begin{fitch}");
+    printElementAndChildren(branch[0]);
+    outputArray.push("\\end{fitch}");
+
+    const proofBody = outputArray.join('\n');
+
+    if (isDocument) {
+         return "\\documentclass{article}\n" +
+            "\\usepackage{fitch} %http://www.actual.world/resources/tex/sty/kluwer/edited/fitch.sty \n\n" +
+            "\\begin{document}\n\n" +
+            proofBody + 
+            "\n\n\\end{document}";
+    }
+    return proofBody;
+}
+
+function generateSequentLatex(node) {
+  let result = "";
+
+  if (node.children) {
+    node.children.forEach(child => {
+      result += generateSequentLatex(child);
+    });
+  }
+
+  const left = node.antecedent.map(f => deductive.convertToLogicalExpression(f)).join(', ');
+  const right = node.succedent.map(f => deductive.convertToLogicalExpression(f)).join(', ');
+  const content = `$${latexEdit(left + ' \\vdash ' + right, 0)}$`;
+
+  if (!node.children || node.children.length === 0) {
+    result += `\\AxiomC{${content}}\n`;
+  } else {
+    if (node.ruleApplied) {
+      result += `\\RightLabel{$${latexEdit(node.ruleApplied, 1)}$}\n`;
+    }
+
+    if (node.children.length === 1) {
+      result += `\\UnaryInfC{${content}}\n`;
+    } else if (node.children.length === 2) {
+      result += `\\BinaryInfC{${content}}\n`;
+    } else if (node.children.length === 3) {
+      result += `\\TrinaryInfC{${content}}\n`;
+    } else {
+      result += `\\UnaryInfC{${content}}\n`;
+    }
+  }
+
+  return result;
+}
+
+function generateSequentContent(isDocument) {
+    if (!sequentContextRef.treeRoot) return "";
+    
+    const latexStr = generateSequentLatex(sequentContextRef.treeRoot);
+    const proofBody = `\\begin{prooftree}\n${latexStr}\n\\end{prooftree}`;
+
+    if (isDocument) {
+        return "\\documentclass{article}\n" +
+            "\\usepackage{bussproofs} %https://ctan.org/pkg/bussproofs \n\n" +
+            "\\begin{document}\n\n" +
+            proofBody +
+            "\n\n\\end{document}";
+    }
+    return proofBody;
+}
+
+// --- UI Logic ---
+
+function setActiveTab(index) {
+    // Update active class
+    navbarItems.forEach(item => item.classList.remove('active'));
+    if (navbarItems[index]) {
+        navbarItems[index].classList.add('active');
+    }
+    
+    // Update content
+    const isDocument = (index === 1); // 0 = Proof, 1 = Document
+    let content = "";
+
+    if (typeProof === 0) { // Gentzen
+        content = generateGentzenContent(isDocument);
+    } else if (typeProof === 1) { // Fitch
+        content = generateFitchContent(isDocument);
+    } else if (typeProof === 2) { // Sequent
+        content = generateSequentContent(isDocument);
+    }
+
+    if (latexInfo) {
+        latexInfo.textContent = content;
+    }
+}
+
+// Attach Tab Listeners
+navbarItems.forEach((item, index) => {
+    item.addEventListener('click', () => setActiveTab(index));
 });
 
+function openModal() {
+    latexModal.style.display = 'flex';
+    setActiveTab(0); // Default to Proof tab
+}
 
+function attachListener() {
+    const btn = document.getElementById('sb-latex') || document.getElementById('latex');
+    if (!btn) return;
+    
+    // Replace button to remove old listeners
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
 
+    newBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // Validation Checks
+        if (typeProof === 0) { // Gentzen
+            const allProofLabels = document.querySelectorAll('label#proofText');
+            const previousLabels = document.querySelectorAll('label.previous');
+            if (allProofLabels.length !== previousLabels.length) {
+                if (!window.confirm("Not all branches complete. Latex code generated may be incorrect. Continue?")) return;
+            }
+        } else if (typeProof === 1) { // Fitch
+            const fitchBranchElements = document.querySelectorAll('.fitch_branch:not(.finished)');
+            if (fitchBranchElements.length > 0) {
+                 if (!window.confirm("The proof is not finished, do you want to continue?")) return;
+            }
+        }
+
+        openModal();
+    });
+}
+
+// --- Exports ---
+
+export function latexGentzen() {
+    attachListener();
+}
+
+export function latexFitch() {
+    attachListener();
+}
+
+export function latexSequent(context) {
+    sequentContextRef = context;
+    if (!latexSequentListenerAdded) {
+        latexSequentListenerAdded = true;
+        attachListener();
+    }
+}
+
+// --- Event Listeners (Global) ---
+
+if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+        latexModal.style.display = 'none';
+    });
+}
+
+if (latexModal) {
+    latexModal.addEventListener('click', (e) => {
+        if (e.target === latexModal) {
+             latexModal.style.display = 'none';
+        }
+    });
+}
+
+if (copyBtn) {
+    copyBtn.addEventListener('click', async function () {
+        const textToCopy = latexInfo.textContent;
+        const icon = copyBtn.querySelector('i');
+        const originalClass = icon ? icon.className : '';
+
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+            
+            // Success Feedback
+            if (icon) {
+                icon.className = 'ri-check-line';
+                setTimeout(() => {
+                    icon.className = originalClass || 'ri-file-copy-line';
+                }, 2000);
+            }
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            // Fallback
+            const textarea = document.createElement("textarea");
+            textarea.value = textToCopy;
+            textarea.style.position = "fixed";
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+             if (icon) {
+                icon.className = 'ri-check-line';
+                setTimeout(() => {
+                    icon.className = originalClass || 'ri-file-copy-line';
+                }, 2000);
+            }
+        }
+    });
+}

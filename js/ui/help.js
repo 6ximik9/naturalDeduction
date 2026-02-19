@@ -3,430 +3,260 @@ import {side} from '../index';
 import {processExpression} from '../index';
 import {checkWithAntlr} from '../core/deductiveEngine';
 
+// Modal Elements
+const helpModal = document.getElementById('helpModal');
+const closeButton = document.querySelector('.closeHelp');
+const navbarItems = document.querySelectorAll('#helpModal .helpNavbarItem');
+const info = document.getElementById('info');
 
-let fontSize = 32;
+// Open Modal Buttons (Home Sidebar & Proof Sidebar)
+const openButtons = [
+    document.getElementById('helpBtn'),
+    document.getElementById('sb-help')
+];
 
-function isAppOpen() {
-  // Перевіряємо, чи браузер має можливість визначення активних вікон
-  if (typeof window !== 'undefined' && typeof window.document !== 'undefined') {
-    // Перевіряємо, чи є активні вікна відкритого браузера
-    if (window.document.hidden || window.document.visibilityState !== 'visible') {
-      // return false; // Якщо вікна не видимі, то застосунок не відкритий
+openButtons.forEach(btn => {
+    if (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            helpModal.style.display = 'flex';
+            // Default to General tab if empty or just reset
+            setActiveTab(0);
+        });
     }
-    fontSize = 20;
-  }
-   // Якщо оточення виконання не є браузером, повертаємо null
+});
+
+// Close Modal Logic
+if (closeButton) {
+    closeButton.addEventListener('click', function () {
+        helpModal.style.display = 'none';
+    });
 }
 
-isAppOpen();
-
-// Знаходимо кнопку, яка відкриває модальне вікно
-var modalButton = document.getElementById('helpBtn');
-// Знаходимо модальне вікно
-var helpModal = document.getElementById('helpModal');
-
-// Показати модальне вікно при кліку на кнопку
-modalButton.addEventListener('click', function () {
-  console.log("test");
-  helpModal.style.display = 'flex'; // Змінюємо стиль, щоб показати модальне вікно
-  setGeneral();
-});
-
-// Закрити модальне вікно при кліку на кнопку закриття
-var closeButton = document.querySelector('.closeHelp');
-closeButton.addEventListener('click', function () {
-  helpModal.style.display = 'none'; // Закриваємо модальне вікно
-
-  document.querySelectorAll('.helpNavbarItem').forEach(function (item, index) {
-
-    if (index !== 0) {
-      item.style.color = 'rgb(80, 80, 80)';
-    } else {
-      item.style.color = 'rgba(0, 97, 161, 0.66)';
-    }
-  });
-
-});
-
-helpModal.addEventListener('click', function (event) {
-  if (event.target === helpModal) {
-    helpModal.style.display = 'none'; // Закриваємо модальне вікно
-    document.querySelectorAll('.helpNavbarItem').forEach(function (item, index) {
-      if (index !== 0) {
-        item.style.color = 'rgb(80, 80, 80)';
-      } else {
-        item.style.color = 'rgba(0, 97, 161, 0.66)';
-      }
+if (helpModal) {
+    helpModal.addEventListener('click', function (event) {
+        if (event.target === helpModal) {
+            helpModal.style.display = 'none';
+        }
     });
-  }
-});
+}
 
-
-// Знаходимо всі елементи з класом helpNavbarItem
-var navbarItems = document.querySelectorAll('.helpNavbarItem');
-var helpDiv = document.querySelector('.help');
-var info = document.getElementById('info');
-
-// Додаємо обробник подій для кожного елементу
-navbarItems.forEach(function (item) {
-  item.addEventListener('click', function (event) {
-    // Змінюємо колір всіх елементів на стандартний
-    navbarItems.forEach(function (navItem) {
-      navItem.style.color = 'rgb(80, 80, 80)';
+// Tabs Logic
+navbarItems.forEach(function (item, index) {
+    item.addEventListener('click', function () {
+        setActiveTab(index);
     });
-    // Отримуємо елемент, на який був зроблений клік
-    var clickedItem = event.target;
-
-    if (clickedItem.textContent === 'General') {
-      setGeneral();
-    } else if (clickedItem.textContent === 'Syntax') {
-      info.innerHTML = '';
-      helpDiv.style.height = '600px';
-      info.appendChild(createMathTable());
-    } else if (clickedItem.textContent === 'Axioms') {
-      info.innerHTML = '';
-      helpDiv.style.height = '600px';
-      setAxioms();
-    } else {
-      info.innerHTML = '';
-      helpDiv.style.height = '600px';
-      helpInput();
-    }
-    // Змінюємо колір клікнутого елементу
-    clickedItem.style.color = 'rgba(0, 97, 161, 0.66)';
-
-  });
 });
 
-function setAxioms() {
-    var robinsonHeader = document.createElement('div');
-    robinsonHeader.textContent = 'Robinson Arithmetic';
-    robinsonHeader.style.fontSize = fontSize + 'px';
-    robinsonHeader.style.fontWeight = 'bold';
-    robinsonHeader.style.marginBottom = '10px';
-    robinsonHeader.style.marginTop = '10px';
+function setActiveTab(index) {
+    // Update Active Class
+    navbarItems.forEach(item => item.classList.remove('active'));
+    if (navbarItems[index]) {
+        navbarItems[index].classList.add('active');
+    }
+
+    // Update Content
+    if (!info) return;
+    info.innerHTML = '';
     
-    var ax1 = createHelpItem('Axiom 1', 's(x) ≠ 0', 'Zero is not a successor of any number.', '');
-    var ax2 = createHelpItem('Axiom 2', 's(x) = s(y) ⇒ x = y', 'Successor function is injective.', '');
-    var ax3 = createHelpItem('Axiom 3', 'x + 0 = x', 'Identity element for addition.', '');
-    var ax4 = createHelpItem('Axiom 4', 'x + s(y) = s(x + y)', 'Recursive definition of addition.', '');
-    var ax5 = createHelpItem('Axiom 5', 'x * 0 = 0', 'Multiplication by zero.', '');
-    var ax6 = createHelpItem('Axiom 6', 'x * s(y) = (x * y) + x', 'Recursive definition of multiplication.', '');
-    var ax7 = createHelpItem('Axiom 7', 'x = x', 'Reflexivity of equality.', '');
+    // Determine content based on text
+    const tabName = navbarItems[index].textContent.trim();
 
-    var orderHeader = document.createElement('div');
-    orderHeader.textContent = 'Linear Order';
-    orderHeader.style.fontSize = fontSize + 'px';
-    orderHeader.style.fontWeight = 'bold';
-    orderHeader.style.marginBottom = '10px';
-    orderHeader.style.marginTop = '20px';
+    if (tabName === 'General') {
+        setGeneral();
+    } else if (tabName === 'Syntax') {
+        info.appendChild(createMathTable());
+    } else if (tabName === 'Axioms') {
+        setAxioms();
+    } else if (tabName === 'Input') {
+        helpInput();
+    }
+}
 
-    var ord1 = createHelpItem('Order 1', '¬(x < x)', 'Irreflexivity of strict order.', '');
-    var ord2 = createHelpItem('Order 2', 'x < y ∧ y < z ⇒ x < z', 'Transitivity of order.', '');
-    var ord3 = createHelpItem('Order 3', 'x < y ∨ x = y ∨ y < x', 'Trichotomy law (linearity).', '');
 
-    info.appendChild(robinsonHeader);
-    info.appendChild(ax1);
-    info.appendChild(ax2);
-    info.appendChild(ax3);
-    info.appendChild(ax4);
-    info.appendChild(ax5);
-    info.appendChild(ax6);
-    info.appendChild(ax7);
+// --- Content Generators ---
 
-    info.appendChild(orderHeader);
-    info.appendChild(ord1);
-    info.appendChild(ord2);
-    info.appendChild(ord3);
+function createCard(title, subtitle, description, iconClass) {
+    const card = document.createElement('div');
+    card.className = 'help-item-card';
+
+    // Icon
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'help-icon';
+    const icon = document.createElement('i');
+    icon.className = iconClass;
+    iconDiv.appendChild(icon);
+
+    // Content
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'help-content';
+
+    const titleEl = document.createElement('span');
+    titleEl.className = 'help-item-title';
+    titleEl.textContent = title;
+    
+    contentDiv.appendChild(titleEl);
+
+    if (subtitle) {
+        const subtitleEl = document.createElement('div');
+        subtitleEl.className = 'help-item-subtitle';
+        subtitleEl.innerHTML = subtitle;
+        contentDiv.appendChild(subtitleEl);
+    }
+
+    const descEl = document.createElement('div'); // changed to div for block content
+    descEl.className = 'help-item-desc';
+    descEl.innerHTML = description; 
+
+    contentDiv.appendChild(descEl);
+
+    card.appendChild(iconDiv);
+    card.appendChild(contentDiv);
+
+    return card;
 }
 
 function setGeneral() {
-  helpDiv.style.height = '600px';
-  info.innerHTML = '';
-  // var run = createHelpItem('Proof by deduction', 'Proof', 'Click to start the proof by natural deduction', '../img/play.svg');
-  // var paste = createHelpItem('Example', 'Paste example', 'Click to insert an example or sample. This helps you add an example faster and demonstrate an idea or problem.', '');
-  // var font = createHelpItem('Setting font size', 'Font size', 'Tap to change the font size. This will allow you to adjust the font to the right size to make it easier to enter information.', '');
-
-  var run = createHelpItem('Proof by deduction', 'Proof', 'Click to start the proof by natural deduction', 'play');
-  var paste = createHelpItem('Example', 'Paste example', 'Click to insert an example or sample. This helps you add an example faster and demonstrate an idea or problem.', '');
-  var font = createHelpItem('Setting font size', 'Font size', 'Tap to change the font size. This will allow you to adjust the font to the right size to make it easier to enter information.', '');
-
-  info.appendChild(run);
-  info.appendChild(paste);
-  info.appendChild(font);
+    info.appendChild(createCard('Proof by deduction', 'Proof', 'Click the "Proof" button (or Play icon) to start the natural deduction environment.', 'ri-play-fill'));
+    info.appendChild(createCard('Example', 'Paste example', 'Use "Paste Example" in the sidebar to load pre-defined problems and demonstrate the solver capabilities.', 'ri-file-text-line'));
+    info.appendChild(createCard('Appearance', 'Font size', 'Use the font size selector in the top header to adjust text size for better readability.', 'ri-text'));
 }
 
+function setAxioms() {
+    const createHeader = (text) => {
+        const h = document.createElement('div');
+        h.className = 'section-header';
+        h.textContent = text;
+        return h;
+    };
 
-function createHelpItem(title, buttonText, description, svgPath) {
-  // Створюємо елемент заголовка
-  var titleElement = document.createElement('span');
-  titleElement.classList.add('helpItemExampleName');
-  titleElement.style.color = 'rgb(33, 33, 33)';
-  titleElement.textContent = title;
-  titleElement.style.whiteSpace = "nowrap";
-  titleElement.style.fontSize = fontSize + 'px';
-
-  // Створюємо кнопку
-  var button = document.createElement('button');
-  button.classList.add('buttonWithIcon');
-  button.style.background = 'rgb(255, 255, 255)';
-  button.style.color = 'rgb(33, 33, 33)';
-  button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
-  button.style.fontSize = fontSize + 'px';
-  if (svgPath === 'play') {
-    button.innerHTML = `
-  <span class="buttonText">${buttonText}</span>
-  <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
-    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#0061a1">
-      <g id="SVGRepo_bgCarrier" stroke-width="0"/>
-      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.24000000000000005"/>
-      <g id="SVGRepo_iconCarrier">
-        <path d="M3 12L3 18.9671C3 21.2763 5.53435 22.736 7.59662 21.6145L10.7996 19.8727M3 8L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L14.0026 18.131" stroke="#0061a1" stroke-width="2.4" stroke-linecap="round"/>
-      </g>
-    </svg>
-  </div>`;
-  } else {
-    button.innerHTML = `
-    <span class="buttonText">${buttonText}</span>
-    <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
-    <img src="${svgPath}" alt="SVG Icon" style="height: 100%; width: 100%;">
-  </div>
-`;
-  }
-
-  if (svgPath === '') {
-    button.innerHTML = `
-    <span class="buttonText">${buttonText}</span>
-`;
-  }
+    info.appendChild(createHeader('Robinson Arithmetic'));
+    const axioms = [
+        ['Axiom 1', 's(x) ≠ 0', 'Zero is not a successor of any number.'],
+        ['Axiom 2', 's(x) = s(y) ⇒ x = y', 'Successor function is injective.'],
+        ['Axiom 3', 'x + 0 = x', 'Identity element for addition.'],
+        ['Axiom 4', 'x + s(y) = s(x + y)', 'Recursive definition of addition.'],
+        ['Axiom 5', 'x * 0 = 0', 'Multiplication by zero.'],
+        ['Axiom 6', 'x * s(y) = (x * y) + x', 'Recursive definition of multiplication.'],
+        ['Axiom 7', 'x = x', 'Reflexivity of equality.']
+    ];
+    axioms.forEach(ax => info.appendChild(createCard(ax[0], ax[1], ax[2], 'ri-bookmark-line')));
 
 
-  // Створюємо елемент опису
-  var descriptionElement = document.createElement('p');
-  descriptionElement.classList.add('helpDescription');
-  descriptionElement.style.color = 'rgb(33, 33, 33)';
-  descriptionElement.textContent = description;
-  descriptionElement.style.fontSize = fontSize + 'px';
-
-  // Створюємо контейнер для всіх елементів
-  var helpItem = document.createElement('div');
-  helpItem.classList.add('helpItem');
-  helpItem.style.borderBottomWidth = '1px';
-  helpItem.style.borderBottomStyle = 'solid';
-  helpItem.style.borderBottomColor = 'rgb(243, 243, 243)';
-
-  // Додаємо елементи до контейнера
-  var itemExample = document.createElement('div');
-  itemExample.classList.add('helpItemExample');
-  itemExample.appendChild(titleElement);
-  var itemComponent = document.createElement('div');
-  itemComponent.classList.add('helpItemExampleComponent');
-  itemComponent.appendChild(button);
-  itemExample.appendChild(itemComponent);
-  helpItem.appendChild(itemExample);
-
-  // Додаємо роздільник
-  var divider = document.createElement('div');
-  divider.classList.add('helpItemDivider');
-  divider.style.color = 'rgb(65, 143, 137)';
-  divider.textContent = '—';
-  helpItem.appendChild(divider);
-
-  // Додаємо опис
-  helpItem.appendChild(descriptionElement);
-
-  // Повертаємо створений елемент
-  return helpItem;
-}
-
-
-function createMathTable() {
-// Define the symbols and their corresponding codes
-  const symbols = [
-    {symbol1: 'αΑ', code1: '\\alpha \\Alpha', symbol2: 'βΒ', code2: '\\beta \\Beta'},
-    {symbol1: 'γΓ', code1: '\\gamma \\Gamma', symbol2: 'δΔ', code2: '\\delta \\Delta'},
-    {symbol1: 'ϵΕ', code1: '\\epsilon \\Epsilon', symbol2: 'ζΖ', code2: '\\zeta \\Zeta'},
-    {symbol1: 'ηΗ', code1: '\\eta \\Eta', symbol2: 'θΘ', code2: '\\theta \\Theta'},
-    {symbol1: 'ιΙ', code1: '\\iota \\Iota', symbol2: 'κΚ', code2: '\\kappa \\Kappa'},
-    {symbol1: 'λΛ', code1: '\\lambda \\Lambda', symbol2: 'μΜ', code2: '\\mu \\Mu'},
-    {symbol1: 'νΝ', code1: '\\nu \\Nu', symbol2: 'ξΞ', code2: '\\xi \\Xi'},
-    {symbol1: 'οΟ', code1: '\\omicron \\Omicron', symbol2: 'πΠ', code2: '\\pi \\Pi'},
-    {symbol1: 'ρΡ', code1: '\\rho \\Rho', symbol2: 'σΣ', code2: '\\sigma \\Sigma'},
-    {symbol1: 'τΤ', code1: '\\tau \\Tau', symbol2: 'υΥ', code2: '\\upsilon \\Upsilon'},
-    {symbol1: 'ϕΦ', code1: '\\phi \\Phi', symbol2: 'χΧ', code2: '\\chi \\Chi'},
-    {symbol1: 'ψΨ', code1: '\\psi \\Psi', symbol2: 'ωΩ', code2: '\\omega \\Omega'}
-  ];
-
-
-  // Create the table element
-  const table = document.createElement('table');
-  table.classList.add('wikitable');
-
-  // Create table body
-  const tbody = document.createElement('tbody');
-
-  // Loop through symbols and generate table rows
-  for (let i = 0; i < symbols.length; i++) {
-    const symbol1 = symbols[i].symbol1;
-    const code1 = symbols[i].code1;
-    const symbol2 = symbols[i].symbol2;
-    const code2 = symbols[i].code2;
-
-    const row = document.createElement('tr');
-
-    const symbolCell1 = document.createElement('td');
-    const symbolSpan1 = document.createElement('span');
-    symbolSpan1.innerHTML = symbol1;
-    symbolCell1.appendChild(symbolSpan1);
-    row.appendChild(symbolCell1);
-
-    const codeCell1 = document.createElement('td');
-    const codeCode1 = document.createElement('code');
-    codeCode1.textContent = code1;
-    codeCell1.appendChild(codeCode1);
-    row.appendChild(codeCell1);
-
-    const symbolCell2 = document.createElement('td');
-    const symbolSpan2 = document.createElement('span');
-    symbolSpan2.innerHTML = symbol2;
-    symbolCell2.appendChild(symbolSpan2);
-    row.appendChild(symbolCell2);
-
-    const codeCell2 = document.createElement('td');
-    const codeCode2 = document.createElement('code');
-    codeCode2.textContent = code2;
-    codeCell2.appendChild(codeCode2);
-    row.appendChild(codeCell2);
-
-    tbody.appendChild(row);
-  }
-
-  // Append table body to table
-  table.appendChild(tbody);
-
-  // Create a div to contain the table
-  const container = document.createElement('div');
-  container.className = 'tableInfo';
-  // Add the "Greek letters" header with styles
-  const greekLettersHeader = document.createElement('div');
-  greekLettersHeader.textContent = 'Greek letters';
-  greekLettersHeader.id = 'greekLettersHeader';
-  greekLettersHeader.style.fontSize = fontSize + 'px';
-  greekLettersHeader.style.fontWeight = 'bold';
-  greekLettersHeader.style.marginBottom = '10px';
-
-
-  const logicalSymbols = [
-    { symbol: '⇒', code: '\\Rightarrow', input: '->, =>' },
-    { symbol: '∨', code: '\\lor', input: '|, or' },
-    { symbol: '∧', code: '\\land', input: '&, and' },
-    { symbol: '¬', code: '\\neg', input: '!, ~' },
-    { symbol: '∀', code: '\\forall', input: 'forall, ALL' },
-    { symbol: '∃', code: '\\exists', input: 'exists, EX' },
-    { symbol: '=', code: '=', input: '=' },
-    { symbol: '≠', code: '\\neq', input: '!=, <>' },
-    { symbol: '⊤', code: '\\top', input: 'TRUE' },
-    { symbol: '⊥', code: '\\bot', input: 'FALSE' },
-    { symbol: 's(x)', code: 's(x)', input: 's(0)' },
-    { symbol: '+', code: '+', input: '+, add' },
-    { symbol: '*', code: '*', input: '*, mult' },
-    { symbol: '⊢', code: '\\vdash', input: '|-' }
-  ];
-
-
-
-  const tableLogic = document.createElement('table');
-  tableLogic.classList.add('wikitable');
-
-  // Header row for Logic table
-  const logicHead = document.createElement('thead');
-  const headRow = document.createElement('tr');
-  ['Symbol', 'Latex', 'Keyboard Input'].forEach(text => {
-      const th = document.createElement('th');
-      th.textContent = text;
-      th.style.textAlign = 'left';
-      th.style.padding = '8px';
-      headRow.appendChild(th);
-  });
-  logicHead.appendChild(headRow);
-  tableLogic.appendChild(logicHead);
-
-  // Create table body
-  const tbodyLogic = document.createElement('tbody');
-
-  // Loop through symbols and generate table rows
-  for (let i = 0; i < logicalSymbols.length; i++) {
-    const symbol1 = logicalSymbols[i].symbol;
-    const code1 = logicalSymbols[i].code;
-    const input1 = logicalSymbols[i].input;
-
-    const row = document.createElement('tr');
-
-    const symbolCell1 = document.createElement('td');
-    const symbolSpan1 = document.createElement('span');
-    symbolSpan1.innerHTML = symbol1;
-    symbolCell1.appendChild(symbolSpan1);
-    row.appendChild(symbolCell1);
-
-    const codeCell1 = document.createElement('td');
-    const codeCode1 = document.createElement('span');
-    codeCode1.textContent = code1;
-    codeCell1.appendChild(codeCode1);
-    row.appendChild(codeCell1);
-    
-    const inputCell1 = document.createElement('td');
-    const inputCode1 = document.createElement('code');
-    inputCode1.textContent = input1;
-    inputCell1.appendChild(inputCode1);
-    row.appendChild(inputCell1);
-
-    tbodyLogic.appendChild(row);
-  }
-
-  const operationHeader = document.createElement('div');
-  operationHeader.textContent = 'Operations & Syntax';
-  operationHeader.id = 'operationHeader';
-  operationHeader.style.fontSize = fontSize + 'px';
-  operationHeader.style.fontWeight = 'bold';
-  operationHeader.style.marginBottom = '10px';
-  operationHeader.style.marginTop = '26px';
-
-  // Append table body to table
-  tableLogic.appendChild(tbodyLogic);
-
-
-  container.appendChild(greekLettersHeader);
-  container.appendChild(table);
-
-  container.appendChild(operationHeader);
-  container.appendChild(tableLogic);
-
-  return container;
+    info.appendChild(createHeader('Linear Order'));
+    const orders = [
+        ['Order 1', '¬(x < x)', 'Irreflexivity of strict order.'],
+        ['Order 2', 'x < y ∧ y < z ⇒ x < z', 'Transitivity of order.'],
+        ['Order 3', 'x < y ∨ x = y ∨ y < x', 'Trichotomy law (linearity).']
+    ];
+    orders.forEach(ord => info.appendChild(createCard(ord[0], ord[1], ord[2], 'ri-sort-asc')));
 }
 
 function helpInput() {
-  // Case sensitivity note
-  var caseNote = createHelpItem('Case Sensitivity', 'P(x) vs x', 'Use UPPERCASE letters for Predicates/Relations (e.g., P, Q, R) and lowercase letters for Variables/Functions (e.g., x, y, f, g).', '');
-  
-  var inline = createHelpItem('Inline', '(A⇒B)∧(B⇒C)⇒(A⇒C)', 'The user can enter logical formulas in a single line. The program will automatically identify the formula and allow you to make operations on it.', '');
-  var multiline = createHelpItem('Multiline', 'A⇒B<br>B⇒C<br>C<br>————————<br>(A⇒B)∧(B⇒C)⇒(A⇒C)',
-    'In this mode, the user can enter logical formulas one per line. All hypotheses are entered above the line, and the result or proven statement is entered below the line', '');
-  var proves = createHelpItem('Formal proof', 'A⇒B, C ⊢ (B⇒C)⇒(A⇒C)',
-    'In this mode, the user can enter logical formulas one by one, separated a comma. All hypotheses are entered before the symbol ⊢, and the result or proven statement is entered after', '');
+    info.appendChild(createCard('Case Sensitivity', 'P(x) vs x', 'Use <b>UPPERCASE</b> letters for Predicates/Relations (e.g., P, Q, R) and <b>lowercase</b> letters for Variables/Functions (e.g., x, y, f, g).', 'ri-edit-box-line'));
+    info.appendChild(createCard('Inline', '(A⇒B)∧(B⇒C)⇒(A⇒C)', 'Enter logical formulas in a single line. The program will automatically identify the formula.', 'ri-text-spacing'));
+    info.appendChild(createCard('Multiline', 'A⇒B<br>B⇒C<br>C<br>————————<br>(A⇒B)∧(B⇒C)⇒(A⇒C)', 'Formulas one per line. Hypotheses above the line, conclusion below.', 'ri-list-check'));
+    info.appendChild(createCard('Formal proof', 'A⇒B, C ⊢ (B⇒C)⇒(A⇒C)', 'Formulas separated by comma. Hypotheses before ⊢, conclusion after.', 'ri-function-line'));
+}
 
-  info.appendChild(caseNote);
-  info.appendChild(inline);
-  info.appendChild(multiline);
-  info.appendChild(proves);
+function createMathTable() {
+    const container = document.createElement('div');
+
+    const greekHeader = document.createElement('div');
+    greekHeader.className = 'section-header';
+    greekHeader.textContent = 'Greek Letters';
+    container.appendChild(greekHeader);
+
+    // Greek Table
+    const greekTable = document.createElement('table');
+    greekTable.className = 'help-table';
+    greekTable.innerHTML = `
+        <thead>
+            <tr><th>Symbol</th><th>LaTeX</th><th>Symbol</th><th>LaTeX</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>α Α</td><td><code>\\alpha \\Alpha</code></td><td>β Β</td><td><code>\\beta \\Beta</code></td></tr>
+            <tr><td>γ Γ</td><td><code>\\gamma \\Gamma</code></td><td>δ Δ</td><td><code>\\delta \\Delta</code></td></tr>
+            <tr><td>ε Ε</td><td><code>\\epsilon \\Epsilon</code></td><td>ζ Ζ</td><td><code>\\zeta \\Zeta</code></td></tr>
+            <tr><td>η Η</td><td><code>\\eta \\Eta</code></td><td>θ Θ</td><td><code>\\theta \\Theta</code></td></tr>
+            <tr><td>ι Ι</td><td><code>\\iota \\Iota</code></td><td>κ Κ</td><td><code>\\kappa \\Kappa</code></td></tr>
+            <tr><td>λ Λ</td><td><code>\\lambda \\Lambda</code></td><td>μ Μ</td><td><code>\\mu \\Mu</code></td></tr>
+            <tr><td>ν Ν</td><td><code>\\nu \\Nu</code></td><td>ξ Ξ</td><td><code>\\xi \\Xi</code></td></tr>
+            <tr><td>ο Ο</td><td><code>\\omicron \\Omicron</code></td><td>π Π</td><td><code>\\pi \\Pi</code></td></tr>
+            <tr><td>ρ Ρ</td><td><code>\\rho \\Rho</code></td><td>σ Σ</td><td><code>\\sigma \\Sigma</code></td></tr>
+            <tr><td>τ Τ</td><td><code>\\tau \\Tau</code></td><td>υ Υ</td><td><code>\\upsilon \\Upsilon</code></td></tr>
+            <tr><td>φ Φ</td><td><code>\\phi \\Phi</code></td><td>χ Χ</td><td><code>\\chi \\Chi</code></td></tr>
+            <tr><td>ψ Ψ</td><td><code>\\psi \\Psi</code></td><td>ω Ω</td><td><code>\\omega \\Omega</code></td></tr>
+        </tbody>
+    `;
+    container.appendChild(greekTable);
+
+
+    const logicHeader = document.createElement('div');
+    logicHeader.className = 'section-header';
+    logicHeader.textContent = 'Operations & Syntax';
+    container.appendChild(logicHeader);
+
+    // Logic Table
+    const logicTable = document.createElement('table');
+    logicTable.className = 'help-table';
+    logicTable.innerHTML = `
+        <thead>
+            <tr><th>Symbol</th><th>LaTeX</th><th>Keyboard Input</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>⇒</td><td><code>\\Rightarrow</code></td><td><code>-></code>, <code>=></code></td></tr>
+            <tr><td>∨</td><td><code>\\lor</code></td><td><code>|</code>, <code>or</code></td></tr>
+            <tr><td>∧</td><td><code>\\land</code></td><td><code>&</code>, <code>and</code></td></tr>
+            <tr><td>¬</td><td><code>\\neg</code></td><td><code>!</code>, <code>~</code></td></tr>
+            <tr><td>∀</td><td><code>\\forall</code></td><td><code>forall</code>, <code>ALL</code></td></tr>
+            <tr><td>∃</td><td><code>\\exists</code></td><td><code>exists</code>, <code>EX</code></td></tr>
+            <tr><td>=</td><td><code>=</code></td><td><code>=</code></td></tr>
+            <tr><td>≠</td><td><code>\\neq</code></td><td><code>!=</code>, <code><></code></td></tr>
+            <tr><td>⊤</td><td><code>\\top</code></td><td><code>TRUE</code></td></tr>
+            <tr><td>⊥</td><td><code>\\bot</code></td><td><code>FALSE</code></td></tr>
+            <tr><td>s(x)</td><td><code>s(x)</code></td><td><code>s(0)</code></td></tr>
+            <tr><td>+</td><td><code>+</code></td><td><code>+</code>, <code>add</code></td></tr>
+            <tr><td>*</td><td><code>*</code></td><td><code>*</code>, <code>mult</code></td></tr>
+            <tr><td>⊢</td><td><code>\\vdash</code></td><td><code>|-</code></td></tr>
+        </tbody>
+    `;
+    container.appendChild(logicTable);
+
+    return container;
 }
 
 
-var button = document.getElementById('redirectButton');
-// Додаємо обробник події 'click', який виконається при натисканні на кнопку
-button.addEventListener('click', function () {
-  // Виконуємо редірект
-  console.log("123123");
-  window.open('https://forms.gle/k3v3sXibjAMzaqQ1A', '_blank');
-});
+// --- Latex Modal Logic ---
+const latexCloseBtn = document.querySelector('.closeLatex');
+const latexModal = document.getElementById('latexModal');
+if (latexCloseBtn && latexModal) {
+    latexCloseBtn.addEventListener('click', () => {
+        latexModal.style.display = 'none';
+    });
+    
+    // Also close on background click
+    latexModal.addEventListener('click', (e) => {
+        if (e.target === latexModal) {
+            latexModal.style.display = 'none';
+        }
+    });
+}
 
+// Redirect Button (Feedback)
+const redirectButton = document.getElementById('redirectButton');
+if (redirectButton) {
+    redirectButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.open('https://forms.gle/k3v3sXibjAMzaqQ1A', '_blank');
+    });
+}
 
+// Support Feedback Button in Proof Sidebar
+const sbFeedback = document.getElementById('sb-feedback');
+if (sbFeedback) {
+    sbFeedback.addEventListener('click', function(e) {
+         e.preventDefault();
+         window.open('https://forms.gle/k3v3sXibjAMzaqQ1A', '_blank');
+    });
+}

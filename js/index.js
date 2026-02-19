@@ -19,7 +19,7 @@ export let typeProof = 0;
 document.addEventListener("DOMContentLoaded", function() {
   // Initialize Proof View (Pan/Zoom/Resize)
   initProofView();
-  
+
   // Initialize Font Selectors
   initFontSelectors();
 
@@ -39,17 +39,17 @@ document.addEventListener("DOMContentLoaded", function() {
     themeToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       themeToggle.classList.toggle('dark');
-      
+
       const isDark = document.body.classList.contains('dark-mode');
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      
+
       // Update Monaco theme
       if (typeof monaco !== 'undefined') {
         monaco.editor.setTheme(isDark ? 'vs-dark' : 'vs');
       }
     });
   }
-  
+
   // Setup Proxy for new Sidebar Buttons
   setupSidebarProxy();
 
@@ -72,18 +72,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.addEventListener('mousemove', function(e) {
       if (!isDragging) return;
-      
+
       const containerRect = container.getBoundingClientRect();
       const newLeftWidth = e.clientX - containerRect.left - (splitter.offsetWidth / 2);
-      
+
       // Constraints (20% min width for each side)
       const minWidth = containerRect.width * 0.2;
       const maxWidth = containerRect.width * 0.8;
-      
+
       if (newLeftWidth > minWidth && newLeftWidth < maxWidth) {
         const leftPercent = (newLeftWidth / containerRect.width) * 100;
         const rightPercent = 100 - leftPercent; // Splitter width is negligible or handled by flex-shrink
-        
+
         leftPanel.style.width = `${leftPercent}%`;
         rightPanel.style.width = `calc(${rightPercent}% - ${splitter.offsetWidth}px)`;
       }
@@ -168,13 +168,13 @@ function updateAxiomTabVisibility(isSequent) {
       axiomTabLi.style.display = isSequent ? 'none' : 'block';
     }
   }
-  
+
   // Update sidebar link visibility
   const sbAxiom = document.getElementById('sb-axiom');
   if (sbAxiom) {
       sbAxiom.style.display = isSequent ? 'none' : 'flex';
   }
-  
+
   if (isSequent) {
       const axiomRadio = document.getElementById('tab3');
       if (axiomRadio && axiomRadio.checked) {
@@ -277,10 +277,12 @@ enterButton.addEventListener('click', function () {
       const proofContainer = document.getElementById('proof-container');
       if (proofContainer) proofContainer.style.display = 'block';
   }
-  
+
+  const fontSelect = document.getElementsByClassName('custom-select')[0];
   // Hide the enter button as we transition to proof mode
   enterButton.style.display = 'none';
-  
+  fontSelect.style.display = 'none';
+
   // Switch Sidebar to Proof Mode
   const homeSidebar = document.getElementById('sidebar-home');
   const proofSidebar = document.getElementById('sidebar-proof');
@@ -306,7 +308,7 @@ function validateInputForStyle(input, style) {
   try {
     // We reuse the parsing logic to check structure
     let ast = deductive.checkWithAntlr(input);
-    
+
     // checkWithAntlr might return an array if the input is a list 'A, B' (which matches atomList)
     // or a 'sequent' object if it contains '⊢'
     // or a simple formula object (which might be wrapped or not, depending on listeners)
@@ -328,7 +330,7 @@ function validateInputForStyle(input, style) {
         } else {
            // Should be array, but if single object, it's length 1 essentially
         }
-      } 
+      }
       else if (Array.isArray(ast)) {
         // It's a list of formulas without turnstile, e.g. "A, B"
         // Gentzen/Fitch treat non-sequent input as the goal formula.
@@ -339,7 +341,7 @@ function validateInputForStyle(input, style) {
         }
       }
     }
-    
+
     // Style 2: Sequent (allows multi-conclusion and lists)
     return true;
 
@@ -473,7 +475,7 @@ function setupSidebarProxy() {
   // proxy('sb-latex', 'latex');
   proxy('sb-help', 'helpBtn');
   proxy('sb-feedback', 'redirectButton');
-  
+
   // Parentheses proxies removed (handled directly in GentzenProof/FitchProof)
 
   // Smart Mode Toggle
@@ -489,7 +491,7 @@ function setupSidebarProxy() {
       } else if (typeProof === 2) { // Sequent
          isActive = sequent.toggleSmartMode();
       }
-      
+
       if (isActive) {
         smartBtn.classList.add('active');
         smartBtn.style.color = '#f59e0b';
@@ -503,7 +505,7 @@ function setupSidebarProxy() {
   // Tab switching with active state toggle
   const tabs = [
     { sb: 'sb-rules', target: 'tab1', labelTarget: 'tab1' }, // tab1 is radio
-    { sb: 'sb-axiom', target: 'tab3', labelTarget: 'tab3' }, 
+    { sb: 'sb-axiom', target: 'tab3', labelTarget: 'tab3' },
     { sb: 'sb-tree', target: 'tab4', labelTarget: 'tab4' }
   ];
 
@@ -515,7 +517,7 @@ function setupSidebarProxy() {
         // Click the corresponding label to trigger radio change
         const label = document.querySelector(`label[for="${t.target}"]`);
         if (label) label.click();
-        
+
         // Update active class on sidebar
         tabs.forEach(x => {
            const el = document.getElementById(x.sb);
