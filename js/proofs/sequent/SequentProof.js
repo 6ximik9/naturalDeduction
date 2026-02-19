@@ -105,7 +105,9 @@ export function parseExpression(text) {
 
     // Select the root initially
     if (rootSequent.domElement) {
-        selectSequent(rootSequent.domElement, rootSequent);
+        setTimeout(() => {
+            selectSequent(rootSequent.domElement, rootSequent);
+        }, 0);
     }
 
     setupTabListeners();
@@ -377,10 +379,9 @@ export function addChildrenToTree(parentSequent, newSequents, ruleName) {
         side = null;
         selectedFormulaIndex = { side: null, index: -1 };
         
-        // Hide menu as nothing is selected
-        document.getElementById('proof-menu').className = 'hidden';
-        const buttonContainer = document.getElementById('button-container');
-        if (buttonContainer) buttonContainer.innerHTML = '';
+        // Hide menu as nothing is selected - NOT ANYMORE, show disabled
+        document.getElementById('proof-menu').className = 'proof-menu';
+        disableAllButtons();
     }
 
     saveStateSequent();
@@ -410,16 +411,12 @@ export function closeBranch(sequentNode, ruleName) {
 
     selectedFormulaIndex = { side: null, index: -1 };
     
-    // Clear global side selection
+    // Clear global side selection if it was the closed node
     if (side === sequentNode.domElement) {
         side = null;
-        // Clear buttons as nothing is selected
-        const buttonContainer = document.getElementById('button-container');
-        if (buttonContainer) {
-            buttonContainer.innerHTML = '';
-        }
-        // Hide the proof menu (buttons and tabs)
-        document.getElementById('proof-menu').className = 'hidden';
+        // Keep menu visible but disabled
+        document.getElementById('proof-menu').className = 'proof-menu';
+        disableAllButtons();
     }
 
     const parentLevelDiv = sequentNode.domElement.parentNode;
@@ -474,6 +471,23 @@ function selectSequent(domElement, sequentNode) {
 
     // Ensure menu is visible
     document.getElementById('proof-menu').className = 'proof-menu';
+
+    // Toggle selection if clicking already active element
+    if (side === domElement) {
+        // Clear all highlights
+        document.querySelectorAll('.sequent-formula').forEach(el => {
+            el.classList.remove('selected');
+            el.style.backgroundColor = '';
+        });
+        document.querySelectorAll('#proofText').forEach(el => {
+            el.style.background = '';
+        });
+        
+        side = null;
+        selectedFormulaIndex = { side: null, index: -1 };
+        disableAllButtons();
+        return;
+    }
 
     side = domElement;
 
@@ -595,11 +609,6 @@ function handleFormulaClick(element, sequentNode) {
         retBtn.classList.add('disabled-action-btn');
     }
 
-    const treeTab = document.getElementById('tab4');
-    if (treeTab && treeTab.checked && typeProof === 2) {
-        renderTreeView();
-    }
-    
     // if (hintToggleState) {
     //     hintToggleState = false;
     //     generateSequentButtons();
@@ -607,9 +616,76 @@ function handleFormulaClick(element, sequentNode) {
     generateSequentButtons();
 }
 
+function disableAllButtons() {
+    const isTreeTab = document.getElementById('tab4') && document.getElementById('tab4').checked;
+    const buttonContainer = document.getElementById('button-container');
+    
+    buttonContainer.innerHTML = '';
+    
+    if (isTreeTab) {
+        if (side) {
+             renderTreeView();
+        } else {
+             // Show message when no side selected
+             buttonContainer.style.display = 'grid';
+             buttonContainer.style.gridTemplateColumns = '1fr';
+             buttonContainer.style.gap = '8px';
+             buttonContainer.style.padding = '20px';
+             buttonContainer.style.justifyItems = 'center';
+
+             const message = document.createElement('div');
+             message.style.cssText = `
+                grid-column: 1 / -1;
+                text-align: center;
+                margin: 20px 0;
+                color: #666;
+                font-family: "Times New Roman", serif;
+                font-size: 18px;
+                padding: 20px;
+                background: rgba(0, 97, 161, 0.05);
+                border-radius: 8px;
+                border: 1px dashed rgba(0, 97, 161, 0.3);
+             `;
+             message.textContent = 'Select a branch to see the tree structure';
+             buttonContainer.appendChild(message);
+        }
+        return;
+    }
+    
+    // Determine which tab is active for regular rules/axioms (assuming shared rules for Tab 1/3 in Sequent or defaulting)
+    // In Sequent, we use SEQUENT_CALCULUS_RULES for now.
+    
+    // Reset container style for buttons
+    buttonContainer.style.display = '';
+    buttonContainer.style.gridTemplateColumns = '';
+    buttonContainer.style.gap = '';
+    buttonContainer.style.padding = '';
+
+    SEQUENT_CALCULUS_RULES.forEach(ruleLatex => {
+        const btn = document.createElement('button');
+        btn.className = 'button';
+        btn.innerHTML = ruleLatex;
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        btn.title = 'Select a branch to prove';
+        buttonContainer.appendChild(btn);
+    });
+    
+    if (window.MathJax) {
+        window.MathJax.typesetPromise([buttonContainer]).catch(err => console.warn('MathJax error:', err));
+    }
+}
+
 function generateSequentButtons() {
     const treeTab = document.getElementById('tab4');
     if (treeTab && treeTab.checked && typeProof === 2) {
+        disableAllButtons();
+        return;
+    }
+
+    if (!side) {
+        disableAllButtons();
         return;
     }
 
@@ -639,6 +715,7 @@ function generateSequentButtons() {
         const btn = document.createElement('button');
         btn.className = 'button';
         btn.innerHTML = ruleLatex;
+        btn.setAttribute('data-original-text', ruleLatex); // Store original text for stable identification
 
         const ruleName = getRuleName(ruleLatex);
 
@@ -665,6 +742,11 @@ function generateSequentButtons() {
 }
 
 export function toggleSmartMode() {
+    if (!side) {
+        shakeElement('helpBtn', 5);
+        return false;
+    }
+    
     hintToggleState = !hintToggleState;
     generateSequentButtons();
     return hintToggleState;
@@ -758,13 +840,7 @@ function setupTabListeners() {
     tabToggles.forEach(toggle => {
         toggle.addEventListener('change', function() {
             if (typeProof !== 2) return;
-            const tabId = this.id;
-            
-            if (tabId === 'tab4') {
-                renderTreeView();
-            } else {
-                generateSequentButtons();
-            }
+            generateSequentButtons();
         });
     });
 }

@@ -159,6 +159,8 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
+
+
 function updateAxiomTabVisibility(isSequent) {
   // Update old tab visibility (hidden but functional)
   const axiomTabLabel = document.querySelector('label[for="tab3"]');
@@ -380,7 +382,23 @@ function sequentProof() {
     // Якщо користувач вводить цілу секвенцію
     let userText = editorMonaco.editor.getValue();
     sequent.parseExpression(userText);
-  } else {
+  }
+  if (editorMonaco.editor.getValue().includes('————————————————')) {
+    let userText = editorMonaco.editor.getValue();
+
+    let lineArray = userText.split('\n');
+    lineArray = lineArray.filter(line => line.trim() !== '');
+
+    const result = lineArray
+      .map(line => line.includes('—') ? '⊢' : line)
+      .join(',')
+      .replace(',⊢,', ' ⊢ ')
+      .replace(',⊢', ' ⊢ ')
+      .replace('⊢,', '⊢ ');
+
+      sequent.parseExpression(result);
+  }
+  else {
     // Якщо користувач вводить тільки формулу (як в Gentzen)
     // Ми інтерпретуємо це як "Довести цю формулу" (⊢ A)
     // Тобто порожній антецедент і одна формула в сукцеденті
