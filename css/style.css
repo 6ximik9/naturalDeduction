@@ -321,7 +321,7 @@ h3 {
   align-items: center;
   align-content: center;
   text-align: center;
-  font-size: 38px;
+  font-size: 36px;
   font-family: 'Times New Roman', sans-serif;
   margin-top: 1%;
   display: none;
@@ -428,7 +428,8 @@ h3 {
 
 #proof label
 {
-  font-size: 38px;
+  font-family: 'Times New Roman', serif !important;
+  font-size: 36px;
   text-wrap: nowrap;
 }
 
@@ -445,12 +446,13 @@ h3 {
 }
 
 [class^="proof-element_level-"], #proofText {
+  font-family: 'Times New Roman', serif !important;
   justify-content: center;
   align-items: center;
   text-align: center;
   min-width: 100px;
   display: flex;
-  font-size: 52px;
+  font-size: 36px;
   margin-bottom: 0px;
   height: auto;
   position: relative;
@@ -478,7 +480,7 @@ label:hover
   margin-top: 2%;
   margin-left: 2%;
   font-family: 'Times New Roman', sans-serif;
-  font-size: 38px;
+  font-size: 36px;
   display: none;
 }
 
@@ -1486,6 +1488,20 @@ span.choose {
   white-space: nowrap;
 }
 
+#fitchHeader {
+  font-family: 'Times New Roman', serif !important;
+  pointer-events: none;
+  margin-bottom: 25px;
+  font-size: 36px;
+  font-weight: normal;
+  text-align: center;
+  width: 100%;
+  color: #212121;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 10px;
+  white-space: nowrap;
+}
+
 #out_fitch *
 {
   font-size: 32px;
@@ -1517,13 +1533,19 @@ span.choose {
 }
 
 .fitch_formula {
+  font-family: 'Times New Roman', serif !important;
   display: flex;
   align-items: center; /* Центрує дочірні елементи по вертикалі */
   /*justify-content: center; !* Центрує дочірні елементи по горизонталі *!*/
   padding-left: 5px; /* Збереження вашого налаштування відступу */
   cursor: pointer;
   /*height: 39px; !* Встановіть фіксовану висоту або достатню висоту для вашого контенту *!*/
-  font-size: 34px !important;
+  font-size: 36px !important;
+}
+
+.sequent-formula {
+  font-family: 'Times New Roman', serif !important;
+  font-size: 36px;
 }
 
 .userFormula{
@@ -1542,7 +1564,7 @@ span.choose {
   color: #666;
   font-weight: bold;
   margin-right: 5px;
-  font-size: 0.6em;
+  font-size: 36px;
   display: inline-block;
   vertical-align: baseline;
   white-space: nowrap;
@@ -1558,6 +1580,7 @@ span.choose {
 
 /* Ensure stable positioning when tree changes */
 #proof label {
+  font-family: 'Times New Roman', serif !important;
   position: relative;
   display: inline-flex;
   align-items: baseline;

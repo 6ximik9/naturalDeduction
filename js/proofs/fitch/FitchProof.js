@@ -65,13 +65,16 @@ export function fitchStart(formula) {
   // }
   document.getElementById('enterFormula').className = 'hidden';
   // document.getElementById('undo_redo').style.display = 'flex'; // Removed legacy
-  document.getElementById('inputFitch').style.display = 'flex';
-  document.getElementById('userText').textContent = convertToLogicalExpression(getProof(checkWithAntlr(formula)));
+  const proofFormula = convertToLogicalExpression(getProof(checkWithAntlr(formula)));
+  document.getElementById('userText').textContent = proofFormula;
   addClickFitchRules();
   addNextLastButtonClickFitch();
   helpButtonToggleState = false;
   processExpression(checkWithAntlr(formula), 1);
   createDivs();
+  if (document.getElementById('fitchHeader')) {
+    document.getElementById('fitchHeader').textContent = proofFormula;
+  }
   latexFitch();
   addOrRemoveParenthesesFitch();
   userHypothesesFitch = [...new Set(userHypothesesFitch)];
@@ -498,6 +501,15 @@ function shakeButton(button) {
 }
 
 function createDivs() {
+  // Знаходимо елемент з id 'proof'
+  const proofDiv = document.getElementById('proof');
+  proofDiv.innerHTML = '';
+
+  // Створюємо заголовок для цільової формули
+  const fitchHeader = document.createElement('div');
+  fitchHeader.id = 'fitchHeader';
+  proofDiv.appendChild(fitchHeader);
+
   // Створюємо головний div
   const outFitch = document.createElement('div');
   outFitch.id = 'out_fitch';
@@ -515,8 +527,7 @@ function createDivs() {
   outFitch.appendChild(outNodes);
   outFitch.appendChild(outJust);
 
-  // Знаходимо елемент з id 'proof' та додаємо до нього головний div
-  const proofDiv = document.getElementById('proof');
+  // Додаємо головний div до 'proof' (який вже знайдено на початку функції)
   proofDiv.appendChild(outFitch);
 }
 
