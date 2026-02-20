@@ -10,6 +10,7 @@ import * as sequent from "./proofs/sequent/SequentProof";
 import * as help from './ui/help';
 import {setEditorError, initFontSelectors} from "./ui/monacoEditor";
 import {initProofView} from "./ui/proofView";
+import {updateLanguage} from "./core/i18n";
 
 let hasError = false;
 let inputText = "";
@@ -17,6 +18,20 @@ let inputText = "";
 export let typeProof = 0;
 
 document.addEventListener("DOMContentLoaded", function() {
+  // Initialize Language
+  const savedLang = localStorage.getItem('selectedLang') || 'EN';
+  updateLanguage(savedLang);
+
+  // Set active class on lang switcher correctly on load
+  const langOpts = document.querySelectorAll('.lang-opt');
+  langOpts.forEach(opt => {
+    if (opt.textContent.trim() === savedLang) {
+      opt.classList.add('active');
+    } else {
+      opt.classList.remove('active');
+    }
+  });
+
   // Initialize Proof View (Pan/Zoom/Resize)
   initProofView();
 
@@ -49,6 +64,21 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   }
+
+  // Language Switcher Logic
+  const langOptsList = document.querySelectorAll('.lang-opt');
+  langOptsList.forEach(opt => {
+    opt.addEventListener('click', () => {
+      // Remove active class from all options
+      langOptsList.forEach(o => o.classList.remove('active'));
+      // Add active class to clicked option
+      opt.classList.add('active');
+      
+      const selectedLang = opt.textContent.trim();
+      updateLanguage(selectedLang);
+      console.log(`Language switched to: ${selectedLang}`);
+    });
+  });
 
   // Setup Proxy for new Sidebar Buttons
   setupSidebarProxy();
