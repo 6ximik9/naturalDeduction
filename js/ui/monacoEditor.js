@@ -120,7 +120,7 @@ function suggestions(position, range) {
 export let editor = monaco.editor.create(document.getElementById('editor'), {
   value: '',
   language: 'proofLanguage',
-  fontSize: 20, // Більший розмір шрифту
+  fontSize: 26, // Більший розмір шрифту
   automaticLayout: true, // <<== the important part
   scrollbar: {
     vertical: 'auto', // Спочатку ховаємо вертикальний скролбар
