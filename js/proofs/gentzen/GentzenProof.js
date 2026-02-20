@@ -6,6 +6,7 @@ import * as editorMonaco from '../../ui/monacoEditor.js'
 import * as deductive from '../../core/deductiveEngine.js';
 import {checkWithAntlr, convertToLogicalExpression, getProof} from '../../core/deductiveEngine.js';
 import * as controlState from '../../state/stateManager.js';
+import {t} from '../../core/i18n.js';
 import {addNextLastButtonClickGentzen} from '../../state/stateManager.js';
 import {checkRule, shakeElement, typeProof} from "../../index.js";
 import {createTreeD3} from "../../ui/tree.js";
@@ -1030,7 +1031,8 @@ function disableAllButtons() {
         btn.disabled = true;
         btn.style.opacity = '0.5';
         btn.style.cursor = 'not-allowed';
-        btn.title = 'Select a branch to prove';
+        btn.title = t('tooltip-select-branch');
+        btn.setAttribute('data-i18n-title', 'tooltip-select-branch');
     });
 }
 
@@ -1067,12 +1069,12 @@ export function saveTree() {
   // Перевірка на синтаксичну коректність
   if (deductive.checkCorrect(parsed) === 1 && currentLevel !== 5) {
     const errorMessages = {
-      7: "Missing conjunction, please correct your input",
-      8: "Missing conjunction, please correct your input",
-      11: "Missing disjunction, please correct your input",
-      13: "Missing implication, please correct your input",
-      18: "Missing relation, please correct your input",
-      19: "Missing relation, please correct your input"
+      7: t("alert-missing-conjunction"),
+      8: t("alert-missing-conjunction"),
+      11: t("alert-missing-disjunction"),
+      13: t("alert-missing-implication"),
+      18: t("alert-missing-relation"),
+      19: t("alert-missing-relation")
     };
     if (errorMessages[currentLevel]) alert(errorMessages[currentLevel]);
     return;
@@ -1738,7 +1740,7 @@ function addClickSwitchNotation() {
       side.querySelector('#proofText').textContent = convertedExpr;
     } catch (e) {
       console.error('Conversion error:', e);
-      alert('Помилка при конвертації виразу. Перевірте формат.');
+      alert(t('alert-error-conversion'));
     }
   });
 }

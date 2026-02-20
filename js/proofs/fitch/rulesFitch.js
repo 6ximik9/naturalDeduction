@@ -2,6 +2,7 @@ import * as deductive from "../../core/deductiveEngine";
 import * as fitchMain from "./FitchProof";
 import {checkRule, shakeElement} from "../../index";
 import * as editorMonaco from "../../ui/monacoEditor";
+import {t} from "../../core/i18n";
 import {addNumberedDivs, clearItems, clickedBranch, clickedProofs, fitchStates, setStateFitch} from "./FitchProof";
 import {
   checkWithAntlr,
@@ -55,7 +56,7 @@ export function secondRule(proofs, branches) {
   let rule = proofs[0].element.textContent.replaceAll(" ", "");
 
   if (checkWithAntlr(rule).type !== "conjunction") {
-    alert("Missing conjunction, please change the selected rows");
+    alert(t("alert-missing-conjunction"));
     clearItems();
     return -1;
   }
@@ -190,7 +191,7 @@ export function thirdRule(proofs, branches) {
     let lastRule = getProof(checkWithAntlr(rule));
 
     if (ruleUser.type !== "disjunction") {
-      alert("Missing disjunction, please correct your input")
+      alert(t("alert-missing-disjunction"));
       return;
     }
 
@@ -209,7 +210,7 @@ export function thirdRule(proofs, branches) {
       saveStateFitch();
       return 0;
     } else {
-      alert("Please correct your input")
+      alert(t("alert-correct-input"))
     }
   });
 
@@ -245,7 +246,7 @@ export function fourthRule(proofs, branches) {
   proofs[0].element.querySelector('span.indexC').remove();
 
   if (checkWithAntlr(proofs[0].element.textContent.replaceAll(" ", "")).type !== "disjunction") {
-    alert("Missing disjunction, please change the selected rows");
+    alert(t("alert-missing-disjunction"));
     clearItems();
     return -1;
   }
@@ -336,7 +337,7 @@ export function sixthRule(proofs, branches) {
 
 
   if (getProof(checkWithAntlr(firstPart)).type !== "implication" && getProof(checkWithAntlr(secondPart)).type !== "implication") {
-    alert("Missing implication, please change the selected rows");
+    alert(t("alert-missing-implication"));
     clearItems();
     return -1;
   }
@@ -366,7 +367,7 @@ export function seventhRule(rules, branches) {
   let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
 
   if (allFormula[allFormula.length - 1].textContent !== "⊥") {
-    alert("Missing absurdum, branch must end with an absurdum mark");
+    alert(t("alert-missing-absurdum"));
     return -1;
   }
 
@@ -398,7 +399,7 @@ export function eighthRule(proofs, branches) {
   let secondPart = proofs[1].element.textContent.replaceAll(" ", "");
 
   if (getProof(checkWithAntlr(firstPart)).type !== "negation" && getProof(checkWithAntlr(secondPart)).type !== "negation") {
-    alert("Missing negation, please change the selected rows");
+    alert(t("alert-missing-negation"));
     return -1;
   }
 
@@ -428,7 +429,7 @@ export function ninthRule(proofs, branches) {
   proofs[0].element.querySelector('span.indexC').remove();
   let rule = proofs[0].element.textContent.replaceAll(" ", "");
   if (rule !== "⊥") {
-    alert("Missing absurdum, please change the selected rows");
+    alert(t("alert-missing-absurdum"));
     return -1;
   }
 
@@ -519,13 +520,13 @@ export function tenthRule(rules, branches) {
   let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
 
   if (allFormula[allFormula.length - 1].textContent !== "⊥") {
-    alert("Missing absurdum, branch must end with an absurdum mark");
+    alert(t("alert-missing-absurdum"));
     return -1;
   }
 
   let check = getProof(checkWithAntlr(allFormula[0].textContent));
   if (check.type !== "negation") {
-    alert("Missing negation, please change the selected branch");
+    alert(t("alert-missing-negation"));
     return -1;
   }
 
@@ -589,7 +590,7 @@ export async function thirteenthRule(proofs, branches) {
   let parsed = getProof(checkWithAntlr(rule));
 
   if (parsed.type !== "forall") {
-    alert("Selected formula must be a universal quantifier (∀)");
+    alert(t("alert-forall-required"));
     return -1;
   }
 
@@ -616,7 +617,7 @@ export async function fourteenthRule(proofs, branches) {
   let lastLine = allFormula[allFormula.length - 1].textContent;
 
   try {
-    const variable = await createInputModal('Universal Quantifier', 'Enter variable (e.g. x):');
+    const variable = await createInputModal(t('rule-universal-quantifier'), t('modal-enter-variable'));
 
     if (variable) {
       let constant = firstLine.trim();
@@ -679,7 +680,7 @@ export function sixteenthRule(proofs, branches) {
   let parsedExist = getProof(checkWithAntlr(existFormula));
 
   if (parsedExist.type !== "exists") {
-    alert("Selected formula must be an existential quantifier (∃)");
+    alert(t("alert-exists-required"));
     return -1;
   }
 
@@ -701,7 +702,7 @@ export async function seventeenthRule(proofs, branches) {
   }
 
   try {
-    const term = await createInputModal('Identity Introduction', 'Enter term (e.g. c):');
+    const term = await createInputModal(t('rule-identity-intro'), t('modal-enter-term'));
 
     if (term) {
       let newFormula = term + " = " + term;
@@ -748,7 +749,7 @@ export async function eighteenthRule(proofs, branches) {
     eqIndex = proofs[1].index;
     targetIndex = proofs[0].index;
   } else {
-    alert("One of the formulas must be an equality (=)");
+    alert(t("alert-equality-required"));
     return -1;
   }
 

@@ -1,4 +1,5 @@
 import * as deductive from '../../core/deductiveEngine.js';
+import {t} from '../../core/i18n.js';
 
 /**
  * Creates a modal for reordering formulas (Exchange rule)
@@ -116,7 +117,7 @@ export function createExchangeModal(title, formulas) {
 
         // Description
         const description = document.createElement('p');
-        description.textContent = 'Drag and drop formulas to reorder them:';
+        description.textContent = t('modal-exchange-desc');
         Object.assign(description.style, {
             margin: '0',
             fontSize: '16px',
@@ -196,7 +197,7 @@ export function createExchangeModal(title, formulas) {
         Object.assign(actionContainer.style, { display: 'flex', gap: '12px', marginTop: '24px' });
 
         const saveButton = document.createElement('button');
-        saveButton.textContent = 'Apply Order';
+        saveButton.textContent = t('modal-btn-apply-order');
         Object.assign(saveButton.style, {
             flex: '1',
             padding: '16px',
@@ -211,7 +212,7 @@ export function createExchangeModal(title, formulas) {
         });
 
         const cancelButton = document.createElement('button');
-        cancelButton.textContent = 'Cancel';
+        cancelButton.textContent = t('modal-btn-cancel');
         Object.assign(cancelButton.style, {
             padding: '16px 24px',
             backgroundColor: '#6c757d',

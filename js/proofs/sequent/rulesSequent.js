@@ -2,6 +2,7 @@
 import * as sequentProof from './SequentProof.js';
 import { Sequent, addChildrenToTree, closeBranch, getActiveSequent, selectedFormulaIndex } from './SequentProof.js';
 import * as deductive from '../../core/deductiveEngine.js';
+import { t } from '../../core/i18n.js';
 import { createInputModal } from '../../ui/modals/input.js';
 import { createExchangeModal } from '../../ui/modals/exchange.js';
 
@@ -58,7 +59,7 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        createInputModal('Cut Rule', 'Enter cut formula (φ):')
+        createInputModal(t('rule-cut'), t('modal-enter-cut-formula'))
             .then((formulaStr) => {
                 try {
                     // Validate and parse the formula
@@ -67,7 +68,7 @@ export const RULES = {
                     // Handle array result (if user entered "A, B" or similar)
                     if (Array.isArray(parsed)) {
                         if (parsed.length !== 1) {
-                            alert("Please enter exactly one formula for the Cut rule.");
+                            alert(t("alert-cut-one-formula"));
                             return;
                         }
                         parsed = parsed[0];
@@ -77,7 +78,7 @@ export const RULES = {
                     const formula = deductive.getProof(parsed);
 
                     if (!formula) {
-                        alert("Invalid formula.");
+                        alert(t("alert-invalid-formula"));
                         return;
                     }
 
@@ -97,7 +98,7 @@ export const RULES = {
 
                 } catch (e) {
                     console.error("Error applying cut rule:", e);
-                    alert("Error parsing the formula. Please checks syntax.");
+                    alert(t("alert-parse-error"));
                 }
             })
             .catch((err) => {
@@ -132,7 +133,7 @@ export const RULES = {
         if (!currentSeq || currentSeq.isClosed) return;
 
         if (selectedFormulaIndex.side !== 'right') {
-            alert("Please select a formula on the RIGHT side.");
+            alert(t("alert-select-right"));
             return;
         }
 
@@ -140,7 +141,7 @@ export const RULES = {
         const targetFormula = unwrap(currentSeq.succedent[idx]);
 
         if (targetFormula.type !== 'conjunction') {
-            alert("Selected formula is not a conjunction.");
+            alert(t("alert-not-conjunction"));
             return;
         }
 
@@ -162,7 +163,7 @@ export const RULES = {
         if (!currentSeq || currentSeq.isClosed) return;
 
         if (selectedFormulaIndex.side !== 'left') {
-            alert("Please select a formula on the LEFT side.");
+            alert(t("alert-select-left"));
             return;
         }
 
@@ -170,7 +171,7 @@ export const RULES = {
         const targetFormula = unwrap(currentSeq.antecedent[idx]);
 
         if (targetFormula.type !== 'disjunction') {
-            alert("Selected formula is not a disjunction.");
+            alert(t("alert-not-disjunction"));
             return;
         }
 
@@ -616,7 +617,7 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
     if (!currentSeq || currentSeq.isClosed) return;
 
     if (selectedFormulaIndex.side !== side) {
-        alert(`Please select a formula on the ${side.toUpperCase()} side.`);
+        alert(side === 'left' ? t("alert-select-left") : t("alert-select-right"));
         return;
     }
 
@@ -632,11 +633,11 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
             const isExists = targetFormula.quantifier === '∃' || targetFormula.quantifier === 'exists';
             
             if ((quantType === 'forall' && !isForall) || (quantType === 'exists' && !isExists)) {
-                alert(`Selected formula is not a ${quantType === 'forall' ? 'universal' : 'existential'} quantifier.`);
+                alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
                 return;
             }
         } else {
-            alert(`Selected formula is not a ${quantType === 'forall' ? 'universal' : 'existential'} quantifier.`);
+            alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
             return;
         }
     }
@@ -648,7 +649,7 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
     
     let operand = targetFormula.operand || targetFormula.expression;
 
-    createInputModal(`${ruleName} Substitution`, `Enter term (t) to substitute for "${variableName}":`)
+    createInputModal(`${ruleName} Substitution`, t('modal-substitution-label').replace('{var}', variableName))
         .then(termStr => {
             try {
                 let parsedTerm = deductive.checkWithAntlr(termStr);
@@ -656,7 +657,7 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
                 const term = deductive.getProof(parsedTerm);
 
                 if (!term) {
-                    alert("Invalid term.");
+                    alert(t("alert-invalid-term"));
                     return;
                 }
 
@@ -678,7 +679,7 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
 
             } catch (e) {
                 console.error("Substitution error:", e);
-                alert("Error parsing term.");
+                alert(t("alert-error-parse-term"));
             }
         })
         .catch(err => console.log("Substitution cancelled"));
@@ -692,7 +693,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
     if (!currentSeq || currentSeq.isClosed) return;
 
     if (selectedFormulaIndex.side !== side) {
-        alert(`Please select a formula on the ${side.toUpperCase()} side.`);
+        alert(side === 'left' ? t("alert-select-left") : t("alert-select-right"));
         return;
     }
 
@@ -707,11 +708,11 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
             const isExists = targetFormula.quantifier === '∃' || targetFormula.quantifier === 'exists';
             
             if ((quantType === 'forall' && !isForall) || (quantType === 'exists' && !isExists)) {
-                alert(`Selected formula is not a ${quantType === 'forall' ? 'universal' : 'existential'} quantifier.`);
+                alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
                 return;
             }
         } else {
-            alert(`Selected formula is not a ${quantType === 'forall' ? 'universal' : 'existential'} quantifier.`);
+            alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
             return;
         }
     }
@@ -720,7 +721,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
     if (typeof variableName === 'object') variableName = variableName.name || variableName.value;
     let operand = targetFormula.operand || targetFormula.expression;
 
-    createInputModal(`${ruleName} (Eigenvariable)`, `Enter FRESH variable (y) to substitute for "${variableName}":`)
+    createInputModal(`${ruleName} (Eigenvariable)`, t('modal-eigenvariable-label').replace('{var}', variableName))
         .then(newVarStr => {
             try {
                 let parsedVar = deductive.checkWithAntlr(newVarStr);
@@ -728,7 +729,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
                 const newVarTerm = deductive.getProof(parsedVar);
                 
                 if (!newVarTerm) {
-                    alert("Invalid input.");
+                    alert(t("alert-invalid-input-generic"));
                     return;
                 }
 
@@ -748,7 +749,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
                 }
                 
                 if (!isFresh) {
-                    alert(`Variable "${newVarName}" is NOT fresh. It already appears in the sequent.`);
+                    alert(t("alert-var-not-fresh"));
                     // Re-open the modal so user can try again immediately
                     applyQuantifierEigenvariableRule(side, quantType, ruleName);
                     return;
@@ -770,7 +771,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
 
             } catch (e) {
                 console.error("Eigenvariable error:", e);
-                alert("Error parsing input.");
+                alert(t("alert-parse-error"));
             }
         })
         .catch(err => console.log("Eigenvariable rule cancelled"));
@@ -813,7 +814,7 @@ function applyLeftRule(transformFn, ruleName) {
     if (!currentSeq || currentSeq.isClosed) return;
 
     if (selectedFormulaIndex.side !== 'left') {
-        alert("Please select a formula on the LEFT side.");
+        alert(t("alert-select-left"));
         return;
     }
 
@@ -822,7 +823,7 @@ function applyLeftRule(transformFn, ruleName) {
 
     const newFormulas = transformFn(targetFormula);
     if (!newFormulas) {
-        alert("Rule not applicable to selected formula.");
+        alert(t("alert-not-applicable"));
         return;
     }
 
@@ -838,7 +839,7 @@ function applyRightRule(transformFn, ruleName) {
     if (!currentSeq || currentSeq.isClosed) return;
 
     if (selectedFormulaIndex.side !== 'right') {
-        alert("Please select a formula on the RIGHT side.");
+        alert(t("alert-select-right"));
         return;
     }
 
@@ -847,7 +848,7 @@ function applyRightRule(transformFn, ruleName) {
 
     const newFormulas = transformFn(targetFormula);
     if (!newFormulas) {
-        alert("Rule not applicable to selected formula.");
+        alert(t("alert-not-applicable"));
         return;
     }
 

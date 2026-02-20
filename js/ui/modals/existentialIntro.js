@@ -6,6 +6,7 @@ import { hasEditorErrors } from "../monacoEditor";
 import { currentLevel, side } from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
 import {getProof} from "../../core/deductiveEngine";
+import {t} from "../../core/i18n";
 
 let customEditor = null;
 
@@ -94,7 +95,7 @@ export function createAdvancedModal(formulas) {
 
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
-    modalTitle.textContent = 'Existential Quantifier Introduction (∃I)';
+    modalTitle.textContent = t('modal-exists-intro-title');
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -104,7 +105,7 @@ export function createAdvancedModal(formulas) {
     });
 
     const description = document.createElement('p');
-    description.textContent = 'Select a formula and specify the substitution to introduce an existential quantifier:';
+    description.textContent = t('modal-exists-intro-desc');
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -172,7 +173,7 @@ export function createAdvancedModal(formulas) {
     const formulaSection = document.createElement('div');
 
     const formulaLabel = document.createElement('label');
-    formulaLabel.textContent = 'Select formula from hypotheses:';
+    formulaLabel.textContent = t('modal-select-hyp-formula');
     Object.assign(formulaLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -197,7 +198,7 @@ export function createAdvancedModal(formulas) {
     // Add default option
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
-    defaultOption.textContent = 'Choose a formula...';
+    defaultOption.textContent = t('modal-choose-formula');
     defaultOption.disabled = true;
     defaultOption.selected = true;
     formulaSelect.appendChild(defaultOption);
@@ -213,7 +214,7 @@ export function createAdvancedModal(formulas) {
     const customFormulaSection = document.createElement('div');
 
     const customLabel = document.createElement('label');
-    customLabel.textContent = 'Or enter custom formula:';
+    customLabel.textContent = t('modal-enter-custom-formula');
     Object.assign(customLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -255,7 +256,7 @@ export function createAdvancedModal(formulas) {
     const variableSection = document.createElement('div');
 
     const variableLabel = document.createElement('label');
-    variableLabel.textContent = 'Select variable to substitute:';
+    variableLabel.textContent = t('modal-select-var-subst');
     Object.assign(variableLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -276,7 +277,7 @@ export function createAdvancedModal(formulas) {
     const termSection = document.createElement('div');
 
     const termLabel = document.createElement('label');
-    termLabel.textContent = 'Enter replacement term:';
+    termLabel.textContent = t('modal-enter-replacement-term');
     Object.assign(termLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -296,7 +297,7 @@ export function createAdvancedModal(formulas) {
 
       if (!buttonValues || buttonValues.length === 0) {
         const noVarsMessage = document.createElement('div');
-        noVarsMessage.textContent = 'No variables available for substitution';
+        noVarsMessage.textContent = t('modal-no-vars-available');
         Object.assign(noVarsMessage.style, {
           padding: '16px',
           textAlign: 'center',
@@ -579,7 +580,7 @@ export function createAdvancedModal(formulas) {
 
     // Create save button with improved styling and validation
     const saveButton = document.createElement('button');
-    saveButton.textContent = 'Apply Substitution';
+    saveButton.textContent = t('modal-btn-apply-subst');
     saveButton.disabled = true;
     Object.assign(saveButton.style, {
       flex: '1',
@@ -597,7 +598,7 @@ export function createAdvancedModal(formulas) {
 
     // Create cancel button
     const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = t('modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       fontSize: '16px',
@@ -641,7 +642,7 @@ export function createAdvancedModal(formulas) {
     // Enhanced save button click handler with comprehensive validation
     saveButton.addEventListener('click', async () => {
       if (!validateForm()) {
-        showNotification('Please complete all required fields.', 'warning');
+        showNotification(t('notify-complete-fields'), 'warning');
         return;
       }
 
@@ -653,11 +654,11 @@ export function createAdvancedModal(formulas) {
         if (formulaValue === 'My formula') {
           formulaValue = customEditor ? customEditor.getValue() : '';
           if (!formulaValue.trim()) {
-            showNotification('Please enter a custom formula.', 'warning');
+            showNotification(t('notify-enter-custom-formula'), 'warning');
             return;
           }
           if (editorMonaco.hasEditorErrors(customEditor)) {
-            showNotification('There are syntax errors in the custom formula.', 'error');
+            showNotification(t('notify-syntax-errors-custom'), 'error');
             return;
           }
         }
@@ -667,12 +668,12 @@ export function createAdvancedModal(formulas) {
           const parsedValue = getProof(deductive.checkWithAntlr(formulaValue));
           console.log(parsedValue);
           if (parsedValue.type !== 'exists') {
-            showNotification('The selected formula must be an existential quantifier (∃).', 'error');
+            showNotification(t('notify-must-be-exists'), 'error');
             return;
           }
         } catch (e) {
           console.warn("Formula parsing error:", e);
-          showNotification('Invalid formula format. Please check your selection.', 'error');
+          showNotification(t('notify-invalid-format'), 'error');
           return;
         }
 
@@ -680,7 +681,7 @@ export function createAdvancedModal(formulas) {
         try {
           deductive.checkWithAntlr(termValue);
         } catch (parseError) {
-          showNotification('Invalid syntax in the replacement term. Please check your input.', 'error');
+          showNotification(t('notify-invalid-syntax-term'), 'error');
           termEditorContainer.classList.add('editor-error');
           return;
         }
@@ -696,7 +697,7 @@ export function createAdvancedModal(formulas) {
           });
 
           if (isElementInArray) {
-            showNotification('The replacement term is not fresh (it already appears in the hypotheses). Please enter a different term.', 'error');
+            showNotification(t('notify-term-not-fresh'), 'error');
             termEditorContainer.classList.add('editor-error');
             return;
           }
@@ -714,7 +715,7 @@ export function createAdvancedModal(formulas) {
 
       } catch (error) {
         console.error('Error in advanced modal:', error);
-        showNotification('An unexpected error occurred. Please try again.', 'error');
+        showNotification(t('notify-unexpected-error'), 'error');
       }
     });
 
@@ -758,7 +759,7 @@ export function createAdvancedModal(formulas) {
 
     const myFormulaOption = document.createElement('option');
     myFormulaOption.value = 'My formula';
-    myFormulaOption.textContent = 'My formula';
+    myFormulaOption.textContent = t('modal-my-formula');
     formulaSelect.appendChild(myFormulaOption);
 
 

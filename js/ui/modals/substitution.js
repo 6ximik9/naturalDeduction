@@ -4,6 +4,7 @@ import {checkRule} from "../../index";
 import {hasEditorErrors} from "../monacoEditor";
 import {currentLevel, side} from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
+import {t} from "../../core/i18n";
 
 /**
  * Creates an improved modal for term substitution in quantifier rules
@@ -82,7 +83,7 @@ export function createModal(constants) {
     // Create modal title
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
-    modalTitle.textContent = currentLevel === 14 ? 'Existential Quantifier Elimination (∃E)' : 'Universal Quantifier Elimination (∀E)';
+    modalTitle.textContent = currentLevel === 14 ? t('modal-subst-exists-elim-title') : t('modal-subst-forall-elim-title');
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -94,7 +95,7 @@ export function createModal(constants) {
 
     // Add description
     const description = document.createElement('p');
-    description.textContent = 'Select a variable to substitute and enter the replacement term:';
+    description.textContent = t('modal-subst-desc');
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -110,7 +111,7 @@ export function createModal(constants) {
     });
 
     const variableLabel = document.createElement('label');
-    variableLabel.textContent = 'Select variable to substitute:';
+    variableLabel.textContent = t('modal-select-var-subst');
     Object.assign(variableLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -232,7 +233,7 @@ export function createModal(constants) {
     });
 
     const termLabel = document.createElement('label');
-    termLabel.textContent = 'Enter replacement term:';
+    termLabel.textContent = t('modal-enter-replacement-term');
     Object.assign(termLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -415,7 +416,7 @@ export function createModal(constants) {
 
     // Create save button with improved styling and validation
     const saveButton = document.createElement('button');
-    saveButton.textContent = 'Apply Substitution';
+    saveButton.textContent = t('modal-btn-apply-subst');
     saveButton.disabled = true;
     Object.assign(saveButton.style, {
       flex: '1',
@@ -433,7 +434,7 @@ export function createModal(constants) {
 
     // Create cancel button
     const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = t('modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       fontSize: '16px',
@@ -474,7 +475,7 @@ export function createModal(constants) {
     // Enhanced save button click handler with comprehensive validation
     saveButton.addEventListener('click', async () => {
       if (!validateForm()) {
-        showNotification('Please complete all required fields.', 'warning');
+        showNotification(t('notify-complete-fields'), 'warning');
         return;
       }
 
@@ -493,7 +494,7 @@ export function createModal(constants) {
           });
 
           if (isElementInArray) {
-            showNotification('The entered term is not fresh (it already appears in the hypotheses). Please enter a different term.', 'error');
+            showNotification(t('notify-term-not-fresh'), 'error');
             editorContainer.classList.add('editor-error');
             return;
           }
@@ -503,7 +504,7 @@ export function createModal(constants) {
         try {
           deductive.checkWithAntlr(editorValue);
         } catch (parseError) {
-          showNotification('Invalid syntax in the replacement term. Please check your input.', 'error');
+          showNotification(t('notify-invalid-syntax-term'), 'error');
           editorContainer.classList.add('editor-error');
           return;
         }
@@ -520,7 +521,7 @@ export function createModal(constants) {
 
       } catch (error) {
         console.error('Error in substitution modal:', error);
-        showNotification('An unexpected error occurred. Please try again.', 'error');
+        showNotification(t('notify-unexpected-error'), 'error');
       }
     });
 
@@ -778,7 +779,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     // Create modal title
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
-    modalTitle.textContent = `${quantifierType === 'forall' ? 'Universal' : 'Existential'} Quantifier Substitution`;
+    modalTitle.textContent = quantifierType === 'forall' ? t('modal-subst-forall-title') : t('modal-subst-exists-title');
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -790,7 +791,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
 
     // Add description
     const description = document.createElement('p');
-    description.textContent = `Variable "${variable}" will be replaced with your input term:`;
+    description.textContent = t('modal-subst-var-desc').replace('{var}', variable);
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -809,7 +810,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
 
     // Create Monaco editor container
     const editorLabel = document.createElement('label');
-    editorLabel.textContent = `Enter replacement term for "${variable}":`;
+    editorLabel.textContent = t('modal-subst-enter-for').replace('{var}', variable);
     Object.assign(editorLabel.style, {
       fontSize: '16px',
       fontWeight: '600',
@@ -940,7 +941,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
 
     // Create apply button
     const applyButton = document.createElement('button');
-    applyButton.textContent = 'Apply Substitution';
+    applyButton.textContent = t('modal-btn-apply-subst');
     applyButton.disabled = true;
     Object.assign(applyButton.style, {
       flex: '1',
@@ -958,7 +959,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
 
     // Create cancel button
     const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = t('modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       fontSize: '16px',
@@ -999,7 +1000,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     // Apply button click handler
     applyButton.addEventListener('click', async () => {
       if (!validateForm()) {
-        showNotification('Please enter a valid replacement term.', 'warning');
+        showNotification(t('alert-invalid-term'), 'warning');
         return;
       }
 
@@ -1010,7 +1011,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
         try {
           deductive.checkWithAntlr(replacementTerm);
         } catch (parseError) {
-          showNotification('Invalid syntax in the replacement term. Please check your input.', 'error');
+          showNotification(t('notify-invalid-syntax-term'), 'error');
           editorContainer.classList.add('editor-error');
           return;
         }
@@ -1034,7 +1035,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
         originalResolve(result);
       } catch (error) {
         console.error('Error in quantifier substitution modal:', error);
-        showNotification('An error occurred. Please try again.', 'error');
+        showNotification(t('notify-unexpected-error'), 'error');
       }
     });
 

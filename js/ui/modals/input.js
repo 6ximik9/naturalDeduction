@@ -2,6 +2,7 @@ import * as monaco from 'monaco-editor';
 import * as editorMonaco from '../monacoEditor';
 import {checkRule} from "../../index";
 import * as deductive from "../../core/deductiveEngine";
+import {t} from "../../core/i18n";
 
 /**
  * Creates a simple modal for inputting a term
@@ -10,7 +11,7 @@ import * as deductive from "../../core/deductiveEngine";
  * @param {string} label - Input label
  * @returns {Promise<string>} Promise that resolves with the entered term
  */
-export function createInputModal(title = 'Input Term', label = 'Enter term:') {
+export function createInputModal(title = t('modal-input-title-default'), label = t('modal-input-label-default')) {
   return new Promise((resolve, reject) => {
     // Create modal overlay
     const modalOverlay = document.createElement('div');
@@ -147,7 +148,7 @@ export function createInputModal(title = 'Input Term', label = 'Enter term:') {
         if (checkRule(1, value, modalEditor) !== 0) {
           isValid = false;
           editorContainer.classList.add('editor-error');
-          errorDisplay.textContent = 'Invalid syntax';
+          errorDisplay.textContent = t('modal-invalid-syntax');
           errorDisplay.style.display = 'block';
         } else {
           editorContainer.classList.remove('editor-error');
@@ -168,7 +169,7 @@ export function createInputModal(title = 'Input Term', label = 'Enter term:') {
     Object.assign(actionContainer.style, { display: 'flex', gap: '12px', marginTop: '24px' });
 
     const saveButton = document.createElement('button');
-    saveButton.textContent = 'Apply';
+    saveButton.textContent = t('modal-btn-apply');
     saveButton.disabled = true;
     Object.assign(saveButton.style, {
       flex: '1',
@@ -185,7 +186,7 @@ export function createInputModal(title = 'Input Term', label = 'Enter term:') {
     });
 
     const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = t('modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       backgroundColor: '#6c757d',

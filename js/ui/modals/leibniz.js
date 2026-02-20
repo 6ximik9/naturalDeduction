@@ -3,6 +3,7 @@ import {checkRule} from "../../index";
 import {currentLevel, side} from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
 import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../monacoEditor";
+import {t} from "../../core/i18n";
 import {has} from "mobx";
 import {checkWithAntlr} from "../../core/deductiveEngine";
 
@@ -130,7 +131,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     // Create modal title
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
-    modalTitle.textContent = 'Leibniz Rule - Select Formula Element';
+    modalTitle.textContent = t('modal-leibniz-title');
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -142,7 +143,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
 
     // Add description
     const description = document.createElement('p');
-    description.textContent = 'Click on any part of the formula below to select it for replacement:';
+    description.textContent = t('modal-leibniz-desc');
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -166,7 +167,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
         selectedElement.classList.remove('selected');
         selectedElement = null;
         selectedPath = null;
-        selectedTextDisplay.textContent = 'No element selected';
+        selectedTextDisplay.textContent = t('modal-no-element-selected');
 
         // Disable Monaco editor
         disableEditor();
@@ -187,7 +188,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       element.classList.add('selected');
 
       // Update selected text display
-      selectedTextDisplay.textContent = `Selected: ${text}`;
+      selectedTextDisplay.textContent = `${t('modal-element-selected')} ${text}`;
 
       // Enable Monaco editor
       enableEditor();
@@ -200,7 +201,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
 
     // Create selected text display
     const selectedTextDisplay = document.createElement('div');
-    selectedTextDisplay.textContent = 'No element selected';
+    selectedTextDisplay.textContent = t('modal-no-element-selected');
     Object.assign(selectedTextDisplay.style, {
       fontSize: '24px',
       color: '#666',
@@ -213,7 +214,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
 
     // Create Monaco editor container
     const editorLabel = document.createElement('label');
-    editorLabel.textContent = 'Enter replacement (select a formula element first):';
+    editorLabel.textContent = t('modal-enter-replacement-label');
     Object.assign(editorLabel.style, {
       fontSize: '16px',
       fontWeight: '600',
@@ -326,7 +327,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       monacoEditor.updateOptions({ readOnly: false });
       editorContainer.style.opacity = '1';
       editorContainer.style.pointerEvents = 'auto';
-      editorLabel.textContent = 'Enter replacement:';
+      editorLabel.textContent = t('modal-enter-replacement-active');
       editorLabel.style.color = '#2c3e50';
 
       // Focus the editor
@@ -341,7 +342,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       monacoEditor.setValue('');
       editorContainer.style.opacity = '0.6';
       editorContainer.style.pointerEvents = 'none';
-      editorLabel.textContent = 'Enter replacement (select a formula element first):';
+      editorLabel.textContent = t('modal-enter-replacement-label');
       editorLabel.style.color = '#6c757d';
     }
 
@@ -383,7 +384,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
 
     // Create apply button
     const applyButton = document.createElement('button');
-    applyButton.textContent = 'Apply Replacement';
+    applyButton.textContent = t('modal-btn-apply-replacement');
     applyButton.disabled = true;
     Object.assign(applyButton.style, {
       flex: '1',
@@ -401,7 +402,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
 
     // Create cancel button
     const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = t('modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       fontSize: '16px',
@@ -442,7 +443,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     // Apply button click handler
     applyButton.addEventListener('click', async () => {
       if (!validateForm()) {
-        showNotification('Please complete all required fields with valid input.', 'warning');
+        showNotification(t('notify-complete-fields'), 'warning');
         return;
       }
 
@@ -456,7 +457,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
           const value = getNodeText(modifiedFormula);
           deductive.checkWithAntlr(value);
         } catch (parseError) {
-          showNotification('Invalid syntax in the replacement term. Please check your input.', 'error');
+          showNotification(t('notify-invalid-syntax-term'), 'error');
           editorContainer.classList.add('editor-error');
           return;
         }
@@ -524,7 +525,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
         originalResolve(result);
       } catch (error) {
         console.error('Error in modal apply:', error);
-        showNotification('An error occurred. Please try again.', 'error');
+        showNotification(t('notify-unexpected-error'), 'error');
       }
     });
 

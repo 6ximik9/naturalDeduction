@@ -870,7 +870,7 @@
                   <div id="proof-container" style="width: 55%; background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; height: 100%;">
                       <div id="proof" style="transform-origin: 0 0; width: 100%; height: 100%;"></div>
 
-                      <div id="proof-resize-handle" title="Resize"></div>
+                      <div id="proof-resize-handle" data-i18n-title="tooltip-resize" title="Resize"></div>
                   </div>
     </div>
     <!-- Old Proof Container (Renamed/Replaced but keeping ID references valid by moving logic) -->
@@ -891,7 +891,7 @@
 <div id="helpModal" class="helpModal">
   <div class="help">
     <div class="help-header">
-      <div class="help-title">
+      <div class="help-title" data-i18n="help-title">
         <i class="ri-question-fill" style="color: var(--col-accent);"></i>
         Help & Documentation
       </div>
@@ -900,10 +900,10 @@
       </button>
     </div>
     <div class="helpNavbar">
-      <div class="helpNavbarItem active">General</div>
-      <div class="helpNavbarItem">Syntax</div>
-      <div class="helpNavbarItem">Input</div>
-      <div class="helpNavbarItem">Axioms</div>
+      <div class="helpNavbarItem active" data-i18n="help-tab-general">General</div>
+      <div class="helpNavbarItem" data-i18n="help-tab-syntax">Syntax</div>
+      <div class="helpNavbarItem" data-i18n="help-tab-input">Input</div>
+      <div class="helpNavbarItem" data-i18n="help-tab-axioms">Axioms</div>
     </div>
     <div id="info">
     </div>
@@ -913,7 +913,7 @@
 <div id="latexModal" class="helpModal">
   <div class="help" id="latexCode">
     <div class="help-header">
-      <div class="help-title">
+      <div class="help-title" data-i18n="latex-title">
         <i class="ri-file-code-line" style="color: var(--col-accent);"></i>
         LaTeX Source
       </div>
@@ -922,12 +922,12 @@
       </button>
     </div>
     <div class="helpNavbar">
-      <div class="helpNavbarItem active">Proof</div>
-      <div class="helpNavbarItem">Document</div>
+      <div class="helpNavbarItem active" data-i18n="latex-tab-proof">Proof</div>
+      <div class="helpNavbarItem" data-i18n="latex-tab-document">Document</div>
     </div>
     <div id="latexInfo"></div>
     <div class="help-footer">
-        <button id="copyLatexCode" class="btn btn-primary" style="width: 100%; justify-content: center;">
+        <button id="copyLatexCode" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn-copy-latex">
           <i class="ri-file-copy-line"></i> Copy LaTeX
         </button>
     </div>

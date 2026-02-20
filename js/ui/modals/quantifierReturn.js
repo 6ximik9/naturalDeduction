@@ -2,6 +2,7 @@ import * as monaco from 'monaco-editor';
 import {checkRule} from "../../index";
 import {currentLevel, side} from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
+import {t} from "../../core/i18n";
 import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../monacoEditor";
 import {convertToSuccessorNotation} from "./leibniz";
 import {checkWithAntlr} from "../../core/deductiveEngine";
@@ -1235,7 +1236,8 @@ function createClickableElement(node, path, onElementClick) {
 
   // Add a title attribute for better accessibility and debugging
   if (content) {
-    element.title = `Click to select "${content}" (${node.type})`;
+    element.title = `${t('tooltip-select-node')} "${content}" (${node.type})`;
+    element.setAttribute('data-i18n-title', 'tooltip-select-node'); // Note: partial update since it has dynamic parts
   }
 
   return element;

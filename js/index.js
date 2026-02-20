@@ -10,7 +10,7 @@ import * as sequent from "./proofs/sequent/SequentProof";
 import * as help from './ui/help';
 import {setEditorError, initFontSelectors} from "./ui/monacoEditor";
 import {initProofView} from "./ui/proofView";
-import {updateLanguage} from "./core/i18n";
+import {updateLanguage, t} from "./core/i18n";
 
 let hasError = false;
 let inputText = "";
@@ -238,7 +238,7 @@ export function checkRule(index, text, editorInstance = editorMonaco.editor) {
       // console.error(`Error on a line ${line}:${column} ${msg.replaceAll("\u22A2", '⊢')}`);
       msg = msg.replaceAll("\\u22A2", '⊢');
       // editorMonaco.setEditorError(index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
-      setEditorError(editorInstance, index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
+      setEditorError(editorInstance, index, column + 2, `${t('label-line')} ${index}, ${t('label-col')} ${column + 1}: ${msg}`);
       enterButton.style.backgroundColor = 'rgba(253, 81, 81, 0.73)';
     }
   });
@@ -257,7 +257,7 @@ export function checkRule(index, text, editorInstance = editorMonaco.editor) {
       // console.error(`Error on a line ${line}:${column} ${msg.replaceAll("\\u22A2", '⊢')}`);
       msg = msg.replaceAll("\\u22A2", '⊢');
       // editorMonaco.setEditorError(index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
-      setEditorError(editorInstance, index, column + 2, `Line ${index}, col ${column + 1}: ${msg}`);
+      setEditorError(editorInstance, index, column + 2, `${t('label-line')} ${index}, ${t('label-col')} ${column + 1}: ${msg}`);
       enterButton.style.backgroundColor = 'rgba(253, 81, 81, 0.73)';
       hasError = true;
     },
@@ -352,11 +352,11 @@ function validateInputForStyle(input, style) {
         // In our modified listener, conclusion is an array of formulas
         if (Array.isArray(ast.conclusion)) {
           if (ast.conclusion.length > 1) {
-            alert("Gentzen and Fitch styles require a single formula in the conclusion (right side of ⊢).");
+            alert(t("alert-single-formula"));
             return false;
           }
           if (ast.conclusion.length === 0) {
-            alert("Gentzen and Fitch styles require a conclusion.");
+            alert(t("alert-missing-conclusion"));
             return false;
           }
         } else {
@@ -368,7 +368,7 @@ function validateInputForStyle(input, style) {
         // Gentzen/Fitch treat non-sequent input as the goal formula.
         // It should be a single formula.
         if (ast.length > 1) {
-          alert("Gentzen and Fitch styles expect a single formula as input (or a single-conclusion sequent).");
+          alert(t("alert-invalid-input"));
           return false;
         }
       }
@@ -508,7 +508,7 @@ function setupSidebarProxy() {
   if (homeBtn) {
     homeBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      if(confirm("Are you sure you want to return to the main page? Progress will be lost.")) {
+      if(confirm(t("confirm-return-main"))) {
         location.reload();
       }
     });

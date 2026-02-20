@@ -1,6 +1,7 @@
 import {typeProof} from "../index";
 import {clearItems} from "../proofs/fitch/FitchProof";
 import * as deductive from '../core/deductiveEngine';
+import {t} from '../core/i18n';
 
 // Global reference for Sequent Context
 let sequentContextRef = { treeRoot: null };
@@ -326,12 +327,12 @@ function attachListener() {
             const allProofLabels = document.querySelectorAll('label#proofText');
             const previousLabels = document.querySelectorAll('label.previous');
             if (allProofLabels.length !== previousLabels.length) {
-                if (!window.confirm("Not all branches complete. Latex code generated may be incorrect. Continue?")) return;
+                if (!window.confirm(t("confirm-latex-incomplete"))) return;
             }
         } else if (typeProof === 1) { // Fitch
             const fitchBranchElements = document.querySelectorAll('.fitch_branch:not(.finished)');
             if (fitchBranchElements.length > 0) {
-                 if (!window.confirm("The proof is not finished, do you want to continue?")) return;
+                 if (!window.confirm(t("confirm-proof-unfinished"))) return;
             }
         }
 

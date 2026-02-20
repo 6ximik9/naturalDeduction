@@ -11,6 +11,7 @@ import {RULE_CHECKS} from "./rulesSequent.js";
 import {latexSequent} from "../../ui/latexGen.js";
 import {saveStateSequent, addNextLastButtonClickSequent, clearStateHistory} from "../../state/stateManager.js";
 import {createTreeD3} from "../../ui/tree.js";
+import {t} from '../../core/i18n.js';
 
 let hintToggleState = false;
 
@@ -668,7 +669,8 @@ function disableAllButtons() {
         btn.disabled = true;
         btn.style.opacity = '0.5';
         btn.style.cursor = 'not-allowed';
-        btn.title = 'Select a branch to prove';
+        btn.title = t('tooltip-select-branch');
+        btn.setAttribute('data-i18n-title', 'tooltip-select-branch');
         buttonContainer.appendChild(btn);
     });
     

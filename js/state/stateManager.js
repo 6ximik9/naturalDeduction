@@ -27,6 +27,7 @@ import {
   rebuildTree,
   setSequentContext
 } from "../proofs/sequent/SequentProof";
+import {t} from "../core/i18n";
 
 
 let backwardButton = document.getElementById('backwardButton');
@@ -317,7 +318,7 @@ function addElementWithIndex(elementData, index) {
 
 var homeButton = document.getElementById("home");
 homeButton.addEventListener("click", function () {
-  var confirmation = confirm("Are you sure you want to go to the main page?");
+  var confirmation = confirm(t("confirm-go-main"));
   if (confirmation) {
     location.reload(true);
   }

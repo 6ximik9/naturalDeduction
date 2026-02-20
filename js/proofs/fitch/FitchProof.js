@@ -16,6 +16,7 @@ import {latexFitch} from "../../ui/latexGen";
 import {formulaToString} from "../../core/formatter";
 import {ROBINSON_AXIOMS} from "../../core/robinsonAxiomValidator";
 import {ORDER_AXIOMS} from "../../core/orderAxiomValidator";
+import {t} from "../../core/i18n";
 
 
 let fitchProof = [];
@@ -756,7 +757,7 @@ function addClickFitchRules() {
       } else if (tabId === 'tab4') {
         if (clickedProofs.length !== 1) {
           event.preventDefault(); // Prevent tab switch
-          alert("Please select one line with the formula");
+          alert(t("alert-select-formula"));
           // Ensure we stay on tab1 (or revert to it)
           const radioInput = document.getElementById('tab1');
           if (radioInput) radioInput.checked = true;
