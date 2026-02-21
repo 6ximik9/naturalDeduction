@@ -132,12 +132,21 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        if (selectedFormulaIndex.side !== 'right') {
-            alert(t("alert-select-right"));
-            return;
+        let idx = selectedFormulaIndex.index;
+        
+        if (idx === -1) {
+            idx = currentSeq.succedent.findIndex(f => unwrap(f).type === 'conjunction');
+            if (idx === -1) {
+                alert(t("alert-not-conjunction"));
+                return;
+            }
+        } else {
+            if (selectedFormulaIndex.side !== 'right') {
+                alert(t("alert-select-right"));
+                return;
+            }
         }
 
-        const idx = selectedFormulaIndex.index;
         const targetFormula = unwrap(currentSeq.succedent[idx]);
 
         if (targetFormula.type !== 'conjunction') {
@@ -162,12 +171,21 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        if (selectedFormulaIndex.side !== 'left') {
-            alert(t("alert-select-left"));
-            return;
+        let idx = selectedFormulaIndex.index;
+        
+        if (idx === -1) {
+            idx = currentSeq.antecedent.findIndex(f => unwrap(f).type === 'disjunction');
+            if (idx === -1) {
+                alert(t("alert-not-disjunction"));
+                return;
+            }
+        } else {
+            if (selectedFormulaIndex.side !== 'left') {
+                alert(t("alert-select-left"));
+                return;
+            }
         }
 
-        const idx = selectedFormulaIndex.index;
         const targetFormula = unwrap(currentSeq.antecedent[idx]);
 
         if (targetFormula.type !== 'disjunction') {
@@ -210,9 +228,17 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        if (selectedFormulaIndex.side !== 'left') return;
+        let idx = selectedFormulaIndex.index;
         
-        const idx = selectedFormulaIndex.index;
+        if (idx === -1) {
+            idx = currentSeq.antecedent.findIndex(f => unwrap(f).type === 'negation');
+            if (idx === -1) return; // Alert handled? Usually silent if not found or handled by logic
+        } else {
+            if (selectedFormulaIndex.side !== 'left') return;
+        }
+
+        if (idx === -1) return;
+        
         const targetFormula = unwrap(currentSeq.antecedent[idx]);
 
         if (targetFormula.type !== 'negation') return;
@@ -239,9 +265,17 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        if (selectedFormulaIndex.side !== 'right') return;
+        let idx = selectedFormulaIndex.index;
         
-        const idx = selectedFormulaIndex.index;
+        if (idx === -1) {
+            idx = currentSeq.succedent.findIndex(f => unwrap(f).type === 'negation');
+            if (idx === -1) return;
+        } else {
+            if (selectedFormulaIndex.side !== 'right') return;
+        }
+
+        if (idx === -1) return;
+        
         const targetFormula = unwrap(currentSeq.succedent[idx]);
 
         if (targetFormula.type !== 'negation') return;
@@ -265,9 +299,17 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        if (selectedFormulaIndex.side !== 'right') return;
+        let idx = selectedFormulaIndex.index;
         
-        const idx = selectedFormulaIndex.index;
+        if (idx === -1) {
+            idx = currentSeq.succedent.findIndex(f => unwrap(f).type === 'implication');
+            if (idx === -1) return;
+        } else {
+            if (selectedFormulaIndex.side !== 'right') return;
+        }
+
+        if (idx === -1) return;
+        
         const targetFormula = unwrap(currentSeq.succedent[idx]);
 
         if (targetFormula.type !== 'implication') return;
@@ -287,9 +329,17 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        if (selectedFormulaIndex.side !== 'left') return;
+        let idx = selectedFormulaIndex.index;
         
-        const idx = selectedFormulaIndex.index;
+        if (idx === -1) {
+            idx = currentSeq.antecedent.findIndex(f => unwrap(f).type === 'implication');
+            if (idx === -1) return;
+        } else {
+            if (selectedFormulaIndex.side !== 'left') return;
+        }
+
+        if (idx === -1) return;
+        
         const targetFormula = unwrap(currentSeq.antecedent[idx]);
 
         if (targetFormula.type !== 'implication') return;
@@ -388,6 +438,9 @@ export const RULES = {
 
 // --- Rule Applicability Checks (for Hints) ---
 
+// Helper: Check if any formula in the list satisfies the predicate
+const checkAny = (formulas, predicate) => formulas.some(f => predicate(unwrap(f)));
+
 export const RULE_CHECKS = {
     // Identity: Valid if there is an intersection between antecedent and succedent
     id: (sequent, selection) => {
@@ -408,178 +461,210 @@ export const RULE_CHECKS = {
 
     // Left AND 1: Selected formula must be on Left and be a Conjunction
     wedgel1: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'conjunction';
+        const isConj = f => f.type === 'conjunction';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isConj);
+        if (selection.side !== 'left') return false;
+        return isConj(unwrap(sequent.antecedent[selection.index]));
     },
     // Alias
     landl1: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'conjunction';
+        const isConj = f => f.type === 'conjunction';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isConj);
+        if (selection.side !== 'left') return false;
+        return isConj(unwrap(sequent.antecedent[selection.index]));
     },
 
     // Left AND 2
     wedgel2: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'conjunction';
+        const isConj = f => f.type === 'conjunction';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isConj);
+        if (selection.side !== 'left') return false;
+        return isConj(unwrap(sequent.antecedent[selection.index]));
     },
     landl2: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'conjunction';
+        const isConj = f => f.type === 'conjunction';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isConj);
+        if (selection.side !== 'left') return false;
+        return isConj(unwrap(sequent.antecedent[selection.index]));
     },
 
     // Right AND: Selected formula must be on Right and be a Conjunction
     wedger: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'conjunction';
+        const isConj = f => f.type === 'conjunction';
+        if (selection.index === -1) return checkAny(sequent.succedent, isConj);
+        if (selection.side !== 'right') return false;
+        return isConj(unwrap(sequent.succedent[selection.index]));
     },
     landr: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'conjunction';
+        const isConj = f => f.type === 'conjunction';
+        if (selection.index === -1) return checkAny(sequent.succedent, isConj);
+        if (selection.side !== 'right') return false;
+        return isConj(unwrap(sequent.succedent[selection.index]));
     },
 
     // Left OR: Selected formula on Left, Disjunction
     veel: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'disjunction';
+        const isDisj = f => f.type === 'disjunction';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isDisj);
+        if (selection.side !== 'left') return false;
+        return isDisj(unwrap(sequent.antecedent[selection.index]));
     },
     lorl: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'disjunction';
+        const isDisj = f => f.type === 'disjunction';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isDisj);
+        if (selection.side !== 'left') return false;
+        return isDisj(unwrap(sequent.antecedent[selection.index]));
     },
 
     // Right OR 1: Selected formula on Right, Disjunction
     veer1: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'disjunction';
+        const isDisj = f => f.type === 'disjunction';
+        if (selection.index === -1) return checkAny(sequent.succedent, isDisj);
+        if (selection.side !== 'right') return false;
+        return isDisj(unwrap(sequent.succedent[selection.index]));
     },
     lorr1: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'disjunction';
+        const isDisj = f => f.type === 'disjunction';
+        if (selection.index === -1) return checkAny(sequent.succedent, isDisj);
+        if (selection.side !== 'right') return false;
+        return isDisj(unwrap(sequent.succedent[selection.index]));
     },
 
     // Right OR 2
     veer2: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'disjunction';
+        const isDisj = f => f.type === 'disjunction';
+        if (selection.index === -1) return checkAny(sequent.succedent, isDisj);
+        if (selection.side !== 'right') return false;
+        return isDisj(unwrap(sequent.succedent[selection.index]));
     },
     lorr2: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'disjunction';
+        const isDisj = f => f.type === 'disjunction';
+        if (selection.index === -1) return checkAny(sequent.succedent, isDisj);
+        if (selection.side !== 'right') return false;
+        return isDisj(unwrap(sequent.succedent[selection.index]));
     },
 
     // Negation Left: Selected on Left, Negation
     negl: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'negation';
+        const isNeg = f => f.type === 'negation';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isNeg);
+        if (selection.side !== 'left') return false;
+        return isNeg(unwrap(sequent.antecedent[selection.index]));
     },
     lnotl: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'negation';
+        const isNeg = f => f.type === 'negation';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isNeg);
+        if (selection.side !== 'left') return false;
+        return isNeg(unwrap(sequent.antecedent[selection.index]));
     },
 
     // Negation Right: Selected on Right, Negation
     negr: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'negation';
+        const isNeg = f => f.type === 'negation';
+        if (selection.index === -1) return checkAny(sequent.succedent, isNeg);
+        if (selection.side !== 'right') return false;
+        return isNeg(unwrap(sequent.succedent[selection.index]));
     },
     lnotr: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'negation';
+        const isNeg = f => f.type === 'negation';
+        if (selection.index === -1) return checkAny(sequent.succedent, isNeg);
+        if (selection.side !== 'right') return false;
+        return isNeg(unwrap(sequent.succedent[selection.index]));
     },
 
     // Implication Right: Selected on Right, Implication
     Rightarrowr: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'implication';
+        const isImpl = f => f.type === 'implication';
+        if (selection.index === -1) return checkAny(sequent.succedent, isImpl);
+        if (selection.side !== 'right') return false;
+        return isImpl(unwrap(sequent.succedent[selection.index]));
     },
     to_r: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'implication';
+        const isImpl = f => f.type === 'implication';
+        if (selection.index === -1) return checkAny(sequent.succedent, isImpl);
+        if (selection.side !== 'right') return false;
+        return isImpl(unwrap(sequent.succedent[selection.index]));
     },
 
     // Implication Left: Selected on Left, Implication
     Rightarrowl: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'implication';
+        const isImpl = f => f.type === 'implication';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isImpl);
+        if (selection.side !== 'left') return false;
+        return isImpl(unwrap(sequent.antecedent[selection.index]));
     },
     to_l: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'implication';
+        const isImpl = f => f.type === 'implication';
+        if (selection.index === -1) return checkAny(sequent.antecedent, isImpl);
+        if (selection.side !== 'left') return false;
+        return isImpl(unwrap(sequent.antecedent[selection.index]));
     },
 
     // --- Structural ---
 
     wl: (sequent, selection) => {
         // Weakening Left: Removes selected formula from antecedent (in bottom-up view)
-        return selection && selection.side === 'left' && selection.index !== -1;
+        // Can be applied if any formula exists on left
+        if (selection.index === -1) return sequent.antecedent.length > 0;
+        return selection.side === 'left';
     },
     wr: (sequent, selection) => {
         // Weakening Right: Removes selected formula from succedent
-        return selection && selection.side === 'right' && selection.index !== -1;
+        if (selection.index === -1) return sequent.succedent.length > 0;
+        return selection.side === 'right';
     },
 
     cl: (sequent, selection) => {
         // Contraction left: Needs a formula on left
-        return selection && selection.side === 'left' && selection.index !== -1;
+        if (selection.index === -1) return sequent.antecedent.length > 0;
+        return selection.side === 'left';
     },
     cr: (sequent, selection) => {
         // Contraction right: Needs a formula on right
-        return selection && selection.side === 'right' && selection.index !== -1;
+        if (selection.index === -1) return sequent.succedent.length > 0;
+        return selection.side === 'right';
     },
 
     exl: (sequent, selection) => {
         // Exchange Left: Show only if focused on Left side (formula selected)
-        return selection && selection.side === 'left' && sequent.antecedent.length > 1;
+        // If whole sequent, check if >1 formula
+        if (selection.index === -1) return sequent.antecedent.length > 1;
+        return selection.side === 'left' && sequent.antecedent.length > 1;
     },
     exr: (sequent, selection) => {
         // Exchange Right: Show only if focused on Right side (formula selected)
-        return selection && selection.side === 'right' && sequent.succedent.length > 1;
+        if (selection.index === -1) return sequent.succedent.length > 1;
+        return selection.side === 'right' && sequent.succedent.length > 1;
     },
 
     // --- Quantifiers ---
 
     foralll: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'forall' || (f.type === 'quantifier' && (f.quantifier === 'forall' || f.quantifier === '∀'));
+        const isForall = f => f.type === 'forall' || (f.type === 'quantifier' && (f.quantifier === 'forall' || f.quantifier === '∀'));
+        if (selection.index === -1) return checkAny(sequent.antecedent, isForall);
+        if (selection.side !== 'left') return false;
+        return isForall(unwrap(sequent.antecedent[selection.index]));
     },
     
     forallr: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'forall' || (f.type === 'quantifier' && (f.quantifier === 'forall' || f.quantifier === '∀'));
+        const isForall = f => f.type === 'forall' || (f.type === 'quantifier' && (f.quantifier === 'forall' || f.quantifier === '∀'));
+        if (selection.index === -1) return checkAny(sequent.succedent, isForall);
+        if (selection.side !== 'right') return false;
+        return isForall(unwrap(sequent.succedent[selection.index]));
     },
 
     existsl: (sequent, selection) => {
-        if (!selection || selection.side !== 'left' || selection.index === -1) return false;
-        const f = unwrap(sequent.antecedent[selection.index]);
-        return f.type === 'exists' || (f.type === 'quantifier' && (f.quantifier === 'exists' || f.quantifier === '∃'));
+        const isExists = f => f.type === 'exists' || (f.type === 'quantifier' && (f.quantifier === 'exists' || f.quantifier === '∃'));
+        if (selection.index === -1) return checkAny(sequent.antecedent, isExists);
+        if (selection.side !== 'left') return false;
+        return isExists(unwrap(sequent.antecedent[selection.index]));
     },
 
     existsr: (sequent, selection) => {
-        if (!selection || selection.side !== 'right' || selection.index === -1) return false;
-        const f = unwrap(sequent.succedent[selection.index]);
-        return f.type === 'exists' || (f.type === 'quantifier' && (f.quantifier === 'exists' || f.quantifier === '∃'));
+        const isExists = f => f.type === 'exists' || (f.type === 'quantifier' && (f.quantifier === 'exists' || f.quantifier === '∃'));
+        if (selection.index === -1) return checkAny(sequent.succedent, isExists);
+        if (selection.side !== 'right') return false;
+        return isExists(unwrap(sequent.succedent[selection.index]));
     },
 
     // Constants
@@ -616,30 +701,40 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
     const currentSeq = getActiveSequent();
     if (!currentSeq || currentSeq.isClosed) return;
 
-    if (selectedFormulaIndex.side !== side) {
-        alert(side === 'left' ? t("alert-select-left") : t("alert-select-right"));
-        return;
-    }
-
-    const idx = selectedFormulaIndex.index;
+    let idx = selectedFormulaIndex.index;
     const formulas = side === 'left' ? currentSeq.antecedent : currentSeq.succedent;
-    const targetFormula = unwrap(formulas[idx]);
 
-    // Check type
-    if (targetFormula.type !== quantType) {
-        // Handle legacy 'quantifier' type if necessary
-        if (targetFormula.type === 'quantifier') {
-            const isForall = targetFormula.quantifier === '∀' || targetFormula.quantifier === 'forall';
-            const isExists = targetFormula.quantifier === '∃' || targetFormula.quantifier === 'exists';
-            
-            if ((quantType === 'forall' && !isForall) || (quantType === 'exists' && !isExists)) {
-                alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
-                return;
-            }
-        } else {
+    // Helper to check type
+    const checkType = (f) => {
+        if (f.type === quantType) return true;
+        if (f.type === 'quantifier') {
+             const isForall = f.quantifier === '∀' || f.quantifier === 'forall';
+             const isExists = f.quantifier === '∃' || f.quantifier === 'exists';
+             if (quantType === 'forall' && isForall) return true;
+             if (quantType === 'exists' && isExists) return true;
+        }
+        return false;
+    };
+
+    if (idx === -1) {
+        idx = formulas.findIndex(f => checkType(unwrap(f)));
+        if (idx === -1) {
             alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
             return;
         }
+    } else {
+        if (selectedFormulaIndex.side !== side) {
+            alert(side === 'left' ? t("alert-select-left") : t("alert-select-right"));
+            return;
+        }
+    }
+
+    const targetFormula = unwrap(formulas[idx]);
+
+    // Check type (redundant for auto-detect but safe for manual)
+    if (!checkType(targetFormula)) {
+        alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
+        return;
     }
 
     // Extract variable and operand
@@ -692,29 +787,40 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
     const currentSeq = getActiveSequent();
     if (!currentSeq || currentSeq.isClosed) return;
 
-    if (selectedFormulaIndex.side !== side) {
-        alert(side === 'left' ? t("alert-select-left") : t("alert-select-right"));
-        return;
-    }
-
-    const idx = selectedFormulaIndex.index;
+    let idx = selectedFormulaIndex.index;
     const formulas = side === 'left' ? currentSeq.antecedent : currentSeq.succedent;
-    const targetFormula = unwrap(formulas[idx]);
 
-    // Check type
-    if (targetFormula.type !== quantType) {
-        if (targetFormula.type === 'quantifier') {
-            const isForall = targetFormula.quantifier === '∀' || targetFormula.quantifier === 'forall';
-            const isExists = targetFormula.quantifier === '∃' || targetFormula.quantifier === 'exists';
-            
-            if ((quantType === 'forall' && !isForall) || (quantType === 'exists' && !isExists)) {
-                alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
-                return;
-            }
-        } else {
+    // Helper to check type
+    const checkType = (f) => {
+        if (f.type === quantType) return true;
+        if (f.type === 'quantifier') {
+             const isForall = f.quantifier === '∀' || f.quantifier === 'forall';
+             const isExists = f.quantifier === '∃' || f.quantifier === 'exists';
+             if (quantType === 'forall' && isForall) return true;
+             if (quantType === 'exists' && isExists) return true;
+        }
+        return false;
+    };
+
+    if (idx === -1) {
+        idx = formulas.findIndex(f => checkType(unwrap(f)));
+        if (idx === -1) {
             alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
             return;
         }
+    } else {
+        if (selectedFormulaIndex.side !== side) {
+            alert(side === 'left' ? t("alert-select-left") : t("alert-select-right"));
+            return;
+        }
+    }
+
+    const targetFormula = unwrap(formulas[idx]);
+
+    // Check type
+    if (!checkType(targetFormula)) {
+        alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
+        return;
     }
 
     let variableName = targetFormula.variable;
@@ -813,12 +919,22 @@ function applyLeftRule(transformFn, ruleName) {
     const currentSeq = getActiveSequent();
     if (!currentSeq || currentSeq.isClosed) return;
 
-    if (selectedFormulaIndex.side !== 'left') {
-        alert(t("alert-select-left"));
-        return;
+    let idx = selectedFormulaIndex.index;
+
+    // Auto-detect if whole sequent selected
+    if (idx === -1) {
+        idx = currentSeq.antecedent.findIndex(f => transformFn(unwrap(f)) !== null);
+        if (idx === -1) {
+            alert(t("alert-not-applicable"));
+            return;
+        }
+    } else {
+        if (selectedFormulaIndex.side !== 'left') {
+            alert(t("alert-select-left"));
+            return;
+        }
     }
 
-    const idx = selectedFormulaIndex.index;
     const targetFormula = unwrap(currentSeq.antecedent[idx]);
 
     const newFormulas = transformFn(targetFormula);
@@ -838,12 +954,22 @@ function applyRightRule(transformFn, ruleName) {
     const currentSeq = getActiveSequent();
     if (!currentSeq || currentSeq.isClosed) return;
 
-    if (selectedFormulaIndex.side !== 'right') {
-        alert(t("alert-select-right"));
-        return;
+    let idx = selectedFormulaIndex.index;
+
+    // Auto-detect if whole sequent selected
+    if (idx === -1) {
+        idx = currentSeq.succedent.findIndex(f => transformFn(unwrap(f)) !== null);
+        if (idx === -1) {
+            alert(t("alert-not-applicable"));
+            return;
+        }
+    } else {
+        if (selectedFormulaIndex.side !== 'right') {
+            alert(t("alert-select-right"));
+            return;
+        }
     }
 
-    const idx = selectedFormulaIndex.index;
     const targetFormula = unwrap(currentSeq.succedent[idx]);
 
     const newFormulas = transformFn(targetFormula);
