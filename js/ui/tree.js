@@ -220,14 +220,7 @@ function transformToD3S(node) {
     }
 
     if (node.type === "parenthesis") {
-      return {
-        name: "()",
-        children: [
-          { name: "(" },
-          processNode(node.value),
-          { name: ")" }
-        ]
-      };
+      return processNode(node.value);
     }
 
     if (node.type === "sequent") {
@@ -287,18 +280,7 @@ function transformToD3S(node) {
   }
 
   function processParenthesis(node) {
-    if (node.type === "parenthesis") {
-      return {
-        name: "()",
-        children: [
-          { name: "(" },
-          processNode(node.value),
-          { name: ")" }
-        ]
-      };
-    } else {
-      return processNode(node);
-    }
+    return processNode(node);
   }
 
   return processNode(node);
