@@ -755,7 +755,10 @@ document.getElementById('proof').addEventListener('click', function (event) {
         spanElement.remove();
       }
     }
-
+    
+    if (window.updateFitchParenthesesButtons) {
+        window.updateFitchParenthesesButtons();
+    }
 
     const radioInput = document.getElementById('tab1');
     radioInput.checked = true;
@@ -885,6 +888,10 @@ export function clearItems() {
   });
   clickedBranch = [];
   
+  if (window.updateFitchParenthesesButtons) {
+      window.updateFitchParenthesesButtons();
+  }
+
   // Refresh button state (will disable buttons since selection is empty)
   // We use 1 to indicate "All Rules" mode, but the empty selection check inside processExpression
   // will ensure buttons are generated in disabled state regardless.
@@ -917,33 +924,52 @@ function addOrRemoveParenthesesFitch() {
 
   if (!addBtn || !delBtn || !retBtn) return;
 
-  // Set initial state
-  toggleButtonState(retBtn, false);
-
   function toggleButtonState(btn, enabled) {
       if (enabled) {
           btn.style.opacity = '1';
           btn.style.pointerEvents = 'auto';
           btn.classList.remove('disabled');
+          btn.classList.remove('disabled-action-btn');
       } else {
           btn.style.opacity = '0.5';
           btn.style.pointerEvents = 'none';
           btn.classList.add('disabled');
+          btn.classList.add('disabled-action-btn');
       }
   }
 
+  // Initial state: ALL disabled
+  [addBtn, delBtn, retBtn].forEach(btn => toggleButtonState(btn, false));
+
   function updateButtons(clickedBtn) {
+    // Check if anything is selected
+    if (!clickedProofs || clickedProofs.length === 0) {
+       [addBtn, delBtn, retBtn].forEach(btn => toggleButtonState(btn, false));
+       return;
+    }
+
+    // Enable all first
     [addBtn, delBtn, retBtn].forEach(btn => toggleButtonState(btn, true));
-    if (clickedBtn) toggleButtonState(clickedBtn, false);
+    
+    // Disable the active one if specified, otherwise default to Original (retBtn)
+    if (clickedBtn) {
+        toggleButtonState(clickedBtn, false);
+    } else {
+        toggleButtonState(retBtn, false);
+    }
   }
 
+  // Export this function to be called when selection changes
+  window.updateFitchParenthesesButtons = updateButtons;
+
   addBtn.addEventListener('click', function (e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (!clickedProofs || clickedProofs.length === 0) return;
+    
     clickedProofs.forEach(function (item) {
       const spanElement = item.element.querySelector('span.indexC');
       if (spanElement) spanElement.remove();
 
-      // Store original text if not already stored
       if (!item.element.dataset.original) {
         item.element.dataset.original = item.element.textContent;
       }
@@ -957,12 +983,13 @@ function addOrRemoveParenthesesFitch() {
   });
 
   delBtn.addEventListener('click', function (e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (!clickedProofs || clickedProofs.length === 0) return;
+
     clickedProofs.forEach(function (item) {
       const spanElement = item.element.querySelector('span.indexC');
       if (spanElement) spanElement.remove();
 
-      // Store original text if not already stored
       if (!item.element.dataset.original) {
         item.element.dataset.original = item.element.textContent;
       }
@@ -976,28 +1003,21 @@ function addOrRemoveParenthesesFitch() {
   });
 
   retBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    let anyRestored = false;
+    if (e) e.preventDefault();
+    if (!clickedProofs || clickedProofs.length === 0) return;
+
     clickedProofs.forEach(function (item) {
-      if (item.element.dataset.original) {
-        const spanElement = item.element.querySelector('span.indexC');
-        if (spanElement) spanElement.remove();
+       const spanElement = item.element.querySelector('span.indexC');
+       if (spanElement) spanElement.remove();
 
-        item.element.textContent = item.element.dataset.original;
-
-        // Remove the stored original as we are back to it
-        delete item.element.dataset.original;
-
-        if (spanElement) item.element.appendChild(spanElement);
-        anyRestored = true;
-      }
+       if (item.element.dataset.original) {
+           item.element.textContent = item.element.dataset.original;
+       }
+       
+       if (spanElement) item.element.appendChild(spanElement);
     });
-
-    if (anyRestored) {
-        updateButtons(retBtn);
-    }
+    updateButtons(retBtn);
   });
-
 }
 
 

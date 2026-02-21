@@ -514,16 +514,10 @@ function selectSequent(domElement, sequentNode) {
 
     selectedFormulaIndex = { side: null, index: -1 };
 
-    // Disable parentheses buttons when whole sequent is selected
-    const addBtn = document.getElementById('addParentheses');
-    const delBtn = document.getElementById('deleteParentheses');
-    const retBtn = document.getElementById('returnUserInput');
-    if (addBtn) addBtn.disabled = true;
-    if (delBtn) delBtn.disabled = true;
-    if (retBtn) retBtn.disabled = true;
-    if (addBtn) addBtn.classList.add('disabled-action-btn');
-    if (delBtn) delBtn.classList.add('disabled-action-btn');
-    if (retBtn) retBtn.classList.add('disabled-action-btn');
+    // Enable parentheses buttons when whole sequent is selected (supports bulk update now)
+    if (window.updateSequentParenthesesButtons) {
+        window.updateSequentParenthesesButtons();
+    }
 
     // if (hintToggleState) {
     //     hintToggleState = false;
@@ -597,22 +591,9 @@ function handleFormulaClick(element, sequentNode) {
         index: parseInt(element.dataset.index)
     };
 
-    // Enable parentheses buttons when a formula is selected, but disable 'Original Proof' as it is the default state
-    const addBtn = document.getElementById('addParentheses');
-    const delBtn = document.getElementById('deleteParentheses');
-    const retBtn = document.getElementById('returnUserInput');
-    
-    if (addBtn) {
-        addBtn.disabled = false;
-        addBtn.classList.remove('disabled-action-btn');
-    }
-    if (delBtn) {
-        delBtn.disabled = false;
-        delBtn.classList.remove('disabled-action-btn');
-    }
-    if (retBtn) {
-        retBtn.disabled = true;
-        retBtn.classList.add('disabled-action-btn');
+    // Update parentheses buttons state
+    if (window.updateSequentParenthesesButtons) {
+        window.updateSequentParenthesesButtons();
     }
 
     // if (hintToggleState) {
@@ -681,6 +662,10 @@ function disableAllButtons() {
     
     if (window.MathJax) {
         window.MathJax.typesetPromise([buttonContainer]).catch(err => console.warn('MathJax error:', err));
+    }
+    
+    if (window.updateSequentParenthesesButtons) {
+        window.updateSequentParenthesesButtons();
     }
 }
 
@@ -755,9 +740,9 @@ export function toggleSmartMode() {
 }
 
 function addOrRemoveParenthesesSequent() {
-    const addBtn = document.getElementById('addParentheses');
-    const delBtn = document.getElementById('deleteParentheses');
-    const retBtn = document.getElementById('returnUserInput');
+    const addBtn = document.getElementById('sb-show-parens') || document.getElementById('addParentheses');
+    const delBtn = document.getElementById('sb-hide-parens') || document.getElementById('deleteParentheses');
+    const retBtn = document.getElementById('sb-original') || document.getElementById('returnUserInput');
 
     if (!addBtn || !delBtn || !retBtn) return;
 
@@ -780,7 +765,9 @@ function addOrRemoveParenthesesSequent() {
 
     function resetBtn(btn) {
         const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
+        if (btn.parentNode) {
+            btn.parentNode.replaceChild(newBtn, btn);
+        }
         return newBtn;
     }
 
@@ -790,44 +777,92 @@ function addOrRemoveParenthesesSequent() {
 
     // Helper to manage button states - defined AFTER resetting buttons to use the new references
     function updateButtons(clickedBtn) {
+        if (!side) {
+             [newAddBtn, newDelBtn, newRetBtn].forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('disabled-action-btn');
+            });
+            return;
+        }
+
         // Enable all first
         [newAddBtn, newDelBtn, newRetBtn].forEach(btn => {
             btn.disabled = false;
             btn.classList.remove('disabled-action-btn');
         });
 
-        // Disable the active one
+        // Disable the active one if specified, otherwise default to Original (newRetBtn)
         if (clickedBtn) {
             clickedBtn.disabled = true;
             clickedBtn.classList.add('disabled-action-btn');
+        } else {
+            newRetBtn.disabled = true;
+            newRetBtn.classList.add('disabled-action-btn');
         }
     }
+    
+    window.updateSequentParenthesesButtons = updateButtons;
+    
+    // Initial state: ALL disabled
+    [newAddBtn, newDelBtn, newRetBtn].forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('disabled-action-btn');
+    });
+    
+    function applyToAll(mode) {
+        if (!side) return;
+        const sequentNode = domToSequentMap.get(side);
+        if (!sequentNode) return;
 
-    newAddBtn.addEventListener('click', function () {
+        const updateSpan = (formulas, sideName) => {
+            formulas.forEach((f, i) => {
+                 const span = side.querySelector(`.sequent-formula[data-side="${sideName}"][data-index="${i}"]`);
+                 if (span) {
+                     if (mode === 1) span.textContent = formulaToString(f, 1);
+                     else if (mode === 0) span.textContent = formulaToString(deductive.getProof(f), 0);
+                     else span.textContent = deductive.convertToLogicalExpression(f);
+                 }
+            });
+        };
+        
+        updateSpan(sequentNode.antecedent, 'left');
+        updateSpan(sequentNode.succedent, 'right');
+    }
+
+    newAddBtn.addEventListener('click', function (e) {
+        if (e) e.preventDefault();
         const data = getSelectedFormulaData();
         if (data && data.span) {
             data.span.textContent = formulaToString(data.formulaObj, 1); // 1 = full parens
             updateButtons(newAddBtn);
+        } else if (side && selectedFormulaIndex.index === -1) {
+            applyToAll(1);
+            updateButtons(newAddBtn);
         }
     });
 
-    newDelBtn.addEventListener('click', function () {
+    newDelBtn.addEventListener('click', function (e) {
+        if (e) e.preventDefault();
         const data = getSelectedFormulaData();
         if (data && data.span) {
             data.span.textContent = formulaToString(deductive.getProof(data.formulaObj), 0); // 0 = minimal parens
             updateButtons(newDelBtn);
+        } else if (side && selectedFormulaIndex.index === -1) {
+            applyToAll(0);
+            updateButtons(newDelBtn);
         }
     });
 
-    newRetBtn.addEventListener('click', function () {
+    newRetBtn.addEventListener('click', function (e) {
+        if (e) e.preventDefault();
         const data = getSelectedFormulaData();
         if (data && data.span) {
             // Restore default formatting as a "return to user input" equivalent
             data.span.textContent = deductive.convertToLogicalExpression(data.formulaObj);
             updateButtons(newRetBtn);
-        } else {
-             // Shake if nothing selected
-             // shakeButton(newRetBtn); // Need to import shakeButton or define it
+        } else if (side && selectedFormulaIndex.index === -1) {
+             applyToAll(2); // 2 = default/original
+             updateButtons(newRetBtn);
         }
     });
 }

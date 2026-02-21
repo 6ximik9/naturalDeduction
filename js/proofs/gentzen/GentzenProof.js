@@ -163,6 +163,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
       clearLabelHighlights();
       side = null;
       disableAllButtons();
+      if (window.updateGentzenParenthesesButtons) window.updateGentzenParenthesesButtons();
       return;
   }
 
@@ -179,6 +180,8 @@ document.getElementById('proof').addEventListener('click', function (event) {
     side = clickedElement.parentNode;
     clickedElement.style.background = 'rgba(136,190,213,0.78)';
   }
+  
+  if (window.updateGentzenParenthesesButtons) window.updateGentzenParenthesesButtons();
 
   // Якщо немає попереднього перегляду — обробити клік
   if (document.getElementsByClassName("preview").length === 0) {
@@ -345,6 +348,11 @@ export function parseExpression(text) {
     // Зберігаємо стан і показуємо кнопки
     controlState.saveState();
     processExpression(parsedProof, 1);
+    
+    if (window.updateGentzenParenthesesButtons) {
+        window.updateGentzenParenthesesButtons();
+    }
+
     document.getElementById('undo_redo').style.display = 'flex';
   } catch (error) {
     console.error("Помилка при парсингу виразу:", error);
@@ -1583,32 +1591,45 @@ function addOrRemoveParenthesesGentzen() {
 
   if (!addBtn || !delBtn || !retBtn) return;
 
-  // Set initial state: Original Proof is disabled by default
-  toggleButtonState(retBtn, false);
-
   // Helper to manage button states
   function toggleButtonState(btn, enabled) {
       if (enabled) {
           btn.style.opacity = '1';
           btn.style.pointerEvents = 'auto';
           btn.classList.remove('disabled');
+          btn.classList.remove('disabled-action-btn');
       } else {
           btn.style.opacity = '0.5';
           btn.style.pointerEvents = 'none';
           btn.classList.add('disabled');
+          btn.classList.add('disabled-action-btn');
       }
   }
 
+  // Initial state: ALL disabled
+  [addBtn, delBtn, retBtn].forEach(btn => toggleButtonState(btn, false));
+
   function updateButtons(activeBtn) {
+    if (!side) {
+        [addBtn, delBtn, retBtn].forEach(btn => toggleButtonState(btn, false));
+        return;
+    }
+
     // Enable all first
     [addBtn, delBtn, retBtn].forEach(btn => toggleButtonState(btn, true));
 
-    // Disable the active one
-    if (activeBtn) toggleButtonState(activeBtn, false);
+    // Disable the active one if specified, otherwise default to Original (retBtn)
+    if (activeBtn) {
+        toggleButtonState(activeBtn, false);
+    } else {
+        toggleButtonState(retBtn, false);
+    }
   }
+  
+  window.updateGentzenParenthesesButtons = updateButtons;
 
   addBtn.addEventListener('click', function (e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!side) return;
     const inProof = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
     side.querySelector('#proofText').textContent = formulaToString(inProof, 1);
@@ -1616,7 +1637,7 @@ function addOrRemoveParenthesesGentzen() {
   });
 
   delBtn.addEventListener('click', function (e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!side) return;
     const expression = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
     side.querySelector('#proofText').textContent = formulaToString(getProof(expression), 0);
@@ -1624,13 +1645,11 @@ function addOrRemoveParenthesesGentzen() {
   });
 
   retBtn.addEventListener('click', function (e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!side) return;
     if (oldUserInput !== "") {
       side.querySelector('#proofText').textContent = oldUserInput;
       updateButtons(retBtn);
-    } else {
-      // shakeButton(retBtn); // No easy shake for sidebar link
     }
   });
 }
