@@ -11,6 +11,7 @@ import {setSide} from "../proofs/gentzen/GentzenProof";
 import {setCurrentLevel} from "../proofs/gentzen/GentzenProof";
 import {setUserHypotheses} from "../proofs/gentzen/GentzenProof";
 import {setLastSide} from "../proofs/gentzen/GentzenProof";
+import {disableAllButtons} from "../proofs/gentzen/GentzenProof";
 import {
   branchIndex, clearItems,
   clickedBranch,
@@ -54,10 +55,17 @@ export function addNextLastButtonClickGentzen() {
     }
 
     if (!elementsAndVariablesArray[state]) {
-      setState(state - 1);
+      if (state > 0) setState(state - 1);
     }
-    setState(state - 1);
-    getState(state);
+    if (state > 0) {
+        setState(state - 1);
+        getState(state);
+    }
+    
+    if (state === 0) {
+       backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
+       homeButton.parentElement.style.display = 'none';
+    }
   });
 
 
@@ -91,15 +99,13 @@ export function addNextLastButtonClickFitch() {
     }
 
     if (!elementsAndVariablesArray[fitchStates]) {
-      setStateFitch(fitchStates - 1);
+      if (fitchStates > 0) setStateFitch(fitchStates - 1);
     }
 
-    setStateFitch(fitchStates - 1);
-    if (fitchStates < 0) {
-      location.reload(true);
-      return;
+    if (fitchStates > 0) {
+        setStateFitch(fitchStates - 1);
+        getStateFitch(fitchStates);
     }
-    getStateFitch(fitchStates);
 
     if (fitchStates === 0) {
       backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
@@ -124,14 +130,13 @@ export function addNextLastButtonClickFitch() {
 export function addNextLastButtonClickSequent() {
   backwardButton.addEventListener('click', function () {
     if (!elementsAndVariablesArray[sequentState]) {
-      setSequentState(sequentState - 1);
+      if (sequentState > 0) setSequentState(sequentState - 1);
     }
-    setSequentState(sequentState - 1);
-    if (sequentState < 0) {
-      location.reload(true);
-      return;
+    
+    if (sequentState > 0) {
+        setSequentState(sequentState - 1);
+        getStateSequent(sequentState);
     }
-    getStateSequent(sequentState);
 
     if (sequentState === 0) {
       backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
@@ -186,7 +191,7 @@ function getStateSequent(id) {
   setSequentContext({ treeRoot: lastElementData.treeRoot });
 
   // Перебудовуємо дерево
-  rebuildTree(lastElementData.treeRoot);
+  rebuildTree(lastElementData.treeRoot, false);
 }
 
 export function saveStateFitch() {
@@ -235,15 +240,25 @@ function getStateFitch(id) {
 
   // Оновлюємо значення змінних з останнього об'єкта
   var variables = lastElementData.variables;
-  setClickedProofs(JSON.parse(JSON.stringify(variables.clickedProofs)));
-  setClickedBranch(JSON.parse(JSON.stringify(variables.clickedBranch)));
+  // Clear selection
+  setClickedProofs([]);
+  setClickedBranch([]);
   setBranchIndex(variables.branchIndex);
+  
+  // Clear visual selection from DOM
+  const selectedElements = allProof.querySelectorAll('.fitch_formula');
+  selectedElements.forEach(el => {
+      el.style.backgroundColor = '';
+      const span = el.querySelector('.indexC');
+      if (span) span.remove();
+  });
+  
   clearItems();
   processExpression("AllRules", 1);
 }
 
 function getState(id) {
-  document.getElementById('proof-menu').className = 'hidden';
+  document.getElementById('proof-menu').className = 'proof-menu';
   document.getElementById('hypotheses-container').style.display = "none";
 
   // Отримуємо останній елемент масиву
@@ -263,9 +278,22 @@ function getState(id) {
   deductionContext.conclusions = JSON.parse(JSON.stringify(variables.deductionContext)).conclusions;
   setLevel(variables.level);
   setCurrentLevel(variables.currentLevel);
+  // Clear selection
   setUserHypotheses(variables.userHypotheses);
-  setSide(variables.side);
-  setLastSide(variables.lastSide);
+  setSide(null);
+  setLastSide(null);
+  
+  // Clear visual selection if any
+  const selectedElements = allProof.querySelectorAll('.selected');
+  selectedElements.forEach(el => el.classList.remove('selected'));
+  const labels = allProof.querySelectorAll('label');
+  labels.forEach(label => {
+      label.style.background = '';
+  });
+  
+  // Disable buttons
+  disableAllButtons();
+  
   // showAllHyp();
 }
 

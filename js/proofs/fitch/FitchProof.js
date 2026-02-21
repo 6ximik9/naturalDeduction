@@ -84,10 +84,7 @@ export function fitchStart(formula) {
 }
 
 
-export function processExpression(expression, countRules) {
-  document.getElementById('proof-menu').className = 'proof-menu';
-
-  const buttons = [
+export const FITCH_BUTTONS = [
     "Assumption"
     , "$$ \\begin{array}{c|ll} m & A \\\\ n & B \\\\  & A \\land B & (\\land I, m, n) \\end{array} $$"
     , "$$ \\begin{array}{c|ll} n & A \\land B \\\\ & A & (\\land E, n) \\\\ & B & (\\land E, n) \\\\ \\end{array} $$"
@@ -108,6 +105,16 @@ export function processExpression(expression, countRules) {
     , "$$ \\begin{array}{c|ll} & c = c & (= I) \\end{array} $$"
     , "$$ \\begin{array}{c|ll} n & t_1 = t_2 \\\\ m & A(t_1) \\\\ & A(t_2) & (= E, n, m) \\end{array} $$"
   ];
+
+export function processExpression(expression, countRules) {
+  document.getElementById('proof-menu').className = 'proof-menu';
+
+  const buttons = FITCH_BUTTONS;
+
+  if (clickedProofs.length === 0 && clickedBranch.length === 0) {
+    generateButtons(buttons.length, buttons, true);
+    return;
+  }
 
   if (countRules === 1) {
     generateButtons(19, buttons);
@@ -133,7 +140,7 @@ export function processExpression(expression, countRules) {
     }
   }).filter(p => p !== null);
 
-  if (clickedProofs.length === 1 && clickedBranch.length === 0) {
+  if (clickedProofs.length === 0 && clickedBranch.length === 0) {
     const f = proofs[0];
     if (f) {
       // Context-specific
@@ -186,7 +193,7 @@ export function processExpression(expression, countRules) {
   generateButtons(recommendedButtons.length, recommendedButtons);
 }
 
-function generateButtons(buttonCount, buttonTexts) {
+function generateButtons(buttonCount, buttonTexts, disabled = false) {
 
   // const buttonContainer = document.getElementById('button-container');
   const buttonContainer = document.getElementById('button-container');
@@ -202,6 +209,11 @@ function generateButtons(buttonCount, buttonTexts) {
   if (branchIndex !== 0 && !isAxiomsTab) {
     let btn = createButton("Close assumption", () => closeAsp());
     btn.style.minHeight = '80px';
+    if (disabled) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+    }
     buttonContainer.appendChild(btn);
   }
 
@@ -241,6 +253,12 @@ function generateButtons(buttonCount, buttonTexts) {
       buttonContainer.appendChild(header);
     }
     let button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i], button));
+
+    if (disabled) {
+      button.disabled = true;
+      button.style.opacity = '0.5';
+      button.style.cursor = 'not-allowed';
+    }
 
     if (isAxiomsTab) {
        button.style.flex = 'none';
@@ -804,7 +822,8 @@ function addClickFitchRules() {
           `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`
         );
         const formattedAxioms = [...formattedRobinson, ...formattedOrder];
-        generateButtons(formattedAxioms.length, formattedAxioms);
+        const isDisabled = clickedProofs.length === 0 && clickedBranch.length === 0;
+        generateButtons(formattedAxioms.length, formattedAxioms, isDisabled);
       }
     });
   });
@@ -865,7 +884,28 @@ export function clearItems() {
     }
   });
   clickedBranch = [];
-
+  
+  // Refresh button state (will disable buttons since selection is empty)
+  // We use 1 to indicate "All Rules" mode, but the empty selection check inside processExpression
+  // will ensure buttons are generated in disabled state regardless.
+  // Exception: If we are in "Axioms" tab (tab3), we should respect that, but processExpression
+  // currently defaults to generating standard buttons. 
+  // However, since we are clearing items, likely we want to reset to a neutral state.
+  // The user can switch tabs if needed.
+  // Note: If the user is on the Axioms tab, this might switch the view to "All Rules".
+  // To avoid this, we could check the active tab.
+  const activeTab = document.querySelector('.tab-trigger.active-tab');
+  const isAxiomsTab = document.getElementById('tab3') && document.getElementById('tab3').checked;
+  
+  if (isAxiomsTab) {
+      // Re-trigger the tab click logic for Axioms to refresh (disable) them
+      const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) => `${index + 1}. ${axiom}`);
+      const formattedOrder = ORDER_AXIOMS.map((axiom, index) => `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`);
+      const formattedAxioms = [...formattedRobinson, ...formattedOrder];
+      generateButtons(formattedAxioms.length, formattedAxioms, true);
+  } else {
+      processExpression("AllRules", 1);
+  }
 }
 
 

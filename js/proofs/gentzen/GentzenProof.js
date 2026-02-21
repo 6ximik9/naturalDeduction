@@ -950,7 +950,7 @@ async function buttonClicked(buttonText) {
   disableAllButtons();
 }
 
-function disableAllButtons() {
+export function disableAllButtons() {
     // Determine which tab is active to know what to show
     const isAxiomsTab = document.getElementById('tab3') && document.getElementById('tab3').checked;
     const isTreeTab = document.getElementById('tab4') && document.getElementById('tab4').checked;

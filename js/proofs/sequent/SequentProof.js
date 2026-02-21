@@ -122,7 +122,7 @@ export function parseExpression(text) {
 /**
  * Rebuilds the visual tree from the Sequent Context (used for state restoration).
  */
-export function rebuildTree(rootNode) {
+export function rebuildTree(rootNode, selectRoot = true) {
     const proofContainer = document.getElementById('proof');
     proofContainer.innerHTML = '';
     domToSequentMap = new WeakMap(); // Reset map
@@ -135,8 +135,13 @@ export function rebuildTree(rootNode) {
     // Try to restore selection if side was saved, but side is a DOM element which is now gone.
     // We might default to selecting the root or the last active node if we could track it.
     // For now, select root.
-    if (rootNode.domElement) {
+    if (selectRoot && rootNode.domElement) {
         selectSequent(rootNode.domElement, rootNode);
+    } else {
+        // Clear selection variables just in case
+        side = null;
+        selectedFormulaIndex = { side: null, index: -1 };
+        disableAllButtons();
     }
 }
 
