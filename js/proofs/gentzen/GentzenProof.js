@@ -612,15 +612,15 @@ function generateButtons(buttonCount, buttonTexts) {
 
 // Exported function for Sidebar "Smart Mode"
 export function toggleSmartMode() {
-  if (!side) {
-      shakeElement('helpBtn', 5);
-      return false;
-  }
-
   // Toggle state globally for both modes
   const newState = !helpButtonToggleState.allRules; // Using allRules as master state
   helpButtonToggleState.allRules = newState;
   helpButtonToggleState.axioms = newState;
+
+  if (!side) {
+    disableAllButtons();
+    return newState;
+  }
 
   const isAxiomsTab = document.getElementById('tab3').checked;
 
@@ -636,17 +636,8 @@ export function toggleSmartMode() {
     }
   } else {
     // Rules tab
-    // Get content from active side or fallback to oldUserInput
-    let content = "";
-    if (side) {
-        content = side.querySelector('#proofText').textContent;
-    } else if (oldUserInput) {
-        content = oldUserInput;
-    } else {
-        console.warn("No active formula selected for Smart Mode");
-        return newState;
-    }
-
+    // Get content from active side
+    let content = side.querySelector('#proofText').textContent;
     processExpression(checkWithAntlr(content), newState ? 0 : 1);
   }
   

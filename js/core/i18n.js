@@ -7,6 +7,7 @@ export const translations = {
     "nav-data": "Dáta",
     "nav-upload": "Nahrať",
     "nav-example": "Príklad",
+    "nav-export": "Export",
     "nav-support": "Podpora",
     "nav-help": "Pomoc",
     "nav-feedback": "Spätná väzba",
@@ -136,6 +137,7 @@ export const translations = {
     "nav-data": "Data",
     "nav-upload": "Upload",
     "nav-example": "Paste Example",
+    "nav-export": "Export",
     "nav-support": "Support",
     "nav-help": "Help",
     "nav-feedback": "Feedback",
@@ -265,6 +267,7 @@ export const translations = {
     "nav-data": "Дані",
     "nav-upload": "Завантажити",
     "nav-example": "Приклад",
+    "nav-export": "Експорт",
     "nav-support": "Підтримка",
     "nav-help": "Допомога",
     "nav-feedback": "Відгук",
@@ -437,6 +440,6 @@ export function updateLanguage(lang) {
       el.setAttribute('title', tArr[key]);
     }
   });
-  
+
   localStorage.setItem('selectedLang', lang);
 }

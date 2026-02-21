@@ -749,11 +749,6 @@ function generateSequentButtons() {
 }
 
 export function toggleSmartMode() {
-    if (!side) {
-        shakeElement('helpBtn', 5);
-        return false;
-    }
-    
     hintToggleState = !hintToggleState;
     generateSequentButtons();
     return hintToggleState;
