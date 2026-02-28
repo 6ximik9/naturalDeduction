@@ -311,8 +311,8 @@ export const ruleGentzenHandlers = {
   },
   "\\neg E": {
     condition: (expr) => getValue(expr) === '⊥',
-    action: () => rules.fifthRule(),
-    requiresTree: false
+    action: async () => await rules.fifthRule(),
+    requiresTree: true
   },
   "\\wedge I": {
     condition: (expr) => expr.type === 'conjunction',
@@ -321,13 +321,13 @@ export const ruleGentzenHandlers = {
   },
   "\\wedge E1": {
     condition: (expr) => isRegularExpression(expr),
-    action: () => rules.seventhRule(deductionContext),
-    requiresTree: false
+    action: async () => await rules.seventhRule(),
+    requiresTree: true
   },
   "\\wedge E2": {
     condition: (expr) => isRegularExpression(expr),
-    action: () => rules.eighthRule(deductionContext),
-    requiresTree: false
+    action: async () => await rules.eighthRule(),
+    requiresTree: true
   },
   "\\vee I1": {
     condition: (expr) => expr.type === 'disjunction',
@@ -341,8 +341,8 @@ export const ruleGentzenHandlers = {
   },
   "\\vee E": {
     condition: (expr) => isRegularExpression(expr),
-    action: () => rules.eleventhRule(),
-    requiresTree: false
+    action: async () => await rules.eleventhRule(),
+    requiresTree: true
   },
   "\\Rightarrow I": {
     condition: (expr) => expr.type === 'implication',
@@ -351,8 +351,8 @@ export const ruleGentzenHandlers = {
   },
   "\\Rightarrow E": {
     condition: (expr) => isRegularExpression(expr),
-    action: () => rules.thirteenthRule(),
-    requiresTree: false
+    action: async () => await rules.thirteenthRule(),
+    requiresTree: true
   },
   "\\exists I": {
     condition: (expr) => (expr.type === 'quantifier' && expr.quantifier === '∃') || expr.type === 'exists',

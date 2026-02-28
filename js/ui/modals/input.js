@@ -11,7 +11,7 @@ import {t} from "../../core/i18n";
  * @param {string} label - Input label
  * @returns {Promise<string>} Promise that resolves with the entered term
  */
-export function createInputModal(title = t('modal-input-title-default'), label = t('modal-input-label-default')) {
+export function createInputModal(title = t('modal-input-title-default'), label = t('modal-input-label-default'), initialValue = '') {
   return new Promise((resolve, reject) => {
     // Create modal overlay
     const modalOverlay = document.createElement('div');
@@ -113,7 +113,7 @@ export function createInputModal(title = t('modal-input-title-default'), label =
     let modalEditor;
     try {
       modalEditor = editorMonaco.createEditor(modalEditorContainer);
-      modalEditor.setValue('');
+      modalEditor.setValue(initialValue);
       modalEditor.updateOptions({
         fontSize: 24,
         lineHeight: 1.4,
@@ -163,6 +163,9 @@ export function createInputModal(title = t('modal-input-title-default'), label =
     };
 
     modalEditor.onDidChangeModelContent(validate);
+    
+    // Run validation immediately to set initial button state
+    setTimeout(validate, 0);
 
     // Buttons
     const actionContainer = document.createElement('div');

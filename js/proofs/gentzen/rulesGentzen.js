@@ -10,17 +10,12 @@ import {checkWithAntlr, convertToLogicalExpression, getProof} from "../../core/d
 import {createAdvancedModal} from "../../ui/modals/existentialIntro";
 import {createModalForReturn} from "../../ui/modals/quantifierReturn";
 import { createModalForLeibniz } from '../../ui/modals/leibniz.js';
+import { createInputModal } from '../../ui/modals/input.js';
 
 // Утиліти
 function createConclusion(proof) {
   index.addConclusions({ level: index.level, proof });
   index.setLevel(index.level + 1);
-}
-
-function createTestConclusion(proof) {
-  index.createTestProof({ level: index.level, proof });
-  const btnSave = document.getElementById('saveBtn');
-  btnSave?.addEventListener('click', index.saveTree);
 }
 
 export function parseProofFromLastSide() {
@@ -79,9 +74,24 @@ export function fourthRule() {
 }
 
 // 5. Тестовий висновок φ
-export function fifthRule() {
+export async function fifthRule() {
+  const previousLevel = index.currentLevel;
   index.setCurrentLevel(5);
-  createTestConclusion(["φ"]);
+  
+  try {
+    const inputText = await createInputModal("Elimination of Negation (¬E)", "Enter formula φ:", "φ");
+    
+    const parsedPhi = deductive.checkWithAntlr(inputText);
+    const parsedNotPhi = deductive.checkWithAntlr(`!(${inputText})`);
+    
+    createConclusion([parsedPhi, parsedNotPhi]);
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 5", error)) {
+      index.setCurrentLevel(previousLevel);
+      return;
+    }
+    throw error;
+  }
 }
 
 // 6. Виведення з подвійного висновку
@@ -100,17 +110,59 @@ export function sixthRule() {
 }
 
 // 7. Введення кон’юнкції (ліва частина)
-export function seventhRule() {
+export async function seventhRule() {
+  const previousLevel = index.currentLevel;
   index.setCurrentLevel(7);
-  const innerText = index.lastSide.querySelector('#proofText')?.textContent;
-  createTestConclusion(['(' + innerText + ')' + '∧' + '()']);
+  
+  try {
+    const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+    const initialText = `(${innerText}) ∧ ()`;
+    
+    const inputText = await createInputModal("Elimination of Conjunction 1 (∧E1)", "Enter the full conjunction formula:", initialText);
+    
+    const parsed = deductive.checkWithAntlr(inputText);
+    if (parsed.type !== 'conjunction') {
+      alert("The formula must be a conjunction.");
+      index.setCurrentLevel(previousLevel);
+      return;
+    }
+    
+    createConclusion(parsed);
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 7", error)) {
+      index.setCurrentLevel(previousLevel);
+      return;
+    }
+    throw error;
+  }
 }
 
 // 8. Введення кон’юнкції (права частина)
-export function eighthRule() {
+export async function eighthRule() {
+  const previousLevel = index.currentLevel;
   index.setCurrentLevel(8);
-  const innerText = index.lastSide.querySelector('#proofText')?.textContent;
-  createTestConclusion(['()' + '∧' + '(' + innerText + ')']);
+  
+  try {
+    const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+    const initialText = `() ∧ (${innerText})`;
+    
+    const inputText = await createInputModal("Elimination of Conjunction 2 (∧E2)", "Enter the full conjunction formula:", initialText);
+    
+    const parsed = deductive.checkWithAntlr(inputText);
+    if (parsed.type !== 'conjunction') {
+      alert("The formula must be a conjunction.");
+      index.setCurrentLevel(previousLevel);
+      return;
+    }
+    
+    createConclusion(parsed);
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 8", error)) {
+      index.setCurrentLevel(previousLevel);
+      return;
+    }
+    throw error;
+  }
 }
 
 
@@ -144,12 +196,32 @@ export function tenthRule() {
   }
 }
 
-// 11. Введення диз’юнкції
-export function eleventhRule() {
+// 11. Введення диз’юнкції (Елімінація диз'юнкції ∨E)
+export async function eleventhRule() {
+  const previousLevel = index.currentLevel;
   index.setCurrentLevel(11);
-  const proof = parseProofFromLastSide();
-  const value = proof.value || proof.name || deductive.convertToLogicalExpression(proof);
-  createTestConclusion(["φ∨ψ", value, value]);
+  
+  try {
+    const inputText = await createInputModal("Elimination of Disjunction (∨E)", "Enter the disjunction formula φ∨ψ:", "φ∨ψ");
+    
+    const parsedInput = deductive.checkWithAntlr(inputText);
+    if (parsedInput.type !== 'disjunction') {
+      alert("The formula must be a disjunction.");
+      index.setCurrentLevel(previousLevel);
+      return;
+    }
+    
+    const baseText = index.lastSide.querySelector('#proofText')?.textContent;
+    const parsedBase = deductive.checkWithAntlr(baseText);
+    
+    createConclusion([parsedInput, parsedBase, parsedBase]);
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 11", error)) {
+      index.setCurrentLevel(previousLevel);
+      return;
+    }
+    throw error;
+  }
 }
 
 // 12. Імплікація: додавання гіпотези та висновку
@@ -186,11 +258,34 @@ export function twelfthRule() {
   createConclusion(conclusion);
 }
 
-// 13. Введення імплікації
-export function thirteenthRule() {
+// 13. Введення імплікації (Елімінація імплікації ⇒E)
+export async function thirteenthRule() {
+  const previousLevel = index.currentLevel;
   index.setCurrentLevel(13);
-  const innerText = index.lastSide.querySelector('#proofText')?.textContent;
-  createTestConclusion(["()⇒(" + innerText + ")"]);
+  
+  try {
+    const innerText = index.lastSide.querySelector('#proofText')?.textContent;
+    const initialText = "()⇒(" + innerText + ")";
+    
+    const inputText = await createInputModal("Elimination of Implication (⇒E)", "Enter the implication formula:", initialText);
+    
+    const parsedInput = deductive.checkWithAntlr(inputText);
+    if (parsedInput.type !== 'implication') {
+      alert("The formula must be an implication.");
+      index.setCurrentLevel(previousLevel);
+      return;
+    }
+    
+    const parsedLeft = parsedInput.left;
+    
+    createConclusion([parsedLeft, parsedInput]);
+  } catch (error) {
+    if (deductive.handleModalCancellation("Rule 13", error)) {
+      index.setCurrentLevel(previousLevel);
+      return;
+    }
+    throw error;
+  }
 }
 
 // 14. Існування: підстановка (∃-елімінація)
