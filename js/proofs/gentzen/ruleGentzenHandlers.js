@@ -283,10 +283,9 @@ function getValue(expr) {
   return expr.value || expr.name;
 }
 
-// Helper function to check if expression is not negation, top, or bottom
+// Helper function to check if expression is regular (now allows everything)
 function isRegularExpression(expr) {
-  const value = getValue(expr);
-  return expr.type !== 'negation' && value !== '⊤' && value !== '⊥';
+  return true;
 }
 
 export const ruleGentzenHandlers = {
@@ -366,26 +365,23 @@ export const ruleGentzenHandlers = {
     requiresTree: true
   },
   "\\forall E": {
-    condition: (expr) => expr.type === 'relation' || expr.type === 'predicate' || expr.type === 'equality' || expr.type === 'forall' || expr.type === 'exists' || expr.type==="successor",
+    condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.sixteenthRule(),
     requiresTree: true
   },
   "\\exists E": {
-    condition: (expr) => {
-      const value = getValue(expr);
-      return value !== '⊤' && value !== '⊥';
-    },
+    condition: (expr) => true,
     action: async () => await rules.seventeenthRule(),
     requiresTree: true,
     returnsResult: true
   },
   "\\text{=E}_1": {
-    condition: (expr) => expr.type === 'relation' || expr.type === 'predicate' || expr.type === 'equality' || expr.type==="successor",
+    condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.eighteenthRule(),
     requiresTree: true,
   },
   "\\text{=E}_2": {
-    condition: (expr) => expr.type === 'relation' || expr.type === 'predicate' || expr.type === 'equality' || expr.type==="successor",
+    condition: (expr) => isRegularExpression(expr),
     action: async () => rules.nineteenthRule(),
     requiresTree: true,
   },

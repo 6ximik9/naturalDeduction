@@ -383,73 +383,142 @@ export function processExpression(expression, countRules) {
     case "atom":
       const value = expr.value || expr.name;
       if (value === '⊤') {
-        generateButtons(1, [GENTZEN_BUTTONS[2]]);
+        generateButtons(8, [
+          GENTZEN_BUTTONS[2], GENTZEN_BUTTONS[6],
+          GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
+          GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
+          GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[0]
+        ]);
       } else if (value === '⊥') {
-        generateButtons(1, [GENTZEN_BUTTONS[4]]);
+        generateButtons(8, [
+          GENTZEN_BUTTONS[4], GENTZEN_BUTTONS[6],
+          GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
+          GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
+          GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[0]
+        ]);
       } else {
-        generateButtons(6, [
+        generateButtons(8, [
           GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
           GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-          GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12]
+          GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+          GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]
         ]);
       }
       break;
 
     case "implication":
-      generateButtons(8, [
+      generateButtons(11, [
         GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[11],
-        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[16]
+        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+        GENTZEN_BUTTONS[18]
       ]);
       break;
 
     case "conjunction":
-      generateButtons(8, [
+      generateButtons(11, [
         GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[5], GENTZEN_BUTTONS[6],
         GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
-        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[16]
+        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+        GENTZEN_BUTTONS[18]
       ]);
       break;
 
     case "disjunction":
-      generateButtons(9, [
+      generateButtons(12, [
         GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[8], GENTZEN_BUTTONS[9],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[16]
+        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16],
+        GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
       ]);
       break;
 
     case "negation":
-      generateButtons(2, [GENTZEN_BUTTONS[3], GENTZEN_BUTTONS[16]]);
+      generateButtons(11, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[3], GENTZEN_BUTTONS[6],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
+        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+        GENTZEN_BUTTONS[18]
+      ]);
       break;
 
     case "quantifier":
       if (expr.quantifier === '∃') {
-        generateButtons(2, [GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[16]]);
+        generateButtons(11, [
+          GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+          GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+          GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+          GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15],
+          GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+          GENTZEN_BUTTONS[18]
+        ]);
       } else if (expr.quantifier === '∀') {
-        generateButtons(2, [GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[16]]);
+        generateButtons(12, [
+          GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+          GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+          GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+          GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15],
+          GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+          GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[20]
+        ]);
       }
       break;
 
     case "forall":
-      generateButtons(3, [GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]]);
+      generateButtons(12, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+        GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15], 
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], 
+        GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[20]
+      ]);
       break;
 
     case "exists":
-      generateButtons(3, [GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]]);
+      generateButtons(11, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+        GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15], 
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+        GENTZEN_BUTTONS[18]
+      ]);
       break;
 
     case "predicate":
+      generateButtons(10, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
+      ]);
+      break;
+
     case "relation":
-      generateButtons(4, [GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]]);
+      generateButtons(8, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]
+      ]);
       break;
 
     case "equality":
-      const eqButtons = [GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]];
+      const eqButtons = [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
+      ];
       if (!expr.operator || expr.operator === '=' || expr.operator === 'EQUAL') {
         eqButtons.push(GENTZEN_BUTTONS[19]);
       }
@@ -461,7 +530,12 @@ export function processExpression(expression, countRules) {
     case "successor":
     case "function":
       // Arithmetic and function expressions
-      generateButtons(4, [GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]]);
+      generateButtons(10, [
+        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
+        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
+      ]);
       break;
 
     case "sequent":
@@ -1948,9 +2022,9 @@ function computeHypothesesForGammaContext(elementContext, level) {
       });
     }
     else{
-      const gammaSpan = elementContext.querySelector(':scope > .gamma-context');
-      const rawHypotheses = gammaSpan.dataset?.hypotheses;
-      return JSON.parse(rawHypotheses);
+      const gammaSpan = elementContext.querySelector(':scope > .gamma-context') || elementContext.querySelector('.gamma-context');
+      const rawHypotheses = gammaSpan?.dataset?.hypotheses;
+      return rawHypotheses ? JSON.parse(rawHypotheses) : [];
     }
   } catch (error) {
     console.error('Error computing hypotheses for gamma context:', error);
