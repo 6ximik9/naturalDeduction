@@ -227,25 +227,24 @@ function handleClick() {
           // Tree View Tab
           const buttonContainer = document.getElementById('button-container');
           buttonContainer.innerHTML = '';
+          buttonContainer.style.height = "100%";
+          buttonContainer.parentElement.style.height = "100%";
           
           let svgContainer = document.createElement("div");
           svgContainer.style.width = "100%";
-          svgContainer.style.maxWidth = "1000px";
-          svgContainer.style.overflow = "auto";
-          svgContainer.style.height = "auto";
-          svgContainer.style.margin = "0 auto";
+          svgContainer.style.height = "100%";
+          svgContainer.style.overflow = "hidden";
+          svgContainer.style.position = "relative";
           svgContainer.style.display = "block";
 
           let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          svgElement.setAttribute("width", "1000");
-          svgElement.setAttribute("height", "1000");
+          svgElement.style.width = "100%";
+          svgElement.style.height = "100%";
 
           svgContainer.appendChild(svgElement);
           buttonContainer.appendChild(svgContainer);
 
-          let size = createTreeD3(parsed);
-          svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
-          svgElement.setAttribute("height", (size[1] + 100).toString());
+          createTreeD3(parsed);
       } else {
           // Default to Rules (Tab 1 or others)
           processExpression(parsed, helpButtonToggleState.allRules ? 0 : 1);
@@ -1038,27 +1037,26 @@ export function disableAllButtons() {
             buttonContainer.style.gridTemplateColumns = '';
             buttonContainer.style.gap = '';
             buttonContainer.style.padding = '';
+            buttonContainer.style.height = "100%";
+            buttonContainer.parentElement.style.height = "100%";
             
             let svgContainer = document.createElement("div");
             svgContainer.style.width = "100%";
-            svgContainer.style.maxWidth = "1000px";
-            svgContainer.style.overflow = "auto";
-            svgContainer.style.height = "auto";
-            svgContainer.style.margin = "0 auto";
+            svgContainer.style.height = "100%";
+            svgContainer.style.overflow = "hidden";
+            svgContainer.style.position = "relative";
             svgContainer.style.display = "block";
 
             let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svgElement.setAttribute("width", "1000");
-            svgElement.setAttribute("height", "1000");
+            svgElement.style.width = "100%";
+            svgElement.style.height = "100%";
 
             svgContainer.appendChild(svgElement);
             buttonContainer.appendChild(svgContainer);
             
              try {
                 const parsed = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
-                let size = createTreeD3(parsed);
-                svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
-                svgElement.setAttribute("height", (size[1] + 100).toString());
+                createTreeD3(parsed);
              } catch (e) {
                  console.warn("Error rendering tree in disabled state", e);
              }
@@ -1572,27 +1570,25 @@ function addClickGentzenRules() {
         buttonContainer.style.padding = '';
         buttonContainer.style.justifyItems = 'center';
         buttonContainer.style.position = 'relative';
+        buttonContainer.style.height = "100%";
+        buttonContainer.parentElement.style.height = "100%";
 
         let svgContainer = document.createElement("div");
-        svgContainer.style.width = "100%"; // Або використовуйте фіксовану ширину, наприклад "1000px"
-        svgContainer.style.maxWidth = "1000px";
-        svgContainer.style.overflow = "auto"; // Дозволяє прокрутку, якщо вміст більше контейнера
-        svgContainer.style.height = "auto"; // Висота адаптується до вмісту
-        svgContainer.style.margin = "0 auto"; // Центруємо контейнер по горизонталі
-        svgContainer.style.display = "block"; // Забезпечуємо block display для margin auto
+        svgContainer.style.width = "100%";
+        svgContainer.style.height = "100%";
+        svgContainer.style.overflow = "hidden";
+        svgContainer.style.position = "relative";
+        svgContainer.style.display = "block";
 
         let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgElement.setAttribute("width", "1000");
-        svgElement.setAttribute("height", "1000"); // Початкова висота, може бути змінена динамічно
+        svgElement.style.width = "100%";
+        svgElement.style.height = "100%";
 
         svgContainer.appendChild(svgElement);
 
         buttonContainer.appendChild(svgContainer);
 
-        let size = createTreeD3(checkWithAntlr(side.querySelector('#proofText').textContent));
-
-        svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
-        svgElement.setAttribute("height", (size[1] + 100).toString());
+        createTreeD3(checkWithAntlr(side.querySelector('#proofText').textContent));
       }
     });
   });

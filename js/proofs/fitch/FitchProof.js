@@ -737,18 +737,19 @@ function addClickFitchRules() {
         buttonContainer.style.display = ''; // Reset display style
         buttonContainer.style.gridTemplateColumns = ''; // Reset grid columns
         buttonContainer.style.padding = ''; // Reset padding
+        buttonContainer.style.height = "100%";
+        buttonContainer.parentElement.style.height = "100%";
 
         let svgContainer = document.createElement("div");
-        svgContainer.style.width = "100%"; // Або використовуйте фіксовану ширину, наприклад "1000px"
-        svgContainer.style.maxWidth = "1000px";
-        svgContainer.style.overflow = "auto"; // Дозволяє прокрутку, якщо вміст більше контейнера
-        svgContainer.style.height = "auto"; // Висота адаптується до вмісту
-        svgContainer.style.margin = "0 auto"; // Центруємо контейнер по горизонталі
-        svgContainer.style.display = "block"; // Забезпечуємо block display для margin auto
+        svgContainer.style.width = "100%";
+        svgContainer.style.height = "100%";
+        svgContainer.style.overflow = "hidden";
+        svgContainer.style.position = "relative";
+        svgContainer.style.display = "block";
 
         let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgElement.setAttribute("width", "1000");
-        svgElement.setAttribute("height", "1000"); // Початкова висота, може бути змінена динамічно
+        svgElement.style.width = "100%";
+        svgElement.style.height = "100%";
 
         svgContainer.appendChild(svgElement);
 
@@ -757,12 +758,9 @@ function addClickFitchRules() {
         const spanElement = clickedProofs[0].element.querySelector('span.indexC');
         if (spanElement) spanElement.remove();
 
-        let size = createTreeD3(getProof(checkWithAntlr(clickedProofs[0].element.textContent)));
+        createTreeD3(getProof(checkWithAntlr(clickedProofs[0].element.textContent)));
 
         if (spanElement) clickedProofs[0].element.appendChild(spanElement);
-
-        svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
-        svgElement.setAttribute("height", (size[1] + 100).toString());
       } else if (tabId === 'tab3') {
         // helpButtonToggleState = false;
         // Format axioms for generateButtons

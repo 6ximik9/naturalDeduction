@@ -885,6 +885,8 @@ function setupTabListeners() {
 function renderTreeView() {
     const buttonContainer = document.getElementById('button-container');
     buttonContainer.innerHTML = '';
+    buttonContainer.style.height = "100%";
+    buttonContainer.parentElement.style.height = "100%";
     
     if (!side) {
         buttonContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Select a formula or sequent in the proof tree to view its structure.</div>';
@@ -912,24 +914,21 @@ function renderTreeView() {
     // Container for SVG
     let svgContainer = document.createElement("div");
     svgContainer.style.width = "100%";
-    svgContainer.style.maxWidth = "1000px";
-    svgContainer.style.overflow = "auto";
-    svgContainer.style.height = "auto";
-    svgContainer.style.margin = "0 auto";
+    svgContainer.style.height = "100%";
+    svgContainer.style.overflow = "hidden";
+    svgContainer.style.position = "relative";
     svgContainer.style.display = "block";
 
     let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgElement.setAttribute("id", "sequentTreeSvg"); // Add specific ID for D3 selection
-    svgElement.setAttribute("width", "1000");
-    svgElement.setAttribute("height", "1000");
+    svgElement.style.width = "100%";
+    svgElement.style.height = "100%";
 
     svgContainer.appendChild(svgElement);
     buttonContainer.appendChild(svgContainer);
     
     try {
-        let size = createTreeD3(formula);
-        svgElement.setAttribute("width", (Math.max(1000, size[0] + 50)).toString());
-        svgElement.setAttribute("height", (size[1] + 100).toString());
+        createTreeD3(formula);
     } catch (e) {
         console.error("Tree render error:", e);
         buttonContainer.innerHTML = '<div style="padding: 20px; color: red;">Error rendering tree. Select a formula to view.</div>';

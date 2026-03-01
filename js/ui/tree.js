@@ -39,17 +39,36 @@ export function createTreeD3(treeJ) {
   // Clear previous content to avoid overlapping trees
   svg.selectAll("*").remove();
 
-  var width = +svg.attr("width"),
-    height = +svg.attr("height"),
-    g = svg.append("g").attr("transform", "translate(0,40)");
+  // Налаштування зуму та переміщення
+  var zoom = d3.zoom()
+    .on("zoom", function(event) {
+      g.attr("transform", event.transform);
+    });
+
+  svg.call(zoom);
+
+  var width = svg.node().getBoundingClientRect().width || 1000,
+    height = svg.node().getBoundingClientRect().height || 500;
+
+  var g = svg.append("g");
 
   var root = d3.hierarchy(transformToD3S(treeJ));
   var depth = getMaxDepth(root);
-  var width = getMaxWidth(root);
+  var treeWidth = getMaxWidth(root);
 
-  var tree = d3.tree().size([height, depth * 100]); // Використовуємо глибину для визначення ширини дерева
+  // Визначаємо розміри дерева
+  // Замість size використовуємо nodeSize, щоб вузли не сплющувались
+  var tree = d3.tree().nodeSize([60, 100]); // [горизонтальна відстань, вертикальна відстань]
 
   tree(root);
+
+  // Встановлюємо початкове зміщення для центрування
+  // nodeSize центрує корінь у x = 0, тому зміщуємо його на середину екрану
+  var initialX = width / 2;
+  var initialY = 40; // Відступ зверху
+  
+  var initialTransform = d3.zoomIdentity.translate(initialX, initialY);
+  svg.call(zoom.transform, initialTransform);
 
 
 // Лінії
