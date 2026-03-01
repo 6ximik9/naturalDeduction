@@ -77,6 +77,13 @@ function getContextIndex(hypotheses) {
   if (gammaContextHistory.has(hash)) {
     return gammaContextHistory.get(hash);
   } else {
+    // If the hash is 'empty', assign it to the history but don't increment the visible index counter
+    if (hash === 'empty') {
+      gammaContextHistory.set(hash, 0); // Give it 0 internally, but it won't be displayed anyway
+      return 0;
+    }
+    
+    // For non-empty hypotheses, get the current index and then increment
     const newIndex = gammaCurrentIndex++;
     gammaContextHistory.set(hash, newIndex);
     return newIndex;
@@ -1838,14 +1845,17 @@ function createGammaContextSpan(elementContext, level) {
     const hypothesesJson = JSON.stringify(hypotheses);
 
     // Формируем отображение Gamma с индексом
-    const gammaDisplay = contextIndex === 0 ? 'Γ' : `Γ<sub>${contextIndex}</sub>`;
+    let gammaDisplay = '';
+    if (hypotheses.length > 0) {
+        gammaDisplay = contextIndex === 0 ? 'Γ' : `Γ<sub>${contextIndex}</sub>`;
+    }
 
     // Створюємо span з data-hypotheses атрибутом та индексом
     return `<span class="gamma-context" data-hypotheses='${hypothesesJson}' data-level="${level}" data-context-index="${contextIndex}">${gammaDisplay}⊢</span>`;
   } catch (error) {
     console.error('Error creating gamma context span:', error);
     // Fallback до звичайного span без data атрибутів
-    return `<span class="gamma-context">Γ⊢</span>`;
+    return `<span class="gamma-context">⊢</span>`;
   }
 }
 
@@ -1898,14 +1908,14 @@ function extractHypothesesFromId(elementId) {
  */
 function formatHypothesesForGamma(hypotheses) {
   if (!hypotheses || hypotheses.length === 0) {
-    return '{}'; // Показуємо порожній набір замість Γ
+    return ''; // Показуємо порожній рядок замість {}
   }
 
   // Гіпотези вже є рядками, просто видаляємо дублікати
   const uniqueHyps = [...new Set(hypotheses)];
 
   if (uniqueHyps.length === 0) {
-    return '{}'; // Показуємо порожній набір замість Γ
+    return ''; // Показуємо порожній рядок замість {}
   }
 
   // Форматуємо як {ψ, φ}
@@ -2031,7 +2041,18 @@ function toggleGammaContext(gammaElement) {
     if (isExpanded) {
       // Згортаємо: повертаємо до Γ⊢ з індексом
       const contextIndex = parseInt(gammaElement.getAttribute('data-context-index') || '0');
-      const gammaDisplay = contextIndex === 0 ? 'Γ' : `Γ<sub>${contextIndex}</sub>`;
+      let gammaDisplay = contextIndex === 0 ? 'Γ' : `Γ<sub>${contextIndex}</sub>`;
+      
+      const hypothesesData = gammaElement.getAttribute('data-hypotheses');
+      if (hypothesesData) {
+          try {
+              const hypArr = JSON.parse(hypothesesData);
+              if (hypArr.length === 0) {
+                  gammaDisplay = '';
+              }
+          } catch (e) {}
+      }
+      
       gammaElement.innerHTML = `${gammaDisplay}⊢`;
       gammaToggleState.set(gammaId, false);
       console.log(`Gamma context collapsed for ${gammaId}`);
@@ -2066,8 +2087,8 @@ function toggleGammaContext(gammaElement) {
         console.log(`Gamma context expanded for ${gammaId}:`, formattedContext);
       } catch (error) {
         console.error('Error expanding gamma context:', error);
-        // У випадку помилки залишаємо Γ⊢
-        gammaElement.textContent = 'Γ⊢';
+        // У випадку помилки залишаємо ⊢
+        gammaElement.textContent = '⊢';
         gammaToggleState.set(gammaId, false);
       }
     }

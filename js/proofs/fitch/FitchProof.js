@@ -708,6 +708,14 @@ document.getElementById('proof').addEventListener('click', function (event) {
       if (spanElement) {
         spanElement.remove();
       }
+      
+      // Update indices for remaining selected elements
+      clickedProofs.forEach((obj, idx) => {
+        let remainingSpan = obj.element.querySelector('.indexC');
+        if (remainingSpan) {
+          remainingSpan.textContent = idx + 1;
+        }
+      });
     }
     
     if (window.updateFitchParenthesesButtons) {
