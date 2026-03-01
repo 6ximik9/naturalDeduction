@@ -572,6 +572,12 @@ function generateButtons(buttonCount, buttonTexts) {
   const buttonContainer = document.getElementById('button-container');
   buttonContainer.innerHTML = '';
 
+  // Reset heights that might be left over from Tree tab
+  buttonContainer.style.height = '';
+  if (buttonContainer.parentElement) {
+    buttonContainer.parentElement.style.height = '';
+  }
+
   // Set position relative for all tabs (needed for help button)
   buttonContainer.style.position = 'relative';
 
@@ -772,6 +778,12 @@ function showFilteredAxioms() {
       // Clear container but preserve styling
       buttonContainer.innerHTML = '';
 
+      // Reset heights that might be left over from Tree tab
+      buttonContainer.style.height = '';
+      if (buttonContainer.parentElement) {
+        buttonContainer.parentElement.style.height = '';
+      }
+
       // Set axioms styling - adjust columns based on number of axioms
       buttonContainer.style.display = 'grid';
       buttonContainer.style.gridTemplateColumns = matchingAxioms.length === 1 ? '1fr' : '1fr 1fr';
@@ -801,6 +813,12 @@ function showFilteredAxioms() {
 
       // Clear container but preserve styling
       buttonContainer.innerHTML = '';
+
+      // Reset heights that might be left over from Tree tab
+      buttonContainer.style.height = '';
+      if (buttonContainer.parentElement) {
+        buttonContainer.parentElement.style.height = '';
+      }
 
       // Set axioms styling
       buttonContainer.style.display = 'grid';
@@ -1041,6 +1059,12 @@ export function disableAllButtons() {
     if (isTreeTab) {
         const buttonContainer = document.getElementById('button-container');
         buttonContainer.innerHTML = '';
+        
+        // Reset heights that might be left over from Tree tab
+        buttonContainer.style.height = '';
+        if (buttonContainer.parentElement) {
+            buttonContainer.parentElement.style.height = '';
+        }
         
         if (side) {
             // Reset styles for tree view

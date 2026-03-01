@@ -609,12 +609,17 @@ function handleFormulaClick(element, sequentNode) {
 
 function disableAllButtons() {
     const isTreeTab = document.getElementById('tab4') && document.getElementById('tab4').checked;
-    const buttonContainer = document.getElementById('button-container');
+        const buttonContainer = document.getElementById('button-container');
     
-    buttonContainer.innerHTML = '';
+        buttonContainer.innerHTML = '';
+        
+        // Reset heights that might be left over from Tree tab
+        buttonContainer.style.height = '';
+        if (buttonContainer.parentElement) {
+            buttonContainer.parentElement.style.height = '';
+        }
     
-    if (isTreeTab) {
-        if (side) {
+        if (isTreeTab) {        if (side) {
              renderTreeView();
         } else {
              // Show message when no side selected
@@ -687,6 +692,13 @@ function generateSequentButtons() {
 
     const buttonContainer = document.getElementById('button-container');
     buttonContainer.innerHTML = '';
+
+    // Reset heights that might be left over from Tree tab
+    buttonContainer.style.height = '';
+    if (buttonContainer.parentElement) {
+        buttonContainer.parentElement.style.height = '';
+    }
+
     // Set position relative for absolute positioning of hint button
     buttonContainer.style.position = 'relative';
 

@@ -194,6 +194,13 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
   // const buttonContainer = document.getElementById('button-container');
   const buttonContainer = document.getElementById('button-container');
   buttonContainer.innerHTML = '';
+
+  // Reset heights that might be left over from Tree tab
+  buttonContainer.style.height = '';
+  if (buttonContainer.parentElement) {
+    buttonContainer.parentElement.style.height = '';
+  }
+
   buttonContainer.style.position = 'relative';
   buttonContainer.style.minHeight = '150px';
 

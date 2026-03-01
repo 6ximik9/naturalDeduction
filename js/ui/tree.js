@@ -58,14 +58,26 @@ export function createTreeD3(treeJ) {
 
   // Визначаємо розміри дерева
   // Замість size використовуємо nodeSize, щоб вузли не сплющувались
-  var tree = d3.tree().nodeSize([60, 100]); // [горизонтальна відстань, вертикальна відстань]
+  var nodeHeight = 100;
+  var tree = d3.tree().nodeSize([60, nodeHeight]); // [горизонтальна відстань, вертикальна відстань]
 
   tree(root);
+
+  // Обчислюємо реальну висоту дерева (максимальний y - мінімальний y)
+  var maxY = 0;
+  var minY = 0;
+  root.each(function(d) {
+    if (d.y > maxY) maxY = d.y;
+    if (d.y < minY) minY = d.y;
+  });
+  
+  var treePixelHeight = maxY - minY;
 
   // Встановлюємо початкове зміщення для центрування
   // nodeSize центрує корінь у x = 0, тому зміщуємо його на середину екрану
   var initialX = width / 2;
-  var initialY = 40; // Відступ зверху
+  // Центруємо по вертикалі: віднімаємо висоту дерева від загальної висоти і ділимо навпіл
+  var initialY = Math.max(40, (height - treePixelHeight) / 2 - minY); 
   
   var initialTransform = d3.zoomIdentity.translate(initialX, initialY);
   svg.call(zoom.transform, initialTransform);
