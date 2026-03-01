@@ -164,6 +164,10 @@ document.getElementById('proof').addEventListener('click', function (event) {
       side = null;
       disableAllButtons();
       if (window.updateGentzenParenthesesButtons) window.updateGentzenParenthesesButtons();
+      
+      const sbRules = document.getElementById('sb-rules');
+      if (sbRules) sbRules.click();
+      
       return;
   }
 

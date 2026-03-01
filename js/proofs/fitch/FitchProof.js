@@ -273,6 +273,9 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
        button.style.width = '100%';
        button.style.maxWidth = 'none';
        button.style.minHeight = '60px';
+    } else {
+       // Prevent buttons from spanning 100% width when there are few rules shown
+       button.style.flex = '0 1 auto'; 
     }
 
     buttonContainer.appendChild(button);
@@ -673,6 +676,9 @@ document.getElementById('proof').addEventListener('click', function (event) {
     } else {
       clickedBranch.splice(foundIndex, 1);
       clickedElement.style.background = '';
+      
+      const sbRules = document.getElementById('sb-rules');
+      if (sbRules) sbRules.click();
     }
 
     return;
@@ -708,8 +714,11 @@ document.getElementById('proof').addEventListener('click', function (event) {
         window.updateFitchParenthesesButtons();
     }
 
+    const sbRules = document.getElementById('sb-rules');
+    if (sbRules) sbRules.click();
+
     const radioInput = document.getElementById('tab1');
-    radioInput.checked = true;
+    if (radioInput) radioInput.checked = true;
     processExpression("AllRules", helpButtonToggleState ? 0 : 1);
   }
 });

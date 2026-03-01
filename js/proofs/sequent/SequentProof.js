@@ -492,6 +492,10 @@ function selectSequent(domElement, sequentNode) {
         side = null;
         selectedFormulaIndex = { side: null, index: -1 };
         disableAllButtons();
+        
+        const sbRules = document.getElementById('sb-rules');
+        if (sbRules) sbRules.click();
+        
         return;
     }
 
