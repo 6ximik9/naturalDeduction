@@ -111,16 +111,6 @@ export function processExpression(expression, countRules) {
 
   const buttons = FITCH_BUTTONS;
 
-  if (clickedProofs.length === 0 && clickedBranch.length === 0) {
-    generateButtons(buttons.length, buttons, true);
-    return;
-  }
-
-  if (countRules === 1) {
-    generateButtons(19, buttons);
-    return;
-  }
-
   // Recommended Rules Logic
   let recommendedIndices = [];
 
@@ -140,7 +130,7 @@ export function processExpression(expression, countRules) {
     }
   }).filter(p => p !== null);
 
-  if (clickedProofs.length === 0 && clickedBranch.length === 0) {
+  if (clickedProofs.length === 1 && clickedBranch.length === 0) {
     const f = proofs[0];
     if (f) {
       // Context-specific
@@ -189,6 +179,12 @@ export function processExpression(expression, countRules) {
     recommendedIndices.push(17); // = I
   }
 
+  if (countRules === 1) {
+    // Show all rules
+    generateButtons(buttons.length, buttons, clickedProofs.length === 0 && clickedBranch.length === 0 ? recommendedIndices : false);
+    return;
+  }
+
   const recommendedButtons = [...new Set(recommendedIndices)].sort((a,b)=>a-b).map(i => buttons[i]);
   generateButtons(recommendedButtons.length, recommendedButtons);
 }
@@ -209,7 +205,7 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
   if (branchIndex !== 0 && !isAxiomsTab) {
     let btn = createButton("Close assumption", () => closeAsp());
     btn.style.minHeight = '80px';
-    if (disabled) {
+    if (disabled === true) {
         btn.disabled = true;
         btn.style.opacity = '0.5';
         btn.style.cursor = 'not-allowed';
@@ -254,7 +250,19 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
     }
     let button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i], button));
 
-    if (disabled) {
+    // If disabled is an array of allowed indices (when nothing is selected but we want to show everything)
+    let isButtonDisabled = false;
+    if (disabled === true) {
+      isButtonDisabled = true;
+    } else if (Array.isArray(disabled)) {
+      // Find the index of this button in the FITCH_BUTTONS array
+      const originalIndex = FITCH_BUTTONS.indexOf(buttonTexts[i]);
+      if (!disabled.includes(originalIndex)) {
+        isButtonDisabled = true;
+      }
+    }
+
+    if (isButtonDisabled) {
       button.disabled = true;
       button.style.opacity = '0.5';
       button.style.cursor = 'not-allowed';
@@ -316,10 +324,16 @@ function createButton(text, clickHandler) {
 async function buttonClicked(buttonText, button) {
 
   if (buttonText === 'Assumption') {
-    document.getElementById('proof-menu').className = 'proof-menu hidden';
-    addBranch(['test'], 'Assumption');
-    branchIndex++;
-    clearItems();
+    try {
+      const inputText = await import('../../ui/modals/input').then(m => m.createInputModal("Assumption", "Enter the assumption formula:"));
+      document.getElementById('proof-menu').className = 'proof-menu hidden';
+      addBranch([inputText], 'Assumption');
+      branchIndex++;
+      clearItems();
+      saveStateFitch();
+    } catch (error) {
+      console.log("Modal cancelled:", error);
+    }
     return;
   }
 
@@ -550,10 +564,6 @@ function createDivs() {
   proofDiv.appendChild(outFitch);
 }
 
-
-let enterText = document.getElementById('editorPanel');
-
-
 function addBranch(formulas, title) {
   if (title !== "Assumption") {
     // Знаходимо div з id 'out_nodes', 'out_nums' та 'out_just'
@@ -592,90 +602,28 @@ function addBranch(formulas, title) {
     fitchBranch.className = 'fitch_branch';
 
     const div = document.createElement('div');
-    div.className = 'userFormula';
-
-    editorMonaco.clearEditorErrors();
-    editorMonaco.editor.setValue('');
-    checkRule(1, editorMonaco.editor.getValue());
-    editorMonaco.editor.updateOptions({fontSize: 28})
-
-    // Check if enterText element exists before accessing its style
-    if (enterText) {
-      enterText.style.width = '300px';
-      enterText.style.height = '50px';
-    }
-
-    // Створюємо кнопку
-    let button = document.createElement('button');
-    button.classList.add('buttonWithIcon');
-    button.style.background = 'rgb(255, 255, 255)';
-    button.style.color = 'rgb(33, 33, 33)';
-    button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
-    button.style.fontSize = '28px';
-    button.style.marginLeft = '20px';
-    button.style.marginTop = '15px';
-    button.style.height = '50px';
-    button.id = 'saveBtn';
-
-    button.innerHTML = `<span class="buttonText">Save</span>`;
-
-    button.addEventListener('click', saveAsp);
-
-
-    // Only append enterText if it exists
-    if (enterText) {
-      div.appendChild(enterText);
-    }
-    div.appendChild(button);
+    div.className = 'fitch_formula';
+    div.style.display = 'flex';
+    
+    let formula = formulas[0];
+    div.textContent = deductive.convertToLogicalExpression(getProof(checkWithAntlr(formula)));
 
     fitchBranch.appendChild(div);
-    let formula = formulas[0];
     fitchProof.push({formula, title, branchIndex});
+    
     // Створюємо div для назви
-
     const titleDiv = document.createElement('div');
     titleDiv.textContent = title; // Використання однієї і тієї ж назви для кожної формули
     outJust.appendChild(titleDiv);
     div.style.borderBottom = '1px solid black';
 
-
     const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
     const lastFitchBranch = fitchBranches[fitchBranches.length - 1];
 
     lastFitchBranch.appendChild(fitchBranch);
-
   }
 
   addNumberedDivs();
-}
-
-editorMonaco.editor.onKeyDown(function (e) {
-  // console.log(document.getElementsByClassName('userFormula'));
-  if (e.keyCode === monaco.KeyCode.Enter && document.getElementsByClassName('userFormula').length>0) {
-    e.preventDefault();
-  }
-});
-
-function saveAsp() {
-  if (checkRule(0, editorMonaco.editor.getValue()) === 1) {
-    shakeElement('saveBtn', 5);
-    return;
-  }
-
-  let inp = editorMonaco.editor.getValue();
-  const fitchBranchElements = document.querySelectorAll('.fitch_branch');
-  let par = fitchBranchElements[fitchBranchElements.length - 1];
-  par.innerHTML = '';
-
-  const div = document.createElement('div');
-  div.className = 'fitch_formula';
-  div.style.display = 'flex';
-  div.textContent = convertToLogicalExpression(getProof(checkWithAntlr(inp)));
-  div.style.borderBottom = '1px solid black';
-  par.appendChild(div);
-  // helpButtonToggleState = false;
-  processExpression("AllRules", helpButtonToggleState ? 0 : 1);
-  saveStateFitch();
 }
 
 export function addNumberedDivs() {

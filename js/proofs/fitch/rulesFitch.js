@@ -45,7 +45,7 @@ export function firstRule(proofs, branches) {
   return 0;
 }
 
-export function secondRule(proofs, branches) {
+export async function secondRule(proofs, branches) {
 
   if (proofs.length !== 1 || branches.length > 0) {
     return -1;
@@ -54,91 +54,41 @@ export function secondRule(proofs, branches) {
   proofs[0].element.querySelector('span.indexC').remove();
 
   let rule = proofs[0].element.textContent.replaceAll(" ", "");
+  let parsedRule = checkWithAntlr(rule);
 
-  if (checkWithAntlr(rule).type !== "conjunction") {
+  if (parsedRule.type !== "conjunction") {
     alert(t("alert-missing-conjunction"));
     clearItems();
     return -1;
   }
 
+  try {
+    const inputText = await createInputModal("Conjunction Elimination (∧E)", "Enter the formula:");
+    const parsedInput = checkWithAntlr(inputText);
+    
+    // Check if the input is valid syntactically
+    if (checkRule(0, inputText) === 1) {
+       return -1;
+    }
 
-  let parts = rule.split("∧");
+    const leftSide = getProof(parsedRule.left);
+    const rightSide = getProof(parsedRule.right);
+    const inputProof = getProof(parsedInput);
 
-  const div = document.createElement('div');
-  div.className = 'userChoice';
-
-  let button = createButton(parts[0], 'saveBtn1');
-  let button1 = createButton(parts[1], 'saveBtn2');
-
-  div.appendChild(button);
-  div.appendChild(button1);
-
-  // fitchBranch.appendChild(div);
-
-  const outJust = document.getElementById('out_just');
-  const titleDiv = document.createElement('div');
-  titleDiv.textContent = "∧E, " + (proofs[0].index + 1); // Використання однієї і тієї ж назви для кожної формули
-  outJust.appendChild(titleDiv);
-  // div.style.borderBottom = '1px solid black';x
-
-  const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
-  const lastFitchBranch = fitchBranches[fitchBranches.length - 1];
-
-  lastFitchBranch.appendChild(div)
-
-  // lastFitchBranch.appendChild(fitchBranch);
-
-  fitchMain.addNumberedDivs();
-
-  return 0;
-}
-
-function createButton(text, id) {
-  let button = document.createElement('button');
-  button.classList.add('buttonWithIcon');
-  button.style.cssText = `
-        box-shadow: rgba(0, 0, 0, 0.25) 0px 2px 5px 0px;
-        font-size: 28px;
-        height: 50px;
-        padding: 0 20px;
-        cursor: pointer;
-        border-radius: 5px;
-        border: none;
-    `;
-  button.id = id;
-  button.innerHTML = `<span class="buttonText">${text}</span>`;
-
-  // Adding a click event listener that alerts the text of the button
-  button.addEventListener('click', function () {
-    let ruleUser = this.querySelector('.buttonText').textContent;
-
-    const par = document.querySelector('.userChoice');
-
-    par.innerHTML = '';
-
-    // const div = document.createElement('div');
-    par.className = 'fitch_formula';
-    par.style.display = 'flex';
-    par.textContent = ruleUser;
-    // par.appendChild(div);
-
-    fitchMain.processExpression("AllRules", 1);
-    saveStateFitch();
-  });
-
-  return button;
-}
-
-let enterText = document.getElementById('editorPanel');
-editorMonaco.editor.onKeyDown(function (e) {
-  // Перевіряємо, чи натиснута клавіша Enter
-  if (e.keyCode === monaco.KeyCode.Enter && document.getElementById('preview')) {
-    // Скасовуємо стандартну дію (перехід на новий рядок)
-    e.preventDefault();
+    if (JSON.stringify(leftSide) === JSON.stringify(inputProof) || JSON.stringify(rightSide) === JSON.stringify(inputProof)) {
+      fitchMain.addRowToBranch(inputText, "∧E, " + (proofs[0].index + 1));
+      return 0;
+    } else {
+      alert(t("alert-correct-input"));
+      return -1;
+    }
+  } catch (error) {
+    console.log("Modal cancelled:", error);
+    return -1;
   }
-});
+}
 
-export function thirdRule(proofs, branches) {
+export async function thirdRule(proofs, branches) {
   if (proofs.length !== 1 || branches.length > 0) {
     clearItems();
     return -1;
@@ -147,94 +97,31 @@ export function thirdRule(proofs, branches) {
   proofs[0].element.querySelector('span.indexC').remove();
   let rule = proofs[0].element.textContent.replaceAll(" ", "");
 
-  const div = document.createElement('div');
-  div.className = 'userFormula';
-
-  editorMonaco.clearEditorErrors();
-  editorMonaco.editor.setValue('(' + rule + ')' + '∨' + ' ');
-  checkRule(1, editorMonaco.editor.getValue());
-  editorMonaco.editor.updateOptions({fontSize: 28})
-
-  // Check if enterText element exists before accessing its style
-  if (enterText) {
-    enterText.style.width = '500px';
-    enterText.style.height = '50px';
-  }
-
-  // Створюємо кнопку
-  let button = document.createElement('button');
-  button.classList.add('buttonWithIcon');
-  button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
-  button.style.fontSize = '28px';
-  button.style.height = '50px';
-  button.style.padding = '0 20px';
-  button.style.cursor = 'pointer';
-  button.style.borderRadius = '5px';
-  button.style.border = 'none';
-  button.id = 'saveBtn';
-
-  button.innerHTML = `
-  <span class="buttonText">Save</span>
-  <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
-    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#0061a1">
-      <g id="SVGRepo_bgCarrier" stroke-width="0"/>
-      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.24000000000000005"/>
-      <g id="SVGRepo_iconCarrier">
-        <path d="M3 12L3 18.9671C3 21.2763 5.53435 22.736 7.59662 21.6145L10.7996 19.8727M3 8L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L14.0026 18.131" stroke="#0061a1" stroke-width="2.4" stroke-linecap="round"/>
-      </g>
-    </svg>
-  </div>`;
-
-
-  button.addEventListener('click', function () {
-    let ruleUser = getProof(checkWithAntlr(editorMonaco.editor.getValue()));
+  try {
+    const inputText = await createInputModal("Disjunction Introduction (∨I)", "Enter the disjunction formula:", "(" + rule + ")∨");
+    
+    let ruleUser = getProof(checkWithAntlr(inputText));
     let lastRule = getProof(checkWithAntlr(rule));
 
     if (ruleUser.type !== "disjunction") {
       alert(t("alert-missing-disjunction"));
-      return;
+      return -1;
     }
 
     let leftSide = getProof(ruleUser.left);
     let rightSide = getProof(ruleUser.right);
 
-
     if (JSON.stringify(leftSide) === JSON.stringify(lastRule) || JSON.stringify(rightSide) === JSON.stringify(lastRule)) {
-      const par = document.querySelector('.userFormula');
-      par.innerHTML = '';
-      // const div = document.createElement('div');
-      par.className = 'fitch_formula';
-      par.style.display = 'flex';
-      par.textContent = formulaToString(ruleUser, 0);
-      fitchMain.processExpression("AllRules", 1);
-      saveStateFitch();
+      fitchMain.addRowToBranch(inputText, "∨I, " + (proofs[0].index + 1));
       return 0;
     } else {
-      alert(t("alert-correct-input"))
+      alert(t("alert-correct-input"));
+      return -1;
     }
-  });
-
-  // Only append enterText if it exists
-  if (enterText) {
-    div.appendChild(enterText);
+  } catch (error) {
+    console.log("Modal cancelled:", error);
+    return -1;
   }
-  div.appendChild(button);
-
-  const outJust = document.getElementById('out_just');
-  const titleDiv = document.createElement('div');
-  titleDiv.textContent = "∨I, " + (proofs[0].index + 1); // Використання однієї і тієї ж назви для кожної формули
-  outJust.appendChild(titleDiv);
-
-  const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
-  const lastFitchBranch = fitchBranches[fitchBranches.length - 1];
-
-  lastFitchBranch.appendChild(div)
-
-  // lastFitchBranch.appendChild(fitchBranch);
-
-  fitchMain.addNumberedDivs();
-
-  return 0;
 }
 
 export function fourthRule(proofs, branches) {
@@ -421,7 +308,7 @@ export function eighthRule(proofs, branches) {
 
 }
 
-export function ninthRule(proofs, branches) {
+export async function ninthRule(proofs, branches) {
   if (proofs.length !== 1 || branches.length > 0) {
     return -1;
   }
@@ -433,82 +320,21 @@ export function ninthRule(proofs, branches) {
     return -1;
   }
 
-  const div = document.createElement('div');
-  div.className = 'userFormula';
-
-  editorMonaco.clearEditorErrors();
-  editorMonaco.editor.setValue('');
-  checkRule(1, editorMonaco.editor.getValue());
-  editorMonaco.editor.updateOptions({fontSize: 28})
-
-  // Check if enterText element exists before accessing its style
-  if (enterText) {
-    enterText.style.width = '500px';
-    enterText.style.height = '50px';
-  }
-
-  // Створюємо кнопку
-  let button = document.createElement('button');
-  button.classList.add('buttonWithIcon');
-  button.style.boxShadow = 'rgba(0, 0, 0, 0.25) 0px 2px 5px 0px';
-  button.style.fontSize = '28px';
-  button.style.height = '50px';
-  button.style.padding = '0 20px';
-  button.style.cursor = 'pointer';
-  button.style.borderRadius = '5px';
-  button.style.border = 'none';
-  button.id = 'saveBtn';
-
-  button.innerHTML = `
-  <span class="buttonText">Save</span>
-  <div class="buttonIcon" style="margin: 0px 0px 0px 10px; height: 100%; width: 24px;">
-    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#0061a1">
-      <g id="SVGRepo_bgCarrier" stroke-width="0"/>
-      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.24000000000000005"/>
-      <g id="SVGRepo_iconCarrier">
-        <path d="M3 12L3 18.9671C3 21.2763 5.53435 22.736 7.59662 21.6145L10.7996 19.8727M3 8L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L14.0026 18.131" stroke="#0061a1" stroke-width="2.4" stroke-linecap="round"/>
-      </g>
-    </svg>
-  </div>`;
-
-  button.addEventListener('click', function () {
-    if (checkRule(0, editorMonaco.editor.getValue()) === 1) {
-      shakeElement('saveBtn', 5);
-      return;
+  try {
+    const inputText = await createInputModal("Elimination of Absurdum (⊥E)", "Enter the formula:");
+    
+    // Add validation using the grammar checker
+    if (checkRule(0, inputText) === 1) {
+       shakeElement('saveBtn', 5); // Just for potential error handling UI if needed
+       return -1;
     }
-
-    const par = document.querySelector('.userFormula');
-    par.innerHTML = '';
-    // const div = document.createElement('div');
-    par.className = 'fitch_formula';
-    par.style.display = 'flex';
-    par.textContent = formulaToString(checkWithAntlr(editorMonaco.editor.getValue()), 0);
-    fitchMain.processExpression("AllRules", 1);
-    // fitchMain.addRowToBranch(editorMonaco.editor.getValue(), '⊥E1, ' + (rules[0].index + 1));
-    saveStateFitch();
-  });
-
-  // Only append enterText if it exists
-  if (enterText) {
-    div.appendChild(enterText);
+    
+    fitchMain.addRowToBranch(inputText, '⊥E, ' + (proofs[0].index + 1));
+    return 0;
+  } catch (error) {
+    console.log("Modal cancelled:", error);
+    return -1;
   }
-  div.appendChild(button);
-
-  const outJust = document.getElementById('out_just');
-  const titleDiv = document.createElement('div');
-  titleDiv.textContent = "∨I, " + (proofs[0].index + 1); // Використання однієї і тієї ж назви для кожної формули
-  outJust.appendChild(titleDiv);
-
-  const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
-  const lastFitchBranch = fitchBranches[fitchBranches.length - 1];
-
-  lastFitchBranch.appendChild(div)
-
-  // lastFitchBranch.appendChild(fitchBranch);
-
-  fitchMain.addNumberedDivs();
-
-  return 0;
 }
 
 export function tenthRule(rules, branches) {
