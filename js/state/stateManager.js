@@ -1,0 +1,353 @@
+import {side} from "../proofs/gentzen/GentzenProof";
+import {currentLevel} from "../proofs/gentzen/GentzenProof";
+import {state} from "../proofs/gentzen/GentzenProof";
+import {deductionContext} from "../proofs/gentzen/GentzenProof";
+import {level} from "../proofs/gentzen/GentzenProof";
+import {userHypotheses} from "../proofs/gentzen/GentzenProof";
+import {lastSide} from "../proofs/gentzen/GentzenProof";
+import {setState} from "../proofs/gentzen/GentzenProof";
+import {setLevel} from "../proofs/gentzen/GentzenProof";
+import {setSide} from "../proofs/gentzen/GentzenProof";
+import {setCurrentLevel} from "../proofs/gentzen/GentzenProof";
+import {setUserHypotheses} from "../proofs/gentzen/GentzenProof";
+import {setLastSide} from "../proofs/gentzen/GentzenProof";
+import {disableAllButtons} from "../proofs/gentzen/GentzenProof";
+import {
+  branchIndex, clearItems,
+  clickedBranch,
+  clickedProofs,
+  fitchStates, setBranchIndex, setClickedBranch, setClickedProofs,
+  setStateFitch,
+  setUserHypothesesFitch,
+  processExpression
+} from "../proofs/fitch/FitchProof";
+import {
+  sequentState,
+  setSequentState,
+  sequentContext,
+  rebuildTree,
+  setSequentContext
+} from "../proofs/sequent/SequentProof";
+import {t} from "../core/i18n";
+
+
+let backwardButton = document.getElementById('backwardButton');
+let forwardButton = document.getElementById('forwardButton');
+let allProof = document.getElementById('proof');
+
+let elementsAndVariablesArray = [];
+
+export function clearStateHistory() {
+  elementsAndVariablesArray = [];
+}
+
+
+// Додаємо обробник події "клік" для кнопок
+export function addNextLastButtonClickGentzen() {
+  backwardButton.addEventListener('click', function () {
+    if (currentLevel === 5 || currentLevel === 11 || currentLevel === 13 || currentLevel === 7 || currentLevel === 8) {
+      const divToRemove = document.getElementById("preview");
+      if (divToRemove) {
+        divToRemove.remove();
+        document.getElementById('keyProof').className = 'hidden';
+        return;
+      }
+    }
+
+    if (!elementsAndVariablesArray[state]) {
+      if (state > 0) setState(state - 1);
+    }
+    if (state > 0) {
+        setState(state - 1);
+        getState(state);
+    }
+    
+    if (state === 0) {
+       backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
+       homeButton.parentElement.style.display = 'none';
+    }
+  });
+
+
+  forwardButton.addEventListener('click', function () {
+    setState(state + 1);
+    if (!elementsAndVariablesArray[state]) {
+      setState(state - 1);
+      return;
+    }
+    getState(state);
+    backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+    homeButton.parentElement.style.display = 'flex';
+  });
+}
+
+
+export function addNextLastButtonClickFitch() {
+
+  backwardButton.addEventListener('click', function () {
+
+    if (document.getElementsByClassName('userFormula').length > 0) {
+      document.getElementsByClassName('userFormula')[0].remove();
+      var outNums = document.getElementById('out_nums');
+      var outJust = document.getElementById('out_just');
+
+// Видалити останній елемент у контейнері 'out_nums'
+      outNums.removeChild(outNums.lastElementChild);
+
+      outJust.removeChild(outJust.lastElementChild);
+      return;
+    }
+
+    if (!elementsAndVariablesArray[fitchStates]) {
+      if (fitchStates > 0) setStateFitch(fitchStates - 1);
+    }
+
+    if (fitchStates > 0) {
+        setStateFitch(fitchStates - 1);
+        getStateFitch(fitchStates);
+    }
+
+    if (fitchStates === 0) {
+      backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
+      homeButton.parentElement.style.display = 'none';
+    }
+  });
+
+  forwardButton.addEventListener('click', function () {
+
+    setStateFitch(fitchStates + 1);
+    if (!elementsAndVariablesArray[fitchStates]) {
+      setStateFitch(fitchStates - 1);
+      return;
+    }
+    getStateFitch(fitchStates);
+    backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+    homeButton.parentElement.style.display = 'flex';
+  });
+}
+
+
+export function addNextLastButtonClickSequent() {
+  backwardButton.addEventListener('click', function () {
+    if (!elementsAndVariablesArray[sequentState]) {
+      if (sequentState > 0) setSequentState(sequentState - 1);
+    }
+    
+    if (sequentState > 0) {
+        setSequentState(sequentState - 1);
+        getStateSequent(sequentState);
+    }
+
+    if (sequentState === 0) {
+      backwardButton.innerHTML = backwardButton.innerHTML.replace("Back", "New formula");
+      homeButton.parentElement.style.display = 'none';
+    }
+  });
+
+  forwardButton.addEventListener('click', function () {
+    setSequentState(sequentState + 1);
+    if (!elementsAndVariablesArray[sequentState]) {
+      setSequentState(sequentState - 1);
+      return;
+    }
+    getStateSequent(sequentState);
+    backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+    homeButton.parentElement.style.display = 'flex';
+  });
+}
+
+export function saveStateSequent() {
+  // Створюємо глибоку копію дерева, ігноруючи domElement
+  const rootCopy = JSON.parse(JSON.stringify(sequentContext.treeRoot, (key, value) => {
+    if (key === 'domElement') return undefined;
+    return value;
+  }));
+
+  const elementData = {
+    treeRoot: rootCopy,
+    variables: {
+      // sequentState не потрібно зберігати тут, він є індексом в масиві
+    }
+  };
+
+  const index = elementsAndVariablesArray.length;
+  setSequentState(index);
+
+  if (sequentState > 0) {
+    backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+    homeButton.parentElement.style.display = 'flex';
+  }
+
+  elementsAndVariablesArray.push({data: elementData, index: index});
+  setSequentState(index + 1);
+}
+
+function getStateSequent(id) {
+  document.getElementById('proof-menu').className = 'proof-menu';
+
+  var lastElementData = elementsAndVariablesArray[id].data;
+
+  // Відновлюємо контекст
+  setSequentContext({ treeRoot: lastElementData.treeRoot });
+
+  // Перебудовуємо дерево
+  rebuildTree(lastElementData.treeRoot, false);
+}
+
+export function saveStateFitch() {
+
+  // Отримуємо елемент "proof"
+  var proofDiv = document.getElementById('proof').cloneNode(true);
+
+  // Отримуємо всі дочірні елементи елемента "proof" та створюємо копію
+  var childElements = Array.from(proofDiv.children).map(function (element) {
+    return element.cloneNode(true);
+  });
+
+  // Створюємо об'єкт з даними елемента та його змінними
+  var elementData = {
+    element: childElements, variables: {
+      clickedProofs: JSON.parse(JSON.stringify(clickedProofs)),
+      clickedBranch: JSON.parse(JSON.stringify(clickedBranch)),
+      branchIndex: branchIndex
+    }
+  };
+
+  // Додаємо цей об'єкт до масиву
+  setStateFitch(elementsAndVariablesArray.length);
+  if (fitchStates > 0) {
+    backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+    homeButton.parentElement.style.display = 'flex';
+  }
+  addElementWithIndex(elementData, fitchStates);
+}
+
+
+function getStateFitch(id) {
+  document.getElementById('proof-menu').className = 'proof-menu';
+  document.getElementById('hypotheses-container').style.display = "none";
+
+  // Отримуємо останній елемент масиву
+  var lastElementData = elementsAndVariablesArray[id].data;
+
+  // Очищаємо div з id "proof"
+  allProof.innerHTML = '';
+
+  // Додаємо кожен елемент з останнього об'єкта масиву до div з id "proof"
+  lastElementData.element.forEach(function (childElement) {
+    allProof.appendChild(childElement.cloneNode(true));
+  });
+
+  // Оновлюємо значення змінних з останнього об'єкта
+  var variables = lastElementData.variables;
+  // Clear selection
+  setClickedProofs([]);
+  setClickedBranch([]);
+  setBranchIndex(variables.branchIndex);
+  
+  // Clear visual selection from DOM
+  const selectedElements = allProof.querySelectorAll('.fitch_formula');
+  selectedElements.forEach(el => {
+      el.style.backgroundColor = '';
+      const span = el.querySelector('.indexC');
+      if (span) span.remove();
+  });
+  
+  clearItems();
+  processExpression("AllRules", 1);
+}
+
+function getState(id) {
+  document.getElementById('proof-menu').className = 'proof-menu';
+  document.getElementById('hypotheses-container').style.display = "none";
+
+  // Отримуємо останній елемент масиву
+  var lastElementData = elementsAndVariablesArray[id].data;
+
+  // Очищаємо div з id "proof"
+  allProof.innerHTML = '';
+
+  // Додаємо кожен елемент з останнього об'єкта масиву до div з id "proof"
+  lastElementData.element.forEach(function (childElement) {
+    allProof.appendChild(childElement.cloneNode(true));
+  });
+
+  // Оновлюємо значення змінних з останнього об'єкта
+  var variables = lastElementData.variables;
+  deductionContext.hypotheses = JSON.parse(JSON.stringify(variables.deductionContext)).hypotheses;
+  deductionContext.conclusions = JSON.parse(JSON.stringify(variables.deductionContext)).conclusions;
+  setLevel(variables.level);
+  setCurrentLevel(variables.currentLevel);
+  // Clear selection
+  setUserHypotheses(variables.userHypotheses);
+  setSide(null);
+  setLastSide(null);
+  
+  // Clear visual selection if any
+  const selectedElements = allProof.querySelectorAll('.selected');
+  selectedElements.forEach(el => el.classList.remove('selected'));
+  const labels = allProof.querySelectorAll('label');
+  labels.forEach(label => {
+      label.style.background = '';
+  });
+  
+  // Disable buttons
+  disableAllButtons();
+  
+  // showAllHyp();
+}
+
+
+export function saveState() {
+
+  const container = document.getElementById('proof');
+  const labels = container.querySelectorAll('label');
+  labels.forEach(label => {
+    label.style.background = '';
+  });
+
+  // Отримуємо елемент "proof"
+  var proofDiv = document.getElementById('proof').cloneNode(true);
+
+  // Отримуємо всі дочірні елементи елемента "proof" та створюємо копію
+  var childElements = Array.from(proofDiv.children).map(function (element) {
+    return element.cloneNode(true);
+  });
+
+  // Створюємо об'єкт з даними елемента та його змінними
+  var elementData = {
+    element: childElements, variables: {
+      deductionContext: JSON.parse(JSON.stringify(deductionContext)),
+      level: level,
+      currentLevel: currentLevel,
+      userHypotheses: userHypotheses,
+      side: side,
+      lastSide: lastSide
+    }
+  };
+
+  // Додаємо цей об'єкт до масиву
+  // state = elementsAndVariablesArray.length;
+  setState(elementsAndVariablesArray.length);
+  if (state > 0) {
+    backwardButton.innerHTML = backwardButton.innerHTML.replace("New formula", "Back");
+    homeButton.parentElement.style.display = 'flex';
+  }
+  addElementWithIndex(elementData, state);
+}
+
+function addElementWithIndex(elementData, index) {
+  // Створюємо об'єкт з даними елемента та його індексом
+  let elementWithIndex = {data: elementData, index: index};
+  // Додаємо об'єкт до масиву
+  elementsAndVariablesArray.push(elementWithIndex);
+  setState(state + 1);
+}
+
+var homeButton = document.getElementById("home");
+homeButton.addEventListener("click", function () {
+  var confirmation = confirm(t("confirm-go-main"));
+  if (confirmation) {
+    location.reload(true);
+  }
+});

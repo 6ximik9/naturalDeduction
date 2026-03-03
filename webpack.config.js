@@ -32,5 +32,10 @@ module.exports = {
       }
     ],
   },
-  plugins: [new MonacoWebpackPlugin()]
+  plugins: [new MonacoWebpackPlugin()],
+  performance: {
+    hints: false,
+    maxEntrypointSize: 5120000,
+    maxAssetSize: 5120000
+  }
 };

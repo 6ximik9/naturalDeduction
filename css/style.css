@@ -1,4 +1,8 @@
 
+/* ==========================================================================
+   BASE STYLES & GLOBAL SETTINGS
+   ========================================================================== */
+
 body {
   background-color: white;
   display: flex;
@@ -12,6 +16,13 @@ body {
   /*zoom: 120%;*/
 }
 
+* {
+  font-family: 'Times New Roman', sans-serif;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY & HEADERS
+   ========================================================================== */
 
 h3 {
   color: white; /* Колір тексту */
@@ -23,11 +34,94 @@ h3 {
   margin-top: 1.8%;
   text-transform: uppercase; /* Перетворення тексту в верхній регістр */
   /*border-bottom: 2px solid #00b3ff; !* Додавання лінії знизу як роздільник *!*/
-
 }
+
+/* ==========================================================================
+   LAYOUT & CONTENT STRUCTURE
+   ========================================================================== */
 
 .content{
   margin-top: 5%;
+}
+
+.formulaType{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: auto;
+  font-family: Arial, sans-serif;
+  width: 80%;
+}
+
+.proof-menu{
+  margin-top: 1%;
+  width: 80%;
+  height: auto;
+  min-width: 25%;
+  display: inline-block;
+  justify-content: center; /* Горизонтальне центрування */
+  align-items: center; /* Вертикальне центрування */
+  text-align: center;
+}
+
+.text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.text-field {
+  width: 35%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.hidden {
+  display: none;
+}
+
+.container {
+  width: 500px;
+  margin: 50px auto 0;
+  text-align: center
+}
+
+.container {
+  position: relative;
+  height: auto; /* Задайте висоту або встановіть значення, що підходить */
+  width: auto; /* Встановіть ширину, яка підходить для вашого вмісту */
+  border-bottom: black 2px solid;
+}
+
+
+
+/* ==========================================================================
+   BUTTONS & CONTROLS
+   ========================================================================== */
+
+/* Base Button Style - Common properties for all main buttons */
+.base-button {
+  font-size: 26px;
+  background: rgb(255, 255, 255);
+  cursor: pointer;
+  padding: 11px 16px;
+  display: flex;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  border: none;
+  outline: none;
+}
+
+.disabled-action-btn {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  box-shadow: none;
+  background: rgba(200, 200, 200, 0.3);
 }
 
 .buttonsSym {
@@ -53,111 +147,12 @@ h3 {
   transform: translate(0,-3px);
 }
 
-#inputFitch
-{
-  flex-direction: column;
-  align-items: center;
-  align-content: center;
-  text-align: center;
-  font-size: 38px;
-  font-family: 'Times New Roman', sans-serif;
-  margin-top: 1%;
-  display: none;
-}
-
-
-
-#proof {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  align-content: center;
-  text-align: center;
-  margin-top: 1%;
-  width: 80%;
-  min-width: 80%;
-  overflow: scroll;
-  scrollbar-width: none; /* для Firefox */
-}
-
-#proof::-webkit-scrollbar {
-  display: none; /* приховуємо скрол */
-}
-
-#proof label
-{
-  font-size: 38px;
-}
-
-#proof .nameRule
-{
-  font-size: 32px;
-}
-
-#hypotheses-container, #hypotheses-container * {
-  font-size: 32px !important; /* Перевизначення шрифту з використанням !important */
-}
-
-.proof-element_level-0 {
-  align-items: center;
-  align-content: center;
-  text-align: center;
-}
-
-
-[class^="proof-element_level-"], #proofText {
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  min-width: 100px;
-  display: flex;
-  font-size: 52px;
-  margin-bottom: 0px;
-  height: auto;
-  position: relative;
-
-}
-
-[class^="divItem-"]:hover {
-  cursor: pointer;
-}
-
-label:hover
-{
-  cursor: pointer;
-}
-
-
-
-.formulaType{
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  height: auto;
-  font-family: Arial, sans-serif;
-  width: 80%;
-
-}
-
-.proof-menu{
-  margin-top: 1%;
-  width: 80%;
-  height: auto;
-  min-width: 25%;
-  display: inline-block;
-  justify-content: center; /* Горизонтальне центрування */
-  align-items: center; /* Вертикальне центрування */
-  text-align: center;
-}
-
 .button-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   width: auto;
 }
-
 
 .button-container button {
   flex: 0 0 calc(33.33% - 200px); /* Розмір кнопки. Мінус 20px - це місце для відступів */
@@ -178,29 +173,6 @@ label:hover
 {
   background-color: rgba(241, 241, 241, 0.85);
   /*zoom: 110%;*/
-}
-
-
-
-.text-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.text-field {
-  width: 35%;
-  box-sizing: border-box;
-  margin-bottom: 8px;
-}
-
-.hidden {
-  display: none;
-}
-
-
-.keyboard {
-
 }
 
 .btn {
@@ -231,20 +203,290 @@ label:hover
   /*box-shadow: 0 20px 40px 0 rgb(208, 0, 255);*/
 }
 
+/* Using base-button class for .buttonMain */
+.buttonMain {
+  /* Inherits from .base-button */
+}
+
+.buttonWithIcon {
+  cursor: pointer;
+  padding: 11px 16px;
+  display: flex;
+  border-radius: 5px;
+  font-size: 14px;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  outline: none;
+}
+
+.mainButtons {
+  display: flex;
+  margin-top: 10px;
+}
+
+.allBtn{
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+  width: 90%;
+  margin-left: 7%;
+}
+
+.undoRedo
+{
+    display: none;
+    justify-content: space-between;
+}
+
+.undoRedo button{
+  margin-right: 10px;
+}
+
+.returnMain
+{
+  margin-bottom: 1%;
+  display: none;
+  width: 30%;
+}
+
+.returnMain button{
+  margin-right: 10px;
+  width: 100%;
+}
+
+#parentheses
+{
+  display: flex;
+  justify-content: center;
+}
+
+#parentheses button{
+  margin-right: 10px;
+}
+
+#saveBtn
+{
+  max-width: 25%;
+  min-width: 25%;
+}
+
+#enter
+{
+  background-color: rgba(253, 81, 81, 0.73);
+}
+
+#values
+{
+  font-size: 24px;
+}
+
+#latex
+{
+  margin-left: 50px;
+  margin-right: 60px;
+}
+
+.closed{
+  background-color: rgba(0, 255, 0, 0.55);
+}
+
+.corner-button {
+  /*width: auto;*/
+  position: fixed;
+  bottom: 10%; /* Відступ знизу */
+  right: 5%; /* Відступ справа */
+  background-color: white; /* Колір фону */
+  border: none;
+  cursor: pointer;
+  z-index: 9999; /* Забезпечує, що кнопка буде поверх інших елементів */
+  font-size: 26px;
+  padding: 1px 12px;
+  /*justify-content: center;*/
+  display: flex;
+  border-radius: 5px;
+  align-items: center;
+  color: rgb(33, 33, 33);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
+  outline: none;
+}
+
+/* ==========================================================================
+   INPUT & FORM ELEMENTS
+   ========================================================================== */
+
+#inputFitch
+{
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  font-size: 36px;
+  font-family: 'Times New Roman', sans-serif;
+  margin-top: 1%;
+  display: none;
+}
+
+.keyboard {
+
+}
+
 .preview{
   /*align-items: center;*/
-  display: flex;
+  /*display: flex;*/
   cursor: text;
 }
+
+/* ==========================================================================
+   PROOF DISPLAY
+   ========================================================================== */
+
+/* Container for the proof with resize capability */
+#proof-container {
+  display: none; /* Hidden by default, shown via JS when proof starts */
+  position: relative;
+  width: 65%;
+  min-height: 60px;
+  height: auto;
+  margin: 1% auto;
+  overflow: hidden; /* Hide overflow from zoomed content */
+  /* resize: both; Removed to use custom handle */
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Custom Resize Handle */
+#proof-resize-handle {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, #0061a1 50%);
+  z-index: 1001;
+  border-bottom-right-radius: 2px;
+}
+#proof-resize-handle:hover {
+  background: linear-gradient(135deg, transparent 50%, #004672 50%);
+}
+
+/* Updated #proof to work inside the container */
+#proof {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Center content vertically */
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  margin-top: 0;
+  padding: 20px;
+  width: fit-content;
+  min-width: 100%;
+  min-height: 100%;
+  overflow: visible;
+  transform-origin: 0 0; /* Zoom from top-left for easier math */
+  cursor: grab;
+}
+
+#proof:active {
+  cursor: grabbing;
+}
+
+/* Controls for zoom */
+.proof-controls {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+  z-index: 1000;
+}
+
+.proof-controls button {
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  padding: 0;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #333;
+}
+
+.proof-controls button:hover {
+  background: #f0f0f0;
+}
+
+#resetZoomBtn {
+  width: auto;
+  font-size: 16px;
+  padding: 0 10px;
+}
+
+#proof label
+{
+  font-family: 'Times New Roman', serif !important;
+  font-size: 36px;
+  text-wrap: nowrap;
+}
+
+#proof .nameRule
+{
+  font-size: 32px;
+}
+
+.proof-element_level-0 {
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  margin: auto;
+}
+
+[class^="proof-element_level-"], #proofText {
+  font-family: 'Times New Roman', serif !important;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-width: 100px;
+  display: flex;
+  font-size: 36px;
+  margin-bottom: 0px;
+  height: auto;
+  position: relative;
+}
+
+[class^="divItem-"]:hover {
+  cursor: pointer;
+}
+
+label:hover
+{
+  cursor: pointer;
+}
+
+#keyProof .buttonsSym
+{
+  margin-bottom: -1.5%;
+}
+
+/* ==========================================================================
+   HYPOTHESES CONTAINER
+   ========================================================================== */
 
 #hypotheses-container {
   margin-top: 2%;
   margin-left: 2%;
   font-family: 'Times New Roman', sans-serif;
-  font-size: 38px;
+  font-size: 36px;
   display: none;
 }
 
+#hypotheses-container, #hypotheses-container * {
+  font-size: 32px !important; /* Перевизначення шрифту з використанням !important */
+}
 
 #currentHypotheses{
   /*justify-content: center;*/
@@ -266,6 +508,7 @@ label:hover
   /*border-left: 2px solid #000; !* Додаємо ліву межу до другого блоку для візуального розділення *!*/
   padding-left: 10px; /* Додаємо відступ зліва від межі */
 }
+
 #currentLabelHypotheses
 {
   margin-left: 10px;
@@ -277,7 +520,9 @@ label:hover
   white-space: nowrap;
 }
 
-
+/* ==========================================================================
+   ANIMATIONS & TOOLTIPS
+   ========================================================================== */
 
 .custom-tooltip {
   position: absolute;
@@ -287,7 +532,6 @@ label:hover
   background: rgba(255, 0, 0, 0.5);
   display: none;
 }
-
 
 .shake {
   animation: shake 0.5s ease-in-out;
@@ -305,20 +549,9 @@ label:hover
   }
 }
 
-#keyProof .buttonsSym
-{
-  margin-bottom: -1.5%;
-}
-
-.closed{
-  background-color: rgba(0, 255, 0, 0.55);
-}
-
-#saveBtn
-{
-  max-width: 25%;
-  min-width: 25%;
-}
+/* ==========================================================================
+   EDITOR COMPONENTS
+   ========================================================================== */
 
 .editorPanel {
   margin-top: 20px; /* Встановлюємо зовнішній відступ зверху */
@@ -342,6 +575,12 @@ label:hover
   border-radius: 0;
   position: relative;
   border: none;
+}
+
+.monaco-editor {
+  position: relative;
+  overflow: visible;
+  -webkit-text-size-adjust: 100%;
 }
 
 .editorResize {
@@ -378,7 +617,6 @@ label:hover
   transform: translate(-50%);
   cursor: col-resize;
   border-radius: 9px;
-
 }
 
 .dots {
@@ -396,43 +634,6 @@ label:hover
   background-color: #616161;
   margin-bottom: 5px;
   border-radius: 100%;
-}
-
-.allBtn{
-  display: flex;
-  justify-content: space-between;
-  box-sizing: border-box;
-  width: 90%;
-  margin-left: 7%;
-}
-
-.mainButtons {
-  display: flex;
-  margin-top: 10px;
-}
-
-
-
-.buttonMain {
-  font-size: 26px;
-  background: rgb(255, 255, 255);
-  cursor: pointer;
-  padding: 11px 16px;
-  display: flex;
-  border-radius: 5px;
-  justify-content: center;
-  align-items: center;
-  /*margin-right: 10px;*/
-  color: rgb(33, 33, 33);
-  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
-  border: none;
-  outline: none;
-}
-
-.monaco-editor {
-  position: relative;
-  overflow: visible;
-  -webkit-text-size-adjust: 100%;
 }
 
 #enter
@@ -459,19 +660,7 @@ label:hover
 }
 
 .undoRedo button{
-  font-size: 26px;
-  background: rgb(255, 255, 255);
-  cursor: pointer;
-  padding: 11px 16px;
-  display: flex;
-  border-radius: 5px;
-  justify-content: center;
-  align-items: center;
   margin-right: 10px;
-  color: rgb(33, 33, 33);
-  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
-  border: none;
-  outline: none;
 }
 
 .returnMain
@@ -482,19 +671,8 @@ label:hover
 }
 
 .returnMain button{
-  font-size: 26px;
-  background: rgb(255, 255, 255);
-  cursor: pointer;
-  display: flex;
-  border-radius: 5px;
-  justify-content: center;
-  align-items: center;
   margin-right: 10px;
-  color: rgb(33, 33, 33);
-  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
-  border: none;
-  outline: none;
-  width: 100%
+  width: 100%;
 }
 
 
@@ -504,13 +682,10 @@ span.choose {
   padding: 5px 0 10px;
   display: inherit
 }
-.container {
-  width: 500px;
-  margin: 50px auto 0;
-  text-align: center
-}
 
-
+/* ==========================================================================
+   DROPDOWN MENUS
+   ========================================================================== */
 
 .dropdown {
   white-space: nowrap;
@@ -533,7 +708,6 @@ span.choose {
   outline: none;
   margin-right: 3%;
 }
-
 
 .arrow {
   border-left: 10px solid transparent;
@@ -594,8 +768,7 @@ span.choose {
   background-color: rgba(0, 97, 161, 1);
 }
 
-
-
+/* Font Dropdown */
 .dropdownFont {
   width: 100%;
   white-space: nowrap;
@@ -676,14 +849,9 @@ span.choose {
   background-color: rgba(0, 97, 161, 1);
 }
 
-
-
-*{
-  font-family: 'Times New Roman', sans-serif;
-}
-
-
-
+/* ==========================================================================
+   HELP MODAL
+   ========================================================================== */
 
 .helpModal {
   display: none;
@@ -847,9 +1015,15 @@ span.choose {
   position: absolute;
   bottom: -15px;
   left: calc(100% + 10px);
-  width: 100px;
+  width: auto;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
 }
 
+/* ==========================================================================
+   TABS
+   ========================================================================== */
 
 .containerTabs {
   width: 65%;
@@ -870,7 +1044,6 @@ span.choose {
   list-style: none;
   display: flex;
   position: relative;
-
 }
 
 /* tab list 會動的底線 */
@@ -894,7 +1067,6 @@ span.choose {
 
 .tab-toggle {
   display: none;
-
 }
 
 .tab-content {
@@ -931,7 +1103,9 @@ span.choose {
   padding: 15px 30px;
 }
 
-
+/* ==========================================================================
+   D3 VISUALIZATION
+   ========================================================================== */
 
 .link {
   fill: none;
@@ -952,107 +1126,11 @@ span.choose {
   pointer-events: none; /* Забезпечує, що текст не впливає на взаємодію з курсором */
 }
 
-#parentheses
-{
-  display: flex;
-  justify-content: center;
-}
-#parentheses button{
-  font-size: 26px;
-  background: rgb(255, 255, 255);
-  cursor: pointer;
-  padding: 11px 16px;
-  display: flex;
-  border-radius: 5px;
-  justify-content: center;
-  align-items: center;
-  margin-right: 10px;
-  color: rgb(33, 33, 33);
-  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
-  border: none;
-  outline: none;
-}
 
 
-#latexCode{
-  font-family: 'Times New Roman', sans-serif;
-  display: flex;
-  flex-direction: column;
-}
-
-#latexInfo {
-  white-space: pre-line;
-  font-size: 32px;
-  overflow-y: scroll;
-  width: 95%;
-  height: 65%;
-  margin-left: 3%;
-  scrollbar-width: none; /* для Firefox */
-}
-
-#latexInfo::-webkit-scrollbar {
-  display: none; /* приховуємо скрол */
-}
-
-
-#latexModal .helpNavbarItem
-{
-  font-size: 32px;
-  color: rgb(80, 80, 80);
-}
-#copyLatexCode{
-  margin-top: 2%;
-  font-size: 48px;
-  background: rgb(255, 255, 255);
-  cursor: pointer;
-  padding: 11px 16px;
-  display: flex;
-  border-radius: 5px;
-  justify-content: center;
-  align-items: center;
-  color: rgb(33, 33, 33);
-  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
-  border: none;
-  outline: none;
-  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-#copyLatexCode:hover {
-  background-color: rgba(241, 241, 241, 0.85);
-  animation: none; /* Скасовуємо анімацію при наведенні, щоб не перервати анімацію кнопки */
-}
-
-@keyframes changeIcon {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(0deg); }
-  100% { transform: rotate(0deg); }
-}
-
-#copyLatexCode .buttonIcon img {
-  transition: transform 0.3s ease;
-}
-
-
-.corner-button {
-  /*width: auto;*/
-  position: fixed;
-  bottom: 10%; /* Відступ знизу */
-  right: 5%; /* Відступ справа */
-  background-color: white; /* Колір фону */
-  border: none;
-  cursor: pointer;
-  z-index: 9999; /* Забезпечує, що кнопка буде поверх інших елементів */
-  font-size: 26px;
-  padding: 1px 12px;
-  /*justify-content: center;*/
-  display: flex;
-  border-radius: 5px;
-  align-items: center;
-  color: rgb(33, 33, 33);
-  box-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px 0;
-  outline: none;
-}
-
+/* ==========================================================================
+   MOBILE RESPONSIVE (max-width: 700px)
+   ========================================================================== */
 
 @media (max-width: 700px) {
 
@@ -1088,7 +1166,10 @@ span.choose {
     position: absolute;
     bottom: -10px;
     left: calc(100% - 5px);
-    width: 100px;
+    width: auto;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
   }
 
   .button-container button {
@@ -1272,6 +1353,10 @@ span.choose {
 
 }
 
+/* ==========================================================================
+   MENU & FILE UPLOAD CONTROLS
+   ========================================================================== */
+
 #menu {
   margin-left: 2%;
   width: 100%;
@@ -1394,10 +1479,26 @@ span.choose {
   border-radius: 0 .375em .375em 0;
 }
 
+/* ==========================================================================
+   FITCH PROOF STYLES
+   ========================================================================== */
 
-/*Стилі Fitch*/
 #out_fitch{
   display: flex;
+  white-space: nowrap;
+}
+
+#fitchHeader {
+  font-family: 'Times New Roman', serif !important;
+  pointer-events: none;
+  margin-bottom: 25px;
+  font-size: 36px;
+  font-weight: normal;
+  text-align: center;
+  width: 100%;
+  color: #212121;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 10px;
   white-space: nowrap;
 }
 
@@ -1432,13 +1533,19 @@ span.choose {
 }
 
 .fitch_formula {
+  font-family: 'Times New Roman', serif !important;
   display: flex;
   align-items: center; /* Центрує дочірні елементи по вертикалі */
   /*justify-content: center; !* Центрує дочірні елементи по горизонталі *!*/
   padding-left: 5px; /* Збереження вашого налаштування відступу */
   cursor: pointer;
   /*height: 39px; !* Встановіть фіксовану висоту або достатню висоту для вашого контенту *!*/
-  font-size: 34px !important;
+  font-size: 36px !important;
+}
+
+.sequent-formula {
+  font-family: 'Times New Roman', serif !important;
+  font-size: 36px;
 }
 
 .userFormula{
@@ -1449,5 +1556,50 @@ span.choose {
   display: block;
 }
 
+/* ==========================================================================
+   GAMMA CONTEXT STYLING
+   ========================================================================== */
+
+.gamma-context {
+  color: #666;
+  font-weight: bold;
+  margin-right: 5px;
+  font-size: 36px;
+  display: inline-block;
+  vertical-align: baseline;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.gamma-context:hover {
+  background-color: #FFD700; /* Золотисто-жовтий фон при наведенні */
+}
+
+/* Ensure stable positioning when tree changes */
+#proof label {
+  font-family: 'Times New Roman', serif !important;
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  width: auto;
+  min-width: fit-content;
+}
+
+/* Keep proof elements stable during tree modifications */
+[class^="proof-element_level-"] {
+  position: relative;
+  transform: translateZ(0); /* Force GPU acceleration for stable positioning */
+}
+
+/* Ensure gamma context and proof text are always on the same line */
+.proof-content {
+  /*display: flex !important;*/
+  align-items: baseline;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
 
 
