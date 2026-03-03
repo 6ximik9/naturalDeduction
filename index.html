@@ -449,9 +449,93 @@
     body.dark-mode ::-webkit-scrollbar-thumb:hover {
         background: #475569;
     }
+    /* --- MOBILE RESPONSIVENESS & SIDEBAR --- */
+    .mobile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .mobile-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed !important;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 260px !important;
+        background-color: var(--col-bg-sidebar) !important;
+      }
+      body.dark-mode .sidebar {
+        background-color: var(--col-bg-white) !important;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      #mobile-menu-btn {
+        display: flex !important;
+        padding: 6px !important;
+      }
+      
+      /* Make header elements smaller to fit */
+      .top-header {
+        padding: 0 16px !important;
+      }
+      
+      #enter {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        margin-left: auto !important;
+      }
+      
+      #proof-split-layout {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+      }
+      #proof-tools {
+        width: 100% !important;
+        height: auto !important;
+        flex-shrink: 0;
+        order: 2;
+        margin-top: 15px;
+      }
+      #proof-container {
+        width: 100% !important;
+        height: 400px !important;
+        flex-shrink: 0;
+        margin-top: 0 !important;
+        overflow: auto !important; /* Allow scroll for large trees */
+        order: 1;
+      }
+      .layout-divider {
+        display: none !important;
+      }
+      .content-area {
+        padding: 16px !important;
+      }
+      .button-container button {
+        font-size: 18px !important;
+        padding: 8px 10px !important;
+      }
+    }
   </style>
 </head>
 <body>
+
+<!-- Mobile Overlay -->
+<div id="mobile-overlay" class="mobile-overlay"></div>
 
 <aside class="sidebar" id="sidebar-home">
   <div class="logo">
@@ -743,7 +827,10 @@
 <div class="main-wrapper">
 
   <header class="top-header">
-    <div class="header-left">
+    <div class="header-left" style="display: flex; align-items: center; gap: 12px;">
+      <button id="mobile-menu-btn" class="btn" style="display: none; padding: 8px; background: transparent; border: 1px solid var(--col-border); border-radius: 8px; cursor: pointer; color: var(--col-text-main); align-items: center; justify-content: center;">
+        <i class="ri-menu-line" style="font-size: 20px;"></i>
+      </button>
       <div class="custom-select" style="position: relative; padding: 0; display: block; width: auto;">
         <i class="ri-text"
            style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;"></i>
@@ -868,8 +955,6 @@
       <!-- Right Panel: Proof Tree -->
                   <div id="proof-container" style="width: 55%; background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; height: 100%;">
                       <div id="proof" style="transform-origin: 0 0; width: 100%; height: 100%;"></div>
-
-                      <div id="proof-resize-handle" data-i18n-title="tooltip-resize" title="Resize"></div>
                   </div>
     </div>
     <!-- Old Proof Container (Renamed/Replaced but keeping ID references valid by moving logic) -->
@@ -942,6 +1027,7 @@
   </button>
 </div>
 
+<script src="js/ui/mobile.js" defer></script>
 <script src="js/app.js" defer></script>
 </body>
 </html>
