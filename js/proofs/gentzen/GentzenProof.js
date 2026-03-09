@@ -16,6 +16,7 @@ import {formulaToString} from "../../core/formatter.js";
 import {addProofTextHoverEffects, initializeProofTextHover} from '../../ui/proofTextHover.js';
 import {validateRobinsonAxioms} from "../../core/robinsonAxiomValidator.js";
 import {parseProofFromLastSide} from "./rulesGentzen";
+import { getActiveAxioms, logicSettings, isVL } from '../../state/logicSettings';
 
 export let deductionContext = {
   hypotheses: [], // Список гіпотез
@@ -230,9 +231,8 @@ function handleClick() {
           if (helpButtonToggleState.axioms) {
                showFilteredAxioms();
           } else {
-              const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) => `${index + 1}. ${axiom}`);
-              const formattedOrder = ORDER_AXIOMS.map((axiom, index) => `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`);
-              generateButtons(formattedRobinson.length + formattedOrder.length, [...formattedRobinson, ...formattedOrder]);
+              const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
+              generateButtons(formattedAxioms.length, formattedAxioms);
           }
       } else if (document.getElementById('tab4').checked) {
           // Tree View Tab
@@ -582,8 +582,9 @@ function generateButtons(buttonCount, buttonTexts) {
   buttonContainer.style.position = 'relative';
 
   // Check if this is for axioms - more specific detection
-  const isAxiomsTab = buttonTexts.length === (ROBINSON_AXIOMS.length + ORDER_AXIOMS.length) &&
-    buttonTexts.every((text, index) => text.startsWith(`${index + 1}. `));
+  const tab3 = document.getElementById('tab3');
+  const isAxiomsTab = (tab3 && tab3.checked) || 
+                      (buttonTexts.length > 0 && buttonTexts.some(t => t.includes('∀x') && (t.includes('s(x)') || t.includes('<'))));
 
   // Check if this is the "All rules" tab (when all GENTZEN_BUTTONS are shown)
   const isAllRulesTab = buttonTexts.length === GENTZEN_BUTTONS.length &&
@@ -600,12 +601,6 @@ function generateButtons(buttonCount, buttonTexts) {
     buttonContainer.style.gap = '8px';
     buttonContainer.style.padding = '20px';
     buttonContainer.style.justifyItems = 'center';
-    // Add simple header for axioms (without complex positioning)
-    const header = document.createElement('h4');
-    header.textContent = 'Robinson Arithmetic Axioms';
-    header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 0 0 14px 0; color: #333; font-family: "Times New Roman", serif;';
-
-    buttonContainer.appendChild(header);
   } else {
     // Reset to default styling for other tabs
     buttonContainer.style.display = '';
@@ -685,14 +680,39 @@ function generateButtons(buttonCount, buttonTexts) {
     }
   }
 
+  let showedRobinsonHeader = false;
+  let showedOrderHeader = false;
+
   for (let i = 0; i < buttonCount; i++) {
-    if (isAxiomsTab && i === ROBINSON_AXIOMS.length) {
+    const text = buttonTexts[i];
+    
+    // Header for Robinson Arithmetic - detect by any Robinson axiom if not shown yet
+    const isRobinsonAxiom = ROBINSON_AXIOMS.some(ax => text.includes(ax));
+    if (isAxiomsTab && isRobinsonAxiom && !showedRobinsonHeader) {
+      const header = document.createElement('h4');
+      header.textContent = 'Robinson Arithmetic Axioms';
+      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 0 0 14px 0; color: var(--col-text-main); font-family: "Times New Roman", serif;';
+      buttonContainer.appendChild(header);
+      showedRobinsonHeader = true;
+    }
+    
+    // Header for Linear Order - detect by any Order axiom if not shown yet
+    const isOrderAxiom = ORDER_AXIOMS.some(ax => text.includes(ax));
+    if (isAxiomsTab && isOrderAxiom && !showedOrderHeader) {
       const header = document.createElement('h4');
       header.textContent = 'Linear Order Axioms';
-      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 20px 0 14px 0; color: #333; font-family: "Times New Roman", serif;';
+      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 20px 0 14px 0; color: var(--col-text-main); font-family: "Times New Roman", serif;';
+      if (!showedRobinsonHeader) header.style.marginTop = '0';
       buttonContainer.appendChild(header);
+      showedOrderHeader = true;
     }
-    const button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i]));
+
+    const button = createButton(text, () => buttonClicked(text));
+    
+    // Tag quantifier and equality rules
+    if (text.includes('\\forall') || text.includes('\\exists') || text.includes('a = b')) {
+      button.classList.add('quantifier-rule');
+    }
 
     if (isAxiomsTab) {
       // Override flex styles for axiom buttons to work properly with grid
@@ -728,9 +748,8 @@ export function toggleSmartMode() {
       showFilteredAxioms();
     } else {
       // Smart Mode OFF: Show all
-      const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) => `${index + 1}. ${axiom}`);
-      const formattedOrder = ORDER_AXIOMS.map((axiom, index) => `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`);
-      generateButtons(formattedRobinson.length + formattedOrder.length, [...formattedRobinson, ...formattedOrder]);
+      const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
+      generateButtons(formattedAxioms.length, formattedAxioms);
     }
   } else {
     // Rules tab
@@ -795,7 +814,7 @@ function showFilteredAxioms() {
       // Add header
       const header = document.createElement('h4');
       header.textContent = 'Robinson Arithmetic Axioms (Recommended)';
-      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 0 0 14px 0; color: #333; font-family: "Times New Roman", serif;';
+      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 0 0 14px 0; color: var(--col-text-main); font-family: "Times New Roman", serif;';
       buttonContainer.appendChild(header);
 
       // Add matching axiom buttons
@@ -1124,9 +1143,8 @@ export function disableAllButtons() {
     
     // Regenerate full lists so user sees all options (disabled) instead of just filtered ones
     if (isAxiomsTab) {
-         const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) => `${index + 1}. ${axiom}`);
-         const formattedOrder = ORDER_AXIOMS.map((axiom, index) => `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`);
-         generateButtons(formattedRobinson.length + formattedOrder.length, [...formattedRobinson, ...formattedOrder]);
+         const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
+         generateButtons(formattedAxioms.length, formattedAxioms);
     } else {
          // Default to rules (Tab 1) logic
          generateButtons(GENTZEN_BUTTONS.length, GENTZEN_BUTTONS);
@@ -1581,13 +1599,7 @@ function addClickGentzenRules() {
              showFilteredAxioms();
         } else {
             // Format axioms for generateButtons
-            const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) =>
-              `${index + 1}. ${axiom}`
-            );
-            const formattedOrder = ORDER_AXIOMS.map((axiom, index) =>
-              `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`
-            );
-            const formattedAxioms = [...formattedRobinson, ...formattedOrder];
+            const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
             generateButtons(formattedAxioms.length, formattedAxioms);
         }
       } else if (tabId === 'tab4') {

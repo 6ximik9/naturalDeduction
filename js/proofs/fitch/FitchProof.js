@@ -17,6 +17,7 @@ import {formulaToString} from "../../core/formatter";
 import {ROBINSON_AXIOMS} from "../../core/robinsonAxiomValidator";
 import {ORDER_AXIOMS} from "../../core/orderAxiomValidator";
 import {t} from "../../core/i18n";
+import { getActiveAxioms, logicSettings, isVL } from '../../state/logicSettings';
 
 
 let fitchProof = [];
@@ -204,10 +205,10 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
   buttonContainer.style.position = 'relative';
   buttonContainer.style.minHeight = '150px';
 
-  // Check if this is for axioms - detection by text format
-  const isAxiomsTab = buttonTexts.length > 0 &&
-                      buttonTexts.length === (ROBINSON_AXIOMS.length + ORDER_AXIOMS.length) &&
-                      buttonTexts.every((text, index) => text.startsWith(`${index + 1}. `));
+  // Check if this is for axioms - use both tab state and content detection
+  const tab3 = document.getElementById('tab3');
+  const isAxiomsTab = (tab3 && tab3.checked) || 
+                      (buttonTexts.length > 0 && buttonTexts.some(t => t.includes('∀x') && (t.includes('s(x)') || t.includes('<'))));
 
   if (branchIndex !== 0 && !isAxiomsTab) {
     let btn = createButton("Close assumption", () => closeAsp());
@@ -234,12 +235,6 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
     buttonContainer.style.gap = '8px';
     buttonContainer.style.padding = '20px';
     buttonContainer.style.justifyItems = 'center';
-
-    // Add header
-    const header = document.createElement('h4');
-    header.textContent = 'Robinson Arithmetic Axioms';
-    header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 0 0 14px 0; color: #333; font-family: "Times New Roman", serif;';
-    buttonContainer.appendChild(header);
   } else {
     // Reset styling for regular rules
     buttonContainer.style.display = '';
@@ -248,14 +243,40 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
     buttonContainer.style.padding = '';
   }
 
+  let showedRobinsonHeader = false;
+  let showedOrderHeader = false;
+
   for (let i = 0; i < buttonCount; i++) {
-    if (isAxiomsTab && i === ROBINSON_AXIOMS.length) {
+    const text = buttonTexts[i];
+    
+    // Header for Robinson Arithmetic
+    const isRobinsonAxiom = ROBINSON_AXIOMS.some(ax => text.includes(ax));
+    if (isAxiomsTab && isRobinsonAxiom && !showedRobinsonHeader) {
+      const header = document.createElement('h4');
+      header.textContent = 'Robinson Arithmetic Axioms';
+      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 0 0 14px 0; color: var(--col-text-main); font-family: "Times New Roman", serif;';
+      if (i > 0) header.style.marginTop = '20px';
+      buttonContainer.appendChild(header);
+      showedRobinsonHeader = true;
+    }
+    
+    // Header for Linear Order
+    const isOrderAxiom = ORDER_AXIOMS.some(ax => text.includes(ax));
+    if (isAxiomsTab && isOrderAxiom && !showedOrderHeader) {
       const header = document.createElement('h4');
       header.textContent = 'Linear Order Axioms';
-      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 20px 0 14px 0; color: #333; font-family: "Times New Roman", serif;';
+      header.style.cssText = 'grid-column: 1 / -1; text-align: center; margin: 20px 0 14px 0; color: var(--col-text-main); font-family: "Times New Roman", serif;';
+      if (!showedRobinsonHeader) header.style.marginTop = '0';
       buttonContainer.appendChild(header);
+      showedOrderHeader = true;
     }
-    let button = createButton(buttonTexts[i], () => buttonClicked(buttonTexts[i], button));
+
+    let button = createButton(text, () => buttonClicked(text, button));
+
+    // Tag quantifier and equality rules
+    if (text.includes('\\forall') || text.includes('\\exists') || text.includes('c = c') || text.includes('t_1 = t_2')) {
+      button.classList.add('quantifier-rule');
+    }
 
     // If disabled is an array of allowed indices (when nothing is selected but we want to show everything)
     let isButtonDisabled = false;
@@ -263,7 +284,7 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
       isButtonDisabled = true;
     } else if (Array.isArray(disabled)) {
       // Find the index of this button in the FITCH_BUTTONS array
-      const originalIndex = FITCH_BUTTONS.indexOf(buttonTexts[i]);
+      const originalIndex = FITCH_BUTTONS.indexOf(text);
       if (!disabled.includes(originalIndex)) {
         isButtonDisabled = true;
       }
@@ -762,6 +783,7 @@ function addClickFitchRules() {
         buttonContainer.style.gridTemplateColumns = ''; // Reset grid columns
         buttonContainer.style.padding = ''; // Reset padding
         buttonContainer.style.height = "100%";
+        buttonContainer.style.width = "100%";
         buttonContainer.parentElement.style.height = "100%";
 
         let svgContainer = document.createElement("div");
@@ -788,13 +810,7 @@ function addClickFitchRules() {
       } else if (tabId === 'tab3') {
         // helpButtonToggleState = false;
         // Format axioms for generateButtons
-        const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) =>
-          `${index + 1}. ${axiom}`
-        );
-        const formattedOrder = ORDER_AXIOMS.map((axiom, index) =>
-          `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`
-        );
-        const formattedAxioms = [...formattedRobinson, ...formattedOrder];
+        const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
         const isDisabled = clickedProofs.length === 0 && clickedBranch.length === 0;
         generateButtons(formattedAxioms.length, formattedAxioms, isDisabled);
       }
@@ -876,9 +892,7 @@ export function clearItems() {
   
   if (isAxiomsTab) {
       // Re-trigger the tab click logic for Axioms to refresh (disable) them
-      const formattedRobinson = ROBINSON_AXIOMS.map((axiom, index) => `${index + 1}. ${axiom}`);
-      const formattedOrder = ORDER_AXIOMS.map((axiom, index) => `${index + 1 + ROBINSON_AXIOMS.length}. ${axiom}`);
-      const formattedAxioms = [...formattedRobinson, ...formattedOrder];
+      const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
       generateButtons(formattedAxioms.length, formattedAxioms, true);
   } else {
       processExpression("AllRules", 1);
@@ -919,7 +933,7 @@ function addOrRemoveParenthesesFitch() {
     }
 
     // Enable all first
-    [addBtn, delBtn, retBtn].forEach(btn => toggleButtonState(btn, true));
+    [addBtn, delBtn, retBtn].forEach(btn => { if(btn) toggleButtonState(btn, true); });
     
     // Disable the active one if specified, otherwise default to Original (retBtn)
     if (clickedBtn) {

@@ -12,12 +12,17 @@ import {setEditorError, initFontSelectors} from "./ui/monacoEditor";
 import {initProofView} from "./ui/proofView";
 import {updateLanguage, t} from "./core/i18n";
 
+import {initStartScreen} from './ui/modals/startScreen';
+
 let hasError = false;
 let inputText = "";
 
 export let typeProof = 0;
 
 document.addEventListener("DOMContentLoaded", function() {
+  // Initialize Start Screen
+  initStartScreen();
+
   // Initialize Language
   const savedLang = localStorage.getItem('selectedLang') || 'EN';
   updateLanguage(savedLang);
@@ -39,23 +44,29 @@ document.addEventListener("DOMContentLoaded", function() {
   initFontSelectors();
 
   // Theme Toggle Logic
-  const themeToggle = document.querySelector('.theme-toggle');
-  if (themeToggle) {
-    // Check for saved preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-      themeToggle.classList.add('dark');
-      if (typeof monaco !== 'undefined') {
-        monaco.editor.setTheme('vs-dark');
-      }
+  const themeToggles = document.querySelectorAll('.theme-toggle');
+  
+  // Check for saved preference
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeToggles.forEach(t => t.classList.add('dark'));
+    if (typeof monaco !== 'undefined') {
+      monaco.editor.setTheme('vs-dark');
     }
+  }
 
+  themeToggles.forEach(themeToggle => {
     themeToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
-      themeToggle.classList.toggle('dark');
-
+      
       const isDark = document.body.classList.contains('dark-mode');
+      
+      themeToggles.forEach(t => {
+        if (isDark) t.classList.add('dark');
+        else t.classList.remove('dark');
+      });
+
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
 
       // Update Monaco theme
@@ -63,18 +74,24 @@ document.addEventListener("DOMContentLoaded", function() {
         monaco.editor.setTheme(isDark ? 'vs-dark' : 'vs');
       }
     });
-  }
+  });
 
   // Language Switcher Logic
   const langOptsList = document.querySelectorAll('.lang-opt');
   langOptsList.forEach(opt => {
     opt.addEventListener('click', () => {
-      // Remove active class from all options
-      langOptsList.forEach(o => o.classList.remove('active'));
-      // Add active class to clicked option
-      opt.classList.add('active');
-
       const selectedLang = opt.textContent.trim();
+      
+      // Remove active class from all options globally
+      langOptsList.forEach(o => o.classList.remove('active'));
+      
+      // Add active class to all options matching the selected language
+      langOptsList.forEach(o => {
+        if (o.textContent.trim() === selectedLang) {
+          o.classList.add('active');
+        }
+      });
+
       updateLanguage(selectedLang);
       console.log(`Language switched to: ${selectedLang}`);
     });
@@ -167,6 +184,16 @@ document.addEventListener("DOMContentLoaded", function() {
       setActiveNav(navSequent);
     });
   }
+
+  const navShowStarts = document.querySelectorAll('.nav-show-start');
+  navShowStarts.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('skipStartScreen');
+      sessionStorage.setItem('isHomeReload', 'true');
+      location.reload(true);
+    });
+  });
 
   // Fallback / Backward Compatibility for old radio buttons if they still exist (hidden)
   var myDict = document.querySelector('.mydict');

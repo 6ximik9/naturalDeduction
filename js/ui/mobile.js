@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerLeft = document.querySelector('.header-left');
     const headerRight = document.querySelector('.header-right');
     const fontSelectContainer = document.querySelector('.custom-select');
-    const langSwitcher = document.querySelector('.lang-switcher');
+    const langSwitcher = document.querySelector('.top-header .lang-switcher');
     
     if (isMobile) {
       if (!targetSidebar) return;

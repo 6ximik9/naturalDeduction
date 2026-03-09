@@ -725,6 +725,11 @@ function generateSequentButtons() {
         btn.innerHTML = ruleLatex;
         btn.setAttribute('data-original-text', ruleLatex); // Store original text for stable identification
 
+        // Tag quantifier and equality rules
+        if (ruleLatex.includes('\\forall') || ruleLatex.includes('\\exists') || ruleLatex.includes('=')) {
+            btn.classList.add('quantifier-rule');
+        }
+
         const ruleName = getRuleName(ruleLatex);
 
         btn.onclick = () => {

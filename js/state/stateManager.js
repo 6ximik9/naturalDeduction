@@ -348,6 +348,7 @@ var homeButton = document.getElementById("home");
 homeButton.addEventListener("click", function () {
   var confirmation = confirm(t("confirm-go-main"));
   if (confirmation) {
+    sessionStorage.setItem('isHomeReload', 'true');
     location.reload(true);
   }
 });
