@@ -13,6 +13,7 @@ import {initProofView} from "./ui/proofView";
 import {updateLanguage, t} from "./core/i18n";
 
 import {initStartScreen} from './ui/modals/startScreen';
+import {isVL} from './state/logicSettings';
 
 let hasError = false;
 let inputText = "";
@@ -323,6 +324,11 @@ enterButton.addEventListener('click', function () {
     return;
   }
 
+  if (!validateInputForLogic(text)) {
+    shakeElement('enter', 5);
+    return;
+  }
+
   if (!validateInputForStyle(text, typeProof)) {
     shakeElement('enter', 5);
     return;
@@ -362,6 +368,70 @@ enterButton.addEventListener('click', function () {
   }
 
 });
+
+function validateInputForLogic(input) {
+  if (!isVL()) {
+    return true; // No restrictions for PR mode
+  }
+
+  try {
+    let ast = deductive.checkWithAntlr(input);
+    let invalidFound = false;
+
+    function checkNode(node) {
+      if (!node || typeof node !== 'object') return;
+      if (invalidFound) return;
+
+      node = deductive.getProof(node);
+
+      const invalidTypes = [
+        'forall', 'exists', 'quantifier',
+        'equality', 'predicate', 'function',
+        'addition', 'multiplication', 'successor', 'number'
+      ];
+
+      if (invalidTypes.includes(node.type)) {
+        invalidFound = true;
+        return;
+      }
+
+      // In VL mode, relation can only be simple proposition (no arguments/terms)
+      if (node.type === 'relation' && node.value && Array.isArray(node.value) && node.value.length > 0) {
+        invalidFound = true;
+        return;
+      }
+      
+      // Also predicate might have terms, but it's already caught in invalidTypes
+      
+      // Traverse children
+      for (let key in node) {
+        if (node.hasOwnProperty(key)) {
+          if (Array.isArray(node[key])) {
+            node[key].forEach(checkNode);
+          } else if (typeof node[key] === 'object' && node[key] !== null) {
+            checkNode(node[key]);
+          }
+        }
+      }
+    }
+
+    if (Array.isArray(ast)) {
+      ast.forEach(checkNode);
+    } else {
+      checkNode(ast);
+    }
+
+    if (invalidFound) {
+      alert(t("alert-invalid-vl-element"));
+      return false;
+    }
+
+    return true;
+  } catch (e) {
+    console.warn("Logic validation failed parsing, checking passed?", e);
+    return true;
+  }
+}
 
 function validateInputForStyle(input, style) {
   try {
@@ -507,11 +577,21 @@ export function shakeElement(elementId, times) {
   }
 
   let interval = 100; // час між кожною тряскою
+  let originalBg = element.style.backgroundColor;
+  let originalTransition = element.style.transition;
 
   element.classList.add('shake'); // Додаємо клас, який запускає анімацію
+  element.style.transition = 'background-color 0.3s ease';
+  element.style.backgroundColor = '#ef4444'; // Приємний червоний колір (Tailwind red-500)
 
   setTimeout(function () {
     element.classList.remove('shake'); // Видаляємо клас після завершення анімації
+    element.style.backgroundColor = originalBg;
+    
+    // Restore transition after the color reverts
+    setTimeout(() => {
+      element.style.transition = originalTransition;
+    }, 300);
   }, interval * times);
 }
 
