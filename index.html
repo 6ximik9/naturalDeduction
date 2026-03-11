@@ -850,6 +850,88 @@
     .start-btn:active {
       transform: translateY(0);
     }
+
+    /* --- MOBILE RESPONSIVENESS & SIDEBAR --- */
+    .mobile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .mobile-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed !important;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 260px !important;
+        background-color: var(--col-bg-sidebar) !important;
+      }
+      body.dark-mode .sidebar {
+        background-color: var(--col-bg-white) !important;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      #mobile-menu-btn {
+        display: flex !important;
+        padding: 6px !important;
+      }
+      
+      /* Make header elements smaller to fit */
+      .top-header {
+        padding: 0 16px !important;
+      }
+      
+      #enter {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        margin-left: auto !important;
+      }
+      
+      #proof-split-layout {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+      }
+      #proof-tools {
+        width: 100% !important;
+        height: auto !important;
+        flex-shrink: 0;
+        order: 2;
+        margin-top: 15px;
+      }
+      #proof-container {
+        width: 100% !important;
+        height: 400px !important;
+        flex-shrink: 0;
+        margin-top: 0 !important;
+        overflow: auto !important; /* Allow scroll for large trees */
+        order: 1;
+      }
+      .layout-divider {
+        display: none !important;
+      }
+      .content-area {
+        padding: 16px !important;
+      }
+      .button-container button {
+        font-size: 18px !important;
+        padding: 8px 10px !important;
+      }
+    }
   </style>
 </head>
 <body>

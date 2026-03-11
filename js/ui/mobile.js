@@ -33,25 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelectorAll('.sidebar .nav-link');
   navLinks.forEach(link => {
     link.addEventListener('click', (event) => {
-      if (window.innerWidth <= 768) {
-        // Prevent closing if the clicked element is the "Paste Example" button
-        // or inside the "Paste Example" dropdown list
-        const isPasteExampleBtn = event.currentTarget.id === 'pasteExampleBtn';
-        
-        if (!isPasteExampleBtn) {
-          closeSidebar();
-        }
-      }
+      // Sidebar will no longer close automatically when a link is clicked
+      // User must close it manually via overlay or toggle
     });
   });
 
-  // Also handle closing when clicking on an actual example item in the list
+  // Also handle example items
   const exampleItems = document.querySelectorAll('#exampleList li');
   exampleItems.forEach(item => {
     item.addEventListener('click', () => {
-       if (window.innerWidth <= 768) {
-         closeSidebar();
-       }
+       // Sidebar remains open
     });
   });
 
