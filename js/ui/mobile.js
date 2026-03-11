@@ -60,8 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const isMobile = window.innerWidth <= 768;
     const headerLeft = document.querySelector('.header-left');
     const headerRight = document.querySelector('.header-right');
-    const fontSelectContainer = document.querySelector('.custom-select');
-    const langSwitcher = document.querySelector('.top-header .lang-switcher');
+    
+    // Select containers from either header or sidebar to ensure they are found after moving
+    const fontSelectContainer = document.querySelector('.top-header .custom-select') || 
+                                document.querySelector('.sidebar .custom-select');
+    const langSwitcher = document.querySelector('.top-header .lang-switcher') || 
+                         document.querySelector('.sidebar .lang-switcher');
     
     if (isMobile) {
       if (!targetSidebar) return;
@@ -113,11 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Move back to header
       if (fontSelectContainer && headerLeft && fontSelectContainer.parentElement !== headerLeft) {
         headerLeft.appendChild(fontSelectContainer);
-        fontSelectContainer.style.width = 'auto';
+        fontSelectContainer.style.width = '';
         const select = fontSelectContainer.querySelector('select');
         if (select) {
-          select.style.border = 'none';
-          select.style.backgroundColor = 'transparent';
+          select.style.border = '';
+          select.style.backgroundColor = '';
+          select.style.borderRadius = '';
         }
       }
       if (langSwitcher && headerRight && langSwitcher.parentElement !== headerRight) {
@@ -128,9 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           headerRight.appendChild(langSwitcher);
         }
-        langSwitcher.style.width = 'auto';
-        langSwitcher.style.backgroundColor = 'transparent';
-        langSwitcher.style.padding = '0';
+        langSwitcher.style.display = '';
+        langSwitcher.style.justifyContent = '';
+        langSwitcher.style.width = '';
+        langSwitcher.style.backgroundColor = '';
+        langSwitcher.style.borderRadius = '';
+        langSwitcher.style.padding = '';
       }
     }
   }

@@ -465,7 +465,7 @@
       flex-direction: column;
       gap: 12px;
     }
-    
+
     .sidebar-radio, .sidebar-checkbox {
       display: flex;
       align-items: center;
@@ -478,17 +478,17 @@
       transition: all 0.2s;
       position: relative;
     }
-    
+
     .sidebar-radio:hover, .sidebar-checkbox:hover {
       color: white;
     }
-    
+
     .sidebar-radio input, .sidebar-checkbox input {
       position: absolute;
       opacity: 0;
       cursor: pointer;
     }
-    
+
     .custom-radio {
       width: 18px;
       height: 18px;
@@ -500,11 +500,11 @@
       transition: all 0.2s;
       flex-shrink: 0;
     }
-    
+
     .sidebar-radio input:checked ~ .custom-radio {
       border-color: var(--col-accent);
     }
-    
+
     .sidebar-radio input:checked ~ .custom-radio::after {
       content: '';
       width: 10px;
@@ -512,7 +512,7 @@
       background: var(--col-accent);
       border-radius: 50%;
     }
-    
+
     .custom-checkbox {
       width: 18px;
       height: 18px;
@@ -524,12 +524,12 @@
       transition: all 0.2s;
       flex-shrink: 0;
     }
-    
+
     .sidebar-checkbox input:checked ~ .custom-checkbox {
       background: var(--col-accent);
       border-color: var(--col-accent);
     }
-    
+
     .sidebar-checkbox input:checked ~ .custom-checkbox::after {
       content: '';
       width: 4px;
@@ -539,7 +539,7 @@
       transform: rotate(45deg);
       margin-bottom: 2px;
     }
-    
+
     .sidebar-radio input:checked ~ span[data-i18n],
     .sidebar-checkbox input:checked ~ span[data-i18n] {
       color: white;
@@ -586,29 +586,56 @@
       visibility: hidden;
       pointer-events: none;
     }
-    
+
     .start-container {
       background: white;
       border: 1px solid var(--col-border);
       border-radius: 12px;
       padding: 40px;
-      width: 90%;
-      max-width: 800px;
+      width: 95%;
+      max-width: 1000px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
       display: flex;
       flex-direction: column;
       gap: 30px;
     }
-    
+
     body.dark-mode .start-container {
       background: var(--col-bg-white);
       border-color: var(--col-border);
       color: var(--col-text-main);
     }
-    
+
     .start-header {
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
+
+    .start-top-row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      margin-bottom: -10px;
+    }
+
+    .start-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .start-top-row {
+        justify-content: center;
+        margin-bottom: 10px;
+      }
+      .start-header h1 {
+        margin-top: 0 !important;
+      }
+    }
+
     .start-header h1 {
       margin: 0 0 10px 0;
       font-size: 28px;
@@ -619,195 +646,209 @@
       color: var(--col-text-muted);
       font-size: 15px;
     }
-    
+
     .start-sections {
-      display: flex;
-      gap: 30px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 25px;
     }
-    
+
+    @media (max-width: 900px) {
+      .start-sections {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+      .start-container {
+        padding: 25px;
+        margin: 20px;
+        height: 90vh;
+        overflow-y: auto;
+      }
+    }
+
     .start-section {
-      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
     }
-    
+
     .start-section h3 {
-      margin: 0;
-      font-size: 16px;
-      color: var(--col-text-main);
+      margin: 0 0 5px 0;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--col-text-muted);
       border-bottom: 1px solid var(--col-border);
-      padding-bottom: 8px;
+      padding-bottom: 6px;
+      text-align: left;
     }
-    
+
     .radio-card {
       display: block;
       position: relative;
       cursor: pointer;
-      padding: 15px;
+      padding: 12px;
       border: 2px solid var(--col-border);
-      border-radius: 8px;
+      border-radius: 10px;
       transition: all 0.2s;
+      background: #fdfdfd;
     }
+
+    body.dark-mode .radio-card {
+      background: rgba(255,255,255,0.02);
+    }
+
     .radio-card:hover {
-      border-color: #9ca3af;
+      border-color: var(--col-accent);
+      background: #f9fafb;
     }
-    .radio-card input[type="radio"] {
+
+    .radio-card input {
       position: absolute;
       opacity: 0;
-      cursor: pointer;
     }
-    .radio-card .card-content {
+
+    .radio-card input:checked + .card-content {
+      /* Optional: style for checked state */
+    }
+
+    .radio-card:has(input:checked) {
+      border-color: var(--col-accent);
+      background: rgba(59, 130, 246, 0.04);
+      box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+    }
+
+    body.dark-mode .radio-card:has(input:checked) {
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .card-content {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
     }
-    .radio-card .card-title {
+
+    .card-title {
       font-weight: 600;
       font-size: 15px;
+      color: var(--col-text-main);
     }
-    .radio-card .card-desc {
-      font-size: 13px;
+
+    .card-desc {
+      font-size: 12px;
       color: var(--col-text-muted);
+      line-height: 1.4;
     }
-    .radio-card input:checked ~ .card-content .card-title {
-      color: var(--col-accent, #2563eb);
+
+    /* Compact Styles */
+    .compact-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
-    .radio-card input:checked ~ .card-content {
-      /* Optional: slight background tint */
+
+    .compact-row {
+      display: flex;
+      gap: 10px;
     }
-    .radio-card input:checked + .card-content::before {
-      content: '';
-      position: absolute;
-      top: -2px; left: -2px; right: -2px; bottom: -2px;
-      border: 2px solid var(--col-accent, #2563eb);
-      border-radius: 8px;
+
+    .compact-row .radio-card {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
     }
-    
+
+    .compact-row .card-title {
+      font-size: 13px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 5px 0;
+    }
+
     .checkbox-item {
       display: flex;
       align-items: center;
       gap: 10px;
       cursor: pointer;
-      padding: 10px;
+      padding: 10px 12px;
       border: 1px solid var(--col-border);
-      border-radius: 6px;
-      transition: opacity 0.2s;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: 0.2s;
     }
-    .checkbox-item input {
-      cursor: pointer;
+
+    .checkbox-item:hover {
+      background: rgba(59, 130, 246, 0.05);
+      border-color: var(--col-accent);
     }
+
+    body.dark-mode .checkbox-item:hover {
+      background: var(--col-bg-sidebar);
+      border-color: var(--col-accent);
+      color: white;
+    }
+
+    .checkbox-item:hover span[data-i18n] {
+      color: inherit;
+    }
+
+    body.dark-mode .checkbox-item:hover span[data-i18n] {
+      color: white !important;
+    }
+
     .checkbox-item.disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      background: #f3f4f6;
+      border-color: var(--col-border);
+      filter: grayscale(1);
       pointer-events: none;
     }
-    
-    .start-footer {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-    }
-    .start-btn {
-      background: var(--col-accent, #2563eb);
-      color: white;
-      border: none;
-      padding: 12px 32px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .start-btn:hover {
-      background: #1d4ed8;
-    }
-    
-    @media (max-width: 768px) {
-      .start-sections {
-        flex-direction: column;
-      }
-    }
-    /* --- MOBILE RESPONSIVENESS & SIDEBAR --- */
-    .mobile-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-    .mobile-overlay.active {
-      opacity: 1;
-      visibility: visible;
+
+    body.dark-mode .checkbox-item.disabled {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--col-border);
     }
 
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed !important;
-        left: 0;
-        top: 0;
-        z-index: 1000;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        width: 260px !important;
-        background-color: var(--col-bg-sidebar) !important;
-      }
-      body.dark-mode .sidebar {
-        background-color: var(--col-bg-white) !important;
-      }
-      .sidebar.open {
-        transform: translateX(0);
-      }
-      #mobile-menu-btn {
-        display: flex !important;
-        padding: 6px !important;
-      }
-      
-      /* Make header elements smaller to fit */
-      .top-header {
-        padding: 0 16px !important;
-      }
-      
-      #enter {
-        padding: 8px 12px !important;
-        font-size: 13px !important;
-        margin-left: auto !important;
-      }
-      
-      #proof-split-layout {
-        flex-direction: column !important;
-        overflow-y: auto !important;
-      }
-      #proof-tools {
-        width: 100% !important;
-        height: auto !important;
-        flex-shrink: 0;
-        order: 2;
-        margin-top: 15px;
-      }
-      #proof-container {
-        width: 100% !important;
-        height: 400px !important;
-        flex-shrink: 0;
-        margin-top: 0 !important;
-        overflow: auto !important; /* Allow scroll for large trees */
-        order: 1;
-      }
-      .layout-divider {
-        display: none !important;
-      }
-      .content-area {
-        padding: 16px !important;
-      }
-      .button-container button {
-        font-size: 18px !important;
-        padding: 8px 10px !important;
-      }
+    .checkbox-item input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .start-footer {
+      padding-top: 10px;
+      border-top: 1px solid var(--col-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .start-btn {
+      background: var(--col-accent);
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .start-btn:hover {
+      background: var(--col-accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .start-btn:active {
+      transform: translateY(0);
     }
   </style>
 </head>
@@ -816,27 +857,30 @@
 <!-- Start Screen -->
 <div id="start-screen">
   <div class="start-container">
-    <div class="start-header" style="position: relative;">
-      <div style="position: absolute; top: -20px; right: -20px; display: flex; align-items: center; gap: 15px;">
-        <div class="lang-switcher">
-          <div class="lang-opt active">EN</div>
-          <div class="lang-opt">SK</div>
-          <div class="lang-opt">UA</div>
-        </div>
-        <div class="theme-toggle" data-i18n-title="theme-toggle" title="Switch Theme">
-          <i class="ri-sun-fill" style="color: #f59e0b; margin-left: 5px;"></i>
-          <i class="ri-moon-clear-line" style="margin-right: 5px;"></i>
+    <div class="start-header">
+      <div class="start-top-row">
+        <div style="flex: 1;"></div>
+        <div class="start-controls">
+          <div class="lang-switcher">
+            <div class="lang-opt active">EN</div>
+            <div class="lang-opt">SK</div>
+            <div class="lang-opt">UA</div>
+          </div>
+          <div class="theme-toggle" data-i18n-title="theme-toggle" title="Switch Theme">
+            <i class="ri-sun-fill" style="color: #f59e0b; margin-left: 5px;"></i>
+            <i class="ri-moon-clear-line" style="margin-right: 5px;"></i>
+          </div>
         </div>
       </div>
-      <h1 data-i18n="start-title">Welcome to LogicProof</h1>
+      <h1 data-i18n="start-title" style="margin-top: -10px;">Welcome to LogicProof</h1>
       <p data-i18n="start-subtitle">Select your proof system and logic level to begin.</p>
     </div>
 
     <div class="start-sections">
-      <!-- Section 1: System -->
+      <!-- Column 1: System -->
       <div class="start-section">
         <h3 data-i18n="start-system">Proof System</h3>
-        
+
         <label class="radio-card">
           <input type="radio" name="proof-system" value="gentzen" checked>
           <div class="card-content">
@@ -862,10 +906,10 @@
         </label>
       </div>
 
-      <!-- Section 2 & 3: Logic & Theories -->
+      <!-- Column 2: Logic & Paradigm -->
       <div class="start-section">
         <h3 data-i18n="start-logic">Logic Level</h3>
-        
+
         <label class="radio-card">
           <input type="radio" name="logic-mode" value="VL">
           <div class="card-content">
@@ -882,28 +926,53 @@
           </div>
         </label>
 
-        <div style="margin-top: 15px;">
-          <h3 data-i18n="start-theories">Theories</h3>
-          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-            <label class="checkbox-item" id="theory-robinson-container">
-              <input type="checkbox" id="theory-robinson" checked>
-              <span data-i18n="start-theory-robinson">Robinson Arithmetic</span>
-            </label>
-            <label class="checkbox-item" id="theory-order-container">
-              <input type="checkbox" id="theory-order" checked>
-              <span data-i18n="start-theory-order">Order Axioms</span>
-            </label>
-          </div>
+        <h3 data-i18n="start-paradigm" style="margin-top: 5px;">Logic Paradigm</h3>
+        <div class="compact-row">
+          <label class="radio-card">
+            <input type="radio" name="logic-paradigm" value="CLASSICAL" checked>
+            <div class="card-content">
+              <span class="card-title" data-i18n="start-paradigm-classical">Classical</span>
+            </div>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="logic-paradigm" value="INTUITIONISTIC">
+            <div class="card-content">
+              <span class="card-title" data-i18n="start-paradigm-intuitionistic">Intuitionistic</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Column 3: Theories & Settings -->
+      <div class="start-section">
+        <h3 data-i18n="start-theories">Theories</h3>
+        <div class="checkbox-group">
+          <label class="checkbox-item" id="theory-robinson-container">
+            <input type="checkbox" id="theory-robinson" checked>
+            <span data-i18n="start-theory-robinson">Robinson Arithmetic</span>
+          </label>
+          <label class="checkbox-item" id="theory-order-container">
+            <input type="checkbox" id="theory-order" checked>
+            <span data-i18n="start-theory-order">Order Axioms</span>
+          </label>
+        </div>
+
+        <div style="margin-top: auto; padding-bottom: 5px;">
+          <h3 style="border: none; color: var(--col-text-muted); font-size: 11px;">Settings</h3>
+          <label class="checkbox-item" style="border: none;">
+            <input type="checkbox" id="skip-start-screen">
+            <span data-i18n="start-dont-show" style="font-size: 13px;">Don't show this screen again</span>
+          </label>
         </div>
       </div>
     </div>
 
-    <div class="start-footer" style="flex-direction: column; gap: 15px;">
+    <div class="start-footer">
+      <div style="flex: 1;"></div>
       <button class="start-btn" id="start-btn" data-i18n="start-button">Start Work</button>
-      <label class="checkbox-item" style="border: none; padding: 0; font-size: 13px; color: var(--col-text-muted); justify-content: center;">
-        <input type="checkbox" id="skip-start-screen">
-        <span data-i18n="start-dont-show">Don't show this screen again</span>
-      </label>
+      <div style="flex: 1; text-align: right;">
+        <!-- Placeholder for potential future icons/links -->
+      </div>
     </div>
   </div>
 </div>
@@ -970,7 +1039,7 @@
         <span class="custom-radio"></span>
         <span data-i18n="start-logic-pl">PL</span>
       </label>
-      
+
       <div class="sidebar-sub-settings" id="sb-theories-container">
         <label class="sidebar-checkbox">
           <input type="checkbox" id="sb-theory-robinson" checked>
@@ -983,6 +1052,20 @@
           <span data-i18n="start-theory-order">Order</span>
         </label>
       </div>
+    </div>
+
+    <div class="menu-title" style="margin-top: 10px;" data-i18n="start-paradigm">Logic Paradigm</div>
+    <div class="sidebar-settings-group">
+      <label class="sidebar-radio">
+        <input type="radio" name="sb-logic-paradigm" value="CLASSICAL" checked>
+        <span class="custom-radio"></span>
+        <span data-i18n="start-paradigm-classical">Classical</span>
+      </label>
+      <label class="sidebar-radio">
+        <input type="radio" name="sb-logic-paradigm" value="INTUITIONISTIC">
+        <span class="custom-radio"></span>
+        <span data-i18n="start-paradigm-intuitionistic">Intuitionistic</span>
+      </label>
     </div>
   </div>
 

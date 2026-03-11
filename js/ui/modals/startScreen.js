@@ -1,4 +1,4 @@
-import { setLogicMode, setTheory, LOGIC_MODES, isVL, logicSettings } from '../../state/logicSettings';
+import { setLogicMode, setLogicParadigm, setTheory, LOGIC_MODES, LOGIC_PARADIGMS, isVL, logicSettings } from '../../state/logicSettings';
 
 export function initStartScreen() {
   const startScreen = document.getElementById('start-screen');
@@ -8,6 +8,7 @@ export function initStartScreen() {
   if (!startScreen || !startBtn) return;
 
   const logicModeRadios = document.querySelectorAll('input[name="logic-mode"]');
+  const logicParadigmRadios = document.querySelectorAll('input[name="logic-paradigm"]');
   const proofSystemRadios = document.querySelectorAll('input[name="proof-system"]');
   const theoryRobinson = document.getElementById('theory-robinson');
   const theoryOrder = document.getElementById('theory-order');
@@ -18,6 +19,10 @@ export function initStartScreen() {
   const savedSettings = JSON.parse(localStorage.getItem('logicProofSettings') || '{}');
   if (savedSettings.mode) {
     const radio = document.querySelector(`input[name="logic-mode"][value="${savedSettings.mode}"]`);
+    if (radio) radio.checked = true;
+  }
+  if (savedSettings.paradigm) {
+    const radio = document.querySelector(`input[name="logic-paradigm"][value="${savedSettings.paradigm}"]`);
     if (radio) radio.checked = true;
   }
   if (savedSettings.system) {
@@ -50,6 +55,10 @@ export function initStartScreen() {
     const selectedLogic = document.querySelector('input[name="logic-mode"]:checked').value;
     setLogicMode(LOGIC_MODES[selectedLogic]);
 
+    // 1.5 Get Logic Paradigm
+    const selectedParadigm = document.querySelector('input[name="logic-paradigm"]:checked').value;
+    setLogicParadigm(LOGIC_PARADIGMS[selectedParadigm]);
+
     // 2. Get Theories
     setTheory('robinson', theoryRobinson.checked);
     setTheory('order', theoryOrder.checked);
@@ -57,6 +66,7 @@ export function initStartScreen() {
     // 3. Save to localStorage for next skip
     localStorage.setItem('logicProofSettings', JSON.stringify({
       mode: selectedLogic,
+      paradigm: selectedParadigm,
       system: document.querySelector('input[name="proof-system"]:checked').value,
       robinson: theoryRobinson.checked,
       order: theoryOrder.checked
@@ -79,6 +89,7 @@ export function initStartScreen() {
     
     // Theories are only available for PL AND (Gentzen OR Fitch)
     const shouldDisable = (selectedLogic === 'VL') || (selectedSystem === 'sequent');
+    const theoriesTitle = document.querySelector('[data-i18n="start-theories"]');
     
     if (shouldDisable) {
       theoryRobinson.disabled = true;
@@ -88,12 +99,14 @@ export function initStartScreen() {
       
       robinsonContainer.classList.add('disabled');
       orderContainer.classList.add('disabled');
+      if (theoriesTitle) theoriesTitle.style.opacity = '0.5';
     } else {
       theoryRobinson.disabled = false;
       theoryOrder.disabled = false;
       
       robinsonContainer.classList.remove('disabled');
       orderContainer.classList.remove('disabled');
+      if (theoriesTitle) theoriesTitle.style.opacity = '1';
     }
   }
 
@@ -134,6 +147,7 @@ export function initStartScreen() {
 function initSidebarSettings() {
   // Listeners for Sidebar logic toggles
   const sidebarRadios = document.querySelectorAll('input[name="sb-logic-mode"]');
+  const sidebarParadigmRadios = document.querySelectorAll('input[name="sb-logic-paradigm"]');
   const sidebarRobinsons = document.querySelectorAll('#sb-theory-robinson');
   const sidebarOrders = document.querySelectorAll('#sb-theory-order');
 
@@ -148,6 +162,15 @@ function initSidebarSettings() {
         setTheory('order', false);
       }
       
+      syncSidebarState();
+      applyLogicFilters();
+    });
+  });
+
+  sidebarParadigmRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const paradigm = e.target.value;
+      setLogicParadigm(LOGIC_PARADIGMS[paradigm]);
       syncSidebarState();
       applyLogicFilters();
     });
@@ -193,8 +216,9 @@ function syncSidebarState() {
     setTheory('order', false);
   }
 
-  // Sync logic mode radios
+  // Sync logic mode and paradigm radios
   document.querySelectorAll(`input[name="sb-logic-mode"][value="${logicSettings.mode}"]`).forEach(r => r.checked = true);
+  document.querySelectorAll(`input[name="sb-logic-paradigm"][value="${logicSettings.paradigm}"]`).forEach(r => r.checked = true);
 
   // Sync theory checkboxes and containers
   const theoryContainers = document.querySelectorAll('#sb-theories-container');
@@ -214,9 +238,11 @@ function syncSidebarState() {
   theoryContainers.forEach(c => {
     if (shouldDisableTheories) {
       c.style.opacity = '0.5';
+      c.style.filter = 'grayscale(1)';
       c.style.pointerEvents = 'none';
     } else {
       c.style.opacity = '1';
+      c.style.filter = 'none';
       c.style.pointerEvents = 'auto';
     }
   });

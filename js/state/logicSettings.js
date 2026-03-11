@@ -3,8 +3,14 @@ export const LOGIC_MODES = {
   PL: 'PL'  // Predicate Logic
 };
 
+export const LOGIC_PARADIGMS = {
+  CLASSICAL: 'CLASSICAL',
+  INTUITIONISTIC: 'INTUITIONISTIC'
+};
+
 export const logicSettings = {
   mode: LOGIC_MODES.VL,
+  paradigm: LOGIC_PARADIGMS.CLASSICAL,
   theories: {
     robinson: false,
     order: false
@@ -13,6 +19,10 @@ export const logicSettings = {
 
 export function setLogicMode(mode) {
   logicSettings.mode = mode;
+}
+
+export function setLogicParadigm(paradigm) {
+  logicSettings.paradigm = paradigm;
 }
 
 export function setTheory(theory, isActive) {
@@ -27,6 +37,10 @@ export function isVL() {
 
 export function isPL() {
   return logicSettings.mode === LOGIC_MODES.PL;
+}
+
+export function isIntuitionistic() {
+  return logicSettings.paradigm === LOGIC_PARADIGMS.INTUITIONISTIC;
 }
 
 export function getActiveAxioms(robinsonAxioms, orderAxioms) {

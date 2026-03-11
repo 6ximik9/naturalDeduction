@@ -16,7 +16,7 @@ import {formulaToString} from "../../core/formatter.js";
 import {addProofTextHoverEffects, initializeProofTextHover} from '../../ui/proofTextHover.js';
 import {validateRobinsonAxioms} from "../../core/robinsonAxiomValidator.js";
 import {parseProofFromLastSide} from "./rulesGentzen";
-import { getActiveAxioms, logicSettings, isVL } from '../../state/logicSettings';
+import { getActiveAxioms, logicSettings, isVL, isIntuitionistic } from '../../state/logicSettings';
 
 export let deductionContext = {
   hypotheses: [], // Список гіпотез
@@ -685,7 +685,13 @@ function generateButtons(buttonCount, buttonTexts) {
 
   for (let i = 0; i < buttonCount; i++) {
     const text = buttonTexts[i];
-    
+
+    if (isIntuitionistic()) {
+        if (text === GENTZEN_BUTTONS[1]) {
+            continue; // Hide RAA (\bot E2) in Intuitionistic Logic
+        }
+    }
+
     // Header for Robinson Arithmetic - detect by any Robinson axiom if not shown yet
     const isRobinsonAxiom = ROBINSON_AXIOMS.some(ax => text.includes(ax));
     if (isAxiomsTab && isRobinsonAxiom && !showedRobinsonHeader) {

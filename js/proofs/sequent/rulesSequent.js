@@ -5,6 +5,7 @@ import * as deductive from '../../core/deductiveEngine.js';
 import { t } from '../../core/i18n.js';
 import { createInputModal } from '../../ui/modals/input.js';
 import { createExchangeModal } from '../../ui/modals/exchange.js';
+import { isIntuitionistic } from '../../state/logicSettings.js';
 
 // --- Logic Helpers ---
 
@@ -300,7 +301,7 @@ export const RULES = {
         if (!currentSeq || currentSeq.isClosed) return;
 
         let idx = selectedFormulaIndex.index;
-        
+
         if (idx === -1) {
             idx = currentSeq.succedent.findIndex(f => unwrap(f).type === 'implication');
             if (idx === -1) return;
@@ -309,21 +310,26 @@ export const RULES = {
         }
 
         if (idx === -1) return;
-        
+
         const targetFormula = unwrap(currentSeq.succedent[idx]);
 
         if (targetFormula.type !== 'implication') return;
 
         const { ant, suc } = cloneSequentData(currentSeq);
         suc.splice(idx, 1);
-        
+
         const A = targetFormula.left || targetFormula.operands[0];
         const B = targetFormula.right || targetFormula.operands[1];
 
-        const newSeq = new Sequent([...ant, A], [...suc, B]);
+        const newSuc = [...suc, B];
+        if (isIntuitionistic() && newSuc.length > 1) {
+            alert(t("alert-intuitionistic-succedent"));
+            return;
+        }
+
+        const newSeq = new Sequent([...ant, A], newSuc);
         addChildrenToTree(currentSeq, [newSeq], "⇒r");
     },
-
     // Implication Left: Γ, A ⇒ B ⊢ Δ  ==>  Γ ⊢ A, Δ  AND  Γ, B ⊢ Δ
     implLeft: () => {
         const currentSeq = getActiveSequent();
@@ -763,15 +769,18 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
                 substituteVariable(newFormula, variableName, term);
 
                 const { ant, suc } = cloneSequentData(currentSeq);
-                
+
                 if (side === 'left') {
                     ant.splice(idx, 1, newFormula);
                 } else {
                     suc.splice(idx, 1, newFormula);
+                    if (isIntuitionistic() && suc.length > 1) {
+                        alert(t("alert-intuitionistic-succedent"));
+                        return;
+                    }
                 }
 
                 addChildrenToTree(currentSeq, [new Sequent(ant, suc)], ruleName);
-
             } catch (e) {
                 console.error("Substitution error:", e);
                 alert(t("alert-error-parse-term"));
@@ -866,15 +875,18 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
                 substituteVariable(newFormula, variableName, newVarTerm);
 
                 const { ant, suc } = cloneSequentData(currentSeq);
-                
+
                 if (side === 'left') {
                     ant.splice(idx, 1, newFormula);
                 } else {
                     suc.splice(idx, 1, newFormula);
+                    if (isIntuitionistic() && suc.length > 1) {
+                        alert(t("alert-intuitionistic-succedent"));
+                        return;
+                    }
                 }
 
                 addChildrenToTree(currentSeq, [new Sequent(ant, suc)], ruleName);
-
             } catch (e) {
                 console.error("Eigenvariable error:", e);
                 alert(t("alert-parse-error"));
@@ -979,7 +991,12 @@ function applyRightRule(transformFn, ruleName) {
     }
 
     const { ant, suc } = cloneSequentData(currentSeq);
-    suc.splice(idx, 1, ...newFormulas); 
+    suc.splice(idx, 1, ...newFormulas);
+
+    if (isIntuitionistic() && suc.length > 1) {
+        alert(t("alert-intuitionistic-succedent"));
+        return;
+    }
 
     const newSeq = new Sequent(ant, suc);
     addChildrenToTree(currentSeq, [newSeq], ruleName);

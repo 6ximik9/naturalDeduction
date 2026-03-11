@@ -17,7 +17,7 @@ import {formulaToString} from "../../core/formatter";
 import {ROBINSON_AXIOMS} from "../../core/robinsonAxiomValidator";
 import {ORDER_AXIOMS} from "../../core/orderAxiomValidator";
 import {t} from "../../core/i18n";
-import { getActiveAxioms, logicSettings, isVL } from '../../state/logicSettings';
+import { getActiveAxioms, logicSettings, isVL, isIntuitionistic } from '../../state/logicSettings';
 
 
 let fitchProof = [];
@@ -207,7 +207,7 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
 
   // Check if this is for axioms - use both tab state and content detection
   const tab3 = document.getElementById('tab3');
-  const isAxiomsTab = (tab3 && tab3.checked) || 
+  const isAxiomsTab = (tab3 && tab3.checked) ||
                       (buttonTexts.length > 0 && buttonTexts.some(t => t.includes('∀x') && (t.includes('s(x)') || t.includes('<'))));
 
   if (branchIndex !== 0 && !isAxiomsTab) {
@@ -248,7 +248,13 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
 
   for (let i = 0; i < buttonCount; i++) {
     const text = buttonTexts[i];
-    
+
+    if (isIntuitionistic()) {
+        if (text === FITCH_BUTTONS[10] || text === FITCH_BUTTONS[11]) {
+            continue; // Hide RAA (C, m-n) and Double Negation (\neg\neg E)
+        }
+    }
+
     // Header for Robinson Arithmetic
     const isRobinsonAxiom = ROBINSON_AXIOMS.some(ax => text.includes(ax));
     if (isAxiomsTab && isRobinsonAxiom && !showedRobinsonHeader) {
@@ -259,7 +265,7 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
       buttonContainer.appendChild(header);
       showedRobinsonHeader = true;
     }
-    
+
     // Header for Linear Order
     const isOrderAxiom = ORDER_AXIOMS.some(ax => text.includes(ax));
     if (isAxiomsTab && isOrderAxiom && !showedOrderHeader) {
@@ -303,7 +309,7 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
        button.style.minHeight = '60px';
     } else {
        // Prevent buttons from spanning 100% width when there are few rules shown
-       button.style.flex = '0 1 auto'; 
+       button.style.flex = '0 1 auto';
     }
 
     buttonContainer.appendChild(button);
@@ -321,7 +327,7 @@ export function toggleSmartMode() {
   // }
 
   helpButtonToggleState = !helpButtonToggleState;
-  
+
   if (helpButtonToggleState) {
     // Show Recommended Rules
     processExpression("HelpToggle", 0);
@@ -635,13 +641,13 @@ function addBranch(formulas, title) {
     const div = document.createElement('div');
     div.className = 'fitch_formula';
     div.style.display = 'flex';
-    
+
     let formula = formulas[0];
     div.textContent = deductive.convertToLogicalExpression(getProof(checkWithAntlr(formula)));
 
     fitchBranch.appendChild(div);
     fitchProof.push({formula, title, branchIndex});
-    
+
     // Створюємо div для назви
     const titleDiv = document.createElement('div');
     titleDiv.textContent = title; // Використання однієї і тієї ж назви для кожної формули
@@ -704,7 +710,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
     } else {
       clickedBranch.splice(foundIndex, 1);
       clickedElement.style.background = '';
-      
+
       const sbRules = document.getElementById('sb-rules');
       if (sbRules) sbRules.click();
     }
@@ -736,7 +742,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
       if (spanElement) {
         spanElement.remove();
       }
-      
+
       // Update indices for remaining selected elements
       clickedProofs.forEach((obj, idx) => {
         let remainingSpan = obj.element.querySelector('.indexC');
@@ -745,7 +751,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
         }
       });
     }
-    
+
     if (window.updateFitchParenthesesButtons) {
         window.updateFitchParenthesesButtons();
     }
@@ -873,7 +879,7 @@ export function clearItems() {
     }
   });
   clickedBranch = [];
-  
+
   if (window.updateFitchParenthesesButtons) {
       window.updateFitchParenthesesButtons();
   }
@@ -882,14 +888,14 @@ export function clearItems() {
   // We use 1 to indicate "All Rules" mode, but the empty selection check inside processExpression
   // will ensure buttons are generated in disabled state regardless.
   // Exception: If we are in "Axioms" tab (tab3), we should respect that, but processExpression
-  // currently defaults to generating standard buttons. 
+  // currently defaults to generating standard buttons.
   // However, since we are clearing items, likely we want to reset to a neutral state.
   // The user can switch tabs if needed.
   // Note: If the user is on the Axioms tab, this might switch the view to "All Rules".
   // To avoid this, we could check the active tab.
   const activeTab = document.querySelector('.tab-trigger.active-tab');
   const isAxiomsTab = document.getElementById('tab3') && document.getElementById('tab3').checked;
-  
+
   if (isAxiomsTab) {
       // Re-trigger the tab click logic for Axioms to refresh (disable) them
       const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
@@ -934,7 +940,7 @@ function addOrRemoveParenthesesFitch() {
 
     // Enable all first
     [addBtn, delBtn, retBtn].forEach(btn => { if(btn) toggleButtonState(btn, true); });
-    
+
     // Disable the active one if specified, otherwise default to Original (retBtn)
     if (clickedBtn) {
         toggleButtonState(clickedBtn, false);
@@ -949,7 +955,7 @@ function addOrRemoveParenthesesFitch() {
   addBtn.addEventListener('click', function (e) {
     if (e) e.preventDefault();
     if (!clickedProofs || clickedProofs.length === 0) return;
-    
+
     clickedProofs.forEach(function (item) {
       const spanElement = item.element.querySelector('span.indexC');
       if (spanElement) spanElement.remove();
@@ -997,7 +1003,7 @@ function addOrRemoveParenthesesFitch() {
        if (item.element.dataset.original) {
            item.element.textContent = item.element.dataset.original;
        }
-       
+
        if (spanElement) item.element.appendChild(spanElement);
     });
     updateButtons(retBtn);
