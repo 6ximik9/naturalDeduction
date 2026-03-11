@@ -879,12 +879,16 @@
         transition: transform 0.3s ease;
         width: 260px !important;
         background-color: var(--col-bg-sidebar) !important;
+        pointer-events: none; /* Fix: prevents overlapping rules */
+        visibility: hidden;    /* Fix: ensures it's truly gone when closed */
       }
       body.dark-mode .sidebar {
         background-color: var(--col-bg-white) !important;
       }
       .sidebar.open {
         transform: translateX(0);
+        pointer-events: auto;
+        visibility: visible;
       }
       #mobile-menu-btn {
         display: flex !important;
