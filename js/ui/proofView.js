@@ -110,6 +110,83 @@ export function initProofView() {
         }
     });
 
+    // --- Touch Support for Panning and Pinch-to-Zoom ---
+    let initialTouchDist = -1;
+    let initialTouchScale = 1;
+
+    proofContainer.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            // Single touch for panning
+            const touch = e.touches[0];
+            if (touch.target.closest('button') || 
+                touch.target.closest('input') || 
+                touch.target.closest('textarea') || 
+                touch.target.closest('.monaco-editor') ||
+                touch.target.closest('.buttonText') ||
+                touch.target.closest('#saveBtn')) return;
+
+            isDragging = true;
+            startX = touch.clientX - translateX;
+            startY = touch.clientY - translateY;
+            mouseStartX = touch.clientX;
+            mouseStartY = touch.clientY;
+        } else if (e.touches.length === 2) {
+            // Double touch for pinch-to-zoom
+            isDragging = false; // Disable panning while zooming
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialTouchDist = dist;
+            initialTouchScale = scale;
+        }
+    }, { passive: false });
+
+    proofContainer.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1 && isDragging) {
+            e.preventDefault(); // Prevent page scroll
+            const touch = e.touches[0];
+            translateX = touch.clientX - startX;
+            translateY = touch.clientY - startY;
+            updateTransform();
+        } else if (e.touches.length === 2 && initialTouchDist > 0) {
+            e.preventDefault(); // Prevent page zoom
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            
+            // Calculate mid point of the two fingers for zoom center
+            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            
+            // Determine scale change
+            const ratio = dist / initialTouchDist;
+            const newScale = Math.min(Math.max(0.1, initialTouchScale * ratio), 5);
+            
+            // Apply zoom centered on fingers
+            const scaleRatio = newScale / scale;
+            const rect = proofContainer.getBoundingClientRect();
+            const mx = midX - rect.left;
+            const my = midY - rect.top;
+
+            translateX = mx - (mx - translateX) * scaleRatio;
+            translateY = my - (my - translateY) * scaleRatio;
+            scale = newScale;
+            
+            updateTransform();
+        }
+    }, { passive: false });
+
+    proofContainer.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) {
+            initialTouchDist = -1;
+        }
+        if (e.touches.length === 0) {
+            isDragging = false;
+        }
+    });
+
     // Prevent click only if dragged significantly
     proof.addEventListener('click', (e) => {
          const dist = Math.sqrt(Math.pow(e.clientX - mouseStartX, 2) + Math.pow(e.clientY - mouseStartY, 2));
