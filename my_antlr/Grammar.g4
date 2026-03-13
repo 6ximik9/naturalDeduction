@@ -112,10 +112,9 @@ basicTerm: '(' addExpr ')'            // Parenthesized arithmetic
          | successorFunc              // s(t)
          | arithmeticFunc             // +(t1, t2), *(t1, t2)
          | functionApp                // f(t1, t2, ...)
-         | variable                   // x, y, z
+         | constant                   // A, B, C (Preferred for uppercase)
+         | variable                   // x, y, z (Preferred for lowercase)
          | numberSymb;                // 0, 1, 2, ...
-         // REMOVED: | constant (redundant)
-         // REMOVED: | relationSymb (Predicates are not terms!)
 
 // Predicate expressions
 predicate: relationSymb '(' termList ')'  // P(t1, t2, ...)
@@ -131,7 +130,10 @@ term: addExpr;                           // Terms are arithmetic expressions
 functionApp: LOWERCASE_LETTER '(' termList ')';
 
 // Variables
-variable: LOWERCASE_LETTER | LOWERCASE_GREEK_LETTER;
+variable: LOWERCASE_LETTER | LOWERCASE_GREEK_LETTER | UPPERCASE_LETTER | UPPERCASE_GREEK_LETTER;
+
+// Constants (New: uppercase letters as constants)
+constant: UPPERCASE_LETTER | UPPERCASE_GREEK_LETTER;
 
 // Relation symbols (predicates): P, Q, R, ... (including Greek)
 relationSymb: UPPERCASE_LETTER | UPPERCASE_GREEK_LETTER;

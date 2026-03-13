@@ -443,6 +443,16 @@ export default class MyGrammarListener extends GrammarListener {
     this.stack.push(variable);
   }
 
+  // Constant handling
+  exitConstant(ctx) {
+    this.logExit("constant", ctx);
+    const constant = {
+      type: 'constant',
+      value: ctx.getText()
+    };
+    this.stack.push(constant);
+  }
+
   // Relation symbol handling
   exitRelationSymb(ctx) {
     this.logExit("relationSymb", ctx);
