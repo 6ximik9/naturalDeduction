@@ -146,7 +146,7 @@
     }
 
     .dropdown-content-sidebar li {
-      color: #9ca3af;
+      color: var(--col-text-sidebar-muted);
       cursor: pointer;
       padding: 5px 0;
       font-size: 13px;
@@ -156,8 +156,8 @@
     }
 
     .dropdown-content-sidebar li:hover {
-      color: white;
-      background: rgba(255, 255, 255, 0.08) !important;
+      color: var(--col-text-sidebar);
+      background: var(--col-bg-sidebar-hover) !important;
     }
 
     /* Font options */
@@ -324,13 +324,15 @@
         --col-text-main: #f3f4f6;    /* Gray 100 */
         --col-text-muted: #9ca3af;   /* Gray 400 */
         --col-border: #334155;       /* Slate 700 */
+
+        --col-bg-sidebar: #111827;
+        --col-text-sidebar: #cbd5e1;
+        --col-text-sidebar-muted: #6b7280;
+        --col-border-sidebar: #1f2937;
+        --col-bg-sidebar-hover: rgba(255, 255, 255, 0.1);
     }
 
     /* Dark Mode Specific Overrides */
-    body.dark-mode .sidebar {
-        border-right-color: #334155;
-    }
-
     body.dark-mode .top-header {
         background-color: var(--col-bg-white) !important;
         border-bottom-color: var(--col-border) !important;
@@ -342,19 +344,6 @@
 
     body.dark-mode .custom-select i {
         color: var(--col-text-main) !important;
-    }
-
-    /* Sidebar Links in Dark Mode */
-    body.dark-mode .nav-link {
-        color: #cbd5e1;
-    }
-    body.dark-mode .nav-link:hover {
-        background-color: rgba(255,255,255,0.1);
-        color: white;
-    }
-    body.dark-mode .nav-link.active {
-        background-color: var(--col-accent);
-        color: white;
     }
 
     /* Buttons in Dark Mode */
@@ -471,7 +460,7 @@
       align-items: center;
       gap: 12px;
       padding: 4px 0;
-      color: #d1d5db;
+      color: var(--col-text-sidebar);
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
@@ -480,7 +469,8 @@
     }
 
     .sidebar-radio:hover, .sidebar-checkbox:hover {
-      color: white;
+      color: var(--col-text-sidebar);
+      opacity: 0.8;
     }
 
     .sidebar-radio input, .sidebar-checkbox input {
@@ -492,7 +482,7 @@
     .custom-radio {
       width: 18px;
       height: 18px;
-      border: 2px solid #6b7280;
+      border: 2px solid var(--col-text-sidebar-muted);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -516,7 +506,7 @@
     .custom-checkbox {
       width: 18px;
       height: 18px;
-      border: 2px solid #6b7280;
+      border: 2px solid var(--col-text-sidebar-muted);
       border-radius: 4px;
       display: flex;
       align-items: center;
@@ -542,31 +532,17 @@
 
     .sidebar-radio input:checked ~ span[data-i18n],
     .sidebar-checkbox input:checked ~ span[data-i18n] {
-      color: white;
+      color: var(--col-text-sidebar);
     }
 
     .sidebar-sub-settings {
       margin-top: 2px;
       padding-left: 15px;
-      border-left: 2px solid #374151;
+      border-left: 2px solid var(--col-border-sidebar);
       display: flex;
       flex-direction: column;
       gap: 10px;
       margin-left: 8px;
-    }
-
-    body.dark-mode .sidebar-radio, body.dark-mode .sidebar-checkbox {
-      color: #cbd5e1;
-    }
-    body.dark-mode .sidebar-radio:hover, body.dark-mode .sidebar-checkbox:hover {
-      color: white;
-    }
-    body.dark-mode .sidebar-radio input:checked ~ span[data-i18n],
-    body.dark-mode .sidebar-checkbox input:checked ~ span[data-i18n] {
-      color: white;
-    }
-    body.dark-mode .sidebar-sub-settings {
-      border-left-color: #334155;
     }
 
     #start-screen {
@@ -1069,7 +1045,7 @@
 <aside class="sidebar" id="sidebar-home">
   <div class="logo">
     <div class="logo-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
            stroke-linejoin="round">
         <path d="M7 8h10M7 12h4m-4 4h10M4 6v12"/>
       </svg>
@@ -1225,7 +1201,7 @@
 <aside class="sidebar" id="sidebar-proof" style="display: none;">
   <div class="logo">
     <div class="logo-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
            stroke-linejoin="round">
         <path d="M7 8h10M7 12h4m-4 4h10M4 6v12"/>
       </svg>
@@ -1305,7 +1281,7 @@
       Redo Step
     </a>
 
-    <div style="height: 1px; background: #374151; margin: 8px 12px;"></div>
+    <div style="height: 1px; background: var(--col-border-sidebar); margin: 8px 12px;"></div>
 
     <a href="#" id="sb-plus" class="nav-link" data-i18n="nav-zoom-in">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1333,7 +1309,7 @@
       Fit View
     </a>
 
-    <div style="height: 1px; background: #374151; margin: 8px 12px;"></div>
+    <div style="height: 1px; background: var(--col-border-sidebar); margin: 8px 12px;"></div>
 
     <a href="#" id="sb-show-parens" class="nav-link" data-i18n="nav-show-parens">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
