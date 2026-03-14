@@ -111,7 +111,7 @@ export function createTreeD3(treeJ) {
     .attr("class", "node")
     .attr("transform", d => `translate(${d.x},${d.y})`);
 
-// Круги для вузлів
+// Круги для вузлів (тло під текстом)
   node.append("circle")
     .attr("r", 20); // Розмір кіл можна налаштовувати
 

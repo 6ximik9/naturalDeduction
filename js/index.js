@@ -14,6 +14,7 @@ import {updateLanguage, t} from "./core/i18n";
 
 import {initStartScreen} from './ui/modals/startScreen';
 import {isVL} from './state/logicSettings';
+import { initLayoutSettings } from './ui/modals/layout';
 
 let hasError = false;
 let inputText = "";
@@ -23,6 +24,9 @@ export let typeProof = 0;
 document.addEventListener("DOMContentLoaded", function() {
   // Initialize Start Screen
   initStartScreen();
+
+  // Initialize Layout Settings
+  initLayoutSettings();
 
   // Initialize Language
   const savedLang = localStorage.getItem('selectedLang') || 'EN';
@@ -113,7 +117,9 @@ document.addEventListener("DOMContentLoaded", function() {
     splitter.addEventListener('mousedown', function(e) {
       isDragging = true;
       splitter.classList.add('active');
-      document.body.style.cursor = 'col-resize';
+      
+      const isHorizontal = container.classList.contains('h-top') || container.classList.contains('h-bottom');
+      document.body.style.cursor = isHorizontal ? 'row-resize' : 'col-resize';
       document.body.style.userSelect = 'none'; // Disable text selection while dragging
       e.preventDefault();
     });
@@ -122,18 +128,49 @@ document.addEventListener("DOMContentLoaded", function() {
       if (!isDragging) return;
 
       const containerRect = container.getBoundingClientRect();
-      const newLeftWidth = e.clientX - containerRect.left - (splitter.offsetWidth / 2);
+      const isHorizontal = container.classList.contains('h-top') || container.classList.contains('h-bottom');
+      const isReverse = container.classList.contains('v-right') || container.classList.contains('h-bottom');
 
-      // Constraints (20% min width for each side)
-      const minWidth = containerRect.width * 0.2;
-      const maxWidth = containerRect.width * 0.8;
+      if (isHorizontal) {
+        let newHeight;
+        if (container.classList.contains('h-bottom')) {
+          newHeight = containerRect.bottom - e.clientY - (splitter.offsetHeight / 2);
+        } else {
+          newHeight = e.clientY - containerRect.top - (splitter.offsetHeight / 2);
+        }
 
-      if (newLeftWidth > minWidth && newLeftWidth < maxWidth) {
-        const leftPercent = (newLeftWidth / containerRect.width) * 100;
-        const rightPercent = 100 - leftPercent; // Splitter width is negligible or handled by flex-shrink
+        const minHeight = containerRect.height * 0.1;
+        const maxHeight = containerRect.height * 0.9;
 
-        leftPanel.style.width = `${leftPercent}%`;
-        rightPanel.style.width = `calc(${rightPercent}% - ${splitter.offsetWidth}px)`;
+        if (newHeight > minHeight && newHeight < maxHeight) {
+          const heightPercent = (newHeight / containerRect.height) * 100;
+          leftPanel.style.flexBasis = `${heightPercent}%`;
+          // Clear direct width/height to avoid conflicts with flex-basis
+          leftPanel.style.height = '';
+          leftPanel.style.width = '';
+          rightPanel.style.height = '';
+          rightPanel.style.width = '';
+        }
+      } else {
+        let newWidth;
+        if (container.classList.contains('v-right')) {
+          newWidth = containerRect.right - e.clientX - (splitter.offsetWidth / 2);
+        } else {
+          newWidth = e.clientX - containerRect.left - (splitter.offsetWidth / 2);
+        }
+
+        const minWidth = containerRect.width * 0.1;
+        const maxWidth = containerRect.width * 0.9;
+
+        if (newWidth > minWidth && newWidth < maxWidth) {
+          const widthPercent = (newWidth / containerRect.width) * 100;
+          leftPanel.style.flexBasis = `${widthPercent}%`;
+          // Clear direct width/height to avoid conflicts with flex-basis
+          leftPanel.style.height = '';
+          leftPanel.style.width = '';
+          rightPanel.style.height = '';
+          rightPanel.style.width = '';
+        }
       }
     });
 
@@ -336,11 +373,16 @@ enterButton.addEventListener('click', function () {
 
   // Show the proof container
   const splitLayout = document.getElementById('proof-split-layout');
+  const layoutBtn = document.getElementById('layoutSettingsBtn');
   if (splitLayout) {
       splitLayout.style.display = 'flex';
+      if (layoutBtn) layoutBtn.style.display = 'flex';
   } else {
       const proofContainer = document.getElementById('proof-container');
-      if (proofContainer) proofContainer.style.display = 'block';
+      if (proofContainer) {
+          proofContainer.style.display = 'block';
+          if (layoutBtn) layoutBtn.style.display = 'flex';
+      }
   }
 
   const fontSelect = document.getElementsByClassName('custom-select')[0];

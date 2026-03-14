@@ -345,14 +345,10 @@ h3 {
 #proof-container {
   display: none; /* Hidden by default, shown via JS when proof starts */
   position: relative;
-  width: 65%;
-  min-height: 60px;
-  height: auto;
-  margin: 1% auto;
   overflow: hidden; /* Hide overflow from zoomed content */
-  /* resize: both; Removed to use custom handle */
   background: #f8f9fa;
   border-radius: 8px;
+  box-sizing: border-box;
 }
 
 /* Custom Resize Handle */
@@ -375,7 +371,7 @@ h3 {
 #proof {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Center content vertically */
+  justify-content: center; /* Center content vertically */
   align-items: center;
   align-content: center;
   text-align: center;
@@ -863,7 +859,7 @@ span.choose {
   background-color: rgba(0, 0, 0, 0.5); /* Затемнений задній фон */
   z-index: 9999;
   justify-content: center;
-  /*align-items: center;*/
+  align-items: center;
 }
 
 
@@ -874,7 +870,7 @@ span.choose {
   position: relative;
   padding: 16px;
   border-radius: 5px;
-  margin-top: 8%;
+  margin-top: 0;
   overflow-y: auto;
 }
 
@@ -1114,9 +1110,8 @@ span.choose {
 }
 
 .node circle {
-  fill: white;
-  /*stroke: steelblue;*/
-  /*stroke-width: 3px;*/
+  fill: var(--col-bg-white);
+  stroke: none;
 }
 
 .node text {

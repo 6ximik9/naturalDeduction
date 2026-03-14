@@ -86,24 +86,27 @@
 
     /* Fix Proof Container to fit new design */
     #proof-container {
-      display: block !important; /* Override style.css display:none */
+      display: flex !important; /* Override style.css display:none */
+      flex-direction: column !important;
       background: white !important;
       border: 1px solid var(--col-border) !important;
       border-radius: 12px !important;
       box-shadow: none !important;
-      padding: 20px !important;
+      padding: 15px !important;
       box-sizing: border-box !important;
       height: 100% !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
     }
 
     #proof {
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
-      justify-content: flex-start !important;
+      justify-content: center !important;
       width: 100% !important;
       height: 100% !important;
-      padding: 35% !important;
+      padding: 50px !important;
       box-sizing: border-box !important;
     }
 
@@ -206,9 +209,24 @@
       display: none !important;
     }
 
-    /* Ensure modals are on top */
+    /* Ensure modals are on top and centered */
     .helpModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none; /* Controlled by JS */
+      align-items: center;
+      justify-content: center;
       z-index: 99999 !important;
+    }
+
+    .help {
+      margin: 0 !important; /* Remove any auto margins that might offset centering */
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     /* Utility class for hiding elements */
@@ -226,6 +244,114 @@
       flex-shrink: 0;
       transition: background-color 0.2s;
     }
+
+    /* Horizontal Splitter Overrides */
+    #proof-split-layout.h-top .layout-divider,
+    #proof-split-layout.h-bottom .layout-divider {
+      width: 100% !important;
+      height: 12px !important;
+      cursor: row-resize !important;
+    }
+    #proof-split-layout.h-top .layout-divider::after,
+    #proof-split-layout.h-bottom .layout-divider::after {
+      width: 100% !important;
+      height: 4px !important;
+    }
+
+    #proof-split-layout.v-right { flex-direction: row-reverse !important; }
+    #proof-split-layout.h-top { flex-direction: column !important; }
+    #proof-split-layout.h-bottom { flex-direction: column-reverse !important; }
+
+    /* Ensure panels stretch to full width/height depending on mode but allow JS to override basis */
+    #proof-split-layout.v-left #proof-tools,
+    #proof-split-layout.v-right #proof-tools,
+    #proof-split-layout.v-left #proof-container,
+    #proof-split-layout.v-right #proof-container {
+      height: 100%;
+      flex-grow: 0;
+      flex-shrink: 1; /* Allow shrinking */
+      min-width: 0; /* Prevent content from forcing minimum width */
+    }
+
+    #proof-split-layout.h-top #proof-tools,
+    #proof-split-layout.h-bottom #proof-tools,
+    #proof-split-layout.h-top #proof-container,
+    #proof-split-layout.h-bottom #proof-container {
+      width: 100%;
+      flex-grow: 0;
+      flex-shrink: 1; /* Allow shrinking */
+      min-height: 0; /* Prevent content from forcing minimum height */
+    }
+
+    /* One panel must grow to fill the remaining space */
+    #proof-split-layout #proof-container {
+      flex-grow: 1 !important;
+      flex-basis: 0 !important;
+    }
+
+    /* Default sizes (50/50 split via flex-basis) */
+    #proof-split-layout.v-left #proof-tools, 
+    #proof-split-layout.v-right #proof-tools { 
+      flex-basis: calc(50% - 6px); 
+    }
+
+    #proof-split-layout.h-top #proof-tools, 
+    #proof-split-layout.h-bottom #proof-tools { 
+      flex-basis: calc(50% - 6px); 
+    }
+
+    /* Layout Modal Styles */
+    .layout-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 20px;
+    }
+    .layout-option-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 15px;
+      border: 2px solid var(--col-border);
+      border-radius: 12px;
+      transition: all 0.2s;
+      background: var(--col-bg-white);
+    }
+    .layout-option-card:hover { border-color: var(--col-accent); background: rgba(59, 130, 246, 0.05); }
+    .layout-option-card:has(input:checked) { border-color: var(--col-accent); background: rgba(59, 130, 246, 0.1); }
+    .layout-option-card input { display: none; }
+    .layout-option-card span { font-size: 14px; font-weight: 500; color: var(--col-text-main); }
+
+    .layout-preview {
+      width: 120px;
+      height: 80px;
+      background: #f3f4f6;
+      border-radius: 6px;
+      display: flex;
+      gap: 4px;
+      padding: 6px;
+      border: 1px solid var(--col-border);
+      overflow: hidden;
+    }
+    .preview-tools { background: var(--col-accent); border-radius: 3px; opacity: 0.7; }
+    .preview-proof { background: white; border: 1px solid #d1d5db; border-radius: 3px; }
+
+    .layout-preview.v-left .preview-tools { width: 50%; height: 100%; }
+    .layout-preview.v-left .preview-proof { width: 50%; height: 100%; }
+
+    .layout-preview.v-right { flex-direction: row-reverse; }
+    .layout-preview.v-right .preview-tools { width: 50%; height: 100%; }
+    .layout-preview.v-right .preview-proof { width: 50%; height: 100%; }
+
+    .layout-preview.h-top { flex-direction: column; }
+    .layout-preview.h-top .preview-tools { width: 100%; height: 50%; }
+    .layout-preview.h-top .preview-proof { width: 100%; height: 50%; }
+
+    .layout-preview.h-bottom { flex-direction: column-reverse; }
+    .layout-preview.h-bottom .preview-tools { width: 100%; height: 50%; }
+    .layout-preview.h-bottom .preview-proof { width: 100%; height: 50%; }
 
     .layout-divider::after {
       content: '';
@@ -361,7 +487,7 @@
     /* D3 Tree Dark Mode */
     body.dark-mode .node circle {
         fill: var(--col-bg-white) !important;
-        stroke: var(--col-text-main) !important;
+        stroke: none !important;
     }
     body.dark-mode .node text {
         fill: var(--col-text-main) !important;
@@ -1439,6 +1565,10 @@
         <i class="ri-moon-clear-line" style="margin-right: 5px;"></i>
       </div>
 
+      <button id="layoutSettingsBtn" class="btn" style="padding: 8px; background: transparent; border: 1px solid var(--col-border); border-radius: 8px; cursor: pointer; color: var(--col-text-main); display: none; align-items: center; justify-content: center; margin-left: 8px;" data-i18n-title="layout-settings-btn-title" title="Layout Settings">
+        <i class="ri-layout-grid-line" style="font-size: 20px;"></i>
+      </button>
+
       <button class="btn btn-primary" style="margin-left: 12px;" id="enter" data-i18n="btn-proof">
         <i class="ri-play-fill"></i> Proof
       </button>
@@ -1463,7 +1593,7 @@
 
       <!-- Left Panel: Rules, Axioms, Context -->
       <div id="proof-tools"
-           style="width: 45%; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden;">
+           style="display: flex; flex-direction: column; gap: 15px; overflow: hidden;">
 
         <!-- Hypotheses (Context) -->
         <div id="hypotheses-container"
@@ -1517,7 +1647,7 @@
       <div id="proof-layout-divider" class="layout-divider"></div>
 
       <!-- Right Panel: Proof Tree -->
-                  <div id="proof-container" style="width: 55%; background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; height: 100%;">
+                  <div id="proof-container" style="background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 15px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; position: relative; min-width: 0; min-height: 0;">
                       <div id="proof" style="transform-origin: 0 0; width: 100%; height: 100%;"></div>
                   </div>
     </div>
@@ -1536,6 +1666,59 @@
 </div>
 
 <!-- Modals -->
+<div id="layoutModal" class="helpModal">
+  <div class="help" style="max-width: 500px; height: auto;">
+    <div class="help-header">
+      <div class="help-title" data-i18n="layout-settings-title">
+        <i class="ri-layout-grid-line" style="color: var(--col-accent);"></i>
+        Layout Settings
+      </div>
+      <button class="closeLayout">
+        <i class="ri-close-line" style="font-size: 24px;"></i>
+      </button>
+    </div>
+    <div class="layout-options-grid">
+      <label class="layout-option-card">
+        <input type="radio" name="layout-choice" value="v-left" checked>
+        <div class="layout-preview v-left">
+          <div class="preview-tools"></div>
+          <div class="preview-proof"></div>
+        </div>
+        <span data-i18n="layout-v-left">Rules Left</span>
+      </label>
+      <label class="layout-option-card">
+        <input type="radio" name="layout-choice" value="v-right">
+        <div class="layout-preview v-right">
+          <div class="preview-tools"></div>
+          <div class="preview-proof"></div>
+        </div>
+        <span data-i18n="layout-v-right">Rules Right</span>
+      </label>
+      <label class="layout-option-card">
+        <input type="radio" name="layout-choice" value="h-top">
+        <div class="layout-preview h-top">
+          <div class="preview-tools"></div>
+          <div class="preview-proof"></div>
+        </div>
+        <span data-i18n="layout-h-top">Rules Top</span>
+      </label>
+      <label class="layout-option-card">
+        <input type="radio" name="layout-choice" value="h-bottom">
+        <div class="layout-preview h-bottom">
+          <div class="preview-tools"></div>
+          <div class="preview-proof"></div>
+        </div>
+        <span data-i18n="layout-h-bottom">Rules Bottom</span>
+      </label>
+    </div>
+    <div class="help-footer">
+      <button id="saveLayoutBtn" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn-save-layout">
+        Save Layout
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="helpModal" class="helpModal">
   <div class="help">
     <div class="help-header">
