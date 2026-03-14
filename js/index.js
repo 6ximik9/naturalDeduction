@@ -373,15 +373,12 @@ enterButton.addEventListener('click', function () {
 
   // Show the proof container
   const splitLayout = document.getElementById('proof-split-layout');
-  const layoutBtn = document.getElementById('layoutSettingsBtn');
   if (splitLayout) {
       splitLayout.style.display = 'flex';
-      if (layoutBtn) layoutBtn.style.display = 'flex';
   } else {
       const proofContainer = document.getElementById('proof-container');
       if (proofContainer) {
           proofContainer.style.display = 'block';
-          if (layoutBtn) layoutBtn.style.display = 'flex';
       }
   }
 

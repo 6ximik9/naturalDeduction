@@ -996,6 +996,10 @@
         display: flex !important;
         padding: 6px !important;
       }
+
+      #layoutSettingsBtn {
+        display: none !important;
+      }
       
       /* Make header elements smaller to fit */
       .top-header {
@@ -1345,6 +1349,10 @@
       </svg>
       Main Page
     </a>
+    <a href="#" id="layoutSettingsBtn" class="nav-link" data-i18n-title="layout-settings-btn-title" title="Layout Settings" data-i18n="nav-layout">
+      <i class="ri-layout-grid-line"></i>
+      Layout
+    </a>
   </div>
 
   <div class="menu-group">
@@ -1564,10 +1572,6 @@
         <i class="ri-sun-fill" style="color: #f59e0b; margin-left: 5px;"></i>
         <i class="ri-moon-clear-line" style="margin-right: 5px;"></i>
       </div>
-
-      <button id="layoutSettingsBtn" class="btn" style="padding: 8px; background: transparent; border: 1px solid var(--col-border); border-radius: 8px; cursor: pointer; color: var(--col-text-main); display: none; align-items: center; justify-content: center; margin-left: 8px;" data-i18n-title="layout-settings-btn-title" title="Layout Settings">
-        <i class="ri-layout-grid-line" style="font-size: 20px;"></i>
-      </button>
 
       <button class="btn btn-primary" style="margin-left: 12px;" id="enter" data-i18n="btn-proof">
         <i class="ri-play-fill"></i> Proof
