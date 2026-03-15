@@ -962,11 +962,11 @@
       min-height: 100px !important;
       flex-direction: row !important;
       flex-wrap: wrap !important;
-      padding: 12px 20px !important;
+      padding: 10px 15px !important; /* Reduced padding */
       border-right: none !important;
       align-items: flex-start !important;
       justify-content: flex-start !important;
-      gap: 0 15px; /* Reduced gap between columns */
+      gap: 0 10px; /* Reduced gap between columns from 15px to 10px */
       z-index: 1000;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
@@ -977,7 +977,7 @@
     body.sb-top .sidebar .logo, body.sb-bottom .sidebar .logo { 
       margin-bottom: 15px !important; 
       padding-left: 0 !important; 
-      margin-right: 15px;
+      margin-right: 10px; /* Reduced margin */
       flex-shrink: 0;
       width: auto !important;
     }
@@ -986,12 +986,12 @@
     body.sb-top .sidebar .menu-group, body.sb-bottom .sidebar .menu-group { 
       display: flex !important; 
       flex-direction: column !important;
-      margin-bottom: 10px !important; 
+      margin-bottom: 5px !important; 
       gap: 2px; 
       align-items: flex-start !important;
-      padding: 0 12px; /* Reduced padding */
+      padding: 0 8px; /* Reduced padding from 12px to 8px */
       border-left: 1px solid var(--col-border-sidebar);
-      min-width: 100px;
+      min-width: 80px; /* Reduced min-width from 100px */
     }
     body.sb-top .sidebar .menu-group:first-of-type, body.sb-bottom .sidebar .menu-group:first-of-type { border-left: none; padding-left: 0; }
     
@@ -1047,6 +1047,27 @@
       grid-template-columns: 1fr 1fr;
     }
     
+    /* Live Control Grid - Same logic as Support */
+    .live-control-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4px;
+      width: 100%;
+    }
+    
+    body.sb-top .live-control-grid, body.sb-bottom .live-control-grid {
+      grid-template-columns: repeat(3, 1fr);
+      width: auto;
+      min-width: 300px; /* Increased for 3 columns */
+    }
+
+    /* Force nav-links in grid to be compact */
+    body.sb-top .live-control-grid .nav-link, body.sb-bottom .live-control-grid .nav-link,
+    body.sb-top .support-links-grid .nav-link, body.sb-bottom .support-links-grid .nav-link {
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+    }
+
     /* Logic Level grouping logic */
     .logic-mode-radios {
         display: flex;
