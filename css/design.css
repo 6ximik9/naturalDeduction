@@ -1762,22 +1762,42 @@
 
       /* Help Modal Mobile Fix */
       .helpNavbar {
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        padding: 0 15px !important;
-        gap: 15px !important;
-        justify-content: flex-start !important;
-        -webkit-overflow-scrolling: touch;
+        flex-wrap: wrap !important;
+        padding: 10px 20px !important;
+        gap: 5px 15px !important;
+        justify-content: center !important;
+        overflow-x: visible !important;
       }
 
       .helpNavbarItem {
         white-space: nowrap !important;
-        padding: 12px 5px !important;
-        flex-shrink: 0 !important;
+        padding: 8px 0 !important;
+        font-size: 13px !important;
       }
 
       .helpModal .help {
         width: 95% !important;
         max-height: 90vh !important;
+      }
+
+      /* Proof Layout Mobile Fix (Tree on top, Tools below) */
+      #proof-split-layout {
+        flex-direction: column-reverse !important;
+        overflow-y: auto !important;
+        display: flex !important;
+        gap: 20px;
+        height: auto !important;
+      }
+
+      #proof-tools, #proof-container {
+        width: 100% !important;
+        flex-basis: auto !important;
+        flex-shrink: 0 !important;
+        min-height: 350px !important;
+        max-height: 500px !important;
+      }
+
+      #proof-layout-divider {
+        display: none !important;
       }
     }
