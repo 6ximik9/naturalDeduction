@@ -1,24 +1,33 @@
 export function initLayoutSettings() {
-  const layoutBtn = document.getElementById('layoutSettingsBtn');
+  const layoutBtns = document.querySelectorAll('.layout-settings-trigger');
   const layoutModal = document.getElementById('layoutModal');
   const closeBtn = layoutModal?.querySelector('.closeLayout');
   const saveBtn = document.getElementById('saveLayoutBtn');
   const layoutChoices = document.querySelectorAll('input[name="layout-choice"]');
   const splitLayout = document.getElementById('proof-split-layout');
 
-  if (!layoutBtn || !layoutModal || !splitLayout) return;
+  if (layoutBtns.length === 0 || !layoutModal) return;
 
   // --- Load Saved Layout ---
   const savedLayout = localStorage.getItem('proofLayout') || 'v-left';
   applyLayout(savedLayout);
 
+  const savedSidebar = localStorage.getItem('sidebarPlacement') || 'sb-left';
+  applySidebar(savedSidebar);
+
   // Sync radio buttons with saved layout
   const activeRadio = document.querySelector(`input[name="layout-choice"][value="${savedLayout}"]`);
   if (activeRadio) activeRadio.checked = true;
 
+  const activeSidebarRadio = document.querySelector(`input[name="sidebar-choice"][value="${savedSidebar}"]`);
+  if (activeSidebarRadio) activeSidebarRadio.checked = true;
+
   // --- Event Listeners ---
-  layoutBtn.addEventListener('click', () => {
-    layoutModal.style.display = 'flex';
+  layoutBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        layoutModal.style.display = 'flex';
+    });
   });
 
   if (closeBtn) {
@@ -37,6 +46,11 @@ export function initLayoutSettings() {
     const selectedLayout = document.querySelector('input[name="layout-choice"]:checked')?.value || 'v-left';
     localStorage.setItem('proofLayout', selectedLayout);
     applyLayout(selectedLayout);
+
+    const selectedSidebar = document.querySelector('input[name="sidebar-choice"]:checked')?.value || 'sb-left';
+    localStorage.setItem('sidebarPlacement', selectedSidebar);
+    applySidebar(selectedSidebar);
+
     layoutModal.style.display = 'none';
     
     // Reset sizes to default 50/50 on layout change to avoid weird distortions
@@ -65,4 +79,9 @@ export function applyLayout(layoutType) {
   
   // Add the selected one
   splitLayout.classList.add(layoutType);
+}
+
+export function applySidebar(sidebarType) {
+  document.body.classList.remove('sb-left', 'sb-right', 'sb-top', 'sb-bottom');
+  document.body.classList.add(sidebarType);
 }
