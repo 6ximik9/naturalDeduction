@@ -74,11 +74,39 @@ function setActiveTab(index) {
         helpInput();
     } else if (index === 3) {
         setAxioms();
+    } else if (index === 4) {
+        setProofTree();
     }
 }
 
 
 // --- Content Generators ---
+
+function setProofTree() {
+    const lang = getLang();
+    const treeData = {
+        UA: [
+            ['Взаємодія', 'Клік по вузлу', 'Натискайте на формули у дереві для їх вибору. Це активує доступні правила на панелі інструментів.', 'ri-mouse-line'],
+            ['Навігація', 'Масштаб та Переміщення', 'Використовуйте коліщатко миші для зуму та перетягуйте полотно для перегляду великих дерев.', 'ri-drag-move-fill'],
+            ['Історія кроків', 'Відмінити / Повторити', 'Кнопки Undo та Redo дозволяють миттєво повертатися до попередніх станів вашого доведення.', 'ri-history-line'],
+            ['LaTeX Експорт', 'Готовий код', 'Отримуйте професійно оформлений код для LaTeX (пакети bussproofs або fitch) одним натисканням.', 'ri-file-code-line']
+        ],
+        SK: [
+            ['Interakcia', 'Kliknutie na uzol', 'Kliknutím na vzorce v strome ich vyberiete. Tým sa aktivujú dostupné pravidlá v paneli nástrojov.', 'ri-mouse-line'],
+            ['Navigácia', 'Mierka a pohyb', 'Pomocou kolieska myši meníte mierku a ťahaním sa pohybujete v rámci veľkých dôkazových stromov.', 'ri-drag-move-fill'],
+            ['História', 'Späť / Znova', 'Tlačidlá Späť a Znova umožňujú okamžitý návrat k predchádzajúcim stavom vášho dôkazu.', 'ri-history-line'],
+            ['LaTeX Export', 'Hotový kód', 'Získajte profesionálne naformátovaný kód pre LaTeX (balíky bussproofs alebo fitch) jediným kliknutím.', 'ri-file-code-line']
+        ],
+        EN: [
+            ['Interaction', 'Click on node', 'Click on formulas in the tree to select them. This activates applicable rules in the toolbar.', 'ri-mouse-line'],
+            ['Navigation', 'Zoom & Pan', 'Use the mouse wheel to zoom and drag the canvas to navigate through large proof trees.', 'ri-drag-move-fill'],
+            ['Proof History', 'Undo / Redo', 'The Undo and Redo buttons allow you to step backward and forward through your proof history.', 'ri-history-line'],
+            ['LaTeX Export', 'Source Code', 'Get professionally formatted LaTeX code (using bussproofs or fitch packages) with one click.', 'ri-file-code-line']
+        ]
+    };
+
+    (treeData[lang] || treeData.EN).forEach(data => info.appendChild(createCard(data[0], data[1], data[2], data[3])));
+}
 
 function createCard(title, subtitle, description, iconClass) {
     const card = document.createElement('div');
@@ -148,6 +176,22 @@ function setGeneral() {
                   (lang === 'SK' ? 'Pomocou selektora veľkosti písma v hornej časti panela nastavte veľkosť textu.' : 
                   'Use the font size selector in the top header to adjust text size for better readability.'),
             icon: 'ri-text'
+        },
+        {
+            title: lang === 'UA' ? 'Розташування' : (lang === 'SK' ? 'Rozloženie' : 'Layout'),
+            subtitle: t['nav-layout'] || 'Layout Settings',
+            desc: lang === 'UA' ? 'Налаштуйте розташування сайдбару (зліва, справа, зверху, знизу) та панелі правил для вашої зручності.' : 
+                  (lang === 'SK' ? 'Upravte si rozloženie bočného panela (vľavo, vpravo, hore, dole) a pravidiel podľa svojich potrieb.' : 
+                  'Customize the placement of the sidebar (left, right, top, bottom) and proof rules to suit your workspace.'),
+            icon: 'ri-layout-grid-line'
+        },
+        {
+            title: lang === 'UA' ? 'Розумний режим' : (lang === 'SK' ? 'Inteligentný režim' : 'Smart Mode'),
+            subtitle: 'Smart Mode',
+            desc: lang === 'UA' ? 'Активуйте цей режим для автоматичного підсвічування можливих кроків та спрощення процесу доведення.' : 
+                  (lang === 'SK' ? 'Aktivujte tento režim pre automatické zvýraznenie možných krokov a zjednodušenie procesu dokazovania.' : 
+                  'Activate this mode to automatically highlight possible steps and simplify the proof process.'),
+            icon: 'ri-lightbulb-line'
         }
     ];
 
