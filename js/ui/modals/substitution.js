@@ -45,18 +45,19 @@ export function createModal(constants) {
     const modal = document.createElement('div');
     modal.className = 'modal';
     Object.assign(modal.style, {
-      background: '#fff',
+      background: 'var(--col-bg-white)',
       borderRadius: '16px',
       width: '90%',
       maxWidth: '700px',
       padding: '32px',
       boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-      border: '1px solid #e0e0e0',
+      border: '1px solid var(--col-border)',
       display: 'flex',
       flexDirection: 'column',
       gap: '24px',
       position: 'relative',
-      animation: 'modalSlideIn 0.3s ease-out'
+      animation: 'modalSlideIn 0.3s ease-out',
+      color: 'var(--col-text-main)'
     });
 
     // Add CSS animations if not already present
@@ -73,9 +74,36 @@ export function createModal(constants) {
           to { opacity: 0; transform: translateY(-20px) scale(0.95); }
         }
         .substitution-button:focus { outline: 2px solid #007bff; outline-offset: 2px; }
-        .editor-container { border: 2px solid #e0e0e0; border-radius: 8px; transition: border-color 0.2s ease; }
+        .editor-container { border: 2px solid var(--col-border); border-radius: 8px; transition: border-color 0.2s ease; }
         .editor-container:focus-within { border-color: #007bff; }
         .editor-error { border-color: #dc3545 !important; }
+        
+        body.dark-mode .substitution-button {
+          background-color: var(--col-bg-white) !important;
+          color: var(--col-text-main) !important;
+          border-color: var(--col-border) !important;
+        }
+        body.dark-mode .substitution-button:hover {
+          background-color: #334155 !important;
+        }
+        .quantifier-variable {
+          background-color: rgba(33, 150, 243, 0.2);
+          color: var(--col-text-main);
+          padding: 2px 4px;
+          border-radius: 4px;
+          font-weight: bold;
+          border: 2px solid #2196f3;
+        }
+        .formula-container {
+          font-size: 28px;
+          font-family: 'Times New Roman', serif;
+          text-align: center;
+          padding: 20px;
+          border: 2px solid var(--col-border);
+          border-radius: 8px;
+          background-color: var(--col-bg-main);
+          line-height: 1.5;
+        }
       `;
       document.head.appendChild(style);
     }
@@ -89,7 +117,7 @@ export function createModal(constants) {
       fontSize: '28px',
       fontWeight: '600',
       textAlign: 'center',
-      color: '#2c3e50',
+      color: 'var(--col-text-main)',
       marginBottom: '8px'
     });
 
@@ -99,7 +127,7 @@ export function createModal(constants) {
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
-      color: '#666',
+      color: 'var(--col-text-muted)',
       textAlign: 'center',
       lineHeight: '1.5'
     });
@@ -116,7 +144,7 @@ export function createModal(constants) {
       display: 'block',
       fontSize: '16px',
       fontWeight: '600',
-      color: '#495057',
+      color: 'var(--col-text-main)',
       marginBottom: '12px'
     });
 
@@ -145,10 +173,10 @@ export function createModal(constants) {
         fontSize: '18px',
         fontWeight: '500',
         cursor: 'pointer',
-        border: '2px solid #e0e0e0',
+        border: '2px solid var(--col-border)',
         borderRadius: '6px',
-        backgroundColor: '#f8f9fa',
-        color: '#495057',
+        backgroundColor: 'var(--col-bg-main)',
+        color: 'var(--col-text-main)',
         transition: 'all 0.2s ease',
         minHeight: '48px',
         display: 'flex',
@@ -158,6 +186,7 @@ export function createModal(constants) {
 
       // Enhanced button state management
       const updateButtonState = (targetButton, isActive, isHovered = false) => {
+        const isDark = document.body.classList.contains('dark-mode');
         if (isActive) {
           Object.assign(targetButton.style, {
             backgroundColor: '#007bff',
@@ -168,16 +197,16 @@ export function createModal(constants) {
           });
         } else if (isHovered) {
           Object.assign(targetButton.style, {
-            backgroundColor: '#e9ecef',
-            borderColor: '#adb5bd',
+            backgroundColor: isDark ? '#334155' : '#e9ecef',
+            borderColor: isDark ? '#475569' : '#adb5bd',
             transform: 'translateY(-1px)',
             boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)'
           });
         } else {
           Object.assign(targetButton.style, {
-            backgroundColor: '#f8f9fa',
-            borderColor: '#e0e0e0',
-            color: '#495057',
+            backgroundColor: 'var(--col-bg-main)',
+            borderColor: 'var(--col-border)',
+            color: 'var(--col-text-main)',
             transform: 'translateY(0)',
             boxShadow: 'none'
           });
@@ -238,7 +267,7 @@ export function createModal(constants) {
       display: 'block',
       fontSize: '16px',
       fontWeight: '600',
-      color: '#495057',
+      color: 'var(--col-text-main)',
       marginBottom: '12px'
     });
 
@@ -246,10 +275,10 @@ export function createModal(constants) {
     const editorContainer = document.createElement('div');
     editorContainer.className = 'editor-container';
     Object.assign(editorContainer.style, {
-      border: '2px solid #e0e0e0',
+      border: '2px solid var(--col-border)',
       borderRadius: '8px',
       padding: '4px',
-      backgroundColor: '#fff',
+      backgroundColor: 'var(--col-bg-white)',
       transition: 'border-color 0.2s ease'
     });
 
@@ -712,20 +741,21 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     const modal = document.createElement('div');
     modal.className = 'modal';
     Object.assign(modal.style, {
-      background: '#fff',
+      background: 'var(--col-bg-white)',
       borderRadius: '16px',
       width: '90%',
       maxWidth: '800px',
       padding: '32px',
       boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-      border: '1px solid #e0e0e0',
+      border: '1px solid var(--col-border)',
       display: 'flex',
       flexDirection: 'column',
       gap: '24px',
       position: 'relative',
       animation: 'modalSlideIn 0.3s ease-out',
       maxHeight: '90vh',
-      overflow: 'auto'
+      overflow: 'auto',
+      color: 'var(--col-text-main)'
     });
 
     // Add CSS animation if not already present
@@ -742,13 +772,11 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
           to { opacity: 0; transform: translateY(-20px) scale(0.95); }
         }
         .quantifier-variable {
-          // background-color: #ffeb3b;
-          background-color: #e3f2fd;
-          color: #333;
+          background-color: rgba(33, 150, 243, 0.2);
+          color: var(--col-text-main);
           padding: 2px 4px;
           border-radius: 4px;
           font-weight: bold;
-          // border: 2px solid #fbc02d;
           border: 2px solid #2196f3;
         }
         .formula-container {
@@ -756,13 +784,13 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
           font-family: 'Times New Roman', serif;
           text-align: center;
           padding: 20px;
-          border: 2px solid #e0e0e0;
+          border: 2px solid var(--col-border);
           border-radius: 8px;
-          background-color: #fafafa;
+          background-color: var(--col-bg-main);
           line-height: 1.5;
         }
         .editor-container {
-          border: 2px solid #e0e0e0;
+          border: 2px solid var(--col-border);
           border-radius: 8px;
           transition: border-color 0.2s ease;
         }
@@ -785,7 +813,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
       fontSize: '28px',
       fontWeight: '600',
       textAlign: 'center',
-      color: '#2c3e50',
+      color: 'var(--col-text-main)',
       marginBottom: '8px'
     });
 
@@ -795,7 +823,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
-      color: '#666',
+      color: 'var(--col-text-muted)',
       textAlign: 'center',
       lineHeight: '1.5'
     });
@@ -814,17 +842,17 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     Object.assign(editorLabel.style, {
       fontSize: '16px',
       fontWeight: '600',
-      color: '#2c3e50'
+      color: 'var(--col-text-main)'
     });
 
     const editorContainer = document.createElement('div');
     editorContainer.className = 'editor-container';
     Object.assign(editorContainer.style, {
       height: '150px',
-      border: '2px solid #e0e0e0',
+      border: '2px solid var(--col-border)',
       borderRadius: '8px',
       padding: '4px',
-      backgroundColor: '#fff',
+      backgroundColor: 'var(--col-bg-white)',
       transition: 'border-color 0.2s ease'
     });
 

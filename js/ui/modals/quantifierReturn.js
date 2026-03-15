@@ -58,18 +58,19 @@ export function createModalForReturn(constants, formula = null, formulaString = 
     const modal = document.createElement('div');
     modal.className = 'modal';
     Object.assign(modal.style, {
-      background: '#fff',
+      background: 'var(--col-bg-white)',
       borderRadius: '16px',
       width: '90%',
       maxWidth: '600px',
       padding: '32px',
       boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-      border: '1px solid #e0e0e0',
+      border: '1px solid var(--col-border)',
       display: 'flex',
       flexDirection: 'column',
       gap: '24px',
       position: 'relative',
-      animation: 'modalSlideIn 0.3s ease-out'
+      animation: 'modalSlideIn 0.3s ease-out',
+      color: 'var(--col-text-main)'
     });
 
     // Add CSS animation and formula styles
@@ -95,7 +96,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           margin: 1px;
         }
         .formula-element:hover {
-          background-color: #e3f2fd;
+          background-color: rgba(33, 150, 243, 0.1);
           transform: scale(1.05);
         }
         .formula-element.selected {
@@ -103,18 +104,22 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           color: white;
           transform: scale(1.1);
         }
+        .formula-element.disabled {
+          opacity: 0.3;
+          pointer-events: none;
+        }
         .formula-container {
           font-size: 28px;
           font-family: 'Times New Roman', serif;
           text-align: center;
           padding: 20px;
-          border: 2px solid #e0e0e0;
+          border: 2px solid var(--col-border);
           border-radius: 8px;
-          background-color: #fafafa;
+          background-color: var(--col-bg-main);
           line-height: 1.5;
         }
         .editor-container {
-          border: 2px solid #e0e0e0;
+          border: 2px solid var(--col-border);
           border-radius: 8px;
           transition: border-color 0.2s ease;
         }
@@ -123,6 +128,15 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         }
         .editor-error {
           border-color: #dc3545 !important;
+        }
+        
+        body.dark-mode .modal-button {
+          background-color: var(--col-bg-white) !important;
+          color: var(--col-text-main) !important;
+          border-color: var(--col-border) !important;
+        }
+        body.dark-mode .modal-button:hover {
+          background-color: #334155 !important;
         }
       `;
       document.head.appendChild(style);
@@ -145,7 +159,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       fontSize: '28px',
       fontWeight: '600',
       textAlign: 'center',
-      color: '#2c3e50',
+      color: 'var(--col-text-main)',
       marginBottom: '8px'
     });
 
@@ -163,7 +177,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
-      color: '#666',
+      color: 'var(--col-text-muted)',
       textAlign: 'center',
       lineHeight: '1.5'
     });
@@ -210,11 +224,11 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       selectedTextDisplay.textContent = 'No element selected';
       Object.assign(selectedTextDisplay.style, {
         fontSize: '24px',
-        color: '#666',
+        color: 'var(--col-text-muted)',
         textAlign: 'center',
         fontStyle: 'italic',
         padding: '10px',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: 'var(--col-bg-main)',
         borderRadius: '6px',
         marginTop: '16px'
       });
@@ -222,30 +236,31 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
     // Enhanced button state management function
     const updateButtonState = (targetButton, isActive, isHovered = false) => {
-      // if (isActive) {
-      //   Object.assign(targetButton.style, {
-      //     backgroundColor: '#007bff',
-      //     borderColor: '#007bff',
-      //     color: '#fff',
-      //     transform: 'translateY(-2px)',
-      //     boxShadow: '0 4px 12px rgba(0, 123, 255, 0.3)'
-      //   });
-      // } else if (isHovered) {
-      //   Object.assign(targetButton.style, {
-      //     backgroundColor: '#e9ecef',
-      //     borderColor: '#adb5bd',
-      //     transform: 'translateY(-1px)',
-      //     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-      //   });
-      // } else {
-      //   Object.assign(targetButton.style, {
-      //     backgroundColor: '#f8f9fa',
-      //     borderColor: '#e0e0e0',
-      //     color: '#495057',
-      //     transform: 'translateY(0)',
-      //     boxShadow: 'none'
-      //   });
-      // }
+      const isDark = document.body.classList.contains('dark-mode');
+      if (isActive) {
+        Object.assign(targetButton.style, {
+          backgroundColor: '#007bff',
+          borderColor: '#007bff',
+          color: '#fff',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 4px 12px rgba(0, 123, 255, 0.3)'
+        });
+      } else if (isHovered) {
+        Object.assign(targetButton.style, {
+          backgroundColor: isDark ? '#334155' : '#e9ecef',
+          borderColor: isDark ? '#475569' : '#adb5bd',
+          transform: 'translateY(-1px)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+        });
+      } else {
+        Object.assign(targetButton.style, {
+          backgroundColor: 'var(--col-bg-main)',
+          borderColor: 'var(--col-border)',
+          color: 'var(--col-text-main)',
+          transform: 'translateY(0)',
+          boxShadow: 'none'
+        });
+      }
     };
 
     // Element click handler for formula interface
@@ -479,7 +494,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       Object.assign(editorLabel.style, {
         fontSize: '16px',
         fontWeight: '600',
-        color: '#6c757d',  // Grayed out initially
+        color: 'var(--col-text-muted)',  // Grayed out initially
         marginTop: '16px'
       });
 
@@ -487,10 +502,10 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       editorContainer.className = 'editor-container';
       Object.assign(editorContainer.style, {
         height: '150px',
-        border: '2px solid #e0e0e0',
+        border: '2px solid var(--col-border)',
         borderRadius: '8px',
         padding: '4px',
-        backgroundColor: '#fff',
+        backgroundColor: 'var(--col-bg-white)',
         transition: 'border-color 0.2s ease',
         marginTop: '8px'
       });

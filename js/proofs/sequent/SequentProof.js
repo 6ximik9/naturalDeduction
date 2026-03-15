@@ -513,7 +513,7 @@ function selectSequent(domElement, sequentNode) {
     // Highlight the whole sequent label
     const label = side.querySelector('#proofText');
     if (label) {
-        label.style.background = 'rgba(136,190,213,0.78)';
+        label.style.background = 'var(--col-highlight-main)';
     }
 
     selectedFormulaIndex = { side: null, index: -1 };
@@ -588,7 +588,7 @@ function handleFormulaClick(element, sequentNode) {
     });
 
     element.classList.add('selected');
-    element.style.backgroundColor = '#e3f2fd';
+    element.style.backgroundColor = 'var(--col-highlight-secondary)';
 
     selectedFormulaIndex = {
         side: element.dataset.side,

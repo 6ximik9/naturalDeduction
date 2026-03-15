@@ -456,6 +456,10 @@
         --col-text-sidebar-muted: #6b7280;
         --col-border-sidebar: #1f2937;
         --col-bg-sidebar-hover: rgba(255, 255, 255, 0.1);
+
+        --col-highlight-main: rgba(59, 130, 246, 0.45);
+        --col-highlight-secondary: rgba(59, 130, 246, 0.3);
+        --col-highlight-success: rgba(34, 197, 94, 0.45);
     }
 
     /* Dark Mode Specific Overrides */
@@ -543,6 +547,15 @@
 
     body.dark-mode #proof label {
         color: var(--col-text-main) !important;
+    }
+
+    body.dark-mode #fitchHeader {
+        color: var(--col-text-main) !important;
+        border-bottom-color: var(--col-border) !important;
+    }
+
+    body.dark-mode .fitch_branch {
+        border-left-color: var(--col-border) !important;
     }
 
     body.dark-mode .gamma-context {

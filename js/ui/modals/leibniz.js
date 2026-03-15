@@ -56,20 +56,21 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     const modal = document.createElement('div');
     modal.className = 'modal';
     Object.assign(modal.style, {
-      background: '#fff',
+      background: 'var(--col-bg-white)',
       borderRadius: '16px',
       width: '90%',
       maxWidth: '800px',
       padding: '32px',
       boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-      border: '1px solid #e0e0e0',
+      border: '1px solid var(--col-border)',
       display: 'flex',
       flexDirection: 'column',
       gap: '24px',
       position: 'relative',
       animation: 'modalSlideIn 0.3s ease-out',
       maxHeight: '90vh',
-      overflow: 'auto'
+      overflow: 'auto',
+      color: 'var(--col-text-main)'
     });
 
     // Add CSS animation
@@ -95,7 +96,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
           margin: 1px;
         }
         .formula-element:hover {
-          background-color: #e3f2fd;
+          background-color: rgba(33, 150, 243, 0.1);
           transform: scale(1.05);
         }
         .formula-element.selected {
@@ -108,13 +109,13 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
           font-family: 'Times New Roman', serif;
           text-align: center;
           padding: 20px;
-          border: 2px solid #e0e0e0;
+          border: 2px solid var(--col-border);
           border-radius: 8px;
-          background-color: #fafafa;
+          background-color: var(--col-bg-main);
           line-height: 1.5;
         }
         .editor-container {
-          border: 2px solid #e0e0e0;
+          border: 2px solid var(--col-border);
           border-radius: 8px;
           transition: border-color 0.2s ease;
         }
@@ -137,7 +138,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       fontSize: '28px',
       fontWeight: '600',
       textAlign: 'center',
-      color: '#2c3e50',
+      color: 'var(--col-text-main)',
       marginBottom: '8px'
     });
 
@@ -147,7 +148,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
-      color: '#666',
+      color: 'var(--col-text-muted)',
       textAlign: 'center',
       lineHeight: '1.5'
     });
@@ -204,11 +205,11 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     selectedTextDisplay.textContent = t('modal-no-element-selected');
     Object.assign(selectedTextDisplay.style, {
       fontSize: '24px',
-      color: '#666',
+      color: 'var(--col-text-muted)',
       textAlign: 'center',
       fontStyle: 'italic',
       padding: '10px',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: 'var(--col-bg-main)',
       borderRadius: '6px'
     });
 
@@ -218,17 +219,17 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     Object.assign(editorLabel.style, {
       fontSize: '16px',
       fontWeight: '600',
-      color: '#6c757d'  // Grayed out initially
+      color: 'var(--col-text-muted)'  // Grayed out initially
     });
 
     const editorContainer = document.createElement('div');
     editorContainer.className = 'editor-container';
     Object.assign(editorContainer.style, {
       height: '150px',
-      border: '2px solid #e0e0e0',
+      border: '2px solid var(--col-border)',
       borderRadius: '8px',
       padding: '4px',
-      backgroundColor: '#fff',
+      backgroundColor: 'var(--col-bg-white)',
       transition: 'border-color 0.2s ease'
     });
 
@@ -328,7 +329,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       editorContainer.style.opacity = '1';
       editorContainer.style.pointerEvents = 'auto';
       editorLabel.textContent = t('modal-enter-replacement-active');
-      editorLabel.style.color = '#2c3e50';
+      editorLabel.style.color = 'var(--col-text-main)';
 
       // Focus the editor
       setTimeout(() => {
@@ -343,7 +344,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       editorContainer.style.opacity = '0.6';
       editorContainer.style.pointerEvents = 'none';
       editorLabel.textContent = t('modal-enter-replacement-label');
-      editorLabel.style.color = '#6c757d';
+      editorLabel.style.color = 'var(--col-text-muted)';
     }
 
     // Form validation function

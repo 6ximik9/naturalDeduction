@@ -184,13 +184,13 @@ document.getElementById('proof').addEventListener('click', function (event) {
   if (clickedElement.tagName === 'DIV') {
     side = clickedElement;
     try {
-      side.querySelector('label').style.background = 'rgba(136,190,213,0.78)';
+      side.querySelector('label').style.background = 'var(--col-highlight-main)';
     } catch (error) {
       console.error('Monaco editor clicked');
     }
   } else if (clickedElement.tagName === 'LABEL') {
     side = clickedElement.parentNode;
-    clickedElement.style.background = 'rgba(136,190,213,0.78)';
+    clickedElement.style.background = 'var(--col-highlight-main)';
   }
   
   if (window.updateGentzenParenthesesButtons) window.updateGentzenParenthesesButtons();
@@ -350,7 +350,7 @@ export function parseExpression(text) {
         if (side) {
             const label = side.querySelector('label');
             if (label) {
-                label.style.background = 'rgba(136,190,213,0.78)';
+                label.style.background = 'var(--col-highlight-main)';
             }
         }
     }, 0);

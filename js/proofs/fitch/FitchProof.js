@@ -705,7 +705,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
     if (foundIndex === -1) {
       if (clickedBranch.length < 2) {
         clickedBranch.push({element: clickedElement, index: elementIndex});
-        clickedElement.style.background = 'rgba(72, 187, 244, 0.78)';
+        clickedElement.style.background = 'var(--col-highlight-secondary)';
       }
     } else {
       clickedBranch.splice(foundIndex, 1);
@@ -731,7 +731,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
       if (clickedProofs.length < 2) {
         // Створюємо новий об'єкт з елементом та його індексом, і додаємо його до масиву
         clickedProofs.push({element: clickedElement, index: elementIndex});
-        clickedElement.style.background = 'rgba(136,190,213,0.78)';
+        clickedElement.style.background = 'var(--col-highlight-main)';
         clickedElement.innerHTML += ' ' + `<span class="indexC" style="font-size: 22px;">${clickedProofs.length}</span>`;
       }
     } else {
@@ -849,7 +849,7 @@ export function addRowToBranch(formula, title) {
 
     if (deductive.compareExpressions(getProof(checkWithAntlr(lastFormula)), getProof(checkWithAntlr(startFormula)))) {
       document.getElementById('proof-menu').className = 'proof-menu hidden';
-      lastElement.style.background = 'rgba(0, 255, 0, 0.55)';
+      lastElement.style.background = 'var(--col-highlight-success)';
       mainBranch.className += " finished";
       mainBranch.style.paddingBottom = '0px';
     }

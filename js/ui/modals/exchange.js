@@ -34,18 +34,19 @@ export function createExchangeModal(title, formulas) {
         const modal = document.createElement('div');
         modal.className = 'modal';
         Object.assign(modal.style, {
-            background: '#fff',
+            background: 'var(--col-bg-white)',
             borderRadius: '16px',
             width: '90%',
             maxWidth: '800px',
             padding: '32px',
             boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-            border: '1px solid #e0e0e0',
+            border: '1px solid var(--col-border)',
             display: 'flex',
             flexDirection: 'column',
             gap: '24px',
             position: 'relative',
-            animation: 'modalSlideIn 0.3s ease-out'
+            animation: 'modalSlideIn 0.3s ease-out',
+            color: 'var(--col-text-main)'
         });
 
         // Add styles for horizontal drag and drop
@@ -68,14 +69,14 @@ export function createExchangeModal(title, formulas) {
                     gap: 8px;
                     justify-content: center;
                     padding: 16px;
-                    border: 2px dashed #e0e0e0;
+                    border: 2px dashed var(--col-border);
                     border-radius: 8px;
-                    background-color: #fafafa;
+                    background-color: var(--col-bg-main);
                     min-height: 80px;
                 }
                 .formula-item {
-                    background-color: #fff;
-                    border: 1px solid #ccc;
+                    background-color: var(--col-bg-white);
+                    border: 1px solid var(--col-border);
                     border-radius: 4px;
                     padding: 4px 12px;
                     cursor: grab;
@@ -87,6 +88,7 @@ export function createExchangeModal(title, formulas) {
                     align-items: center;
                     transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth movement */
                     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                    color: var(--col-text-main);
                 }
                 .formula-item:hover {
                     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -112,7 +114,7 @@ export function createExchangeModal(title, formulas) {
             fontSize: '28px',
             fontWeight: '600',
             textAlign: 'center',
-            color: '#2c3e50'
+            color: 'var(--col-text-main)'
         });
 
         // Description
@@ -121,7 +123,7 @@ export function createExchangeModal(title, formulas) {
         Object.assign(description.style, {
             margin: '0',
             fontSize: '16px',
-            color: '#666',
+            color: 'var(--col-text-muted)',
             textAlign: 'center'
         });
 

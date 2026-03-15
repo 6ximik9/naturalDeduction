@@ -34,18 +34,19 @@ export function createInputModal(title = t('modal-input-title-default'), label =
     const modal = document.createElement('div');
     modal.className = 'modal';
     Object.assign(modal.style, {
-      background: '#fff',
+      background: 'var(--col-bg-white)',
       borderRadius: '16px',
       width: '90%',
       maxWidth: '600px',
       padding: '32px',
       boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-      border: '1px solid #e0e0e0',
+      border: '1px solid var(--col-border)',
       display: 'flex',
       flexDirection: 'column',
       gap: '24px',
       position: 'relative',
-      animation: 'modalSlideIn 0.3s ease-out'
+      animation: 'modalSlideIn 0.3s ease-out',
+      color: 'var(--col-text-main)'
     });
 
     // Add styles if needed (reusing existing animations if present)
@@ -61,7 +62,7 @@ export function createInputModal(title = t('modal-input-title-default'), label =
           from { opacity: 1; transform: translateY(0) scale(1); }
           to { opacity: 0; transform: translateY(-20px) scale(0.95); }
         }
-        .editor-container { border: 2px solid #e0e0e0; border-radius: 8px; transition: border-color 0.2s ease; }
+        .editor-container { border: 2px solid var(--col-border); border-radius: 8px; transition: border-color 0.2s ease; }
         .editor-container:focus-within { border-color: #007bff; }
         .editor-error { border-color: #dc3545 !important; }
       `;
@@ -76,7 +77,7 @@ export function createInputModal(title = t('modal-input-title-default'), label =
       fontSize: '28px',
       fontWeight: '600',
       textAlign: 'center',
-      color: '#2c3e50'
+      color: 'var(--col-text-main)'
     });
 
     // Input Label
@@ -86,7 +87,7 @@ export function createInputModal(title = t('modal-input-title-default'), label =
       display: 'block',
       fontSize: '16px',
       fontWeight: '600',
-      color: '#495057',
+      color: 'var(--col-text-main)',
       marginBottom: '8px'
     });
 
@@ -95,10 +96,10 @@ export function createInputModal(title = t('modal-input-title-default'), label =
     editorContainer.className = 'editor-container';
     Object.assign(editorContainer.style, {
       height: '100px',
-      border: '2px solid #e0e0e0',
+      border: '2px solid var(--col-border)',
       borderRadius: '8px',
       padding: '4px',
-      backgroundColor: '#fff'
+      backgroundColor: 'var(--col-bg-white)'
     });
 
     const modalEditorContainer = document.createElement('div');

@@ -47,20 +47,21 @@ export function createAdvancedModal(formulas) {
     // Create modal container with improved styling
     const modal = document.createElement('div');
     Object.assign(modal.style, {
-      background: '#fff',
+      background: 'var(--col-bg-white)',
       borderRadius: '16px',
       width: '95%',
       maxWidth: '1200px',
       maxHeight: '90vh',
       padding: '32px',
       boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-      border: '1px solid #e0e0e0',
+      border: '1px solid var(--col-border)',
       display: 'flex',
       flexDirection: 'column',
       gap: '24px',
       position: 'relative',
       overflow: 'hidden',
-      animation: 'modalSlideIn 0.3s ease-out'
+      animation: 'modalSlideIn 0.3s ease-out',
+      color: 'var(--col-text-main)'
     });
 
     // Add CSS animations if not already present
@@ -77,11 +78,27 @@ export function createAdvancedModal(formulas) {
           to { opacity: 0; transform: translateY(-20px) scale(0.95); }
         }
         .advanced-button:focus { outline: 2px solid #007bff; outline-offset: 2px; }
-        .formula-select { border: 2px solid #e0e0e0; transition: border-color 0.2s ease; }
+        .formula-select { border: 2px solid var(--col-border); transition: border-color 0.2s ease; }
         .formula-select:focus { border-color: #007bff; }
-        .editor-section { border: 2px solid #e0e0e0; border-radius: 8px; transition: border-color 0.2s ease; }
+        .editor-section { border: 2px solid var(--col-border); border-radius: 8px; transition: border-color 0.2s ease; }
         .editor-section:focus-within { border-color: #007bff; }
         .editor-error { border-color: #dc3545 !important; }
+        
+        body.dark-mode .formula-select {
+          background-color: var(--col-bg-white);
+          color: var(--col-text-main);
+        }
+        body.dark-mode .advanced-button {
+          background-color: var(--col-bg-white) !important;
+          color: var(--col-text-main) !important;
+          border-color: var(--col-border) !important;
+        }
+        body.dark-mode .advanced-button:hover {
+          background-color: #334155 !important;
+        }
+        body.dark-mode .editor-section {
+          background-color: var(--col-bg-main) !important;
+        }
       `;
       document.head.appendChild(style);
     }
@@ -100,7 +117,7 @@ export function createAdvancedModal(formulas) {
       margin: '0',
       fontSize: '28px',
       fontWeight: '600',
-      color: '#2c3e50',
+      color: 'var(--col-text-main)',
       marginBottom: '8px'
     });
 
@@ -109,7 +126,7 @@ export function createAdvancedModal(formulas) {
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
-      color: '#666',
+      color: 'var(--col-text-muted)',
       lineHeight: '1.5'
     });
 
@@ -138,7 +155,7 @@ export function createAdvancedModal(formulas) {
       border: 'none',
       fontSize: '28px',
       cursor: 'pointer',
-      color: '#6c757d',
+      color: 'var(--col-text-muted)',
       width: '40px',
       height: '40px',
       borderRadius: '50%',
@@ -150,13 +167,13 @@ export function createAdvancedModal(formulas) {
     });
 
     closeButton.addEventListener('mouseenter', () => {
-      closeButton.style.backgroundColor = '#f8f9fa';
-      closeButton.style.color = '#495057';
+      closeButton.style.backgroundColor = 'rgba(0,0,0,0.05)';
+      closeButton.style.color = 'var(--col-text-main)';
     });
 
     closeButton.addEventListener('mouseleave', () => {
       closeButton.style.backgroundColor = 'transparent';
-      closeButton.style.color = '#6c757d';
+      closeButton.style.color = 'var(--col-text-muted)';
     });
 
     closeButton.addEventListener('click', closeModal);
@@ -178,7 +195,7 @@ export function createAdvancedModal(formulas) {
       display: 'block',
       fontSize: '16px',
       fontWeight: '600',
-      color: '#495057',
+      color: 'var(--col-text-main)',
       marginBottom: '12px'
     });
 
@@ -189,8 +206,9 @@ export function createAdvancedModal(formulas) {
       padding: '16px',
       fontSize: '16px',
       borderRadius: '8px',
-      border: '2px solid #e0e0e0',
-      backgroundColor: '#fff',
+      border: '2px solid var(--col-border)',
+      backgroundColor: 'var(--col-bg-white)',
+      color: 'var(--col-text-main)',
       cursor: 'pointer',
       transition: 'border-color 0.2s ease'
     });
@@ -219,7 +237,7 @@ export function createAdvancedModal(formulas) {
       display: 'block',
       fontSize: '16px',
       fontWeight: '600',
-      color: '#495057',
+      color: 'var(--col-text-main)',
       marginBottom: '12px'
     });
 
@@ -227,10 +245,10 @@ export function createAdvancedModal(formulas) {
     customEditorContainer.id = 'customEditorContainer';
     customEditorContainer.className = 'editor-section';
     Object.assign(customEditorContainer.style, {
-      border: '2px solid #e0e0e0',
+      border: '2px solid var(--col-border)',
       borderRadius: '8px',
       padding: '8px',
-      backgroundColor: '#f8f9fa',
+      backgroundColor: 'var(--col-bg-main)',
       minHeight: '120px',
       display: 'block' // Start visible since "My formula" is the default
     });
@@ -261,7 +279,7 @@ export function createAdvancedModal(formulas) {
       display: 'block',
       fontSize: '16px',
       fontWeight: '600',
-      color: '#495057',
+      color: 'var(--col-text-main)',
       marginBottom: '12px'
     });
 
@@ -282,7 +300,7 @@ export function createAdvancedModal(formulas) {
       display: 'block',
       fontSize: '16px',
       fontWeight: '600',
-      color: '#495057',
+      color: 'var(--col-text-main)',
       marginBottom: '12px'
     });
 
@@ -301,11 +319,11 @@ export function createAdvancedModal(formulas) {
         Object.assign(noVarsMessage.style, {
           padding: '16px',
           textAlign: 'center',
-          color: '#6c757d',
+          color: 'var(--col-text-muted)',
           fontStyle: 'italic',
-          backgroundColor: '#f8f9fa',
+          backgroundColor: 'var(--col-bg-main)',
           borderRadius: '6px',
-          border: '1px solid #e0e0e0'
+          border: '1px solid var(--col-border)'
         });
         buttonContainer.appendChild(noVarsMessage);
         validateForm();
@@ -324,10 +342,10 @@ export function createAdvancedModal(formulas) {
           fontSize: '16px',
           fontWeight: '500',
           cursor: 'pointer',
-          border: '2px solid #e0e0e0',
+          border: '2px solid var(--col-border)',
           borderRadius: '6px',
-          backgroundColor: '#f8f9fa',
-          color: '#495057',
+          backgroundColor: 'var(--col-bg-main)',
+          color: 'var(--col-text-main)',
           transition: 'all 0.2s ease',
           minHeight: '44px',
           display: 'flex',
@@ -337,6 +355,7 @@ export function createAdvancedModal(formulas) {
 
         // Enhanced button state management
         const updateButtonState = (targetButton, isActive, isHovered = false) => {
+          const isDark = document.body.classList.contains('dark-mode');
           if (isActive) {
             Object.assign(targetButton.style, {
               backgroundColor: '#007bff',
@@ -347,16 +366,16 @@ export function createAdvancedModal(formulas) {
             });
           } else if (isHovered) {
             Object.assign(targetButton.style, {
-              backgroundColor: '#e9ecef',
-              borderColor: '#adb5bd',
+              backgroundColor: isDark ? '#334155' : '#e9ecef',
+              borderColor: isDark ? '#475569' : '#adb5bd',
               transform: 'translateY(-1px)',
               boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)'
             });
           } else {
             Object.assign(targetButton.style, {
-              backgroundColor: '#f8f9fa',
-              borderColor: '#e0e0e0',
-              color: '#495057',
+              backgroundColor: 'var(--col-bg-main)',
+              borderColor: 'var(--col-border)',
+              color: 'var(--col-text-main)',
               transform: 'translateY(0)',
               boxShadow: 'none'
             });

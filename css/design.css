@@ -20,6 +20,10 @@
       --col-text-main: #1f2937;
       --col-text-muted: #9ca3af;
       --col-border: #e5e7eb;
+
+      --col-highlight-main: rgba(136, 190, 213, 0.78);
+      --col-highlight-secondary: #e3f2fd;
+      --col-highlight-success: rgba(0, 255, 0, 0.55);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
