@@ -1784,7 +1784,6 @@
       #proof-split-layout {
         flex-direction: column-reverse !important;
         overflow-y: auto !important;
-        display: flex !important;
         gap: 20px;
         height: auto !important;
       }

@@ -1,10 +1,10 @@
-// runTests.js - Standalone версія без браузерних залежностей
+// runTests.js - Standalone version without browser dependencies
 
 // ==========================================
-// 🛠️ MOCK ФУНКЦІЇ (замість браузерних імпортів)
+// 🛠️ MOCK FUNCTIONS (instead of browser imports)
 // ==========================================
 
-// Mock функція getProof (знімає дужки з AST вузлів)
+// Mock function getProof (unwraps parentheses from AST nodes)
 function getProof(proof) {
   if (!proof || proof.type !== "parenthesis") {
     return proof;
@@ -12,7 +12,7 @@ function getProof(proof) {
   return getProof(proof.value);
 }
 
-// Константи для аксіом Робінсона
+// Constants for Robinson Axioms
 const ROBINSON_AXIOMS = [
   "∀x ∀y (s(x) = s(y) ⇒ x = y)", // ax1
   "∀x (0 ≠ s(x))", // ax2
@@ -24,38 +24,38 @@ const ROBINSON_AXIOMS = [
 ];
 
 // ==========================================
-// 🛠️ HELPER ФУНКЦІЇ
+// 🛠️ HELPER FUNCTIONS
 // ==========================================
 
 const unwrap = (node) => getProof(node);
 
-// Глибоке порівняння вузлів (ВИПРАВЛЕНЕ)
+// Deep comparison of nodes
 const areNodesEqual = (n1, n2) => {
   if (!n1 || !n2) return n1 === n2;
 
-  // Якщо це обгортки (parenthesis), знімаємо їх
+  // If it's a wrapper (parenthesis), unwrap it
   if (n1.type === 'parenthesis') return areNodesEqual(n1.value, n2);
   if (n2.type === 'parenthesis') return areNodesEqual(n1, n2.value);
 
   if (n1.type !== n2.type) return false;
 
-  // Порівняння значень (Константи, Змінні, Числа)
+  // Value comparison (Constants, Variables, Numbers)
   if (['variable', 'constant', 'number'].includes(n1.type)) {
-    // Використовуємо value або name в залежності від того, що є
+    // Use value or name depending on availability
     const v1 = n1.value || n1.name;
     const v2 = n2.value || n2.name;
     return v1 === v2;
   }
 
-  // Рекурсія для структур
+  // Recursion for structures
   if (n1.type === 'successor') return areNodesEqual(n1.term, n2.term);
 
-  // Для бінарних операцій
+  // For binary operations
   if (['addition', 'multiplication', 'equality', 'implication', 'disjunction', 'conjunction'].includes(n1.type)) {
     return areNodesEqual(n1.left, n2.left) && areNodesEqual(n1.right, n2.right);
   }
 
-  // Для кванторів (exists, forall)
+  // For quantifiers (exists, forall)
   if (n1.type === 'exists' || n1.type === 'forall') {
     return n1.variable === n2.variable && areNodesEqual(n1.operand, n2.operand);
   }
@@ -63,13 +63,13 @@ const areNodesEqual = (n1, n2) => {
   return false;
 };
 
-// Перевірка на нуль
+// Check for zero
 const isZero = (node) => {
   const n = unwrap(node);
   return n && (n.type === 'constant' || n.type === 'number') && n.value === '0';
 };
 
-// Перевірка на "Successor-like" (s(...) або число > 0)
+// Check for "Successor-like" (s(...) or number > 0)
 const isSuccessorLike = (node) => {
   const n = unwrap(node);
   if (n.type === 'successor') return true;
@@ -77,7 +77,7 @@ const isSuccessorLike = (node) => {
   return false;
 };
 
-// Отримати глибину саксесора або число
+// Get successor depth or number
 const getSuccessorDepth = (node) => {
   let current = unwrap(node);
   let depth = 0;
@@ -94,7 +94,7 @@ const getSuccessorDepth = (node) => {
   return { type: 'term', base: current, depth: depth };
 };
 
-// Зняти один шар саксесора (для Ax1)
+// Remove one successor layer (for Ax1)
 const peelSuccessor = (node) => {
   const n = unwrap(node);
   if (n.type === 'successor') return unwrap(n.term);
@@ -102,7 +102,7 @@ const peelSuccessor = (node) => {
   if (n.type === 'constant' || n.type === 'number') {
     const val = parseInt(n.value, 10);
     if (!isNaN(val) && val > 0) {
-      // Повертаємо об'єкт того ж типу, але на 1 менше
+      // Return object of same type but with value - 1
       return { ...n, value: (val - 1).toString() };
     }
   }
@@ -110,7 +110,7 @@ const peelSuccessor = (node) => {
 };
 
 const createAST = {
-  // Helpers для створення вузлів AST
+  // Helpers for creating AST nodes
   constant: (val) => ({ type: 'constant', value: val.toString() }),
   variable: (name) => ({ type: 'variable', name }),
   successor: (term) => ({ type: 'successor', term }),
@@ -122,7 +122,7 @@ const createAST = {
   exists: (variable, operand) => ({ type: 'exists', variable, operand }),
   forall: (variable, operand) => ({ type: 'forall', variable, operand }),
 
-  // Швидке створення числа через саксесори (напр. 2 -> s(s(0)))
+  // Fast creation of number via successors (e.g. 2 -> s(s(0)))
   numberAsSuccessors: (num) => {
     let node = { type: 'constant', value: '0' };
     for (let i = 0; i < num; i++) {
@@ -131,12 +131,12 @@ const createAST = {
     return node;
   },
 
-  // Швидке створення числа як константи (напр. "2")
+  // Fast creation of number as constant (e.g. "2")
   numberAsConst: (num) => ({ type: 'constant', value: num.toString() })
 };
 
 // ==========================================
-// 🔍 ФУНКЦІЇ ВАЛІДАЦІЇ АКСІОМ (1-3)
+// 🔍 AXIOM VALIDATION FUNCTIONS (1-3)
 // ==========================================
 
 /**
@@ -167,26 +167,26 @@ function validateAxiom1(root) {
 
 /**
  * Ax2: ∀x (0 ≠ s(x))
- * Перевіряє патерни: NOT(0=s(x)) або 0 != s(x)
+ * Checks patterns: NOT(0=s(x)) or 0 != s(x)
  */
 function validateAxiom2(formula) {
   const root = unwrap(formula);
 
-  // Варіант А: Заперечення рівності (NOT (0 = s(x)))
+  // Option A: Negation of equality (NOT (0 = s(x)))
   if (root.type === 'negation') {
     const operand = unwrap(root.operand);
     if (operand.type === 'equality') {
       const left = unwrap(operand.left);
       const right = unwrap(operand.right);
 
-      // Перевіряємо: один бік 0, інший s(...)
+      // Check: one side is 0, other is s(...)
       if ((isZero(left) && isSuccessorLike(right)) || (isZero(right) && isSuccessorLike(left))) {
         return { index: 1, code: "Ax2", desc: "Zero is not a successor (0 ≠ s(x))" };
       }
     }
   }
 
-  // Варіант Б: Якщо парсер підтримує оператор "!=" або "≠"
+  // Option B: If parser supports "!=" or "≠" operator
   if (root.type === 'equality' && (root.operator === '!=' || root.operator === '≠')) {
     const left = unwrap(root.left);
     const right = unwrap(root.right);
@@ -204,13 +204,13 @@ function validateAxiom2(formula) {
 function validateAxiom3(formula) {
   const root = unwrap(formula);
 
-  // Має бути імплікація
+  // Must be an implication
   if (root.type !== 'implication') return null;
 
   const premise = unwrap(root.left);       // x != 0
   const conclusion = unwrap(root.right);   // exists y (x = s(y))
 
-  // 1. Аналіз передумови (x != 0)
+  // 1. Premise analysis (x != 0)
   let x_Var = null;
 
   if (premise.type === 'negation') {
@@ -224,20 +224,20 @@ function validateAxiom3(formula) {
     else if (isZero(premise.right)) x_Var = premise.left;
   }
 
-  if (!x_Var) return null; // Не знайшли структуру "щось != 0"
+  if (!x_Var) return null; // "something != 0" structure not found
 
-  // 2. Аналіз висновку (exists y (x = s(y)))
+  // 2. Conclusion analysis (exists y (x = s(y)))
   if (conclusion.type === 'exists') {
     const body = unwrap(conclusion.operand);
     if (body.type === 'equality') {
-      // Шукаємо x = s(y) або s(y) = x
+      // Look for x = s(y) or s(y) = x
       let successorPart = null;
 
       if (areNodesEqual(body.left, x_Var)) successorPart = body.right;
       else if (areNodesEqual(body.right, x_Var)) successorPart = body.left;
 
       if (successorPart && successorPart.type === 'successor') {
-        // Перевіряємо, чи змінна всередині successor це та, що під квантором
+        // Check if variable inside successor matches quantified variable
         const innerVar = unwrap(successorPart.term);
         if (innerVar.type === 'variable' && innerVar.name === conclusion.variable) {
           return { index: 2, code: "Ax3", desc: "Predecessor Existence" };
@@ -250,7 +250,7 @@ function validateAxiom3(formula) {
 }
 
 // ==========================================
-// 🔍 ФУНКЦІЇ ВАЛІДАЦІЇ АКСІОМ (4-7)
+// 🔍 AXIOM VALIDATION FUNCTIONS (4-7)
 // ==========================================
 
 /**
@@ -286,54 +286,54 @@ function validateAxiom5(root) {
   const left = unwrap(rootNode.left);
   const right = unwrap(rootNode.right);
 
-  // Left: x + s(y) (або x + number)
+  // Left: x + s(y) (or x + number)
   if (left.type !== 'addition') return null;
   // Right: s(...)
   if (right.type !== 'successor' && right.type !== 'constant' && right.type !== 'number') return null;
 
-  const sy_Left = unwrap(left.right); // Другий доданок зліва
+  const sy_Left = unwrap(left.right); // Second operand on left
 
-  // Перевірка, що другий доданок НЕ нуль (інакше це Ax4)
+  // Check that second operand is NOT zero (otherwise it's Ax4)
   if (isZero(sy_Left)) return null;
 
-  // Отримуємо глибини/значення
+  // Get depths/values
   // Left side Y part
   const valLeftY = getSuccessorDepth(sy_Left);
 
-  // Right side (s(x+y)) -> треба дістати те, що всередині s, або число - 1
+  // Right side (s(x+y)) -> need to get what's inside s, or number - 1
   let rightInnerVal;
   let rightIsNumber = false;
 
   if (right.type === 'successor') {
     // s(TERM)
-    const term = unwrap(right.term); // TERM має бути x + y
+    const term = unwrap(right.term); // TERM should be x + y
     if (term.type !== 'addition') return null;
 
     const x_Right = unwrap(term.left);
     const y_Right = unwrap(term.right);
 
-    // Перевіряємо X
+    // Check X
     if (!areNodesEqual(unwrap(left.left), x_Right)) return null;
 
     rightInnerVal = getSuccessorDepth(y_Right);
 
   } else if (right.type === 'constant' || right.type === 'number') {
-    // Це число (наприклад 3, що є s(2))
-    // Тоді x + y має дорівнювати 2
+    // It's a number (e.g. 3, which is s(2))
+    // Then x + y should equal 2
     const rVal = parseInt(right.value, 10);
-    rightInnerVal = { type: 'number', value: rVal - 1 }; // Зменшуємо на 1 (зняли зовнішній s)
+    rightInnerVal = { type: 'number', value: rVal - 1 }; // Decrement by 1 (remove outer s)
     rightIsNumber = true;
   } else {
     return null;
   }
 
-  // Фінальне порівняння Y частин
+  // Final comparison of Y parts
   if (valLeftY.type === 'number' && rightInnerVal.type === 'number') {
     if (valLeftY.value === rightInnerVal.value + 1) {
       return { index: 4, code: "Ax5", desc: "Recursive addition (x + s(y) = s(x+y))" };
     }
   } else {
-    // Символьний: a + s(b) = s(a+b)
+    // Symbolic: a + s(b) = s(a+b)
     if (valLeftY.depth === rightInnerVal.depth + 1 && areNodesEqual(valLeftY.base, rightInnerVal.base)) {
       return { index: 4, code: "Ax5", desc: "Recursive addition (x + s(y) = s(x+y))" };
     }
@@ -352,17 +352,17 @@ function validateAxiom6(formula) {
   const left = unwrap(root.left);
   const right = unwrap(root.right);
 
-  // Left: Multiplcation
+  // Left: Multiplication
   if (left.type !== 'multiplication') return null;
 
-  // Перевірка: Right == 0
+  // Check: Right == 0
   if (!isZero(right)) return null;
 
-  // Перевірка: Left operand 2 == 0
+  // Check: Left operand 2 == 0
   const arg2 = unwrap(left.right);
   if (!isZero(arg2)) return null;
 
-  // Тоді це Ax6: x * 0 = 0
+  // Then it's Ax6: x * 0 = 0
   return { index: 5, code: "Ax6", desc: "Multiplication by zero (x * 0 = 0)" };
 }
 
@@ -376,42 +376,42 @@ function validateAxiom7(formula) {
   const left = unwrap(root.left);   // x * s(y)
   const right = unwrap(root.right); // (x * y) + x
 
-  // Структура Зліва
+  // Structure on Left
   if (left.type !== 'multiplication') return null;
   const x_Left = unwrap(left.left);
   const sy_Left = unwrap(left.right);
 
-  // sy_Left має бути s(...) або число > 0
-  if (isZero(sy_Left)) return null; // Це Ax6
+  // sy_Left should be s(...) or number > 0
+  if (isZero(sy_Left)) return null; // This is Ax6
 
-  // Структура Справа
+  // Structure on Right
   if (right.type !== 'addition') return null;
   const xy_Right = unwrap(right.left);  // (x * y)
   const x_Right_Outer = unwrap(right.right); // + x
 
-  // 1. Перевіряємо X (він усюди має бути однаковим)
+  // 1. Check X (should be same everywhere)
   // x_Left == x_Right_Outer
   if (!areNodesEqual(x_Left, x_Right_Outer)) return null;
 
-  // 2. Перевіряємо (x * y) всередині додавання
+  // 2. Check (x * y) inside addition
   if (xy_Right.type !== 'multiplication') return null;
   const x_Right_Inner = unwrap(xy_Right.left);
   const y_Right = unwrap(xy_Right.right);
 
   if (!areNodesEqual(x_Left, x_Right_Inner)) return null;
 
-  // 3. Перевіряємо Y
-  // Зліва ми маємо sy_Left (це s(y)). Справа маємо y_Right (це y).
+  // 3. Check Y
+  // On left we have sy_Left (which is s(y)). On right we have y_Right (which is y).
   const valLeftY = getSuccessorDepth(sy_Left);
   const valRightY = getSuccessorDepth(y_Right);
 
-  // Логіка як в Ax5: зліва має бути на 1 більше ніж справа
+  // Logic same as in Ax5: left should be 1 greater than right
   let isMatch = false;
 
   if (valLeftY.type === 'number' && valRightY.type === 'number') {
     if (valLeftY.value === valRightY.value + 1) isMatch = true;
   } else {
-    // Символи: a * s(b) = ...
+    // Symbols: a * s(b) = ...
     if (valLeftY.depth === valRightY.depth + 1 && areNodesEqual(valLeftY.base, valRightY.base)) {
       isMatch = true;
     }
@@ -425,14 +425,14 @@ function validateAxiom7(formula) {
 }
 
 // ==========================================
-// 🔍 ГОЛОВНА ФУНКЦІЯ ВАЛІДАЦІЇ
+// 🔍 MAIN VALIDATION FUNCTION
 // ==========================================
 
 /**
- * Головний метод для перевірки всіх аксіом Робінсона
+ * Main method for checking all Robinson axioms
  */
 function validateRobinsonAxioms(formula) {
-  console.log("🚀 Починаю перевірку всіх аксіом Робинсона...");
+  console.log("🚀 Starting validation of Robinson axioms...");
 
   const validationResults = {
     isAxiom: false,
@@ -466,11 +466,11 @@ function validateRobinsonAxioms(formula) {
         validationResults.axiomNumber = validator.num;
         validationResults.axiomFormula = ROBINSON_AXIOMS[validator.num - 1];
         validationResults.description = result.desc;
-        console.log(`✅ Формула відповідає аксіомі ${validator.num} (${result.code})`);
+        console.log(`✅ Formula matches axiom ${validator.num} (${result.code})`);
         break;
       }
     } catch (error) {
-      console.error(`❌ Помилка при перевірці аксіоми ${validator.num}:`, error);
+      console.error(`❌ Error validating axiom ${validator.num}:`, error);
       validationResults.details.push({
         axiomNumber: validator.num,
         isValid: false,
@@ -480,14 +480,14 @@ function validateRobinsonAxioms(formula) {
   }
 
   if (!validationResults.isAxiom) {
-    console.log("❌ Формула не відповідає жодній аксіомі Робинсона");
+    console.log("❌ Formula does not match any Robinson axiom");
   }
 
   return validationResults;
 }
 
 // ==========================================
-// ТЕСТОВІ ДАНІ
+// TEST DATA
 // ==========================================
 const tests = [
   // --- Ax1: s(x)=s(y) => x=y ---
@@ -511,7 +511,7 @@ const tests = [
     name: "Ax1: Invalid (Wrong conclusion)",
     ast: createAST.implication(
       createAST.equality(createAST.successor(createAST.variable('a')), createAST.successor(createAST.variable('b'))),
-      createAST.equality(createAST.variable('a'), createAST.variable('a')) // a=a замість a=b
+      createAST.equality(createAST.variable('a'), createAST.variable('a')) // a=a instead of a=b
     ),
     expectedAx: null
   },
@@ -583,7 +583,7 @@ const tests = [
       createAST.addition(createAST.constant('0'), createAST.variable('a')),
       createAST.variable('a')
     ),
-    expectedAx: null // Це комутативність, не Ax4
+    expectedAx: null // This is commutativity, not Ax4
   },
 
   // --- Ax5: x + s(y) = s(x+y) ---
@@ -609,7 +609,7 @@ const tests = [
       createAST.addition(createAST.constant('1'), createAST.constant('2')),
       createAST.constant('3')
     ),
-    expectedAx: null // Немає структури s(...) справа
+    expectedAx: null // No s(...) structure on right
   },
 
   // --- Ax6: x * 0 = 0 ---
@@ -667,7 +667,7 @@ const tests = [
 ];
 
 // ==========================================
-// ЗАПУСК ТЕСТІВ
+// RUN TESTS
 // ==========================================
 function runTests() {
   console.log("🚀 STARTING AUTOMATED ROBINSON AXIOM TESTS\n");
@@ -709,5 +709,5 @@ function runTests() {
   }
 }
 
-// Запускаємо
+// Start
 runTests();
