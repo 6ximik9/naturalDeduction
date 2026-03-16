@@ -76,22 +76,22 @@ disjunction: conjunction (DIS conjunction)*;
 conjunction: negation (CON negation)*;
 
 // Negation and quantifiers
-negation: NEG+ quantified
+negation: NEG+ negation
         | quantified;
 
 // Quantified expressions
-// Changed from 'negation' to 'implication' to allow greedy scope: ∀x A -> B means ∀x (A -> B)
+// Non-greedy scope: ∀x A -> B means (∀x A) -> B
 quantified: forallQuant
           | existQuant
           | atomic;
 
 // Universal quantifier: (∀x)φ or ∀x φ
-forallQuant: '(' FORALL variable ')' implication
-           | FORALL variable implication;
+forallQuant: '(' FORALL variable ')' negation
+           | FORALL variable negation;
 
 // Existential quantifier: (∃x)φ or ∃x φ
-existQuant: '(' EXISTS variable ')' implication
-          | EXISTS variable implication;
+existQuant: '(' EXISTS variable ')' negation
+          | EXISTS variable negation;
 
 // Atomic expressions - highest precedence
 atomic: '(' implication ')'           // Parenthesized formula
