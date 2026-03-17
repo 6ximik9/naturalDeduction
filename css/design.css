@@ -848,6 +848,49 @@
       border-radius: 2px;
     }
 
+    /* Examples Modal Mobile Responsive */
+    @media (max-width: 768px) {
+      .examples-modal-content {
+        width: 95%;
+        height: auto;
+        max-height: 85vh;
+        border-radius: 16px;
+      }
+
+      .examples-modal-header {
+        padding: 16px 20px;
+      }
+
+      .examples-tabs {
+        padding: 8px 12px;
+        flex-wrap: wrap;
+      }
+
+      .example-tab-btn {
+        padding: 8px 14px;
+        font-size: 13px;
+        flex: 1;
+        min-width: 80px;
+        text-align: center;
+      }
+
+      .example-list-container {
+        padding: 16px;
+      }
+
+      .example-item {
+        padding: 14px;
+      }
+
+      .example-label {
+        font-size: 14px;
+      }
+
+      .example-value {
+        font-size: 12px;
+      }
+    }
+
     .example-value {
       font-family: 'JetBrains Mono', 'Fira Code', monospace;
       font-size: 15px;
