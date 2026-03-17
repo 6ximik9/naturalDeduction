@@ -693,11 +693,20 @@ function generateSequentButtons() {
     const buttonContainer = document.getElementById('button-container');
     buttonContainer.innerHTML = '';
 
-    // Reset heights that might be left over from Tree tab
+    // Reset heights and styles that might be left over from Tree tab or Axioms tab in other modes
     buttonContainer.style.height = '';
     if (buttonContainer.parentElement) {
         buttonContainer.parentElement.style.height = '';
     }
+
+    // Set standard rule layout styles
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.flexDirection = 'row';
+    buttonContainer.style.flexWrap = 'wrap';
+    buttonContainer.style.gridTemplateColumns = '';
+    buttonContainer.style.gap = '8px';
+    buttonContainer.style.padding = '';
+    buttonContainer.style.justifyItems = '';
 
     // Set position relative for absolute positioning of hint button
     buttonContainer.style.position = 'relative';
@@ -906,14 +915,20 @@ function setupTabListeners() {
 function renderTreeView() {
     const buttonContainer = document.getElementById('button-container');
     buttonContainer.innerHTML = '';
+
+    // Reset heights and styles for tree view
+    buttonContainer.style.display = 'block'; 
+    buttonContainer.style.gridTemplateColumns = '';
+    buttonContainer.style.gap = '';
+    buttonContainer.style.padding = '';
+    buttonContainer.style.justifyItems = '';
     buttonContainer.style.height = "100%";
     buttonContainer.parentElement.style.height = "100%";
-    
+
     if (!side) {
         buttonContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Select a formula or sequent in the proof tree to view its structure.</div>';
         return;
     }
-    
     const currentSeq = domToSequentMap.get(side);
     if (!currentSeq) return;
     

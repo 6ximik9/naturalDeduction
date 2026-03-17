@@ -572,7 +572,7 @@ function generateButtons(buttonCount, buttonTexts) {
   const buttonContainer = document.getElementById('button-container');
   buttonContainer.innerHTML = '';
 
-  // Reset heights that might be left over from Tree tab
+  // Reset heights and styles that might be left over from Tree tab or Axioms tab
   buttonContainer.style.height = '';
   if (buttonContainer.parentElement) {
     buttonContainer.parentElement.style.height = '';
@@ -582,17 +582,21 @@ function generateButtons(buttonCount, buttonTexts) {
   buttonContainer.style.position = 'relative';
 
   // Check if this is for axioms - more specific detection
+  // Use tab3.checked but also consider buttonTexts to avoid race conditions during tab switching
   const tab3 = document.getElementById('tab3');
-  const isAxiomsTab = (tab3 && tab3.checked) || 
+  const tab1 = document.getElementById('tab1');
+  
+  // If we're currently switching to tab1 (Rules), we should not treat it as axioms
+  // even if tab3.checked is still true due to race condition.
+  // We check if buttonTexts contains typical rules or if tab1 is being selected.
+  let isAxiomsTab = (tab3 && tab3.checked) || 
                       (buttonTexts.length > 0 && buttonTexts.some(t => t.includes('∀x') && (t.includes('s(x)') || t.includes('<'))));
-
-  // Check if this is the "All rules" tab (when all GENTZEN_BUTTONS are shown)
-  const isAllRulesTab = buttonTexts.length === GENTZEN_BUTTONS.length &&
-    buttonTexts === GENTZEN_BUTTONS;
-
-  // Recommended rules tab is when it's not axioms and not all rules
-  // BUT we should show help button if All rules toggle is active (even when showing recommended rules)
-  const isRecommendedRulesTab = !isAxiomsTab && !isAllRulesTab && !helpButtonToggleState.allRules;
+  
+  // Refined check: if we have rules (which are many), it's probably not the axioms tab (which has few)
+  // Or more simply, if we are calling this from a rule-generating context.
+  if (buttonTexts.length > 10 && buttonTexts === GENTZEN_BUTTONS) {
+      isAxiomsTab = false;
+  }
 
   if (isAxiomsTab) {
     // Special styling for axioms - 2 columns layout
@@ -603,10 +607,14 @@ function generateButtons(buttonCount, buttonTexts) {
     buttonContainer.style.justifyItems = 'center';
   } else {
     // Reset to default styling for other tabs
-    buttonContainer.style.display = '';
+    // Using explicit values that match index.html defaults to ensure clean state
+    buttonContainer.style.display = 'flex'; 
+    buttonContainer.style.flexDirection = 'row';
+    buttonContainer.style.flexWrap = 'wrap';
     buttonContainer.style.gridTemplateColumns = '';
-    buttonContainer.style.gap = '';
+    buttonContainer.style.gap = '8px';
     buttonContainer.style.padding = '';
+    buttonContainer.style.justifyItems = '';
   }
 
 
@@ -1592,71 +1600,63 @@ function addClickGentzenRules() {
         setTimeout(disableAllButtons, 0);
         return;
       }
-      if (tabId === 'tab1') {
-        if (typeProof === 1) {
-          return;
+      
+      // Use setTimeout to ensure radio button state is updated before we check it
+      setTimeout(() => {
+        if (tabId === 'tab1') {
+          if (typeProof === 1) {
+            return;
+          }
+          // Preserve Smart Mode state
+          processExpression(checkWithAntlr(oldUserInput), helpButtonToggleState.allRules ? 0 : 1);
+        } else if (tabId === 'tab3') {
+          // Axioms tab - show Robinson Arithmetic axioms and Order Axioms
+          if (typeProof === 1) {
+            return;
+          }
+
+          if (helpButtonToggleState.axioms) {
+               showFilteredAxioms();
+          } else {
+              // Format axioms for generateButtons
+              const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
+              generateButtons(formattedAxioms.length, formattedAxioms);
+          }
+        } else if (tabId === 'tab4') {
+          const buttonContainer = document.getElementById('button-container');
+          buttonContainer.innerHTML = '';
+
+          // Reset button-container styles to original state (remove grid styles from Axioms tab)
+          // Set height to 100% for the SVG tree
+          buttonContainer.style.display = 'block'; 
+          buttonContainer.style.gridTemplateColumns = '';
+          buttonContainer.style.gap = '';
+          buttonContainer.style.padding = '';
+          buttonContainer.style.justifyItems = '';
+          buttonContainer.style.position = 'relative';
+          buttonContainer.style.height = "100%";
+          buttonContainer.parentElement.style.height = "100%";
+
+          let svgContainer = document.createElement("div");
+          svgContainer.style.width = "100%";
+          svgContainer.style.height = "100%";
+          svgContainer.style.overflow = "hidden";
+          svgContainer.style.position = "relative";
+          svgContainer.style.display = "block";
+
+          let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svgElement.style.width = "100%";
+          svgElement.style.height = "100%";
+
+          svgContainer.appendChild(svgElement);
+          buttonContainer.appendChild(svgContainer);
+
+          const parsed = checkWithAntlr(oldUserInput);
+          createTreeD3(parsed);
         }
-        // Preserve Smart Mode state
-        processExpression(checkWithAntlr(oldUserInput), helpButtonToggleState.allRules ? 0 : 1);
-        // } else if (tabId === 'tab2') {
-        //   if (typeProof === 1) {
-        //     return;
-        //   }
-        //   // Reset toggle states when switching to recommended rules tab
-        //   helpButtonToggleState.allRules = false;
-        //   helpButtonToggleState.axioms = false;
-        //   processExpression(checkWithAntlr(side.querySelector('#proofText').textContent), 0);
-      } else if (tabId === 'tab3') {
-        // Axioms tab - show Robinson Arithmetic axioms and Order Axioms
-        if (typeProof === 1) {
-          return;
-        }
-
-        if (helpButtonToggleState.axioms) {
-             showFilteredAxioms();
-        } else {
-            // Format axioms for generateButtons
-            const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
-            generateButtons(formattedAxioms.length, formattedAxioms);
-        }
-      } else if (tabId === 'tab4') {
-        // Reset toggle states when switching to tree view tab
-        // Persist state instead of resetting
-        // helpButtonToggleState.allRules = false;
-        // helpButtonToggleState.axioms = false;
-        const buttonContainer = document.getElementById('button-container');
-        buttonContainer.innerHTML = '';
-
-        // Reset button-container styles to original state (remove grid styles from Axioms tab)
-        buttonContainer.style.display = '';
-        buttonContainer.style.gridTemplateColumns = '';
-        buttonContainer.style.gap = '';
-        buttonContainer.style.padding = '';
-        buttonContainer.style.justifyItems = 'center';
-        buttonContainer.style.position = 'relative';
-        buttonContainer.style.height = "100%";
-        buttonContainer.parentElement.style.height = "100%";
-
-        let svgContainer = document.createElement("div");
-        svgContainer.style.width = "100%";
-        svgContainer.style.height = "100%";
-        svgContainer.style.overflow = "hidden";
-        svgContainer.style.position = "relative";
-        svgContainer.style.display = "block";
-
-        let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgElement.style.width = "100%";
-        svgElement.style.height = "100%";
-
-        svgContainer.appendChild(svgElement);
-
-        buttonContainer.appendChild(svgContainer);
-
-        createTreeD3(checkWithAntlr(side.querySelector('#proofText').textContent));
-      }
+      }, 0);
     });
   });
-
 }
 
 function addClickSwitchNotation() {

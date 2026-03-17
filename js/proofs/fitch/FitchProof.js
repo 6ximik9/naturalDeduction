@@ -196,7 +196,7 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
   const buttonContainer = document.getElementById('button-container');
   buttonContainer.innerHTML = '';
 
-  // Reset heights that might be left over from Tree tab
+  // Reset heights and styles that might be left over from Tree tab or Axioms tab
   buttonContainer.style.height = '';
   if (buttonContainer.parentElement) {
     buttonContainer.parentElement.style.height = '';
@@ -207,8 +207,14 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
 
   // Check if this is for axioms - use both tab state and content detection
   const tab3 = document.getElementById('tab3');
-  const isAxiomsTab = (tab3 && tab3.checked) ||
+  let isAxiomsTab = (tab3 && tab3.checked) ||
                       (buttonTexts.length > 0 && buttonTexts.some(t => t.includes('∀x') && (t.includes('s(x)') || t.includes('<'))));
+
+  // Race condition guard: if we have rules (which are many), it's probably not the axioms tab (which has few)
+  // Or more simply, if we are calling this from a rule-generating context.
+  if (buttonCount > 10 && buttonTexts === FITCH_BUTTONS) {
+      isAxiomsTab = false;
+  }
 
   if (branchIndex !== 0 && !isAxiomsTab) {
     let btn = createButton("Close assumption", () => closeAsp());
@@ -236,11 +242,15 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
     buttonContainer.style.padding = '20px';
     buttonContainer.style.justifyItems = 'center';
   } else {
-    // Reset styling for regular rules
-    buttonContainer.style.display = '';
+    // Reset to default styling for other tabs
+    // Using explicit values that match index.html defaults to ensure clean state
+    buttonContainer.style.display = 'flex'; 
+    buttonContainer.style.flexDirection = 'row';
+    buttonContainer.style.flexWrap = 'wrap';
     buttonContainer.style.gridTemplateColumns = '';
-    buttonContainer.style.gap = '';
+    buttonContainer.style.gap = '8px';
     buttonContainer.style.padding = '';
+    buttonContainer.style.justifyItems = '';
   }
 
   let showedRobinsonHeader = false;
@@ -771,55 +781,64 @@ function addClickFitchRules() {
   tabTriggers.forEach(function (trigger) {
     trigger.addEventListener('click', function (event) {
       const tabId = this.getAttribute('for');
-      if (tabId === 'tab1') {
-        // helpButtonToggleState = false;
-        processExpression("AllRules", helpButtonToggleState ? 0 : 1);
-      } else if (tabId === 'tab4') {
-        if (clickedProofs.length !== 1) {
-          event.preventDefault(); // Prevent tab switch
-          alert(t("alert-select-formula"));
-          // Ensure we stay on tab1 (or revert to it)
-          const radioInput = document.getElementById('tab1');
-          if (radioInput) radioInput.checked = true;
-          return;
+      
+      // Use setTimeout to ensure radio button state is updated before we check it
+      setTimeout(() => {
+        if (tabId === 'tab1') {
+          // helpButtonToggleState = false;
+          processExpression("AllRules", helpButtonToggleState ? 0 : 1);
+        } else if (tabId === 'tab4') {
+          if (clickedProofs.length !== 1) {
+            event.preventDefault(); // Prevent tab switch
+            alert(t("alert-select-formula"));
+            // Ensure we stay on tab1 (or revert to it)
+            const radioInput = document.getElementById('tab1');
+            if (radioInput) radioInput.checked = true;
+            return;
+          }
+          const buttonContainer = document.getElementById('button-container');
+          buttonContainer.innerHTML = '';
+          
+          // Reset button-container styles and prepare for tree view
+          buttonContainer.style.display = 'block'; 
+          buttonContainer.style.gridTemplateColumns = '';
+          buttonContainer.style.gap = '';
+          buttonContainer.style.padding = '';
+          buttonContainer.style.justifyItems = '';
+          buttonContainer.style.position = 'relative';
+          buttonContainer.style.height = "100%";
+          buttonContainer.style.width = "100%";
+          buttonContainer.parentElement.style.height = "100%";
+
+          let svgContainer = document.createElement("div");
+          svgContainer.style.width = "100%";
+          svgContainer.style.height = "100%";
+          svgContainer.style.overflow = "hidden";
+          svgContainer.style.position = "relative";
+          svgContainer.style.display = "block";
+
+          let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svgElement.style.width = "100%";
+          svgElement.style.height = "100%";
+
+          svgContainer.appendChild(svgElement);
+
+          buttonContainer.appendChild(svgContainer);
+
+          const spanElement = clickedProofs[0].element.querySelector('span.indexC');
+          if (spanElement) spanElement.remove();
+
+          createTreeD3(getProof(checkWithAntlr(clickedProofs[0].element.textContent)));
+
+          if (spanElement) clickedProofs[0].element.appendChild(spanElement);
+        } else if (tabId === 'tab3') {
+          // helpButtonToggleState = false;
+          // Format axioms for generateButtons
+          const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
+          // Axioms should always be available in Fitch mode
+          generateButtons(formattedAxioms.length, formattedAxioms, false);
         }
-        const buttonContainer = document.getElementById('button-container');
-        buttonContainer.innerHTML = '';
-        buttonContainer.style.display = ''; // Reset display style
-        buttonContainer.style.gridTemplateColumns = ''; // Reset grid columns
-        buttonContainer.style.padding = ''; // Reset padding
-        buttonContainer.style.height = "100%";
-        buttonContainer.style.width = "100%";
-        buttonContainer.parentElement.style.height = "100%";
-
-        let svgContainer = document.createElement("div");
-        svgContainer.style.width = "100%";
-        svgContainer.style.height = "100%";
-        svgContainer.style.overflow = "hidden";
-        svgContainer.style.position = "relative";
-        svgContainer.style.display = "block";
-
-        let svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgElement.style.width = "100%";
-        svgElement.style.height = "100%";
-
-        svgContainer.appendChild(svgElement);
-
-        buttonContainer.appendChild(svgContainer);
-
-        const spanElement = clickedProofs[0].element.querySelector('span.indexC');
-        if (spanElement) spanElement.remove();
-
-        createTreeD3(getProof(checkWithAntlr(clickedProofs[0].element.textContent)));
-
-        if (spanElement) clickedProofs[0].element.appendChild(spanElement);
-      } else if (tabId === 'tab3') {
-        // helpButtonToggleState = false;
-        // Format axioms for generateButtons
-        const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
-        // Axioms should always be available in Fitch mode
-        generateButtons(formattedAxioms.length, formattedAxioms, false);
-      }
+      }, 0);
     });
   });
 }
@@ -893,7 +912,6 @@ export function clearItems() {
   // The user can switch tabs if needed.
   // Note: If the user is on the Axioms tab, this might switch the view to "All Rules".
   // To avoid this, we could check the active tab.
-  const activeTab = document.querySelector('.tab-trigger.active-tab');
   const isAxiomsTab = document.getElementById('tab3') && document.getElementById('tab3').checked;
 
   if (isAxiomsTab) {
@@ -1009,8 +1027,3 @@ function addOrRemoveParenthesesFitch() {
     updateButtons(retBtn);
   });
 }
-
-
-
-
-
