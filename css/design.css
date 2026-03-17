@@ -1602,6 +1602,14 @@
     body.dark-mode .custom-select {
         border-color: var(--col-border) !important;
     }
+    body.dark-mode .custom-select:hover {
+        background-color: #334155 !important;
+        border-color: var(--col-accent) !important;
+    }
+    body.dark-mode .custom-select select option {
+        background-color: var(--col-bg-white);
+        color: var(--col-text-main);
+    }
 
     /* General containers in Dark Mode */
     body.dark-mode #proof-container,
