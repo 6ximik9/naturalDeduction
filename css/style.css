@@ -1327,6 +1327,7 @@ span.choose {
   #out_fitch *
   {
     font-size: 22px !important;
+    box-sizing: border-box;
   }
 
   #out_nums{
@@ -1334,7 +1335,10 @@ span.choose {
   }
 
   #out_nums > div{
-    height: 27px !important;
+    height: 32px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   #out_just
@@ -1343,9 +1347,20 @@ span.choose {
   }
 
   #out_just > div{
-    height: 27px !important;
+    height: 32px !important;
+    display: flex;
+    align-items: center;
   }
 
+  .fitch_formula {
+    height: 32px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  .fitch_branch {
+    padding-bottom: 0px !important;
+  }
 }
 
 /* ==========================================================================
@@ -1499,7 +1514,7 @@ span.choose {
 
 #out_fitch *
 {
-  font-size: 32px;
+  box-sizing: border-box;
 }
 
 #out_nums{
@@ -1507,7 +1522,11 @@ span.choose {
 }
 
 #out_nums > div{
-  height: 41.55px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
 }
 
 #out_just
@@ -1516,25 +1535,27 @@ span.choose {
 }
 
 #out_just > div{
-  height: 41.55px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  font-size: 32px;
 }
 
 
 .fitch_branch {
-  border-left: 1px solid black;
+  border-left: 2px solid black;
   margin-left: 1em;
   width: fit-content;
-  padding-bottom: 40px;
+  padding-bottom: 0px;
 }
 
 .fitch_formula {
   font-family: 'Times New Roman', serif !important;
   display: flex;
-  align-items: center; /* Центрує дочірні елементи по вертикалі */
-  /*justify-content: center; !* Центрує дочірні елементи по горизонталі *!*/
-  padding-left: 5px; /* Збереження вашого налаштування відступу */
+  align-items: center;
+  padding-left: 10px;
   cursor: pointer;
-  /*height: 39px; !* Встановіть фіксовану висоту або достатню висоту для вашого контенту *!*/
+  height: 48px;
   font-size: 36px !important;
 }
 

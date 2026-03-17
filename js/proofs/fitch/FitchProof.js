@@ -817,8 +817,8 @@ function addClickFitchRules() {
         // helpButtonToggleState = false;
         // Format axioms for generateButtons
         const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
-        const isDisabled = clickedProofs.length === 0 && clickedBranch.length === 0;
-        generateButtons(formattedAxioms.length, formattedAxioms, isDisabled);
+        // Axioms should always be available in Fitch mode
+        generateButtons(formattedAxioms.length, formattedAxioms, false);
       }
     });
   });
@@ -897,9 +897,9 @@ export function clearItems() {
   const isAxiomsTab = document.getElementById('tab3') && document.getElementById('tab3').checked;
 
   if (isAxiomsTab) {
-      // Re-trigger the tab click logic for Axioms to refresh (disable) them
+      // Re-trigger the tab click logic for Axioms to refresh (and keep them enabled)
       const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
-      generateButtons(formattedAxioms.length, formattedAxioms, true);
+      generateButtons(formattedAxioms.length, formattedAxioms, false);
   } else {
       processExpression("AllRules", 1);
   }

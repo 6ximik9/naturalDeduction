@@ -51,14 +51,15 @@ function createTooltip(element, convertedText) {
 
   Object.assign(tooltip.style, {
     position: 'absolute',
-    backgroundColor: '#2c3e50',
-    color: 'white',
+    backgroundColor: 'var(--col-tooltip-bg)',
+    color: 'var(--col-tooltip-text)',
     padding: '12px 16px',
     borderRadius: '8px',
     fontSize: '24px',
     fontFamily: '"Times New Roman", serif',
     fontWeight: 'bold',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    border: '1px solid var(--col-border)',
     zIndex: '10000',
     pointerEvents: 'none',
     opacity: '0',
@@ -155,28 +156,8 @@ function handleProofTextHover(event) {
 
     const convertedText = convertNumbersToSuccessorNotation(originalText);
 
-    // Store original styles before changing them
-    if (!element.dataset.hoverOriginalStyles) {
-      element.dataset.hoverOriginalStyles = JSON.stringify({
-        backgroundColor: element.style.backgroundColor || '',
-        borderRadius: element.style.borderRadius || '',
-        padding: element.style.padding || '',
-        boxShadow: element.style.boxShadow || '',
-        transition: element.style.transition || ''
-      });
-    }
-
-    // Add subtle highlighting to the original element (only if not already styled by click)
-    const currentBg = element.style.backgroundColor;
-    if (!currentBg || currentBg === '' || currentBg === 'transparent') {
-      element.style.backgroundColor = '#e8f4fd';
-    }
-
-    // Add other hover styles
-    element.style.borderRadius = '4px';
-    element.style.padding = '2px 4px';
-    element.style.transition = 'all 0.2s ease';
-    element.style.boxShadow = '0 1px 3px rgba(0, 123, 191, 0.2)';
+    // Add highlighting via CSS class
+    element.classList.add('successor-hover');
 
     // Mark element as currently hovered
     element.dataset.isHovered = 'true';
@@ -198,21 +179,8 @@ function handleProofTextLeave(event) {
     // Remove hover marker
     delete element.dataset.isHovered;
 
-    // Restore original styles
-    if (element.dataset.hoverOriginalStyles) {
-      const originalStyles = JSON.parse(element.dataset.hoverOriginalStyles);
-
-      // Only restore background if it's our hover color
-      if (element.style.backgroundColor === 'rgb(232, 244, 253)') {
-        element.style.backgroundColor = originalStyles.backgroundColor;
-      }
-
-      // Restore other styles
-      element.style.borderRadius = originalStyles.borderRadius;
-      element.style.padding = originalStyles.padding;
-      element.style.boxShadow = originalStyles.boxShadow;
-      element.style.transition = originalStyles.transition;
-    }
+    // Remove highlighting via CSS class
+    element.classList.remove('successor-hover');
 
     // Remove tooltip
     removeTooltip();

@@ -1086,6 +1086,9 @@ export function disableAllButtons() {
     const isAxiomsTab = document.getElementById('tab3') && document.getElementById('tab3').checked;
     const isTreeTab = document.getElementById('tab4') && document.getElementById('tab4').checked;
     
+    // In Fitch mode (typeProof === 1), axioms should always be available
+    const isFitch = (typeProof === 1);
+    
     if (isTreeTab) {
         const buttonContainer = document.getElementById('button-container');
         buttonContainer.innerHTML = '';
@@ -1156,6 +1159,9 @@ export function disableAllButtons() {
     if (isAxiomsTab) {
          const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
          generateButtons(formattedAxioms.length, formattedAxioms);
+         
+         // If in Fitch mode, we don't disable the axiom buttons
+         if (isFitch) return;
     } else {
          // Default to rules (Tab 1) logic
          generateButtons(GENTZEN_BUTTONS.length, GENTZEN_BUTTONS);

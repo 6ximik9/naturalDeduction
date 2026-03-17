@@ -24,6 +24,11 @@
       --col-highlight-main: rgba(136, 190, 213, 0.78);
       --col-highlight-secondary: #e3f2fd;
       --col-highlight-success: rgba(0, 255, 0, 0.55);
+
+      /* Successor Tooltip & Hover */
+      --col-hover-bg: #e8f4fd;
+      --col-tooltip-bg: #2c3e50;
+      --col-tooltip-text: #ffffff;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1542,6 +1547,20 @@
         --col-highlight-main: rgba(59, 130, 246, 0.45);
         --col-highlight-secondary: rgba(59, 130, 246, 0.3);
         --col-highlight-success: rgba(34, 197, 94, 0.45);
+
+        /* Successor Tooltip & Hover Dark Mode */
+        --col-hover-bg: rgba(59, 130, 246, 0.2);
+        --col-tooltip-bg: #1e293b;
+        --col-tooltip-text: #f3f4f6;
+    }
+
+    /* Hover effect for proof text elements */
+    #proofText.successor-hover {
+        background-color: var(--col-hover-bg) !important;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 123, 191, 0.2);
+        transition: background-color 0.2s ease;
+        cursor: help;
     }
 
     /* Dark Mode Specific Overrides */
