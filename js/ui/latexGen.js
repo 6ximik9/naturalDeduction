@@ -22,49 +22,93 @@ const copyBtn = document.getElementById('copyLatexCode');
  */
 function getLate(element) {
   let results = [];
+  const processed = new Set();
 
   function traverse(node) {
-    const childDivs = Array.from(node.children);
-    
-    // Filter useful children
-    const divElements = childDivs.filter(child =>
-      child.tagName.toLowerCase() === 'div' &&
-      !child.className.includes('nameRule')
-    );
-    const labelElements = childDivs.filter(child => child.tagName.toLowerCase() === 'label');
-    const rule = childDivs.filter(child =>
-      child.tagName.toLowerCase() === 'div' &&
-      child.className.includes('nameRule')
-    );
+    if (!node || node.nodeType !== 1) return;
 
-    if (labelElements.length > 0) {
-      results.push(labelElements[0].textContent);
+    // 1. Знайти формулу-висновок цього вузла
+    // Шукаємо перший не оброблений label#proofText, який не належить глибшому рівню
+    const allLabels = Array.from(node.querySelectorAll('label#proofText'));
+    let label = allLabels.find(l => {
+        if (processed.has(l)) return false;
+        let parent = l.parentElement;
+        while (parent && parent !== node) {
+            if (parent.className && typeof parent.className === 'string' && parent.className.includes('proof-element_level-')) return false;
+            parent = parent.parentElement;
+        }
+        return true;
+    });
+
+    if (!label) return;
+    processed.add(label);
+
+    // Використовуємо :scope, щоб знайти контекст саме цього рівня, а не з вкладених рівнів
+    let gamma = label.parentElement.querySelector(':scope > .gamma-context');
+    let content = label.textContent;
+    if (gamma) {
+        let gammaText = "";
+        if (gamma.querySelector('sub')) {
+            // Використовуємо плейсхолдери для дужок індексу, щоб latexEdit їх не екранував
+            gammaText = gamma.innerHTML.replace(/<sub>(.*?)<\/sub>/g, '___SUB_START___$1___SUB_END___').replace(/<[^>]*>/g, '');
+        } else {
+            gammaText = gamma.textContent;
+        }
+        content = gammaText + content;
     }
 
-    if (divElements.length === 1) {
-      if (rule.length > 0) {
-        results.push('unary');
-        results.push(rule[0].textContent);
-      }
-      traverse(divElements[0]);
-    } else if (divElements.length === 2) {
-      if (rule.length > 0) {
-        results.push('binary');
-        results.push(rule[0].textContent);
-      }
-      traverse(divElements[1]);
-      results.push('axiom');
-      traverse(divElements[0]);
-    } else if (divElements.length === 3) {
-      if (rule.length > 0) {
-        results.push('trinary');
-        results.push(rule[0].textContent);
-      }
-      traverse(divElements[2]);
-      results.push('axiom');
-      traverse(divElements[1]);
-      results.push('axiom');
-      traverse(divElements[0]);
+    // 2. Знайти гілки (засновки) та правило
+    // В Гентзені вони знаходяться над лінією (border-bottom)
+    let ruleText = null;
+    let branches = [];
+
+    // Шукаємо контейнер з лінією, що знаходиться "вище" нашого label
+    let current = label.parentElement;
+    let lineDiv = null;
+    while (current && current !== node.parentElement) {
+        lineDiv = Array.from(current.querySelectorAll('div')).find(d => 
+            (d.style.borderBottomWidth && d.style.borderBottomWidth !== '0px') || 
+            (d.style.borderBottom && d.style.borderBottom !== 'none')
+        );
+        if (lineDiv) break;
+        current = current.parentElement;
+    }
+
+    if (lineDiv) {
+        // Гілки - це безпосередні діти контейнера з лінією
+        branches = Array.from(lineDiv.children).filter(c => c.tagName === 'DIV');
+        
+        // Правило - це .nameRule, що є сусідом контейнера з лінією (всередині flex-row)
+        let ruleDiv = lineDiv.closest('div[style*="flex-direction: row"]')?.querySelector(':scope > .nameRule');
+        if (ruleDiv) ruleText = ruleDiv.textContent;
+
+        if (branches.length === 1) {
+            results.push(content);
+            results.push('unary');
+            if (ruleText) results.push(ruleText);
+            traverse(branches[0]);
+        } else if (branches.length === 2) {
+            results.push(content);
+            results.push('binary');
+            if (ruleText) results.push(ruleText);
+            traverse(branches[1]); // right
+            results.push('axiom');
+            traverse(branches[0]); // left
+        } else if (branches.length === 3) {
+            results.push(content);
+            results.push('trinary');
+            if (ruleText) results.push(ruleText);
+            traverse(branches[2]);
+            results.push('axiom');
+            traverse(branches[1]);
+            results.push('axiom');
+            traverse(branches[0]);
+        } else {
+            results.push(content);
+        }
+    } else {
+        // Якщо лінії немає - це аксіома (листок)
+        results.push(content);
     }
   }
 
@@ -86,18 +130,26 @@ function transformArray(inputArray) {
       const value = inputArray[i + 1];
       if (type === 'unary') {
         transformed.push(`\\UnaryInfC{$${latexEdit(value, 0)}$}`);
+        i += 2;
       } else if (type === 'binary') {
         transformed.push(`\\BinaryInfC{$${latexEdit(value, 0)}$}`);
+        i += 2;
       } else if (type === 'trinary') {
         transformed.push(`\\TrinaryInfC{$${latexEdit(value, 0)}$}`);
+        i += 2;
       } else if (type === 'axiom') {
         transformed.push(`\\AxiomC{$${latexEdit(value, 0)}$}`);
+        i += 2;
       } else {
         transformed.push(`\\RightLabel{$${latexEdit(type, 1)}$}`);
         i += 1;
-        continue;
       }
-      i += 2;
+    } else {
+      // Обробити останній елемент, щоб не було зависання
+      if (type !== 'axiom' && type !== 'unary' && type !== 'binary' && type !== 'trinary') {
+          transformed.push(`\\RightLabel{$${latexEdit(type, 1)}$}`);
+      }
+      i++;
     }
   }
   transformed.push('\\end{prooftree}');
@@ -127,6 +179,8 @@ function latexEdit(str, mode) {
     '~': ' \\neg ', ' ¬': ' \\neg ', '!': ' \\neg ',
     '∀': ' \\forall ', '∃': ' \\exists ',
     '⊤': ' \\top ', '⊥': ' \\bot ',
+    '⊢': ' \\vdash ', '⊨': ' \\vDash ',
+    '{': '\\{', '}': '\\}',
     '<=': ' \\le ', '>=': ' \\ge ',
     '≠': ' \\neq ', '!=': ' \\neq ',
     '*': ' \\cdot '
@@ -143,6 +197,9 @@ function latexEdit(str, mode) {
     }
   });
 
+  // Повертаємо справжні дужки для нижніх індексів
+  str = str.replace(/___SUB_START___/g, '_{').replace(/___SUB_END___/g, '}');
+
   return str;
 }
 
@@ -151,15 +208,16 @@ function latexEdit(str, mode) {
 function generateGentzenContent(isDocument) {
     const proofContainer = document.querySelector('.proof-element_level-0');
     if (!proofContainer) return "";
-    
+
     const proofTexts = getLate(proofContainer).reverse();
+    console.log(proofTexts);
     const proofBody = transformArray(proofTexts).join('\n');
 
     if (isDocument) {
         return "\\documentclass{article}\n" +
                "\\usepackage{bussproofs} %https://ctan.org/pkg/bussproofs \n\n" +
                "\\begin{document}\n\n" +
-               proofBody + 
+               proofBody +
                "\n\n\\end{document}";
     }
     return proofBody;
@@ -177,11 +235,11 @@ function printElementAndChildren(element) {
   var outJustDiv = document.getElementById('out_just').children;
   const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
   const children = Array.from(element.children);
-  
+
   children.forEach((child, index) => {
     if (child.classList.contains('fitch_branch')) {
       indexTest++;
-      printElementAndChildren(child); 
+      printElementAndChildren(child);
     } else {
       let output;
       let rule;
@@ -219,7 +277,7 @@ function generateFitchContent(isDocument) {
          return "\\documentclass{article}\n" +
             "\\usepackage{fitch} %http://www.actual.world/resources/tex/sty/kluwer/edited/fitch.sty \n\n" +
             "\\begin{document}\n\n" +
-            proofBody + 
+            proofBody +
             "\n\n\\end{document}";
     }
     return proofBody;
@@ -261,7 +319,7 @@ function generateSequentLatex(node) {
 
 function generateSequentContent(isDocument) {
     if (!sequentContextRef.treeRoot) return "";
-    
+
     const latexStr = generateSequentLatex(sequentContextRef.treeRoot);
     const proofBody = `\\begin{prooftree}\n${latexStr}\n\\end{prooftree}`;
 
@@ -283,7 +341,7 @@ function setActiveTab(index) {
     if (navbarItems[index]) {
         navbarItems[index].classList.add('active');
     }
-    
+
     // Update content
     const isDocument = (index === 1); // 0 = Proof, 1 = Document
     let content = "";
@@ -314,7 +372,7 @@ function openModal() {
 function attachListener() {
     const btn = document.getElementById('sb-latex') || document.getElementById('latex');
     if (!btn) return;
-    
+
     // Replace button to remove old listeners
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
@@ -382,7 +440,7 @@ if (copyBtn) {
 
         try {
             await navigator.clipboard.writeText(textToCopy);
-            
+
             // Success Feedback
             if (icon) {
                 icon.className = 'ri-check-line';
