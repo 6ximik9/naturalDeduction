@@ -41,7 +41,10 @@ export function initStartScreen() {
   const isReloadViaHome = sessionStorage.getItem('isHomeReload') === 'true';
   sessionStorage.removeItem('isHomeReload');
 
-  if (shouldSkip && !isReloadViaHome) {
+  const returnToEditor = sessionStorage.getItem('returnToEditor') === 'true';
+  sessionStorage.removeItem('returnToEditor');
+
+  if ((shouldSkip && !isReloadViaHome) || returnToEditor) {
     applyAllSettings();
     startScreen.classList.add('hidden');
     // Still need to init sidebar and filters

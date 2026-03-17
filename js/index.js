@@ -15,6 +15,7 @@ import {updateLanguage, t} from "./core/i18n";
 import {initStartScreen} from './ui/modals/startScreen';
 import {isVL} from './state/logicSettings';
 import { initLayoutSettings } from './ui/modals/layout';
+import { initExamplesModal } from './ui/modals/examples';
 
 let hasError = false;
 let inputText = "";
@@ -27,6 +28,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Initialize Layout Settings
   initLayoutSettings();
+
+  // Initialize Examples Modal
+  initExamplesModal();
 
   // Initialize Language
   const savedLang = localStorage.getItem('selectedLang') || 'EN';
@@ -223,11 +227,19 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  const navShowStarts = document.querySelectorAll('.nav-show-start');
+  const navShowStarts = document.querySelectorAll('.nav-show-start, .logo');
   navShowStarts.forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.preventDefault();
-      localStorage.removeItem('skipStartScreen');
+      const theme = localStorage.getItem('theme');
+      const lang = localStorage.getItem('selectedLang');
+      localStorage.clear();
+      if (theme) {
+        localStorage.setItem('theme', theme);
+      }
+      if (lang) {
+        localStorage.setItem('selectedLang', lang);
+      }
       sessionStorage.setItem('isHomeReload', 'true');
       location.reload(true);
     });
@@ -404,6 +416,13 @@ enterButton.addEventListener('click', function () {
   else
   {
     gentzenProof();
+  }
+
+  // Ensure view is reset (Fit View) at start
+  if (window.resetProofView) {
+      setTimeout(() => {
+          window.resetProofView();
+      }, 50);
   }
 
 });
@@ -654,8 +673,27 @@ function setupSidebarProxy() {
   if (homeBtn) {
     homeBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      if(confirm(t("confirm-return-main"))) {
+      if(confirm(t("confirm-return-main") || "Are you sure you want to return to the editor? Your proof progress will be lost.")) {
+        sessionStorage.setItem('savedFormula', editorMonaco.editor.getValue());
+        sessionStorage.setItem('returnToEditor', 'true');
         location.reload();
+      }
+    });
+  }
+
+  const fullscreenBtn = document.getElementById('fullscreen-btn');
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', () => {
+      const proofContainer = document.getElementById('proof-container');
+      if (proofContainer) {
+        proofContainer.classList.toggle('proof-fullscreen');
+        const isFullscreen = proofContainer.classList.contains('proof-fullscreen');
+        
+        if (isFullscreen) {
+          fullscreenBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`;
+        } else {
+          fullscreenBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`;
+        }
       }
     });
   }

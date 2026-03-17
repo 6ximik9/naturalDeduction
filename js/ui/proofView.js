@@ -30,6 +30,19 @@ export function initProofView() {
         proof.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     };
 
+    window.resetProofView = () => {
+        scale = 1;
+        translateX = 0;
+        // Shift up by 20% of container height if possible, otherwise a sensible default
+        const offset = proofContainer ? proofContainer.offsetHeight * 0.2 : 100;
+        translateY = -offset;
+        updateTransform();
+        if (proofContainer) {
+            proofContainer.style.width = '';
+            proofContainer.style.height = '';
+        }
+    };
+
     const zoom = (delta, mouseX, mouseY) => {
         // Sensitivity factor for smoother zoom (especially for trackpads)
         // 0.002 provides a good balance between speed and precision
@@ -207,24 +220,14 @@ export function initProofView() {
     if (zoomOutBtn) zoomOutBtn.addEventListener('click', (e) => { e.preventDefault(); zoom(100); });
     if (resetZoomBtn) resetZoomBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        scale = 1;
-        translateX = 0;
-        translateY = 0;
-        updateTransform();
-        proofContainer.style.width = '';
-        proofContainer.style.height = '';
+        window.resetProofView();
     });
     
     // Legacy Button Listeners
     if (legacyZoomIn) legacyZoomIn.addEventListener('click', () => zoom(-100));
     if (legacyZoomOut) legacyZoomOut.addEventListener('click', () => zoom(100));
     if (legacyReset) legacyReset.addEventListener('click', () => {
-        scale = 1;
-        translateX = 0;
-        translateY = 0;
-        updateTransform();
-        proofContainer.style.width = '';
-        proofContainer.style.height = '';
+        window.resetProofView();
     });
 
     // Custom Resize Logic

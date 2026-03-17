@@ -21,7 +21,7 @@ export const SEQUENT_CALCULUS_RULES = [
 
   // Implikácia
   "$$\\frac{\\Gamma, \\phi \\vdash \\Delta, \\psi}{\\Gamma \\vdash \\Delta, \\phi \\Rightarrow \\psi} \\; (\\Rightarrow r)$$ ",
-  "$$\\frac{\\Gamma \\vdash \\Lambda, \\phi \\quad \\Delta, \\psi \\vdash \\Sigma}{\\Gamma, \\Delta, \\phi \\Rightarrow \\psi \\vdash \\Lambda, \\Sigma} \\; (\\Rightarrow l)$$ ",
+  "$$\\frac{\\Gamma \\vdash \\Delta, \\phi \\quad \\Gamma, \\psi \\vdash \\Delta}{\\Gamma, \\phi \\Rightarrow \\psi \\vdash \\Delta} \\; (\\Rightarrow l)$$ ",
 
   // Konštanty
   "$$\\frac{\\Gamma \\vdash \\Delta}{\\Gamma, \\top \\vdash \\Delta} \\; (\\top l)$$ ",

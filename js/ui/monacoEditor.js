@@ -286,22 +286,7 @@ if (editorResize && editorPanel) {
 }
 
 
-const dropdownItems = document.querySelectorAll('.dropdown-content li');
-const checkbox = document.querySelector('.dropdown input[type="checkbox"]');
-// Додаємо обробник події для кожного елемента
-dropdownItems.forEach(item => {
-  item.addEventListener('click', function () {
-    const selectedValue = this.getAttribute('data-value'); // Отримуємо значення data-value атрибуту
-
-    if(selectedValue === "multiline") {
-      editor.setValue("(φ⇒θ)\n(ψ⇒θ)\n————————————————\n(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)");
-    }
-    else{editor.setValue(selectedValue);}
-    checkbox.click();
-  });
-});
-
-
+// Old dropdown handling removed in favor of Examples Modal
 const dropdownItemsFont = document.querySelectorAll('.dropdown-contentFont li');
 const checkboxFont = document.querySelector('.dropdownFont input[type="checkbox"]');
 if (checkboxFont && dropdownItemsFont.length > 0) {
