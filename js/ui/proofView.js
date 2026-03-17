@@ -30,13 +30,58 @@ export function initProofView() {
         proof.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     };
 
+    window.fitProofView = () => {
+        if (!proofContainer || !proof) return;
+
+        // Use a small timeout to allow MathJax/layout to finish
+        setTimeout(() => {
+            const originalMinHeight = proof.style.minHeight;
+            
+            proof.style.transform = 'none';
+            proof.style.minHeight = '0px';
+            proof.style.width = 'fit-content';
+
+            requestAnimationFrame(() => {
+                const containerW = proofContainer.clientWidth;
+                const containerH = proofContainer.clientHeight;
+                
+                // Use scrollWidth/Height to capture rule names that might overflow
+                const contentW = proof.scrollWidth;
+                const contentH = proof.scrollHeight;
+
+                if (contentW === 0 || contentH === 0) {
+                    proof.style.minHeight = originalMinHeight;
+                    updateTransform();
+                    return;
+                }
+
+                // Increase horizontal padding specifically for rule names
+                const paddingW = 120; // More space for names like (=>E)
+                const paddingH = 60;
+                
+                const availableW = Math.max(containerW - paddingW, 100);
+                const availableH = Math.max(containerH - paddingH, 100);
+
+                const scaleX = availableW / contentW;
+                const scaleY = availableH / contentH;
+                
+                let newScale = Math.min(scaleX, scaleY);
+                newScale = Math.min(Math.max(0.2, newScale), 1.1);
+
+                // Re-calculate with newScale
+                translateX = (containerW - contentW * newScale) / 2;
+                translateY = (containerH - contentH * newScale) / 2;
+                
+                scale = newScale;
+
+                proof.style.minHeight = originalMinHeight;
+                updateTransform();
+            });
+        }, 80); // Slightly longer timeout for MathJax stability
+    };
+
     window.resetProofView = () => {
-        scale = 1;
-        translateX = 0;
-        // Shift up by 20% of container height if possible, otherwise a sensible default
-        const offset = proofContainer ? proofContainer.offsetHeight * 0.2 : 100;
-        translateY = -offset;
-        updateTransform();
+        window.fitProofView();
         if (proofContainer) {
             proofContainer.style.width = '';
             proofContainer.style.height = '';
@@ -273,23 +318,14 @@ export function initProofView() {
     const observer = new MutationObserver(() => {
         // Debounce slightly to wait for layout updates
         requestAnimationFrame(() => {
-            // Temporarily disable min-height to measure actual content height
-            // preventing the container's own height from influencing the measurement
-            // via the CSS min-height: 100% rule on #proof
-            const prevMinHeight = proof.style.minHeight;
-            proof.style.minHeight = '0px';
-            
-            // Measure content
+            // Measure visual height based on content size and current scale
             const contentHeight = proof.offsetHeight;
-            
-            // Restore style
-            proof.style.minHeight = prevMinHeight;
-            
-            // Calculate visual height based on content size and current scale
             const visualHeight = contentHeight * scale;
             
-            // Update container height
-            proofContainer.style.height = (visualHeight + 60) + 'px'; 
+            // We no longer automatically update container height as it conflicts 
+            // with flex layout and stable zooming. The container should have
+            // its own size managed by the split layout or manual resize.
+            // proofContainer.style.height = (visualHeight + 60) + 'px'; 
         });
     });
 

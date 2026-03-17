@@ -929,14 +929,17 @@ function closeSide(container) {
 
   let gammaHtml = existingElement.outerHTML;
   
-  // 3. Видаляємо всі span-елементи для отримання чистого тексту формули
+  // 3. Створюємо копію для вилучення чистого тексту формули (без назви правила)
+  let tempClone = container.cloneNode(true);
+  tempClone.querySelectorAll('.nameRule, span, sub, sup').forEach(el => el.remove());
+  let rawText = tempClone.textContent.trim();
+
+  // Видаляємо всі span-елементи з оригіналу
   container.querySelectorAll('span').forEach(span => span.remove());
 
   // Позначаємо гілку як закриту
   container.className = 'closed';
   
-  // Очищаємо текст від зайвих пробілів
-  let rawText = container.textContent.trim();
   let labelText = `[${rawText}]`;
   labelText = labelText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -982,14 +985,16 @@ async function buttonClicked(buttonText) {
         const newConclusion = deductionContext.conclusions[size + 1];
         // Check if a new conclusion was actually added
         if (newConclusion) {
-          nameRule = "\\forall E";
+          nameRule = "Ax" + axiomNumber;
 
           createProofTree(newConclusion, side);
 
           // Відразу закриваємо гілку для аксіоми
           const axiomElement = document.querySelector(`.proof-element_level-${newConclusion.level}`);
           if (axiomElement) {
-            const proofDiv = axiomElement.querySelector('div:not(.nameRule)');
+            // Шукаємо контейнер саме формули (який містить label#proofText), 
+            // а не весь блок виведення (inferenceRow)
+            const proofDiv = axiomElement.querySelector('.proof-content')?.parentElement;
             if (proofDiv) {
               closeSide(proofDiv);
             }

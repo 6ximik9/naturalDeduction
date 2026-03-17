@@ -371,7 +371,7 @@ h3 {
 #proof {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center content vertically */
+  justify-content: flex-start; /* Align content to the top for stable positioning */
   align-items: center;
   align-content: center;
   text-align: center;

@@ -46,6 +46,19 @@ function getLate(element) {
     // Використовуємо :scope, щоб знайти контекст саме цього рівня, а не з вкладених рівнів
     let gamma = label.parentElement.querySelector(':scope > .gamma-context');
     let content = label.textContent;
+
+    // Очищення контенту від квадратних дужок та вилучення правила (для закритих гілок)
+    let ruleFromClosed = null;
+    if (content.startsWith('[') && content.endsWith(']')) {
+        content = content.substring(1, content.length - 1);
+        // Спроба витягти назву правила з кінця, якщо вона там випадково залишилася (наприклад, Ax5 або ∀E)
+        let ruleMatch = content.match(/\s?\((Ax\d+|[^()]+)\)$/);
+        if (ruleMatch) {
+            ruleFromClosed = ruleMatch[1];
+            content = content.substring(0, content.length - ruleMatch[0].length).trim();
+        }
+    }
+
     if (gamma) {
         let gammaText = "";
         if (gamma.querySelector('sub')) {
@@ -79,8 +92,16 @@ function getLate(element) {
         branches = Array.from(lineDiv.children).filter(c => c.tagName === 'DIV');
         
         // Правило - це .nameRule, що є сусідом контейнера з лінією (всередині flex-row)
-        let ruleDiv = lineDiv.closest('div[style*="flex-direction: row"]')?.querySelector(':scope > .nameRule');
-        if (ruleDiv) ruleText = ruleDiv.textContent;
+        // Використовуємо більш надійний пошук через батьківські елементи
+        let ruleDiv = lineDiv.parentElement?.parentElement?.querySelector(':scope > .nameRule');
+        
+        if (ruleDiv) {
+            ruleText = ruleDiv.getAttribute('data-rule') || ruleDiv.textContent;
+            // Видаляємо MathJax-дужки, якщо вони потрапили в текст
+            if (ruleText) {
+                ruleText = ruleText.replace(/^\\\(/, '').replace(/\\\)$/, '');
+            }
+        }
 
         if (branches.length === 1) {
             results.push(content);
@@ -92,28 +113,43 @@ function getLate(element) {
             results.push('binary');
             if (ruleText) results.push(ruleText);
             traverse(branches[1]); // right
-            results.push('axiom');
             traverse(branches[0]); // left
         } else if (branches.length === 3) {
             results.push(content);
             results.push('trinary');
             if (ruleText) results.push(ruleText);
             traverse(branches[2]);
-            results.push('axiom');
             traverse(branches[1]);
-            results.push('axiom');
             traverse(branches[0]);
         } else {
-            results.push(content);
+            // Якщо є правило але немає гілок (аксіома з назвою)
+            if (ruleText) {
+                results.push(content);
+                results.push('unary');
+                results.push(ruleText);
+                results.push('');
+                results.push('axiom');
+            } else {
+                results.push(content);
+                results.push('axiom');
+            }
         }
     } else {
-        // Якщо лінії немає - це аксіома (листок)
-        results.push(content);
+        // Якщо лінії немає, можливо це закрита гілка з правилом
+        if (ruleFromClosed) {
+            results.push(content);
+            results.push('unary');
+            results.push(ruleFromClosed);
+            results.push('');
+            results.push('axiom');
+        } else {
+            results.push(content);
+            results.push('axiom');
+        }
     }
   }
 
   traverse(element);
-  results.push('axiom');
   return results;
 }
 
@@ -145,7 +181,6 @@ function transformArray(inputArray) {
         i += 1;
       }
     } else {
-      // Обробити останній елемент, щоб не було зависання
       if (type !== 'axiom' && type !== 'unary' && type !== 'binary' && type !== 'trinary') {
           transformed.push(`\\RightLabel{$${latexEdit(type, 1)}$}`);
       }
@@ -180,7 +215,7 @@ function latexEdit(str, mode) {
     '∀': ' \\forall ', '∃': ' \\exists ',
     '⊤': ' \\top ', '⊥': ' \\bot ',
     '⊢': ' \\vdash ', '⊨': ' \\vDash ',
-    '{': '\\{', '}': '\\}',
+    // '{': '\\{', '}': '\\}', // Видалено екранування дужок для підтримки \text{...}
     '<=': ' \\le ', '>=': ' \\ge ',
     '≠': ' \\neq ', '!=': ' \\neq ',
     '*': ' \\cdot '
@@ -193,7 +228,8 @@ function latexEdit(str, mode) {
     if (mode === 0) {
       str = str.replace(regex, replacements[key]);
     } else {
-      str = str.replace(regex, replacements[key] + ' ');
+      // Для назв правил не додаємо зайвий пробіл
+      str = str.replace(regex, replacements[key]);
     }
   });
 

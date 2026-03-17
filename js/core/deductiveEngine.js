@@ -338,6 +338,7 @@ export function convertToLogicalExpression(conclusion) {
 export function createLineLevel(text) {
   const container = document.createElement('div');
   container.classList.add('nameRule');
+  container.setAttribute('data-rule', text); // Store original text for LaTeX export
   container.innerHTML = '\\((' + text + ')\\)'; // Додаємо форматування MathJax
   MathJax.typeset([container]); // Викликаємо MathJax для форматування
   return container;
