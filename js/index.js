@@ -697,6 +697,30 @@ function setupSidebarProxy() {
     });
   }
 
+  // Download Dropdown Logic
+  const downloadBtn = document.getElementById('download-btn');
+  const downloadMenu = document.getElementById('download-menu');
+  if (downloadBtn && downloadMenu) {
+    downloadBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      downloadMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!downloadBtn.contains(e.target)) {
+        downloadMenu.classList.remove('show');
+      }
+    });
+
+    // Close on item click
+    const downloadItems = downloadMenu.querySelectorAll('.download-item');
+    downloadItems.forEach(item => {
+      item.addEventListener('click', () => {
+        downloadMenu.classList.remove('show');
+      });
+    });
+  }
+
   proxy('sb-prev', 'backwardButton');
   proxy('sb-next', 'forwardButton');
   // Zoom buttons handled directly by proofView.js

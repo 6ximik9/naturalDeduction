@@ -611,7 +611,7 @@
 
     <!-- Split View for Proof Phase -->
     <div id="proof-split-layout"
-         style="display: none; flex-direction: row; height: 100%; width: 100%; margin-top: 20px; overflow: hidden;">
+         style="display: none; flex-direction: row; height: 100%; width: 100%; margin-top: 0; overflow: hidden;">
 
       <!-- Left Panel: Rules, Axioms, Context -->
       <div id="proof-tools"
@@ -671,13 +671,25 @@
       <!-- Right Panel: Proof Tree -->
       <div id="proof-container" style="background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 15px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; position: relative; min-width: 0; min-height: 0;">
           <div class="proof-actions" style="position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; gap: 8px;">
-              <button id="sb-latex" class="fullscreen-btn" title="Download LaTeX Source" data-i18n-title="nav-latex">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-              </button>
+              <div class="download-dropdown" style="position: relative;">
+                  <button id="download-btn" class="fullscreen-btn" title="Download options">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  </button>
+                  <div id="download-menu" class="download-menu">
+                      <button id="sb-latex" class="download-item">
+                          <i class="ri-file-code-line"></i>
+                          <span>LaTeX</span>
+                      </button>
+                      <button id="sb-svg" class="download-item" disabled title="Coming soon">
+                          <i class="ri-image-line"></i>
+                          <span>SVG</span>
+                      </button>
+                  </div>
+              </div>
               <button id="fullscreen-btn" class="fullscreen-btn" title="Toggle Fullscreen">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>

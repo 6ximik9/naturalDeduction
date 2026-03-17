@@ -314,7 +314,7 @@
     /* --- 4. Content Area --- */
     .content-area {
       flex-grow: 1;
-      padding: 24px 32px;
+      padding: 10px 32px 24px 32px; /* Reduced top padding from 24px */
       display: flex;
       flex-direction: column;
     }
@@ -1078,6 +1078,74 @@
     body.dark-mode .fullscreen-btn {
       background: var(--col-bg-sidebar);
       border-color: var(--col-border);
+    }
+
+    /* Download Dropdown Menu */
+    .download-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: white;
+      border: 1px solid var(--col-border);
+      border-radius: 10px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      display: none; /* Hidden by default */
+      flex-direction: column;
+      min-width: 140px;
+      overflow: hidden;
+      z-index: 100;
+      padding: 4px;
+    }
+
+    .download-menu.show {
+      display: flex;
+      animation: dropdownFade 0.2s ease-out;
+    }
+
+    @keyframes dropdownFade {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .download-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: none;
+      background: transparent;
+      color: var(--col-text-main);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      text-align: left;
+      width: 100%;
+    }
+
+    .download-item:hover:not(:disabled) {
+      background-color: var(--col-bg-secondary);
+      color: var(--col-accent);
+    }
+
+    .download-item:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      color: #9ca3af;
+    }
+
+    .download-item i {
+      font-size: 18px;
+    }
+
+    body.dark-mode .download-menu {
+      background: var(--col-bg-sidebar);
+      border-color: var(--col-border);
+    }
+
+    body.dark-mode .download-item:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.05);
     }
     
     #proof-container {
