@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function toggleSidebar() {
     const activeSidebar = getActiveSidebar();
     if (activeSidebar) {
-      moveSettingsForMobile(activeSidebar);
       activeSidebar.classList.toggle('open');
       overlay.classList.toggle('active');
     }
@@ -30,130 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
   menuBtn.addEventListener('click', toggleSidebar);
   overlay.addEventListener('click', closeSidebar);
 
+  // Close sidebar when clicking a link (optional, depends on preference)
   const navLinks = document.querySelectorAll('.sidebar .nav-link');
   navLinks.forEach(link => {
-    link.addEventListener('click', (event) => {
-      // Sidebar will no longer close automatically when a link is clicked
-      // User must close it manually via overlay or toggle
+    link.addEventListener('click', () => {
+      // Uncomment if you want the sidebar to close after selecting a tool
+      // closeSidebar();
     });
   });
 
-  // Also handle example items
-  const exampleItems = document.querySelectorAll('#exampleList li');
-  exampleItems.forEach(item => {
-    item.addEventListener('click', () => {
-       // Sidebar remains open
-    });
-  });
-
-  // Function to move settings into sidebar or header
-  function moveSettingsForMobile(targetSidebar) {
-    const isMobile = window.innerWidth <= 768;
-    const headerLeft = document.querySelector('.header-left');
-    const headerRight = document.querySelector('.header-right');
-    
-    // Select containers from either header or sidebar to ensure they are found after moving
-    const fontSelectContainer = document.querySelector('.top-header .custom-select') || 
-                                document.querySelector('.sidebar .custom-select');
-    const langSwitcher = document.querySelector('.top-header .lang-switcher') || 
-                         document.querySelector('.sidebar .lang-switcher');
-    
-    if (isMobile) {
-      if (!targetSidebar) return;
-      
-      let mobileContainer = targetSidebar.querySelector('.mobile-settings-container');
-      if (!mobileContainer) {
-        mobileContainer = document.createElement('div');
-        mobileContainer.className = 'mobile-settings-container';
-        mobileContainer.style.padding = '16px 12px';
-        mobileContainer.style.borderTop = '1px solid var(--col-border)';
-        mobileContainer.style.display = 'flex';
-        mobileContainer.style.flexDirection = 'column';
-        mobileContainer.style.gap = '16px';
-        
-        // Find Support menu group and insert before it
-        const menuGroups = targetSidebar.querySelectorAll('.menu-group');
-        const supportGroup = Array.from(menuGroups).find(g => {
-          const title = g.querySelector('.menu-title');
-          return title && title.textContent === 'Support' || title && title.getAttribute('data-i18n') === 'nav-support';
-        });
-        
-        if (supportGroup) {
-          targetSidebar.insertBefore(mobileContainer, supportGroup);
-        } else {
-          targetSidebar.appendChild(mobileContainer);
-        }
-      }
-
-      if (fontSelectContainer && fontSelectContainer.parentElement !== mobileContainer) {
-        mobileContainer.appendChild(fontSelectContainer);
-        fontSelectContainer.style.width = '100%'; 
-        const select = fontSelectContainer.querySelector('select');
-        if (select) {
-          select.style.border = '1px solid var(--col-border)';
-          select.style.borderRadius = '8px';
-          select.style.backgroundColor = 'var(--col-bg-main)';
-        }
-      }
-      if (langSwitcher && langSwitcher.parentElement !== mobileContainer) {
-        mobileContainer.appendChild(langSwitcher);
-        langSwitcher.style.display = 'flex';
-        langSwitcher.style.justifyContent = 'space-between';
-        langSwitcher.style.width = '100%';
-        langSwitcher.style.backgroundColor = 'var(--col-bg-main)';
-        langSwitcher.style.borderRadius = '8px';
-        langSwitcher.style.padding = '4px';
-      }
-    } else {
-      // Move back to header
-      if (fontSelectContainer && headerLeft && fontSelectContainer.parentElement !== headerLeft) {
-        headerLeft.appendChild(fontSelectContainer);
-        fontSelectContainer.style.width = '';
-        const select = fontSelectContainer.querySelector('select');
-        if (select) {
-          select.style.border = '';
-          select.style.backgroundColor = '';
-          select.style.borderRadius = '';
-        }
-      }
-      if (langSwitcher && headerRight && langSwitcher.parentElement !== headerRight) {
-        // Insert before theme toggle
-        const themeToggle = headerRight.querySelector('.theme-toggle');
-        if (themeToggle) {
-          headerRight.insertBefore(langSwitcher, themeToggle);
-        } else {
-          headerRight.appendChild(langSwitcher);
-        }
-        langSwitcher.style.display = '';
-        langSwitcher.style.justifyContent = '';
-        langSwitcher.style.width = '';
-        langSwitcher.style.backgroundColor = '';
-        langSwitcher.style.borderRadius = '';
-        langSwitcher.style.padding = '';
-      }
-    }
-  }
-
-  // Handle resize events
+  // Handle resize events to ensure sidebar is closed when going back to desktop
   window.addEventListener('resize', () => {
-    moveSettingsForMobile(getActiveSidebar());
     if (window.innerWidth > 768) {
       closeSidebar();
     }
   });
-
-  // Initial call
-  moveSettingsForMobile(getActiveSidebar());
-  
-  // Watch for sidebar changes (when proof/home toggles)
-  const observer = new MutationObserver(() => {
-    if (window.innerWidth <= 768) {
-       moveSettingsForMobile(getActiveSidebar());
-    }
-  });
-  
-  const homeSidebar = document.getElementById('sidebar-home');
-  const proofSidebar = document.getElementById('sidebar-proof');
-  if (homeSidebar) observer.observe(homeSidebar, { attributes: true, attributeFilter: ['style'] });
-  if (proofSidebar) observer.observe(proofSidebar, { attributes: true, attributeFilter: ['style'] });
 });

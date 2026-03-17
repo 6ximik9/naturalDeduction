@@ -566,17 +566,6 @@
     </div>
   </div>
 
-  <div class="menu-group">
-    <div class="menu-title" data-i18n="nav-export">Export</div>
-    <a href="#" id="sb-latex" class="nav-link" data-i18n="nav-latex">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="16 18 22 12 16 6"></polyline>
-        <polyline points="8 6 2 12 8 18"></polyline>
-      </svg>
-      LaTeX Source
-    </a>
-  </div>
-
   <div class="menu-group" style="margin-top: auto;">
     <div class="menu-title" data-i18n="nav-support">Support</div>
     <div class="support-links-grid">
@@ -599,6 +588,10 @@
 </aside>
 
 <div class="main-wrapper">
+
+  <button id="mobile-menu-btn" class="mobile-menu-btn" style="display: none;">
+    <i class="ri-menu-line"></i>
+  </button>
 
   <button id="enter" class="btn btn-primary" style="position: fixed; bottom: 30px; right: 30px; z-index: 1000; border-radius: 50px; height: 60px; padding: 0 30px; font-size: 18px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);" data-i18n="btn-proof">
     <i class="ri-play-fill" style="font-size: 24px;"></i> Proof
@@ -676,20 +669,24 @@
       <div id="proof-layout-divider" class="layout-divider"></div>
 
       <!-- Right Panel: Proof Tree -->
-                  <div id="proof-container" style="background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 15px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; position: relative; min-width: 0; min-height: 0;">
-                      <button id="fullscreen-btn" class="fullscreen-btn" title="Toggle Fullscreen">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                        </svg>
-                      </button>
-                      <div id="proof" style="transform-origin: 0 0; width: 100%; height: 100%;"></div>
-                  </div>
+      <div id="proof-container" style="background: white; border: 1px solid var(--col-border); border-radius: 12px; padding: 15px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; position: relative; min-width: 0; min-height: 0;">
+          <div class="proof-actions" style="position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; gap: 8px;">
+              <button id="sb-latex" class="fullscreen-btn" title="Download LaTeX Source" data-i18n-title="nav-latex">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </button>
+              <button id="fullscreen-btn" class="fullscreen-btn" title="Toggle Fullscreen">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+              </button>
+          </div>
+          <div id="proof" style="transform-origin: 0 0; width: 100%; height: 100%;"></div>
+      </div>
     </div>
-    <!-- Old Proof Container (Renamed/Replaced but keeping ID references valid by moving logic) -->
-    <!-- Note: JS looks for 'proof-container'. I'll rename the right panel wrapper to 'proof-container'
-         so existing JS zoom logic works, but I need to ensure it doesn't break layout.
-         Actually, the Right Panel wrapper should BE #proof-container.
-    -->
 
     <!-- Legacy Inputs (Hidden) -->
     <div id="inputFitch" style="display:none;">

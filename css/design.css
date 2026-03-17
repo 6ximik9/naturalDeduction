@@ -282,6 +282,35 @@
     }
     .btn-secondary:hover { background-color: #f9fafb; border-color: #d1d5db; }
 
+    /* Mobile Menu Button (Floating) */
+    .mobile-menu-btn {
+      position: fixed;
+      top: 15px;
+      left: 30px;
+      width: 44px;
+      height: 44px;
+      background: white;
+      border: 1px solid var(--col-border);
+      border-radius: 10px;
+      display: none; /* Hidden by default on desktop */
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      cursor: pointer;
+      color: var(--col-text-main);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.2s ease;
+    }
+
+    body.dark-mode .mobile-menu-btn {
+      background: var(--col-bg-sidebar);
+      border-color: var(--col-border);
+    }
+
+    .mobile-menu-btn i {
+      font-size: 24px;
+    }
+
     /* --- 4. Content Area --- */
     .content-area {
       flex-grow: 1;
@@ -1026,10 +1055,6 @@
     }
 
     .fullscreen-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 10;
       background: white;
       border: 1px solid var(--col-border);
       border-radius: 8px;
@@ -1047,10 +1072,12 @@
     .fullscreen-btn:hover {
       background: var(--col-bg-secondary);
       color: var(--col-accent);
+      border-color: var(--col-accent);
     }
     
     body.dark-mode .fullscreen-btn {
-      background: var(--col-bg-white);
+      background: var(--col-bg-sidebar);
+      border-color: var(--col-border);
     }
     
     #proof-container {
@@ -2134,6 +2161,10 @@
 
     /* --- Mobile Responsive (768px) --- */
     @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex !important;
+      }
+
       #mobile-menu-btn {
         display: flex !important;
       }
