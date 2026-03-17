@@ -302,18 +302,22 @@ if (checkboxFont && dropdownItemsFont.length > 0) {
 
 // Support for new design Font Size selection
 export function initFontSelectors() {
-  const fontSelect = document.getElementById('font-size-select');
+  const fontSelects = document.querySelectorAll('.font-size-select');
 
-  if (fontSelect) {
+  fontSelects.forEach(fontSelect => {
     // Remove existing listeners by cloning (if any)
     const newFontSelect = fontSelect.cloneNode(true);
     fontSelect.parentNode.replaceChild(newFontSelect, fontSelect);
 
     newFontSelect.addEventListener('change', function(e) {
       const size = this.value;
+      // Update all selects to match
+      document.querySelectorAll('.font-size-select').forEach(s => {
+        s.value = size;
+      });
       if (editor) editor.updateOptions({fontSize: parseInt(size)});
     });
-  }
+  });
 }
 
 // Call it immediately if DOM is already parsed (backward compat), but mainly intended for external call

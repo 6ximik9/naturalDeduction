@@ -66,7 +66,8 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   themeToggles.forEach(themeToggle => {
-    themeToggle.addEventListener('click', () => {
+    themeToggle.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent parent (.logo) from triggering reload
       document.body.classList.toggle('dark-mode');
       
       const isDark = document.body.classList.contains('dark-mode');
@@ -394,10 +395,8 @@ enterButton.addEventListener('click', function () {
       }
   }
 
-  const fontSelect = document.getElementsByClassName('custom-select')[0];
   // Hide the enter button as we transition to proof mode
   enterButton.style.display = 'none';
-  fontSelect.style.display = 'none';
 
   // Switch Sidebar to Proof Mode
   const homeSidebar = document.getElementById('sidebar-home');

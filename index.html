@@ -154,14 +154,67 @@
 <div id="mobile-overlay" class="mobile-overlay"></div>
 
 <aside class="sidebar" id="sidebar-home">
-  <div class="logo">
-    <div class="logo-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-           stroke-linejoin="round">
-        <path d="M7 8h10M7 12h4m-4 4h10M4 6v12"/>
-      </svg>
+  <div class="sidebar-header">
+    <div class="logo">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round">
+            <path d="M7 8h10M7 12h4m-4 4h10M4 6v12"/>
+          </svg>
+        </div>
+        LogicProof
+      </div>
+      <div class="theme-toggle" data-i18n-title="theme-toggle" title="Switch Theme">
+        <i class="ri-sun-fill" style="color: #f59e0b; margin-left: 5px;"></i>
+        <i class="ri-moon-clear-line" style="margin-right: 5px;"></i>
+      </div>
     </div>
-    LogicProof
+
+    <div class="menu-group languages-group">
+      <div class="menu-title">Languages</div>
+      <div class="sidebar-settings-group">
+        <div class="lang-switcher">
+          <div class="lang-opt active">EN</div>
+          <div class="lang-opt">SK</div>
+          <div class="lang-opt">UA</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-group editor-settings-group">
+      <div class="menu-title">Editor Settings</div>
+      <div class="sidebar-settings-group">
+        <div class="custom-select" style="position: relative; padding: 0; display: block; width: 100%;">
+          <i class="ri-text"
+             style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;"></i>
+          <select class="font-size-select" style="
+              appearance: none;
+              -webkit-appearance: none;
+              -moz-appearance: none;
+              width: 100%;
+              height: 38px;
+              background: transparent;
+              border: none;
+              padding: 0 30px 0 36px;
+              font-family: 'Inter', sans-serif;
+              font-size: 13px;
+              font-weight: 500;
+              color: var(--col-text-main);
+              cursor: pointer;
+              outline: none;
+          ">
+            <option value="26" selected data-i18n="font-size-label">Font Size: 26px</option>
+            <option value="32" data-i18n="font-size-label">Font Size: 32px</option>
+            <option value="38" data-i18n="font-size-label">Font Size: 38px</option>
+            <option value="44" data-i18n="font-size-label">Font Size: 44px</option>
+            <option value="50" data-i18n="font-size-label">Font Size: 50px</option>
+          </select>
+          <i class="ri-arrow-down-s-line"
+             style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #9ca3af; z-index: 1;"></i>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="menu-group">
@@ -312,14 +365,67 @@
 </aside>
 
 <aside class="sidebar" id="sidebar-proof" style="display: none;">
-  <div class="logo">
-    <div class="logo-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-           stroke-linejoin="round">
-        <path d="M7 8h10M7 12h4m-4 4h10M4 6v12"/>
-      </svg>
+  <div class="sidebar-header">
+    <div class="logo">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round">
+            <path d="M7 8h10M7 12h4m-4 4h10M4 6v12"/>
+          </svg>
+        </div>
+        LogicProof
+      </div>
+      <div class="theme-toggle" data-i18n-title="theme-toggle" title="Switch Theme">
+        <i class="ri-sun-fill" style="color: #f59e0b; margin-left: 5px;"></i>
+        <i class="ri-moon-clear-line" style="margin-right: 5px;"></i>
+      </div>
     </div>
-    LogicProof
+
+    <div class="menu-group languages-group">
+      <div class="menu-title">Languages</div>
+      <div class="sidebar-settings-group">
+        <div class="lang-switcher">
+          <div class="lang-opt active">EN</div>
+          <div class="lang-opt">SK</div>
+          <div class="lang-opt">UA</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-group editor-settings-group">
+      <div class="menu-title">Editor Settings</div>
+      <div class="sidebar-settings-group">
+        <div class="custom-select" style="position: relative; padding: 0; display: block; width: 100%;">
+          <i class="ri-text"
+             style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;"></i>
+          <select class="font-size-select" style="
+              appearance: none;
+              -webkit-appearance: none;
+              -moz-appearance: none;
+              width: 100%;
+              height: 38px;
+              background: transparent;
+              border: none;
+              padding: 0 30px 0 36px;
+              font-family: 'Inter', sans-serif;
+              font-size: 13px;
+              font-weight: 500;
+              color: var(--col-text-main);
+              cursor: pointer;
+              outline: none;
+          ">
+            <option value="26" selected data-i18n="font-size-label">Font Size: 26px</option>
+            <option value="32" data-i18n="font-size-label">Font Size: 32px</option>
+            <option value="38" data-i18n="font-size-label">Font Size: 38px</option>
+            <option value="44" data-i18n="font-size-label">Font Size: 44px</option>
+            <option value="50" data-i18n="font-size-label">Font Size: 50px</option>
+          </select>
+          <i class="ri-arrow-down-s-line"
+             style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #9ca3af; z-index: 1;"></i>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="menu-group">
@@ -494,60 +600,9 @@
 
 <div class="main-wrapper">
 
-  <header class="top-header">
-    <div class="header-left" style="display: flex; align-items: center; gap: 12px;">
-      <button id="mobile-menu-btn" class="btn" style="display: none; padding: 8px; background: transparent; border: 1px solid var(--col-border); border-radius: 8px; cursor: pointer; color: var(--col-text-main); align-items: center; justify-content: center;">
-        <i class="ri-menu-line" style="font-size: 20px;"></i>
-      </button>
-      <div class="custom-select" style="position: relative; padding: 0; display: block; width: auto;">
-        <i class="ri-text"
-           style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;"></i>
-        <select id="font-size-select" style="
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            width: 100%;
-            height: 38px;
-            background: transparent;
-            border: none;
-            padding: 0 30px 0 36px;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--col-text-main);
-            cursor: pointer;
-            outline: none;
-        ">
-          <option value="26" selected data-i18n="font-size-label">Font Size: 26px</option>
-          <option value="32" data-i18n="font-size-label">Font Size: 32px</option>
-          <option value="38" data-i18n="font-size-label">Font Size: 38px</option>
-          <option value="44" data-i18n="font-size-label">Font Size: 44px</option>
-          <option value="50" data-i18n="font-size-label">Font Size: 50px</option>
-        </select>
-        <i class="ri-arrow-down-s-line"
-           style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #9ca3af; z-index: 1;"></i>
-      </div>
-    </div>
-
-    <div class="header-right">
-      <div style="width: 1px; height: 24px; background: #e5e7eb; margin: 0 8px;"></div>
-
-      <div class="lang-switcher">
-        <div class="lang-opt active">EN</div>
-        <div class="lang-opt">SK</div>
-        <div class="lang-opt">UA</div>
-      </div>
-
-      <div class="theme-toggle" data-i18n-title="theme-toggle" title="Switch Theme">
-        <i class="ri-sun-fill" style="color: #f59e0b; margin-left: 5px;"></i>
-        <i class="ri-moon-clear-line" style="margin-right: 5px;"></i>
-      </div>
-
-      <button class="btn btn-primary" style="margin-left: 12px;" id="enter" data-i18n="btn-proof">
-        <i class="ri-play-fill"></i> Proof
-      </button>
-    </div>
-  </header>
+  <button id="enter" class="btn btn-primary" style="position: fixed; bottom: 30px; right: 30px; z-index: 1000; border-radius: 50px; height: 60px; padding: 0 30px; font-size: 18px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);" data-i18n="btn-proof">
+    <i class="ri-play-fill" style="font-size: 24px;"></i> Proof
+  </button>
 
   <div class="content-area">
     <div id="enterFormula" style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">

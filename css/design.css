@@ -54,16 +54,31 @@
       border-right: 1px solid var(--col-border-sidebar);
     }
 
+    .sidebar-header {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 18px; /* Increased from 8px to be less cramped */
+    }
+
     .logo {
       font-size: 18px;
       font-weight: 700;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
-      margin-bottom: 40px;
-      padding-left: 10px;
+      margin-bottom: 28px; /* Distance from Logo to Languages */
+      padding: 0 10px;
       color: var(--col-text-sidebar);
       cursor: pointer;
+    }
+
+    .languages-group {
+      margin-bottom: 20px !important; /* Increased distance from Languages to Editor Settings */
+    }
+
+    .editor-settings-group {
+      margin-bottom: 0 !important; /* Remove bottom margin to let sidebar-header control distance to System */
     }
 
     .logo-icon {
@@ -113,19 +128,12 @@
       flex-direction: column;
     }
 
-    /* --- 3. Header --- */
+    /* --- 3. Header Removed --- */
     .top-header {
-      height: var(--header-height);
-      background-color: var(--col-bg-white);
-      border-bottom: 1px solid var(--col-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 32px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      display: none !important;
     }
 
-    .header-left { display: flex; align-items: center; gap: 20px; }
+    .header-left { display: none !important; }
 
     .header-title {
       font-weight: 600;
@@ -146,9 +154,11 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    .custom-select:hover { border-color: #bfa5a5; background-color: #f9fafb; }
+    .custom-select:hover { border-color: var(--col-accent); background-color: #f9fafb; }
+    
+    body.dark-mode .custom-select:hover { background-color: rgba(255,255,255,0.05); }
 
-    .header-right { display: flex; align-items: center; gap: 16px; }
+    .header-right { display: none !important; }
 
     /* Перемикач мов (Segmented Control) */
     .lang-switcher {
@@ -159,17 +169,23 @@
       gap: 4px;
       border: 1px solid transparent;
       transition: all 0.3s ease;
+      width: 100%;
+      flex-shrink: 0; /* Prevent shrinking */
     }
 
     .lang-opt {
-      padding: 6px 14px;
-      font-size: 12px;
+      flex: 1;
+      text-align: center;
+      padding: 6px 0;
+      font-size: 11px;
       font-weight: 600;
       border-radius: 7px;
       cursor: pointer;
       color: #6b7280;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       user-select: none;
+      white-space: nowrap; /* Prevent text wrapping */
+      min-width: 40px; /* Ensure a minimum width */
     }
 
     .lang-opt:hover:not(.active) {
@@ -218,6 +234,7 @@
       padding: 0 4px;
       color: #6b7280;
       font-size: 12px;
+      flex-shrink: 0;
     }
 
     .theme-toggle::after {
@@ -232,8 +249,9 @@
       transition: 0.3s;
       box-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
-    /* Приклад активного стану теми (можна додавати клас через JS) */
-    .theme-toggle.dark::after { left: 23px; background: #1f2937; }
+    
+    body.dark-mode .theme-toggle { background-color: #334155; }
+    body.dark-mode .theme-toggle::after { left: 23px; background: #1f2937; }
 
     /* Кнопки */
     .btn {
@@ -270,6 +288,16 @@
       padding: 24px 32px;
       display: flex;
       flex-direction: column;
+    }
+
+    /* Adjust Proof button position when sidebar is on the right */
+    body.sb-right #enter {
+      right: calc(var(--sidebar-width) + 30px) !important;
+    }
+
+    /* Adjust Proof button position when sidebar is at the bottom */
+    body.sb-bottom #enter {
+      bottom: 180px !important; /* Increased distance from bottom */
     }
 
     .editor-card {
@@ -1314,14 +1342,21 @@
     body.sb-bottom .sidebar { border-top: 1px solid var(--col-border-sidebar) !important; }
 
     /* Logo adjustment */
-    body.sb-top .sidebar .logo, body.sb-bottom .sidebar .logo { 
-      margin-bottom: 15px !important; 
-      padding-left: 0 !important; 
-      margin-right: 10px; /* Reduced margin */
+    body.sb-top .sidebar .logo, body.sb-bottom .sidebar .logo {
+      margin-bottom: 8px !important;
+      padding-left: 0 !important;
+      margin-right: 0px; /* Reset as it's now in a vertical column */
       flex-shrink: 0;
-      width: auto !important;
+      width: 100% !important;
     }
 
+    /* Column/Header adjustment */
+    body.sb-top .sidebar .sidebar-header, body.sb-bottom .sidebar .sidebar-header {
+      margin-bottom: 0px !important;
+      margin-right: 15px;
+      min-width: 160px;
+      padding-left: 12px; /* Added spacing from left edge */
+    }
     /* Groups as Columns */
     body.sb-top .sidebar .menu-group, body.sb-bottom .sidebar .menu-group { 
       display: flex !important; 
@@ -1335,6 +1370,33 @@
     }
     body.sb-top .sidebar .menu-group:first-of-type, body.sb-bottom .sidebar .menu-group:first-of-type { border-left: none; padding-left: 0; }
     
+    /* Horizontal mode (Top/Bottom) overrides for Languages & Editor Settings */
+    body.sb-top .sidebar .languages-group, 
+    body.sb-bottom .sidebar .languages-group,
+    body.sb-top .sidebar .editor-settings-group,
+    body.sb-bottom .sidebar .editor-settings-group {
+        border-left: none !important;
+        padding-left: 0 !important;
+        margin-left: 0; /* Reset negative margin */
+        min-width: 140px;
+        flex-shrink: 0;
+    }
+    
+    body.sb-top .sidebar .languages-group .menu-title,
+    body.sb-bottom .sidebar .languages-group .menu-title,
+    body.sb-top .sidebar .editor-settings-group .menu-title,
+    body.sb-bottom .sidebar .editor-settings-group .menu-title {
+        display: none !important;
+    }
+
+    body.sb-top .sidebar .languages-group .sidebar-settings-group,
+    body.sb-bottom .sidebar .languages-group .sidebar-settings-group,
+    body.sb-top .sidebar .editor-settings-group .sidebar-settings-group,
+    body.sb-bottom .sidebar .editor-settings-group .sidebar-settings-group {
+        padding: 0 !important;
+        margin-bottom: 8px;
+    }
+
     /* Support group alignment in horizontal mode */
     body.sb-top .sidebar .menu-group:last-of-type, body.sb-bottom .sidebar .menu-group:last-of-type {
       margin-top: 0 !important;
@@ -1618,7 +1680,7 @@
     }
 
     /* Font dropdown */
-    body.dark-mode #font-size-select {
+    body.dark-mode .font-size-select {
         color: var(--col-text-main) !important;
     }
     body.dark-mode .custom-select {
@@ -1848,6 +1910,11 @@
       display: flex;
       align-items: center;
       gap: 15px;
+      flex-shrink: 0;
+    }
+
+    .start-controls .lang-switcher {
+      width: 160px; /* Force consistent width on start screen */
     }
 
     @media (max-width: 600px) {
@@ -2088,6 +2155,25 @@
 
       .sidebar.open {
         transform: translateX(280px);
+      }
+
+      /* Mobile styles for Proof button - Move to LEFT to avoid Monaco keyboard button */
+      #enter {
+        bottom: 40px !important;
+        left: 40px !important;
+        right: auto !important; /* Reset right position */
+        height: 50px !important;
+        padding: 0 20px !important;
+        font-size: 16px !important;
+        box-shadow: 0 8px 15px -3px rgba(239, 68, 68, 0.5) !important;
+      }
+
+      /* Ensure sidebar-specific positions don't override mobile left alignment */
+      body.sb-right #enter,
+      body.sb-bottom #enter {
+        left: 40px !important;
+        right: auto !important;
+        bottom: 40px !important;
       }
 
       .mobile-overlay {
