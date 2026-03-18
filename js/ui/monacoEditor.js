@@ -63,9 +63,17 @@ function suggestions(position, range) {
     {label: '\\tau', insertText: 'τ', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\upsilon', insertText: 'υ', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\phi', insertText: 'φ', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\varphi', insertText: 'φ', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\chi', insertText: 'χ', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\psi', insertText: 'ψ', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\varpsi', insertText: 'ψ', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\omega', insertText: 'ω', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\vartheta', insertText: 'ϑ', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\varepsilon', insertText: 'ε', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\varsigma', insertText: 'ς', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\varrho', insertText: 'ϱ', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\varkappa', insertText: 'ϰ', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\varpi', insertText: 'ϖ', range: range, kind: monaco.languages.CompletionItemKind.Text},
 
     {label: '\\Alpha', insertText: 'A', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\Beta', insertText: 'B', range: range, kind: monaco.languages.CompletionItemKind.Text},
@@ -103,7 +111,7 @@ function suggestions(position, range) {
     {label: '\\top', insertText: '⊤', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\bot', insertText: '⊥', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\-', insertText: '————————————————\n', range: range, kind: monaco.languages.CompletionItemKind.Text},
-    {label: '\\proves', insertText: '⊢', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\vdash', insertText: '⊢', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\forall', insertText: '∀', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\FORALL', insertText: '∀', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\exists', insertText: '∃', range: range, kind: monaco.languages.CompletionItemKind.Text},
@@ -138,7 +146,7 @@ const savedFormulaToEdit = localStorage.getItem('editIntroductionFormula');
 if (savedFormulaToEdit) {
   editor.setValue(savedFormulaToEdit);
   localStorage.removeItem('editIntroductionFormula');
-  
+
   // Trigger initial validation to update UI (like the proof button color)
   // Use setTimeout to ensure all modules (index.js, etc.) are fully loaded
   // and 'editor' is correctly exported before checkRule is called.
