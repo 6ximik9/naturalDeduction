@@ -40,14 +40,16 @@ export function firstRule() {
 // 2. Введення заперечення
 export function secondRule() {
   index.setCurrentLevel(2);
-  // const innerText = '¬(' + index.side.innerText + ')';
-  const innerText = '¬(' + index.lastSide.querySelector('#proofText')?.textContent+ ')';
-  console.log(index.side);
-  console.log(index.side.textContent);
+  const pr = parseProofFromLastSide();
+  const cleanFormula = deductive.getProof(pr);
+  const cleanText = deductive.convertToLogicalExpression(cleanFormula);
+  
+  // Додаємо дужки лише для складних бінарних операцій
+  const complexTypes = ['implication', 'disjunction', 'conjunction', 'equality', 'addition', 'multiplication'];
+  const needsParens = complexTypes.includes(cleanFormula.type);
+  const innerText = '¬' + (needsParens ? '(' + cleanText + ')' : cleanText);
 
   const hyp = deductive.checkWithAntlr(innerText);
-
-  // index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
 
   index.addHypotheses({ level: index.level, hyp });
 
@@ -63,12 +65,16 @@ export function thirdRule() {
 // 4. Виведення з ¬
 export function fourthRule() {
   index.setCurrentLevel(4);
-  // const innerText = index.side.innerText.replace('¬', '');
-  const innerText = index.lastSide.querySelector('#proofText')?.textContent.replace('¬', '');
-  const hyp = deductive.checkWithAntlr(innerText);
+  const pr = parseProofFromLastSide();
+  let hyp;
+  if (pr && pr.type === 'negation' && pr.operand) {
+    hyp = deductive.getProof(pr.operand);
+  } else {
+    const innerText = index.lastSide.querySelector('#proofText')?.textContent.replace('¬', '');
+    hyp = deductive.checkWithAntlr(innerText);
+  }
 
-  // index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
-  // index.addHypotheses({ level: index.level, hyp });
+  index.addHypotheses({ level: index.level, hyp });
 
   createConclusion({ type: "atom", value: "⊥" });
 }
@@ -232,28 +238,17 @@ export function twelfthRule() {
   // Handle new left/right structure and legacy operands structure
   let hyp, conclusion;
   if (pr.left && pr.right) {
-    hyp = pr.left;
+    hyp = deductive.getProof(pr.left);
     conclusion = deductive.getProof(pr.right);
   } else if (pr.operands && pr.operands.length >= 2) {
-    hyp = pr.operands[0];
+    hyp = deductive.getProof(pr.operands[0]);
     conclusion = deductive.getProof(pr.operands[1]);
   } else {
     console.error("Invalid implication structure:", pr);
     return;
   }
 
-  // index.lastSide.id += 'divId-' + deductive.convertToLogicalExpression(hyp);
-  // const gammaSpan1 = index.lastSide.querySelector('.gamma-context');
-  // addHypothesesToGammaSpan(gammaSpan1, deductive.convertToLogicalExpression(hyp));
-
-
-  // const alreadyExists = index.deductionContext.hypotheses.some(item =>
-  //   JSON.stringify(item.hyp) === JSON.stringify(hyp)
-  // );
-
-  // if (!alreadyExists) {
-    index.addHypotheses({ level: index.level, hyp });
-  // }
+  index.addHypotheses({ level: index.level, hyp });
 
   createConclusion(conclusion);
 }

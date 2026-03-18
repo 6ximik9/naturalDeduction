@@ -149,8 +149,11 @@ document.getElementById('proof').addEventListener('click', function (event) {
 
   const clickedElement = event.target;
 
-  // Ігнорувати клік по вже закритому елементу
-  if (clickedElement.className === "previous" || clickedElement.className.includes("proof-element_level-") || clickedElement.id === "proof") return;
+  // Ігнорувати клік по вже закритому елементу, контейнеру гілок або самому полю доказу
+  if (clickedElement.className === "previous" || 
+      clickedElement.className.includes("proof-element_level-") || 
+      clickedElement.classList.contains('premises-container') ||
+      clickedElement.id === "proof") return;
 
   // Обробка кліку на gamma-context елемент
   if (clickedElement.classList.contains('gamma-context')) {
@@ -161,9 +164,16 @@ document.getElementById('proof').addEventListener('click', function (event) {
 
   let potentialSide = null;
   if (clickedElement.tagName === 'DIV') {
-    potentialSide = clickedElement;
+    // Елемент є валідним, якщо він має клас proof-content або містить його безпосередньо
+    if (clickedElement.classList.contains('proof-content') || clickedElement.querySelector(':scope > .proof-content')) {
+      potentialSide = clickedElement;
+    } else {
+      return;
+    }
   } else if (clickedElement.tagName === 'LABEL') {
     potentialSide = clickedElement.parentNode;
+  } else {
+    return;
   }
 
   // Якщо клікнули по вже активному елементу - знімаємо виділення
@@ -936,13 +946,14 @@ function closeSide(container) {
   }
 
   let gammaHtml = existingElement.outerHTML;
-  
-  // 3. Створюємо копію для вилучення чистого тексту формули (без назви правила)
-  let tempClone = container.cloneNode(true);
-  tempClone.querySelectorAll('.nameRule, span, sub, sup').forEach(el => el.remove());
-  let rawText = tempClone.textContent.trim();
+  let rawText = container.querySelector('#proofText')?.textContent.trim() || "";
+  // Якщо ми закриваємо гілку, яка вже була закрита в системі (наприклад, аксіому), 
+  // то вона вже має квадратні дужки. Видаляємо їх для коректного форматування.
+  if (rawText.startsWith('[') && rawText.endsWith(']')) {
+    rawText = rawText.substring(1, rawText.length - 1);
+  }
 
-  // Видаляємо всі span-елементи з оригіналу
+  // Видаляємо всі span-елементи з оригіналу (вони будуть замінені новою структувою)
   container.querySelectorAll('span').forEach(span => span.remove());
 
   // Позначаємо гілку як закриту
@@ -1241,6 +1252,7 @@ function createProofTree(conclusions, container, hyp = null) {
     premisesGroup.style.alignItems = 'center';
 
     nodesContainer = document.createElement('div');
+    nodesContainer.className = 'premises-container';
     nodesContainer.style.display = 'flex';
     nodesContainer.style.flexDirection = 'row';
     nodesContainer.style.gap = '80px';
@@ -1354,20 +1366,30 @@ function createProofTree(conclusions, container, hyp = null) {
 
     if(currentLevel ===2 )
     {
-      hyp = '¬(' + lastSide.querySelector('#proofText')?.textContent+ ')';
+      const pr = parseProofFromLastSide();
+      const cleanFormula = deductive.getProof(pr);
+      const cleanText = deductive.convertToLogicalExpression(cleanFormula);
+      const complexTypes = ['implication', 'disjunction', 'conjunction', 'equality', 'addition', 'multiplication'];
+      const needsParens = complexTypes.includes(cleanFormula.type);
+      hyp = '¬' + (needsParens ? '(' + cleanText + ')' : cleanText);
     }
     else if(currentLevel===4)
     {
-      hyp = '¬(' + lastSide.querySelector('#proofText')?.textContent.replace('¬', '');
+      const pr = parseProofFromLastSide();
+      if (pr && pr.type === 'negation' && pr.operand) {
+        hyp = deductive.convertToLogicalExpression(deductive.getProof(pr.operand));
+      } else {
+        hyp = lastSide.querySelector('#proofText')?.textContent.replace('¬', '');
+      }
     }
     else if(currentLevel===12)
     {
       const pr = parseProofFromLastSide();
       console.log(pr);
       if (pr.left && pr.right) {
-        hyp = deductive.convertToLogicalExpression(pr.left);
+        hyp = deductive.convertToLogicalExpression(deductive.getProof(pr.left));
       } else if (pr.operands && pr.operands.length >= 2) {
-        hyp = deductive.convertToLogicalExpression(pr.operands[0]);
+        hyp = deductive.convertToLogicalExpression(deductive.getProof(pr.operands[0]));
       } else {
         console.error("Invalid implication structure:", pr);
         return;
