@@ -147,7 +147,7 @@ export const translations = {
     "start-sys-gentzen-desc": "Dôkazy prirodzenej dedukcie v tvare stromu.",
     "start-sys-fitch": "Prirodzená dedukcia (Fitch)",
     "start-sys-fitch-desc": "Dôkazy prirodzenej dedukcie v lineárnom tvare.",
-    "start-sys-sequent": "Sekventový počet",
+    "start-sys-sequent": "Sekventový kalkul",
     "start-sys-sequent-desc": "Stromy dôkazov pomocou sekventov.",
     "start-logic": "Úroveň logiky",
     "start-logic-vl": "Výroková logika (VL)",
