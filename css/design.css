@@ -23,7 +23,7 @@
 
       --col-highlight-main: rgba(136, 190, 213, 0.78);
       --col-highlight-secondary: #e3f2fd;
-      --col-highlight-success: rgba(0, 255, 0, 0.55);
+      --col-highlight-success: rgba(34, 197, 94, 0.15);
 
       /* Successor Tooltip & Hover */
       --col-hover-bg: #e8f4fd;
@@ -1703,7 +1703,7 @@
 
         --col-highlight-main: rgba(59, 130, 246, 0.45);
         --col-highlight-secondary: rgba(59, 130, 246, 0.3);
-        --col-highlight-success: rgba(34, 197, 94, 0.45);
+        --col-highlight-success: rgba(34, 197, 94, 0.25);
 
         /* Successor Tooltip & Hover Dark Mode */
         --col-hover-bg: rgba(59, 130, 246, 0.2);

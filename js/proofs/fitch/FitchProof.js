@@ -698,7 +698,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
     return;
   }
 
-  if (document.querySelector('div.fitch_formula[style="background: rgba(0, 255, 0, 0.55);"]')) {
+  if (document.querySelector('.finished') || document.querySelector('div.fitch_formula[style*="success"]')) {
     return;
   }
 

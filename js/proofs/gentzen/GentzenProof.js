@@ -1348,7 +1348,6 @@ function createProofTree(conclusions, container, hyp = null) {
         proofDiv.innerHTML = '<label class="previous" id="proofText">' + text + '</label>';
       }
       proofDiv.style.paddingTop = "25px";
-      proofDiv.style.background = "white";
       proofDiv.className = 'closed';
       closeSide(side);
     }

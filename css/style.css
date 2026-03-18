@@ -287,8 +287,11 @@ h3 {
   margin-right: 60px;
 }
 
-.closed{
-  background-color: rgba(0, 255, 0, 0.55);
+.closed {
+  background-color: var(--col-highlight-success);
+  border-radius: 8px;
+  padding: 2px 8px;
+  transition: background-color 0.3s ease;
 }
 
 .corner-button {
