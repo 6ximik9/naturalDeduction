@@ -28,7 +28,6 @@ function getLate(element) {
     if (!node || node.nodeType !== 1) return;
 
     // 1. Знайти формулу-висновок цього вузла
-    // Шукаємо перший не оброблений label#proofText, який не належить глибшому рівню
     const allLabels = Array.from(node.querySelectorAll('label#proofText'));
     let label = allLabels.find(l => {
         if (processed.has(l)) return false;
@@ -43,26 +42,25 @@ function getLate(element) {
     if (!label) return;
     processed.add(label);
 
-    // Використовуємо :scope, щоб знайти контекст саме цього рівня, а не з вкладених рівнів
     let gamma = label.parentElement.querySelector(':scope > .gamma-context');
     let content = label.textContent;
 
-    // Очищення контенту від квадратних дужок та вилучення правила (для закритих гілок)
+    // Отримуємо назву правила для закритих гілок (наприклад, аксіом), але НЕ видаляємо квадратні дужки,
+    // оскільки вони потрібні в LaTeX для позначення гіпотез.
     let ruleFromClosed = null;
     if (content.startsWith('[') && content.endsWith(']')) {
-        content = content.substring(1, content.length - 1);
-        // Спроба витягти назву правила з кінця, якщо вона там випадково залишилася (наприклад, Ax5 або ∀E)
-        let ruleMatch = content.match(/\s?\((Ax\d+|[^()]+)\)$/);
+        // Регулярний вираз тепер набагато суворіший: шукаємо тільки AxN або кванторні правила в кінці закритих дужок
+        let ruleMatch = content.match(/\s?\((Ax\d+|[∀∃][EI])\s?\)\s?\]$/);
         if (ruleMatch) {
             ruleFromClosed = ruleMatch[1];
-            content = content.substring(0, content.length - ruleMatch[0].length).trim();
+            // Видаляємо ТІЛЬКИ назву правила, залишаючи закриваючу дужку формули
+            content = content.replace(ruleMatch[0], ']');
         }
     }
 
     if (gamma) {
         let gammaText = "";
         if (gamma.querySelector('sub')) {
-            // Використовуємо плейсхолдери для дужок індексу, щоб latexEdit їх не екранував
             gammaText = gamma.innerHTML.replace(/<sub>(.*?)<\/sub>/g, '___SUB_START___$1___SUB_END___').replace(/<[^>]*>/g, '');
         } else {
             gammaText = gamma.textContent;
@@ -71,33 +69,28 @@ function getLate(element) {
     }
 
     // 2. Знайти гілки (засновки) та правило
-    // В Гентзені вони знаходяться над лінією (border-bottom)
     let ruleText = null;
     let branches = [];
 
-    // Шукаємо контейнер з лінією, що знаходиться "вище" нашого label
     let current = label.parentElement;
     let lineDiv = null;
     while (current && current !== node.parentElement) {
         lineDiv = Array.from(current.querySelectorAll('div')).find(d => 
             (d.style.borderBottomWidth && d.style.borderBottomWidth !== '0px') || 
-            (d.style.borderBottom && d.style.borderBottom !== 'none')
+            (d.style.borderBottom && d.style.borderBottom !== 'none') ||
+            (d.classList.contains('premises-container'))
         );
         if (lineDiv) break;
         current = current.parentElement;
     }
 
     if (lineDiv) {
-        // Гілки - це безпосередні діти контейнера з лінією
         branches = Array.from(lineDiv.children).filter(c => c.tagName === 'DIV');
         
-        // Правило - це .nameRule, що є сусідом контейнера з лінією (всередині flex-row)
-        // Використовуємо більш надійний пошук через батьківські елементи
+        // Пошук назви правила (.nameRule)
         let ruleDiv = lineDiv.parentElement?.parentElement?.querySelector(':scope > .nameRule');
-        
         if (ruleDiv) {
             ruleText = ruleDiv.getAttribute('data-rule') || ruleDiv.textContent;
-            // Видаляємо MathJax-дужки, якщо вони потрапили в текст
             if (ruleText) {
                 ruleText = ruleText.replace(/^\\\(/, '').replace(/\\\)$/, '');
             }
@@ -122,11 +115,11 @@ function getLate(element) {
             traverse(branches[1]);
             traverse(branches[0]);
         } else {
-            // Якщо є правило але немає гілок (аксіома з назвою)
-            if (ruleText) {
+            // Гілка без засновків (аксіома або гіпотеза)
+            if (ruleText || ruleFromClosed) {
                 results.push(content);
                 results.push('unary');
-                results.push(ruleText);
+                results.push(ruleText || ruleFromClosed);
                 results.push('');
                 results.push('axiom');
             } else {
@@ -135,7 +128,6 @@ function getLate(element) {
             }
         }
     } else {
-        // Якщо лінії немає, можливо це закрита гілка з правилом
         if (ruleFromClosed) {
             results.push(content);
             results.push('unary');
@@ -211,7 +203,7 @@ function latexEdit(str, mode) {
     '⇒': ' \\Rightarrow ', '->': ' \\rightarrow ', '→': ' \\rightarrow ',
     '∨': ' \\lor ', 'OR': ' \\lor ', 'or': ' \\lor ', '|': ' \\lor ', '||': ' \\lor ',
     '∧': ' \\land ', 'AND': ' \\land ', 'and': ' \\land ', '&': ' \\land ', '&&': ' \\land ',
-    '~': ' \\neg ', ' ¬': ' \\neg ', '!': ' \\neg ',
+    '~': ' \\neg ', '¬': ' \\neg ', '!': ' \\neg ',
     '∀': ' \\forall ', '∃': ' \\exists ',
     '⊤': ' \\top ', '⊥': ' \\bot ',
     '⊢': ' \\vdash ', '⊨': ' \\vDash ',
