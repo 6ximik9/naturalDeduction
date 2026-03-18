@@ -133,6 +133,25 @@ export let editor = monaco.editor.create(document.getElementById('editor'), {
   wordBasedSuggestions: false
 });
 
+// Check for saved formula to edit (introduction)
+const savedFormulaToEdit = localStorage.getItem('editIntroductionFormula');
+if (savedFormulaToEdit) {
+  editor.setValue(savedFormulaToEdit);
+  localStorage.removeItem('editIntroductionFormula');
+  
+  // Trigger initial validation to update UI (like the proof button color)
+  // Use setTimeout to ensure all modules (index.js, etc.) are fully loaded
+  // and 'editor' is correctly exported before checkRule is called.
+  setTimeout(() => {
+    const lines = savedFormulaToEdit.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].trim() !== '' && !lines[i].includes("—")) {
+        checkRule(i + 1, lines[i].replaceAll('\n', ''));
+      }
+    }
+  }, 0);
+}
+
 
 
 // Викликає підсказки автоматично під час зміни курсора

@@ -16,6 +16,7 @@ import {initStartScreen} from './ui/modals/startScreen';
 import {isVL} from './state/logicSettings';
 import { initLayoutSettings } from './ui/modals/layout';
 import { initExamplesModal } from './ui/modals/examples';
+import { createReturnConfirmModal } from './ui/modals/returnConfirm';
 
 let hasError = false;
 let inputText = "";
@@ -230,8 +231,36 @@ document.addEventListener("DOMContentLoaded", function() {
 
   const navShowStarts = document.querySelectorAll('.nav-show-start, .logo');
   navShowStarts.forEach(btn => {
-    btn.addEventListener('click', function(e) {
+    btn.addEventListener('click', async function(e) {
       e.preventDefault();
+
+      // If we are in proof mode (proof sidebar is visible), show the confirmation modal
+      const proofSidebar = document.getElementById('sidebar-proof');
+      if (proofSidebar && proofSidebar.style.display !== 'none') {
+        try {
+          const result = await createReturnConfirmModal();
+          if (result === 'edit') {
+            localStorage.setItem('editIntroductionFormula', editorMonaco.editor.getValue());
+            sessionStorage.setItem('savedFormula', editorMonaco.editor.getValue());
+            sessionStorage.setItem('returnToEditor', 'true');
+          } else if (result === 'yes') {
+            sessionStorage.setItem('savedFormula', editorMonaco.editor.getValue());
+            sessionStorage.setItem('returnToEditor', 'true');
+          } else if (result === 'start') {
+            const theme = localStorage.getItem('theme');
+            const lang = localStorage.getItem('selectedLang');
+            localStorage.clear();
+            if (theme) localStorage.setItem('theme', theme);
+            if (lang) localStorage.setItem('selectedLang', lang);
+            sessionStorage.setItem('isHomeReload', 'true');
+          }
+          location.reload();
+          return;
+        } catch (err) {
+          return; // Cancelled
+        }
+      }
+
       const theme = localStorage.getItem('theme');
       const lang = localStorage.getItem('selectedLang');
       localStorage.clear();
@@ -670,12 +699,28 @@ function setupSidebarProxy() {
   // Map sidebar buttons to hidden/existing controls
   const homeBtn = document.getElementById('sb-home');
   if (homeBtn) {
-    homeBtn.addEventListener('click', (e) => {
+    homeBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      if(confirm(t("confirm-return-main") || "Are you sure you want to return to the editor? Your proof progress will be lost.")) {
-        sessionStorage.setItem('savedFormula', editorMonaco.editor.getValue());
-        sessionStorage.setItem('returnToEditor', 'true');
+      try {
+        const result = await createReturnConfirmModal();
+        if (result === 'edit') {
+          localStorage.setItem('editIntroductionFormula', editorMonaco.editor.getValue());
+          sessionStorage.setItem('savedFormula', editorMonaco.editor.getValue());
+          sessionStorage.setItem('returnToEditor', 'true');
+        } else if (result === 'yes') {
+          sessionStorage.setItem('savedFormula', editorMonaco.editor.getValue());
+          sessionStorage.setItem('returnToEditor', 'true');
+        } else if (result === 'start') {
+          const theme = localStorage.getItem('theme');
+          const lang = localStorage.getItem('selectedLang');
+          localStorage.clear();
+          if (theme) localStorage.setItem('theme', theme);
+          if (lang) localStorage.setItem('selectedLang', lang);
+          sessionStorage.setItem('isHomeReload', 'true');
+        }
         location.reload();
+      } catch (err) {
+        // Modal cancelled
       }
     });
   }

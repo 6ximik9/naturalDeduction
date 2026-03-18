@@ -14,7 +14,7 @@ export const translations = {
     "btn-proof": "Dôkaz",
     "theme-toggle": "Prepnúť tému",
     "font-size-label": "Veľkosť písma",
-    "nav-home": "Späť do editora",
+    "nav-home": "Späť",
     "nav-layout": "Rozloženie",
     "nav-rules": "Pravidlá",
     "nav-axiom": "Axióma",
@@ -136,7 +136,7 @@ export const translations = {
     "modal-eigenvariable-label": "Zadajte ČERSTVÚ premennú (y) na substitúciu za \"{var}\":",
     "confirm-latex-incomplete": "Nie všetky vetvy sú dokončené. Vygenerovaný LaTeX kód môže byť nesprávny. Pokračovať?",
     "confirm-proof-unfinished": "Dôkaz nie je dokončený, chcete pokračovať?",
-    "confirm-return-main": "Naozaj sa chcete vrátiť do editora? Váš postup v dôkaze bude stratený.",
+    "confirm-return-main": "Naozaj chcete odísť? Váš aktuálny postup v dôkaze bude stratený.",
     "confirm-go-main": "Naozaj chcete ísť na hlavnú stránku?",
     "label-line": "Riadok",
     "label-col": "stĺpec",
@@ -162,7 +162,9 @@ export const translations = {
     "start-theory-order": "Axiómy usporiadania",
     "start-button": "Začať prácu",
     "start-dont-show": "Túto obrazovku už nezobrazovať",
-    "nav-show-start": "Úvodná stránka"
+    "nav-show-start": "Úvodná stránka",
+    "modal-btn-yes": "Vymazať a vrátiť sa",
+    "modal-btn-edit-intro": "Upraviť vloženie"
   },
   EN: {
     "nav-system": "System",
@@ -179,7 +181,7 @@ export const translations = {
     "btn-proof": "Proof",
     "theme-toggle": "Switch Theme",
     "font-size-label": "Font Size",
-    "nav-home": "Back to Editor",
+    "nav-home": "Back",
     "nav-layout": "Layout",
     "nav-rules": "Rules",
     "nav-axiom": "Axiom",
@@ -301,7 +303,7 @@ export const translations = {
     "modal-eigenvariable-label": "Enter FRESH variable (y) to substitute for \"{var}\":",
     "confirm-latex-incomplete": "Not all branches complete. Latex code generated may be incorrect. Continue?",
     "confirm-proof-unfinished": "The proof is not finished, do you want to continue?",
-    "confirm-return-main": "Are you sure you want to return to the editor? Your proof progress will be lost.",
+    "confirm-return-main": "Are you sure you want to exit? Your current proof progress will be lost.",
     "confirm-go-main": "Are you sure you want to go to the main page?",
     "label-line": "Line",
     "label-col": "col",
@@ -327,7 +329,9 @@ export const translations = {
     "start-theory-order": "Order Axioms",
     "start-button": "Start Work",
     "start-dont-show": "Don't show this screen again",
-    "nav-show-start": "Welcome Screen"
+    "nav-show-start": "Welcome Screen",
+    "modal-btn-yes": "Clear and Return",
+    "modal-btn-edit-intro": "Edit Introduction"
   },
   UA: {
     "nav-system": "Система",
@@ -344,7 +348,7 @@ export const translations = {
     "btn-proof": "Доведення",
     "theme-toggle": "Змінити тему",
     "font-size-label": "Розмір шрифту",
-    "nav-home": "Редактор",
+    "nav-home": "Назад",
     "nav-layout": "Вигляд",
     "nav-rules": "Правила",
     "nav-axiom": "Аксіома",
@@ -466,7 +470,7 @@ export const translations = {
     "modal-eigenvariable-label": "Введіть СВІЖУ змінну (y) для заміни \"{var}\":",
     "confirm-latex-incomplete": "Не всі гілки завершені. Згенерований LaTeX код може бути некоректним. Продовжити?",
     "confirm-proof-unfinished": "Доведення не завершене, ви хочете продовжити?",
-    "confirm-return-main": "Ви впевнені, що хочете повернутися до редактора? Ваш прогрес у доведенні буде втрачено.",
+    "confirm-return-main": "Ви впевнені, що хочете вийти? Поточний прогрес доведення буде втрачено.",
     "confirm-go-main": "Ви впевнені, що хочете перейти на головну сторінку?",
     "label-line": "Рядок",
     "label-col": "стовп",
@@ -492,7 +496,9 @@ export const translations = {
     "start-theory-order": "Аксіоми порядку",
     "start-button": "Почати роботу",
     "start-dont-show": "Більше не показувати це вікно",
-    "nav-show-start": "Вітальна сторінка"
+    "nav-show-start": "Вітальна сторінка",
+    "modal-btn-yes": "Очистити та повернутися",
+    "modal-btn-edit-intro": "Редагувати вступ"
   }
 };
 
