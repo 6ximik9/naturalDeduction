@@ -83,7 +83,7 @@ function getContextIndex(hypotheses) {
       gammaContextHistory.set(hash, 0); // Give it 0 internally, but it won't be displayed anyway
       return 0;
     }
-    
+
     // For non-empty hypotheses, get the current index and then increment
     const newIndex = gammaCurrentIndex++;
     gammaContextHistory.set(hash, newIndex);
@@ -154,8 +154,8 @@ document.getElementById('proof').addEventListener('click', function (event) {
   const clickedElement = event.target;
 
   // Ігнорувати клік по вже закритому елементу, контейнеру гілок або самому полю доказу
-  if (clickedElement.className === "previous" || 
-      clickedElement.className.includes("proof-element_level-") || 
+  if (clickedElement.className === "previous" ||
+      clickedElement.className.includes("proof-element_level-") ||
       clickedElement.classList.contains('premises-container') ||
       clickedElement.id === "proof") return;
 
@@ -186,10 +186,10 @@ document.getElementById('proof').addEventListener('click', function (event) {
       side = null;
       disableAllButtons();
       if (window.updateGentzenParenthesesButtons) window.updateGentzenParenthesesButtons();
-      
+
       const sbRules = document.getElementById('sb-rules');
       if (sbRules) sbRules.click();
-      
+
       return;
   }
 
@@ -206,7 +206,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
     side = clickedElement.parentNode;
     clickedElement.style.background = 'var(--col-highlight-main)';
   }
-  
+
   if (window.updateGentzenParenthesesButtons) window.updateGentzenParenthesesButtons();
 
   // Якщо немає попереднього перегляду — обробити клік
@@ -238,7 +238,7 @@ function handleClick() {
     try {
       oldUserInput = side.querySelector('#proofText').textContent;
       const parsed = deductive.checkWithAntlr(oldUserInput);
-      
+
       // Determine active tab and update accordingly
       if (document.getElementById('tab3').checked) {
           // Axioms Tab
@@ -254,7 +254,7 @@ function handleClick() {
           buttonContainer.innerHTML = '';
           buttonContainer.style.height = "100%";
           buttonContainer.parentElement.style.height = "100%";
-          
+
           let svgContainer = document.createElement("div");
           svgContainer.style.width = "100%";
           svgContainer.style.height = "100%";
@@ -372,7 +372,7 @@ export function parseExpression(text) {
     // Зберігаємо стан і показуємо кнопки
     controlState.saveState();
     processExpression(parsedProof, 1);
-    
+
     if (window.updateGentzenParenthesesButtons) {
         window.updateGentzenParenthesesButtons();
     }
@@ -399,11 +399,11 @@ export function processExpression(expression, countRules) {
   }
 
   const expr = deductive.getProof(expression);
-  
+
   // Logic for Ax rule recommendation
   const axHandler = ruleGentzenHandlers["Ax"];
   const shouldRecommendAx = side && axHandler && axHandler.condition(expr, side);
-  
+
   const getButtonsWithAx = (buttons) => {
     if (shouldRecommendAx) {
       // Add Ax to the beginning if not already there
@@ -526,8 +526,8 @@ export function processExpression(expression, countRules) {
         GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15], 
-        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], 
+        GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15],
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
         GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[20]
       ];
       generateButtons(forallButtons.length, getButtonsWithAx(forallButtons));
@@ -538,7 +538,7 @@ export function processExpression(expression, countRules) {
         GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15], 
+        GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15],
         GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
         GENTZEN_BUTTONS[18]
       ];
@@ -630,13 +630,13 @@ function generateButtons(buttonCount, buttonTexts) {
   // Use tab3.checked but also consider buttonTexts to avoid race conditions during tab switching
   const tab3 = document.getElementById('tab3');
   const tab1 = document.getElementById('tab1');
-  
+
   // If we're currently switching to tab1 (Rules), we should not treat it as axioms
   // even if tab3.checked is still true due to race condition.
   // We check if buttonTexts contains typical rules or if tab1 is being selected.
-  let isAxiomsTab = (tab3 && tab3.checked) || 
+  let isAxiomsTab = (tab3 && tab3.checked) ||
                       (buttonTexts.length > 0 && buttonTexts.some(t => t.includes('∀x') && (t.includes('s(x)') || t.includes('<'))));
-  
+
   // Refined check: if we have rules (which are many), it's probably not the axioms tab (which has few)
   // Or more simply, if we are calling this from a rule-generating context.
   if (buttonTexts.length > 10 && buttonTexts === GENTZEN_BUTTONS) {
@@ -653,7 +653,7 @@ function generateButtons(buttonCount, buttonTexts) {
   } else {
     // Reset to default styling for other tabs
     // Using explicit values that match index.html defaults to ensure clean state
-    buttonContainer.style.display = 'flex'; 
+    buttonContainer.style.display = 'flex';
     buttonContainer.style.flexDirection = 'row';
     buttonContainer.style.flexWrap = 'wrap';
     buttonContainer.style.gridTemplateColumns = '';
@@ -723,7 +723,7 @@ function generateButtons(buttonCount, buttonTexts) {
       buttonContainer.appendChild(header);
       showedRobinsonHeader = true;
     }
-    
+
     // Header for Linear Order - detect by any Order axiom if not shown yet
     const isOrderAxiom = ORDER_AXIOMS.some(ax => text.includes(ax));
     if (isAxiomsTab && isOrderAxiom && !showedOrderHeader) {
@@ -736,7 +736,7 @@ function generateButtons(buttonCount, buttonTexts) {
     }
 
     const button = createButton(text, () => buttonClicked(text));
-    
+
     // Tag quantifier and equality rules
     if (text.includes('\\forall') || text.includes('\\exists') || text.includes('a = b')) {
       button.classList.add('quantifier-rule');
@@ -785,7 +785,7 @@ export function toggleSmartMode() {
     let content = side.querySelector('#proofText').textContent;
     processExpression(checkWithAntlr(content), newState ? 0 : 1);
   }
-  
+
   return newState;
 }
 
@@ -943,7 +943,7 @@ function closeSide(container) {
 
   // 1. Шукаємо елемент gamma
   const existingElement = container.querySelector('.gamma-context');
-  
+
   if (!existingElement) {
     console.warn("Could not find gamma-context in element to close", container);
     return;
@@ -951,7 +951,7 @@ function closeSide(container) {
 
   let gammaHtml = existingElement.outerHTML;
   let rawText = container.querySelector('#proofText')?.textContent.trim() || "";
-  // Якщо ми закриваємо гілку, яка вже була закрита в системі (наприклад, аксіому), 
+  // Якщо ми закриваємо гілку, яка вже була закрита в системі (наприклад, аксіому),
   // то вона вже має квадратні дужки. Видаляємо їх для коректного форматування.
   if (rawText.startsWith('[') && rawText.endsWith(']')) {
     rawText = rawText.substring(1, rawText.length - 1);
@@ -962,7 +962,7 @@ function closeSide(container) {
 
   // Позначаємо гілку як закриту
   container.className = 'closed';
-  
+
   let labelText = `[${rawText}]`;
   labelText = labelText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -1015,7 +1015,7 @@ async function buttonClicked(buttonText) {
           // Відразу закриваємо гілку для аксіоми
           const axiomElement = document.querySelector(`.proof-element_level-${newConclusion.level}`);
           if (axiomElement) {
-            // Шукаємо контейнер саме формули (який містить label#proofText), 
+            // Шукаємо контейнер саме формули (який містить label#proofText),
             // а не весь блок виведення (inferenceRow)
             const proofDiv = axiomElement.querySelector('.proof-content')?.parentElement;
             if (proofDiv) {
@@ -1056,10 +1056,10 @@ async function buttonClicked(buttonText) {
 
   // Перевірка умови застосування правила
   if (!handler.condition(expr, lastSide)) {
-    const targetButton = Array.from(allButtons).find(btn => 
+    const targetButton = Array.from(allButtons).find(btn =>
       btn.getAttribute('data-original-text') === buttonText
     );
-    
+
     if (targetButton) {
       shakeButton(targetButton);
     } else {
@@ -1108,20 +1108,20 @@ export function disableAllButtons() {
     // Determine which tab is active to know what to show
     const isAxiomsTab = document.getElementById('tab3') && document.getElementById('tab3').checked;
     const isTreeTab = document.getElementById('tab4') && document.getElementById('tab4').checked;
-    
+
     // In Fitch mode (typeProof === 1), axioms should always be available
     const isFitch = (typeProof === 1);
-    
+
     if (isTreeTab) {
         const buttonContainer = document.getElementById('button-container');
         buttonContainer.innerHTML = '';
-        
+
         // Reset heights that might be left over from Tree tab
         buttonContainer.style.height = '';
         if (buttonContainer.parentElement) {
             buttonContainer.parentElement.style.height = '';
         }
-        
+
         if (side) {
             // Reset styles for tree view
             buttonContainer.style.display = '';
@@ -1130,7 +1130,7 @@ export function disableAllButtons() {
             buttonContainer.style.padding = '';
             buttonContainer.style.height = "100%";
             buttonContainer.parentElement.style.height = "100%";
-            
+
             let svgContainer = document.createElement("div");
             svgContainer.style.width = "100%";
             svgContainer.style.height = "100%";
@@ -1144,7 +1144,7 @@ export function disableAllButtons() {
 
             svgContainer.appendChild(svgElement);
             buttonContainer.appendChild(svgContainer);
-            
+
              try {
                 const parsed = deductive.checkWithAntlr(side.querySelector('#proofText').textContent);
                 createTreeD3(parsed);
@@ -1177,12 +1177,12 @@ export function disableAllButtons() {
         }
         return; // Exit early for tree tab
     }
-    
+
     // Regenerate full lists so user sees all options (disabled) instead of just filtered ones
     if (isAxiomsTab) {
          const formattedAxioms = getActiveAxioms(ROBINSON_AXIOMS, ORDER_AXIOMS);
          generateButtons(formattedAxioms.length, formattedAxioms);
-         
+
          // If in Fitch mode, we don't disable the axiom buttons
          if (isFitch) return;
     } else {
@@ -1339,7 +1339,7 @@ export function createProofTree(conclusions, container, hyp = null) {
       if (currentLevel === 40) {
           // Format as "phi ∈ Γ"
           text = `${text} ∈ `;
-          
+
           // Use custom order: formula label then gamma span (which now contains only Γ)
           if (mainReplaces !== "") {
             proofDiv.innerHTML = `<div class="proof-content"><label id="proofText">${text}</label>${gammaContextSpan}</div>` +
@@ -1601,7 +1601,7 @@ function addOrRemoveParenthesesGentzen() {
         toggleButtonState(retBtn, false);
     }
   }
-  
+
   window.updateGentzenParenthesesButtons = updateButtons;
 
   addBtn.addEventListener('click', function (e) {
@@ -1639,7 +1639,7 @@ function addClickGentzenRules() {
         setTimeout(disableAllButtons, 0);
         return;
       }
-      
+
       // Use setTimeout to ensure radio button state is updated before we check it
       setTimeout(() => {
         if (tabId === 'tab1') {
@@ -1667,7 +1667,7 @@ function addClickGentzenRules() {
 
           // Reset button-container styles to original state (remove grid styles from Axioms tab)
           // Set height to 100% for the SVG tree
-          buttonContainer.style.display = 'block'; 
+          buttonContainer.style.display = 'block';
           buttonContainer.style.gridTemplateColumns = '';
           buttonContainer.style.gap = '';
           buttonContainer.style.padding = '';
@@ -2145,7 +2145,7 @@ function toggleGammaContext(gammaElement) {
       // Згортаємо: повертаємо до Γ⊢ з індексом
       const contextIndex = parseInt(gammaElement.getAttribute('data-context-index') || '0');
       let gammaDisplay = contextIndex === 0 ? 'Γ' : `Γ<sub>${contextIndex}</sub>`;
-      
+
       const hypothesesData = gammaElement.getAttribute('data-hypotheses');
       if (hypothesesData) {
           try {
@@ -2155,7 +2155,7 @@ function toggleGammaContext(gammaElement) {
               }
           } catch (e) {}
       }
-      
+
       gammaElement.innerHTML = `${gammaDisplay}${turnstile}`;
       gammaToggleState.set(gammaId, false);
       console.log(`Gamma context collapsed for ${gammaId}`);

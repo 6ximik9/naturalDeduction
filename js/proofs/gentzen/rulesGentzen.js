@@ -25,7 +25,6 @@ export function parseProofFromLastSide() {
 }
 
 export function createAxiomConclusion(axiomText, axiomLevel) {
-  console.log(`Creating axiom conclusion: ${axiomText}`);
   index.setCurrentLevel(axiomLevel);
   const parsed = deductive.checkWithAntlr(axiomText);
   const proof = deductive.getProof(parsed);

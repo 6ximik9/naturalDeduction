@@ -176,12 +176,12 @@ function transformArray(inputArray) {
         transformed.push(`\\AxiomC{$${latexEdit(value, 0)}$}`);
         i += 2;
       } else {
-        transformed.push(`\\RightLabel{$${latexEdit(type, 1)}$}`);
+        transformed.push(`\\RightLabel{$\\small (${latexEdit(type, 1)})$}`);
         i += 1;
       }
     } else {
       if (type !== 'axiom' && type !== 'unary' && type !== 'binary' && type !== 'trinary') {
-          transformed.push(`\\RightLabel{$${latexEdit(type, 1)}$}`);
+          transformed.push(`\\RightLabel{$\\small (${latexEdit(type, 1)})$}`);
       }
       i++;
     }
@@ -225,18 +225,13 @@ function latexEdit(str, mode) {
 
   sortedKeys.forEach(key => {
     const regex = new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-    if (mode === 0) {
-      str = str.replace(regex, replacements[key]);
-    } else {
-      // Для назв правил не додаємо зайвий пробіл
-      str = str.replace(regex, replacements[key]);
-    }
+    str = str.replace(regex, replacements[key]);
   });
 
   // Повертаємо справжні дужки для нижніх індексів
   str = str.replace(/___SUB_START___/g, '_{').replace(/___SUB_END___/g, '}');
 
-  return str;
+  return str.trim();
 }
 
 // --- Content Generation Logic ---
@@ -322,7 +317,7 @@ function generateFitchContent(isDocument) {
 function generateSequentLatex(node) {
   let result = "";
 
-  if (node.children) {
+  if (node.children && node.children.length > 0) {
     node.children.forEach(child => {
       result += generateSequentLatex(child);
     });
@@ -333,10 +328,16 @@ function generateSequentLatex(node) {
   const content = `$${latexEdit(left + ' \\vdash ' + right, 0)}$`;
 
   if (!node.children || node.children.length === 0) {
-    result += `\\AxiomC{${content}}\n`;
+    if (node.ruleApplied) {
+      result += `\\AxiomC{}\n`;
+      result += `\\RightLabel{$\\small (${latexEdit(node.ruleApplied, 1)})$}\n`;
+      result += `\\UnaryInfC{${content}}\n`;
+    } else {
+      result += `\\AxiomC{${content}}\n`;
+    }
   } else {
     if (node.ruleApplied) {
-      result += `\\RightLabel{$${latexEdit(node.ruleApplied, 1)}$}\n`;
+      result += `\\RightLabel{$\\small (${latexEdit(node.ruleApplied, 1)})$}\n`;
     }
 
     if (node.children.length === 1) {
