@@ -1,4 +1,5 @@
 import * as rules from './rulesGentzen';
+import * as deductive from "../../core/deductiveEngine";
 import {deductionContext, shakeButton} from "./GentzenProof";
 import {nineteenthRule, twentiethRule, createAxiomConclusion} from "./rulesGentzen";
 import {
@@ -254,27 +255,28 @@ export const AXIOM_HANDLERS = {
 
 // Всі правила виводу у вигляді LaTeX-формул
 export const GENTZEN_BUTTONS = [
-  "$$\\frac{\\bot}{\\phi} \\quad (\\bot E1) $$",
-  "$${\\frac{[\\neg\\phi]}{\\vdots} \\atop \\frac{\\bot}{\\phi}} (\\bot E2) $$",
-  "$$\\frac{}{\\top} \\quad (\\top I) $$",
-  "$${\\frac{[\\phi]}{\\vdots} \\atop \\frac{\\bot}{\\neg\\phi}} (\\neg I) $$",
-  "$$ \\frac{\\phi \\quad \\quad \\neg \\phi }{\\bot} \\quad (\\neg E)$$",
-  "$$\\frac{\\phi \\quad \\quad \\psi}{\\phi \\wedge \\psi} (\\wedge I)$$",
-  "$$\\frac{\\phi \\wedge \\psi}{\\phi} (\\wedge E1)$$",
-  "$$\\frac{\\phi \\wedge \\psi}{\\psi} (\\wedge E2)$$",
-  "$$\\frac{\\phi}{\\phi \\vee \\psi} (\\vee I1)$$",
-  "$$ \\frac{\\psi}{\\phi \\vee \\psi} (\\vee I2) $$",
-  "$$ \\frac{\\phi \\vee \\psi \\quad \\quad \\theta \\quad \\quad \\theta}{ \\theta} (\\vee E) $$",
-  "$$\\frac{\\psi}{\\phi \\Rightarrow \\psi} (\\Rightarrow I)$$",
-  "$$ \\frac{\\phi \\quad \\quad \\phi \\Rightarrow \\psi }{\\psi} (\\Rightarrow E) $$",
-  "$$ \\frac{\\varphi[t/x]}{(\\exists x)\\varphi} \\; (\\exists I) $$",
-  "$$ \\frac{\\varphi[t/x]}{(\\forall x)\\varphi} \\; (\\forall I) \\; \\tiny t \\text{ fresh} $$",
-  "$$ \\frac{(\\forall x)\\varphi}{\\varphi[t/x]} \\; (\\forall E) $$",
-  "$$ \\frac{(\\exists x)\\varphi \\quad {\\normalsize \\frac{[\\varphi[t/x]]}{\\vdots} \\atop \\normalsize \\psi}}{\\psi} \\; (\\exists E) \\; \\tiny t \\text{ fresh} $$",
-  "$$\\frac{P(a) \\quad a = b}{P(b)} \\; (\\text{=E}_1)$$",
-  "$$\\frac{P(b) \\quad a = b}{P(a)} \\; (\\text{=E}_2)$$",
-  "$$ \\small \\frac{\\begin{matrix} [P(b)] \\\\ \\vdots \\\\ P(a) \\end{matrix} \\quad \\begin{matrix} [P(a)] \\\\ \\vdots \\\\ P(b) \\end{matrix}}{a = b} \\; (\\text{=I})$$",
-  "$$ \\frac{\\varphi[0/x] \\quad {\\frac{[\\varphi]}{\\vdots} \\atop \\varphi[s(x)/x]}}{(\\forall x)\\varphi} \\; (Ind) $$"
+  "$$\\frac{\\varphi \\in \\Gamma}{\\Gamma \\vdash \\varphi} (Ax)$$ ",
+  "$$\\frac{\\Gamma \\vdash \\bot}{\\Gamma \\vdash \\phi} \\quad (\\bot E1) $$",
+  "$$\\frac{\\Gamma, \\neg\\phi \\vdash \\bot}{\\Gamma \\vdash \\phi} \\quad (\\bot E2) $$",
+  "$$\\frac{}{\\Gamma \\vdash \\top} \\quad (\\top I) $$",
+  "$$\\frac{\\Gamma, \\phi \\vdash \\bot}{\\Gamma \\vdash \\neg\\phi} \\quad (\\neg I) $$",
+  "$$ \\frac{\\Gamma \\vdash \\phi \\quad \\quad \\Gamma \\vdash \\neg \\phi }{\\Gamma \\vdash \\bot} \\quad (\\neg E)$$",
+  "$$\\frac{\\Gamma \\vdash \\phi \\quad \\quad \\Gamma \\vdash \\psi}{\\Gamma \\vdash \\phi \\wedge \\psi} (\\wedge I)$$",
+  "$$\\frac{\\Gamma \\vdash \\phi \\wedge \\psi}{\\Gamma \\vdash \\phi} (\\wedge E1)$$",
+  "$$\\frac{\\Gamma \\vdash \\phi \\wedge \\psi}{\\Gamma \\vdash \\psi} (\\wedge E2)$$",
+  "$$\\frac{\\Gamma \\vdash \\phi}{\\Gamma \\vdash \\phi \\vee \\psi} (\\vee I1)$$",
+  "$$ \\frac{\\Gamma \\vdash \\psi}{\\Gamma \\vdash \\phi \\vee \\psi} (\\vee I2) $$",
+  "$$ \\frac{\\Gamma \\vdash \\phi \\vee \\psi \\quad \\quad \\Gamma, \\phi \\vdash \\theta \\quad \\quad \\Gamma, \\psi \\vdash \\theta}{\\Gamma \\vdash \\theta} (\\vee E) $$",
+  "$$\\frac{\\Gamma, \\phi \\vdash \\psi}{\\Gamma \\vdash \\phi \\Rightarrow \\psi} (\\Rightarrow I)$$",
+  "$$ \\frac{\\Gamma \\vdash \\phi \\quad \\quad \\Gamma \\vdash \\phi \\Rightarrow \\psi }{\\Gamma \\vdash \\psi} (\\Rightarrow E) $$",
+  "$$ \\frac{\\Gamma \\vdash \\varphi[t/x]}{\\Gamma \\vdash (\\exists x)\\varphi} \\; (\\exists I) $$",
+  "$$ \\frac{\\Gamma \\vdash \\varphi[t/x]}{\\Gamma \\vdash (\\forall x)\\varphi} \\; (\\forall I) \\; \\tiny t \\text{ fresh} $$",
+  "$$ \\frac{\\Gamma \\vdash (\\forall x)\\varphi}{\\Gamma \\vdash \\varphi[t/x]} \\; (\\forall E) $$",
+  "$$ \\frac{\\Gamma \\vdash (\\exists x)\\varphi \\quad \\Gamma, \\varphi[t/x] \\vdash \\psi}{\\Gamma \\vdash \\psi} \\; (\\exists E) \\; \\tiny t \\text{ fresh} $$",
+  "$$\\frac{\\Gamma \\vdash P(a) \\quad \\Gamma \\vdash a = b}{\\Gamma \\vdash P(b)} \\; (\\text{=E}_1)$$",
+  "$$\\frac{\\Gamma \\vdash P(b) \\quad \\Gamma \\vdash a = b}{\\Gamma \\vdash P(a)} \\; (\\text{=E}_2)$$",
+  "$$ \\frac{\\Gamma, P(b) \\vdash P(a) \\quad \\Gamma, P(a) \\vdash P(b)}{\\Gamma \\vdash a = b} \\; (\\text{=I})$$",
+  "$$ \\frac{\\Gamma \\vdash \\varphi[0/x] \\quad \\Gamma, \\varphi \\vdash \\varphi[s(x)/x]}{\\Gamma \\vdash (\\forall x)\\varphi} \\; (Ind) $$"
 ];
 
 
@@ -289,6 +291,57 @@ function isRegularExpression(expr) {
 }
 
 export const ruleGentzenHandlers = {
+  "Ax": {
+    condition: (expr, side) => {
+      if (!side) return false;
+
+      // Check local hypotheses
+      let isInLocalHypotheses = false;
+      try {
+        const gammaSpan = side.querySelector('.gamma-context');
+        if (gammaSpan) {
+          const hypothesesData = gammaSpan.getAttribute('data-hypotheses');
+          if (hypothesesData) {
+            const hypotheses = JSON.parse(hypothesesData);
+            isInLocalHypotheses = hypotheses.some(hypText => {
+              try {
+                const hypParsed = deductive.getProof(deductive.checkWithAntlr(hypText));
+                return deductive.compareExpressions(hypParsed, expr);
+              } catch (error) {
+                return false;
+              }
+            });
+          }
+        }
+      } catch (error) {}
+
+      if (isInLocalHypotheses) return true;
+
+      // Check Robinson axioms
+      const isRobinsonAxiom = ROBINSON_AXIOMS.some(axiom => {
+        try {
+          const axiomParsed = deductive.getProof(deductive.checkWithAntlr(axiom));
+          return deductive.compareExpressions(axiomParsed, expr);
+        } catch (error) {
+          return false;
+        }
+      });
+      if (isRobinsonAxiom) return true;
+
+      // Check Order axioms
+      const isOrderAxiom = ORDER_AXIOMS.some(axiom => {
+        try {
+          const axiomParsed = deductive.getProof(deductive.checkWithAntlr(axiom));
+          return deductive.compareExpressions(axiomParsed, expr);
+        } catch (error) {
+          return false;
+        }
+      });
+      return isOrderAxiom;
+    },
+    action: () => rules.axRule(),
+    requiresTree: true
+  },
   "\\bot E1": {
     condition: (expr) => isRegularExpression(expr),
     action: () => rules.firstRule(),

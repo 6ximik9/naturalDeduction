@@ -132,6 +132,10 @@ export function setLastSide(newLastSide) {
   lastSide = newLastSide;
 }
 
+export function setNameRule(newNameRule) {
+  nameRule = newNameRule;
+}
+
 export function addConclusions(data) {
   deductionContext.conclusions.push(data);
 }
@@ -214,7 +218,7 @@ document.getElementById('proof').addEventListener('click', function (event) {
 /**
  * Скидає підсвічування всіх label-елементів у дереві доказу.
  */
-function clearLabelHighlights() {
+export function clearLabelHighlights() {
   const labels = document.getElementById('proof').querySelectorAll('label');
   labels.forEach(label => {
     label.style.background = '';
@@ -395,6 +399,23 @@ export function processExpression(expression, countRules) {
   }
 
   const expr = deductive.getProof(expression);
+  
+  // Logic for Ax rule recommendation
+  const axHandler = ruleGentzenHandlers["Ax"];
+  const shouldRecommendAx = side && axHandler && axHandler.condition(expr, side);
+  
+  const getButtonsWithAx = (buttons) => {
+    if (shouldRecommendAx) {
+      // Add Ax to the beginning if not already there
+      if (!buttons.includes(GENTZEN_BUTTONS[0])) {
+        return [GENTZEN_BUTTONS[0], ...buttons];
+      }
+    } else {
+      // Remove Ax if it's there
+      return buttons.filter(btn => btn !== GENTZEN_BUTTONS[0]);
+    }
+    return buttons;
+  };
 
   switch (expr.type) {
     case "variable":
@@ -402,139 +423,151 @@ export function processExpression(expression, countRules) {
     case "number":
     case "atom":
       const value = expr.value || expr.name;
+      let atomButtons;
       if (value === '⊤') {
-        generateButtons(8, [
+        atomButtons = [
           GENTZEN_BUTTONS[2], GENTZEN_BUTTONS[6],
           GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
           GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
-          GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[0]
-        ]);
+          GENTZEN_BUTTONS[16]
+        ];
       } else if (value === '⊥') {
-        generateButtons(8, [
+        atomButtons = [
           GENTZEN_BUTTONS[4], GENTZEN_BUTTONS[6],
           GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
           GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
-          GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[0]
-        ]);
+          GENTZEN_BUTTONS[16]
+        ];
       } else {
-        generateButtons(8, [
-          GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        atomButtons = [
+          GENTZEN_BUTTONS[1],
           GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
           GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
           GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]
-        ]);
+        ];
       }
+      generateButtons(atomButtons.length, getButtonsWithAx(atomButtons));
       break;
 
     case "implication":
-      generateButtons(11, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const implButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[11],
         GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
         GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
         GENTZEN_BUTTONS[18]
-      ]);
+      ];
+      generateButtons(implButtons.length, getButtonsWithAx(implButtons));
       break;
 
     case "conjunction":
-      generateButtons(11, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const conjButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[5], GENTZEN_BUTTONS[6],
         GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
         GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
         GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
         GENTZEN_BUTTONS[18]
-      ]);
+      ];
+      generateButtons(conjButtons.length, getButtonsWithAx(conjButtons));
       break;
 
     case "disjunction":
-      generateButtons(12, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const disjButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[8], GENTZEN_BUTTONS[9],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
         GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16],
         GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
-      ]);
+      ];
+      generateButtons(disjButtons.length, getButtonsWithAx(disjButtons));
       break;
 
     case "negation":
-      generateButtons(11, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const negButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[3], GENTZEN_BUTTONS[6],
         GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
         GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
         GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
         GENTZEN_BUTTONS[18]
-      ]);
+      ];
+      generateButtons(negButtons.length, getButtonsWithAx(negButtons));
       break;
 
     case "quantifier":
       if (expr.quantifier === '∃') {
-        generateButtons(11, [
-          GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        const exButtons = [
+          GENTZEN_BUTTONS[1],
           GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
           GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
           GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15],
           GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
           GENTZEN_BUTTONS[18]
-        ]);
+        ];
+        generateButtons(exButtons.length, getButtonsWithAx(exButtons));
       } else if (expr.quantifier === '∀') {
-        generateButtons(12, [
-          GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        const allButtons = [
+          GENTZEN_BUTTONS[1],
           GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
           GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
           GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15],
           GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
           GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[20]
-        ]);
+        ];
+        generateButtons(allButtons.length, getButtonsWithAx(allButtons));
       }
       break;
 
     case "forall":
-      generateButtons(12, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const forallButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
         GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15], 
         GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], 
         GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[20]
-      ]);
+      ];
+      generateButtons(forallButtons.length, getButtonsWithAx(forallButtons));
       break;
 
     case "exists":
-      generateButtons(11, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const existsButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
         GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15], 
         GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
         GENTZEN_BUTTONS[18]
-      ]);
+      ];
+      generateButtons(existsButtons.length, getButtonsWithAx(existsButtons));
       break;
 
     case "predicate":
-      generateButtons(10, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const predButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
         GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
-      ]);
+      ];
+      generateButtons(predButtons.length, getButtonsWithAx(predButtons));
       break;
 
     case "relation":
-      generateButtons(8, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const relButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
         GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]
-      ]);
+      ];
+      generateButtons(relButtons.length, getButtonsWithAx(relButtons));
       break;
 
     case "equality":
       const eqButtons = [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
         GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
@@ -542,7 +575,7 @@ export function processExpression(expression, countRules) {
       if (!expr.operator || expr.operator === '=' || expr.operator === 'EQUAL') {
         eqButtons.push(GENTZEN_BUTTONS[19]);
       }
-      generateButtons(eqButtons.length, eqButtons);
+      generateButtons(eqButtons.length, getButtonsWithAx(eqButtons));
       break;
 
     case "addition":
@@ -550,21 +583,23 @@ export function processExpression(expression, countRules) {
     case "successor":
     case "function":
       // Arithmetic and function expressions
-      generateButtons(10, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const arithButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
         GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
-      ]);
+      ];
+      generateButtons(arithButtons.length, getButtonsWithAx(arithButtons));
       break;
 
     case "sequent":
       // Handle sequent notation
-      generateButtons(6, [
-        GENTZEN_BUTTONS[0], GENTZEN_BUTTONS[1],
+      const sequentButtons = [
+        GENTZEN_BUTTONS[1],
         GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
         GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12]
-      ]);
+      ];
+      generateButtons(sequentButtons.length, getButtonsWithAx(sequentButtons));
       break;
 
     default:
@@ -664,71 +699,6 @@ function generateButtons(buttonCount, buttonTexts) {
       }
     } catch (error) {
       console.warn('Error reading gamma-context data:', error);
-    }
-
-    // Check if current expression matches any Robinson arithmetic axiom
-    const isRobinsonAxiom = ROBINSON_AXIOMS.some(axiom => {
-      try {
-        const axiomParsed = deductive.getProof(deductive.checkWithAntlr(axiom));
-        return deductive.compareExpressions(axiomParsed, currentExpr);
-      } catch (error) {
-        console.warn('Error parsing axiom:', axiom, error);
-        return false;
-      }
-    });
-
-    // Check if current expression matches any Order axiom
-    const isOrderAxiom = ORDER_AXIOMS.some(axiom => {
-      try {
-        const axiomParsed = deductive.getProof(deductive.checkWithAntlr(axiom));
-        return deductive.compareExpressions(axiomParsed, currentExpr);
-      } catch (error) {
-        console.warn('Error parsing axiom:', axiom, error);
-        return false;
-      }
-    });
-
-    if (isInLocalHypotheses || isRobinsonAxiom || isOrderAxiom) {
-      const closeBtn = createButton("$$\\frac{\\varphi \\in \\Gamma}{\\Gamma \\vdash \\varphi} (Ax)$$ ", () => {
-          lastSide = side;
-          const currentFormulaText = side.querySelector('#proofText').textContent;
-          const parsed = deductive.checkWithAntlr(currentFormulaText);
-          const proof = deductive.getProof(parsed);
-
-          nameRule = "Ax";
-          setCurrentLevel(40); // Set unique level for (Ax) to avoid conflicts with other rules (e.g. 12)
-          const size = deductionContext.conclusions.length - 1;
-          addConclusions({ level: level, proof });
-          level++;
-
-          const newConclusion = deductionContext.conclusions[size + 1];
-          createProofTree(newConclusion, side);
-
-          // Mark as closed manually with the pleasant green color (class 'closed')
-          // and make it non-clickable for rules (class 'previous')
-          const axiomElement = document.querySelector(`.proof-element_level-${newConclusion.level}`);
-          if (axiomElement) {
-              const proofDiv = axiomElement.querySelector('.proof-content')?.parentElement;
-              if (proofDiv) {
-                  proofDiv.className = 'closed';
-                  
-                  // Make label and content non-clickable by adding 'previous' class
-                  const label = proofDiv.querySelector('#proofText');
-                  if (label) label.classList.add('previous');
-                  
-                  const proofContent = proofDiv.querySelector('.proof-content');
-                  if (proofContent) proofContent.classList.add('previous');
-              }
-          }
-          disableAllButtons();
-          side = null;
-          clearLabelHighlights();
-      });
-      closeBtn.style.minHeight = '80px';
-      buttonContainer.appendChild(closeBtn);
-      console.log(`🔒 (Ax) available - formula found in local hypotheses or is Robinson axiom`);
-    } else {
-      console.log(`❌ (Ax) not available - formula not in local hypotheses`);
     }
   }
 
@@ -1085,7 +1055,7 @@ async function buttonClicked(buttonText) {
   }
 
   // Перевірка умови застосування правила
-  if (!handler.condition(expr)) {
+  if (!handler.condition(expr, lastSide)) {
     const targetButton = Array.from(allButtons).find(btn => 
       btn.getAttribute('data-original-text') === buttonText
     );
@@ -1254,7 +1224,7 @@ function createProofElement(level) {
   return proofElement;
 }
 
-function createProofTree(conclusions, container, hyp = null) {
+export function createProofTree(conclusions, container, hyp = null) {
   if (!conclusions || Object.keys(conclusions).length === 0 || !conclusions.proof) {
     return;
   }

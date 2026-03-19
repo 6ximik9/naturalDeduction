@@ -504,3 +504,39 @@ export async function induction() {
   console.log("Induction hypothesis:", inductionHypothesis);
   return inductionHypothesis;
 }
+
+export function axRule() {
+  const side = index.lastSide;
+  const currentFormulaText = side.querySelector('#proofText').textContent;
+  const parsed = deductive.checkWithAntlr(currentFormulaText);
+  const proof = deductive.getProof(parsed);
+
+  index.setNameRule("Ax");
+  index.setCurrentLevel(40); // Set unique level for (Ax) to avoid conflicts with other rules (e.g. 12)
+  const size = index.deductionContext.conclusions.length - 1;
+  index.addConclusions({ level: index.level, proof });
+  index.setLevel(index.level + 1);
+
+  const newConclusion = index.deductionContext.conclusions[size + 1];
+  index.createProofTree(newConclusion, side);
+
+  // Mark as closed manually with the pleasant green color (class 'closed')
+  // and make it non-clickable for rules (class 'previous')
+  const axiomElement = document.querySelector(`.proof-element_level-${newConclusion.level}`);
+  if (axiomElement) {
+    const proofDiv = axiomElement.querySelector('.proof-content')?.parentElement;
+    if (proofDiv) {
+      proofDiv.className = 'closed';
+
+      // Make label and content non-clickable by adding 'previous' class
+      const label = proofDiv.querySelector('#proofText');
+      if (label) label.classList.add('previous');
+
+      const proofContent = proofDiv.querySelector('.proof-content');
+      if (proofContent) proofContent.classList.add('previous');
+    }
+  }
+  index.disableAllButtons();
+  index.setSide(null);
+  index.clearLabelHighlights();
+}
