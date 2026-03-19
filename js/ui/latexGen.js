@@ -50,7 +50,7 @@ function getLate(element) {
     let ruleFromClosed = null;
     if (content.startsWith('[') && content.endsWith(']')) {
         // Регулярний вираз тепер набагато суворіший: шукаємо тільки AxN або кванторні правила в кінці закритих дужок
-        let ruleMatch = content.match(/\s?\((Ax\d+|[∀∃][EI])\s?\)\s?\]$/);
+        let ruleMatch = content.match(/\s?\((Ax\d*|[∀∃][EI])\s?\)\s?\]$/);
         if (ruleMatch) {
             ruleFromClosed = ruleMatch[1];
             // Видаляємо ТІЛЬКИ назву правила, залишаючи закриваючу дужку формули
@@ -65,7 +65,14 @@ function getLate(element) {
         } else {
             gammaText = gamma.textContent;
         }
-        content = gammaText + content;
+        
+        // Handle custom order (e.g. for Ax rule: "phi ∈ Γ")
+        // Check if label comes before gamma in DOM
+        if (label.compareDocumentPosition(gamma) & Node.DOCUMENT_POSITION_FOLLOWING) {
+            content = content + gammaText;
+        } else {
+            content = gammaText + content;
+        }
     }
 
     // 2. Знайти гілки (засновки) та правило
@@ -205,6 +212,7 @@ function latexEdit(str, mode) {
     '∧': ' \\land ', 'AND': ' \\land ', 'and': ' \\land ', '&': ' \\land ', '&&': ' \\land ',
     '~': ' \\neg ', '¬': ' \\neg ', '!': ' \\neg ',
     '∀': ' \\forall ', '∃': ' \\exists ',
+    '∈': ' \\in ',
     '⊤': ' \\top ', '⊥': ' \\bot ',
     '⊢': ' \\vdash ', '⊨': ' \\vDash ',
     // '{': '\\{', '}': '\\}', // Видалено екранування дужок для підтримки \text{...}

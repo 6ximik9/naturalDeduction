@@ -689,12 +689,46 @@ function generateButtons(buttonCount, buttonTexts) {
     });
 
     if (isInLocalHypotheses || isRobinsonAxiom || isOrderAxiom) {
-      const closeBtn = createButton("Close branch", () => closeSide(side));
+      const closeBtn = createButton("$$\\frac{\\varphi \\in \\Gamma}{\\Gamma \\vdash \\varphi} (Ax)$$ ", () => {
+          lastSide = side;
+          const currentFormulaText = side.querySelector('#proofText').textContent;
+          const parsed = deductive.checkWithAntlr(currentFormulaText);
+          const proof = deductive.getProof(parsed);
+
+          nameRule = "Ax";
+          setCurrentLevel(40); // Set unique level for (Ax) to avoid conflicts with other rules (e.g. 12)
+          const size = deductionContext.conclusions.length - 1;
+          addConclusions({ level: level, proof });
+          level++;
+
+          const newConclusion = deductionContext.conclusions[size + 1];
+          createProofTree(newConclusion, side);
+
+          // Mark as closed manually with the pleasant green color (class 'closed')
+          // and make it non-clickable for rules (class 'previous')
+          const axiomElement = document.querySelector(`.proof-element_level-${newConclusion.level}`);
+          if (axiomElement) {
+              const proofDiv = axiomElement.querySelector('.proof-content')?.parentElement;
+              if (proofDiv) {
+                  proofDiv.className = 'closed';
+                  
+                  // Make label and content non-clickable by adding 'previous' class
+                  const label = proofDiv.querySelector('#proofText');
+                  if (label) label.classList.add('previous');
+                  
+                  const proofContent = proofDiv.querySelector('.proof-content');
+                  if (proofContent) proofContent.classList.add('previous');
+              }
+          }
+          disableAllButtons();
+          side = null;
+          clearLabelHighlights();
+      });
       closeBtn.style.minHeight = '80px';
       buttonContainer.appendChild(closeBtn);
-      console.log(`🔒 Close branch available - formula found in local hypotheses or is Robinson axiom`);
+      console.log(`🔒 (Ax) available - formula found in local hypotheses or is Robinson axiom`);
     } else {
-      console.log(`❌ Close branch not available - formula not in local hypotheses`);
+      console.log(`❌ (Ax) not available - formula not in local hypotheses`);
     }
   }
 
@@ -925,7 +959,7 @@ function createButton(text, clickHandler) {
 
 /**
  * Закриває гілку дерева доказу, очищаючи заміни та оновлюючи інтерфейс.
- * @param {HTMLElement} container - DOM-елемент гілки.
+ * @param {HTMLElement} container - DOM-елемент гілку.
  */
 function closeSide(container) {
   // Normalize to the main proof element (outer div) if we passed the inner proof-content
@@ -1330,14 +1364,28 @@ function createProofTree(conclusions, container, hyp = null) {
     if (text !== " ") {
       // Створюємо gamma-context span з data-hypotheses
       const proofLevel = conclusions.level;
-      const gammaContextSpan = createGammaContextSpan(container, proofLevel);
+      let gammaContextSpan = createGammaContextSpan(container, proofLevel, currentLevel === 40);
 
-      if (mainReplaces !== "") {
-        proofDiv.innerHTML = `<div class="proof-content">${gammaContextSpan}<label id="proofText">${text}</label></div>` +
-          '<span id="repl" style="display: none;">' + mainReplaces + '</span>';
-        mainReplaces = "";
+      if (currentLevel === 40) {
+          // Format as "phi ∈ Γ"
+          text = `${text} ∈ `;
+          
+          // Use custom order: formula label then gamma span (which now contains only Γ)
+          if (mainReplaces !== "") {
+            proofDiv.innerHTML = `<div class="proof-content"><label id="proofText">${text}</label>${gammaContextSpan}</div>` +
+              '<span id="repl" style="display: none;">' + mainReplaces + '</span>';
+            mainReplaces = "";
+          } else {
+            proofDiv.innerHTML = `<div class="proof-content"><label id="proofText">${text}</label>${gammaContextSpan}</div>`;
+          }
       } else {
-        proofDiv.innerHTML = `<div class="proof-content">${gammaContextSpan}<label id="proofText">${text}</label></div>`;
+          if (mainReplaces !== "") {
+            proofDiv.innerHTML = `<div class="proof-content">${gammaContextSpan}<label id="proofText">${text}</label></div>` +
+              '<span id="repl" style="display: none;">' + mainReplaces + '</span>';
+            mainReplaces = "";
+          } else {
+            proofDiv.innerHTML = `<div class="proof-content">${gammaContextSpan}<label id="proofText">${text}</label></div>`;
+          }
       }
     } else {
       if (mainReplaces !== "") {
@@ -1905,9 +1953,10 @@ function computeHypothesesForGammaContext(elementContext, level) {
  * Створює gamma-context span з data-hypotheses атрибутом
  * @param {HTMLElement|string} elementContext - Контекст елемента для обчислення гіпотез
  * @param {number} level - Рівень елемента в доказі
+ * @param {boolean} isAxiom - Чи створюється контекст для правила Ax (без знака ⊢)
  * @returns {string} - HTML рядок для gamma-context span
  */
-function createGammaContextSpan(elementContext, level) {
+function createGammaContextSpan(elementContext, level, isAxiom = false) {
   try {
     // Обчислюємо гіпотези для цього контексту
     const hypotheses = computeHypothesesForGammaContext(elementContext, level);
@@ -1922,14 +1971,18 @@ function createGammaContextSpan(elementContext, level) {
     let gammaDisplay = '';
     if (hypotheses.length > 0) {
         gammaDisplay = contextIndex === 0 ? 'Γ' : `Γ<sub>${contextIndex}</sub>`;
+    } else if (isAxiom) {
+        gammaDisplay = 'Γ';
     }
 
+    const turnstile = isAxiom ? '' : '⊢';
+
     // Створюємо span з data-hypotheses атрибутом та индексом
-    return `<span class="gamma-context" data-hypotheses='${hypothesesJson}' data-level="${level}" data-context-index="${contextIndex}">${gammaDisplay}⊢</span>`;
+    return `<span class="gamma-context" data-hypotheses='${hypothesesJson}' data-level="${level}" data-context-index="${contextIndex}" data-is-axiom="${isAxiom}">${gammaDisplay}${turnstile}</span>`;
   } catch (error) {
     console.error('Error creating gamma context span:', error);
     // Fallback до звичайного span без data атрибутів
-    return `<span class="gamma-context">⊢</span>`;
+    return `<span class="gamma-context">${isAxiom ? 'Γ' : '⊢'}</span>`;
   }
 }
 
@@ -2072,9 +2125,12 @@ function addHypothesesToGammaSpan(gammaSpan, newHypotheses) {
     const gammaId = getGammaId(spanElement);
     const isExpanded = gammaToggleState.get(gammaId) || false;
 
+    const isAxiom = spanElement.getAttribute('data-is-axiom') === 'true';
+    const turnstile = isAxiom ? '' : '⊢';
+
     if (!isExpanded) {
       // Обновляем отображение только если элемент свернут
-      spanElement.innerHTML = `${newGammaDisplay}⊢`;
+      spanElement.innerHTML = `${newGammaDisplay}${turnstile}`;
     }
 
     console.log(`Successfully added ${hypothesesToAdd.length} new hypotheses to gamma context`);
@@ -2112,6 +2168,9 @@ function toggleGammaContext(gammaElement) {
       return;
     }
 
+    const isAxiom = gammaElement.getAttribute('data-is-axiom') === 'true';
+    const turnstile = isAxiom ? '' : '⊢';
+
     if (isExpanded) {
       // Згортаємо: повертаємо до Γ⊢ з індексом
       const contextIndex = parseInt(gammaElement.getAttribute('data-context-index') || '0');
@@ -2122,12 +2181,12 @@ function toggleGammaContext(gammaElement) {
           try {
               const hypArr = JSON.parse(hypothesesData);
               if (hypArr.length === 0) {
-                  gammaDisplay = '';
+                  gammaDisplay = isAxiom ? 'Γ' : '';
               }
           } catch (e) {}
       }
       
-      gammaElement.innerHTML = `${gammaDisplay}⊢`;
+      gammaElement.innerHTML = `${gammaDisplay}${turnstile}`;
       gammaToggleState.set(gammaId, false);
       console.log(`Gamma context collapsed for ${gammaId}`);
     } else {
@@ -2156,13 +2215,13 @@ function toggleGammaContext(gammaElement) {
         const formattedContext = formatHypothesesForGamma(hypotheses);
 
         // Оновлюємо відображення
-        gammaElement.textContent = `${formattedContext}⊢`;
+        gammaElement.textContent = `${formattedContext}${turnstile}`;
         gammaToggleState.set(gammaId, true);
         console.log(`Gamma context expanded for ${gammaId}:`, formattedContext);
       } catch (error) {
         console.error('Error expanding gamma context:', error);
         // У випадку помилки залишаємо ⊢
-        gammaElement.textContent = '⊢';
+        gammaElement.textContent = turnstile;
         gammaToggleState.set(gammaId, false);
       }
     }
