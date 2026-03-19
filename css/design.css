@@ -103,6 +103,16 @@
       letter-spacing: 0.05em;
     }
 
+    .sidebar-sub-header {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--col-text-sidebar-muted);
+      padding: 6px 16px 2px 12px;
+      opacity: 0.8;
+    }
+
     .nav-link {
       display: flex;
       align-items: center;
