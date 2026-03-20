@@ -244,7 +244,7 @@ function generateButtons(buttonCount, buttonTexts, disabled = false) {
   } else {
     // Reset to default styling for other tabs
     // Using explicit values that match index.html defaults to ensure clean state
-    buttonContainer.style.display = 'flex'; 
+    buttonContainer.style.display = 'flex';
     buttonContainer.style.flexDirection = 'row';
     buttonContainer.style.flexWrap = 'wrap';
     buttonContainer.style.gridTemplateColumns = '';
@@ -565,19 +565,28 @@ async function buttonClicked(buttonText, button) {
 }
 
 function shakeButton(button) {
-  // const allButtons = document.querySelectorAll('#button-container button');
   let element = button;
+  const originalBg = element.style.backgroundColor;
+  const originalTransition = element.style.transition;
 
-  let interval = 100; // час між кожною тряскою
+  element.classList.add('shake');
+  element.style.transition = 'background-color 0.3s ease';
 
-  element.classList.add('shake'); // Додаємо клас, який запускає анімацію
-  element.style.transition = 'background-color 0.5s ease'; // Додаємо перехід для зміни кольору
-  element.style.backgroundColor = 'rgba(253,81,81,0.5)'; // Змінюємо колір
+  // Вибираємо колір залежно від теми
+  const isDark = document.body.classList.contains('dark-mode');
+  const errorColor = isDark ? 'rgba(248, 113, 113, 0.3)' : '#fecaca';
+
+  element.style.setProperty('background-color', errorColor, 'important');
 
   setTimeout(function () {
-    element.classList.remove('shake'); // Видаляємо клас після завершення анімації
-    element.style.backgroundColor = 'white'; // Повертаємо колір до початкового
-  }, interval * 5);
+    element.classList.remove('shake');
+    element.style.backgroundColor = originalBg;
+
+    // Restore transition after the color reverts
+    setTimeout(() => {
+        element.style.transition = originalTransition;
+    }, 300);
+  }, 500); // Повертаємо старий час (0.5 сек)
 }
 
 function createDivs() {
@@ -781,7 +790,7 @@ function addClickFitchRules() {
   tabTriggers.forEach(function (trigger) {
     trigger.addEventListener('click', function (event) {
       const tabId = this.getAttribute('for');
-      
+
       // Use setTimeout to ensure radio button state is updated before we check it
       setTimeout(() => {
         if (tabId === 'tab1') {
@@ -798,9 +807,9 @@ function addClickFitchRules() {
           }
           const buttonContainer = document.getElementById('button-container');
           buttonContainer.innerHTML = '';
-          
+
           // Reset button-container styles and prepare for tree view
-          buttonContainer.style.display = 'block'; 
+          buttonContainer.style.display = 'block';
           buttonContainer.style.gridTemplateColumns = '';
           buttonContainer.style.gap = '';
           buttonContainer.style.padding = '';
