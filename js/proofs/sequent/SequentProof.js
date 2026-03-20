@@ -742,6 +742,14 @@ function generateSequentButtons() {
         const ruleName = getRuleName(ruleLatex);
 
         btn.onclick = () => {
+            const currentSeq = getActiveSequent();
+            const check = RULE_CHECKS[ruleName];
+
+            if (check && !check(currentSeq, selectedFormulaIndex)) {
+                shakeButton(btn);
+                return;
+            }
+
             if (ruleSequentHandlers[ruleName]) {
                 try {
                     ruleSequentHandlers[ruleName].action();
@@ -761,6 +769,35 @@ function generateSequentButtons() {
     }
 
     // generateHintButton(buttonContainer); // Removed in favor of sidebar toggle
+}
+
+export function shakeButton(button) {
+    let element = button;
+    const originalBg = element.style.backgroundColor;
+    const originalTransition = element.style.transition;
+
+    element.classList.add('shake');
+    element.style.transition = 'background-color 0.3s ease';
+
+    // Вибираємо колір залежно від теми
+    const isDark = document.body.classList.contains('dark-mode');
+    const errorColor = isDark ? 'rgba(248, 113, 113, 0.3)' : '#fecaca';
+
+    element.style.setProperty('background-color', errorColor, 'important');
+
+    setTimeout(function () {
+        element.classList.remove('shake');
+        if (originalBg === "") {
+            element.style.removeProperty("background-color");
+        } else {
+            element.style.backgroundColor = originalBg;
+        }
+
+        // Restore transition after the color reverts
+        setTimeout(() => {
+            element.style.transition = originalTransition;
+        }, 300);
+    }, 500); // Повертаємо старий час (0.5 сек)
 }
 
 export function toggleSmartMode() {
