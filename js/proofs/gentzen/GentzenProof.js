@@ -427,24 +427,18 @@ export function processExpression(expression, countRules) {
       let atomButtons;
       if (value === '⊤') {
         atomButtons = [
-          GENTZEN_BUTTONS[2], GENTZEN_BUTTONS[6],
-          GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
-          GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
-          GENTZEN_BUTTONS[16]
+          GENTZEN_BUTTONS[3]
         ];
       } else if (value === '⊥') {
         atomButtons = [
-          GENTZEN_BUTTONS[4], GENTZEN_BUTTONS[6],
-          GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
-          GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
-          GENTZEN_BUTTONS[16]
+          GENTZEN_BUTTONS[5]
         ];
       } else {
         atomButtons = [
-          GENTZEN_BUTTONS[1],
-          GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-          GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-          GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]
+          GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+          GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+          GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+          GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17]
         ];
       }
       generateButtons(atomButtons.length, getButtonsWithAx(atomButtons));
@@ -452,48 +446,48 @@ export function processExpression(expression, countRules) {
 
     case "implication":
       const implButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[11],
-        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
-        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
-        GENTZEN_BUTTONS[18]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+        GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[12],
+        GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[16],
+        GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18],
+        GENTZEN_BUTTONS[19]
       ];
       generateButtons(implButtons.length, getButtonsWithAx(implButtons));
       break;
 
     case "conjunction":
       const conjButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[5], GENTZEN_BUTTONS[6],
-        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
-        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
-        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
-        GENTZEN_BUTTONS[18]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[8], GENTZEN_BUTTONS[11],
+        GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[16],
+        GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18],
+        GENTZEN_BUTTONS[19]
       ];
       generateButtons(conjButtons.length, getButtonsWithAx(conjButtons));
       break;
 
     case "disjunction":
       const disjButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-        GENTZEN_BUTTONS[8], GENTZEN_BUTTONS[9],
-        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16],
-        GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+        GENTZEN_BUTTONS[9], GENTZEN_BUTTONS[10],
+        GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+        GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[19]
       ];
       generateButtons(disjButtons.length, getButtonsWithAx(disjButtons));
       break;
 
     case "negation":
       const negButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[3], GENTZEN_BUTTONS[6],
-        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[10],
-        GENTZEN_BUTTONS[12], GENTZEN_BUTTONS[15],
-        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
-        GENTZEN_BUTTONS[18]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[4], GENTZEN_BUTTONS[7],
+        GENTZEN_BUTTONS[8], GENTZEN_BUTTONS[11],
+        GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[16],
+        GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18],
+        GENTZEN_BUTTONS[19]
       ];
       generateButtons(negButtons.length, getButtonsWithAx(negButtons));
       break;
@@ -501,22 +495,22 @@ export function processExpression(expression, countRules) {
     case "quantifier":
       if (expr.quantifier === '∃') {
         const exButtons = [
-          GENTZEN_BUTTONS[1],
-          GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-          GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-          GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15],
-          GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
-          GENTZEN_BUTTONS[18]
+          GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+          GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+          GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+          GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[16],
+          GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18],
+          GENTZEN_BUTTONS[19]
         ];
         generateButtons(exButtons.length, getButtonsWithAx(exButtons));
       } else if (expr.quantifier === '∀') {
         const allButtons = [
-          GENTZEN_BUTTONS[1],
-          GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-          GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-          GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15],
-          GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
-          GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[20]
+          GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+          GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+          GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+          GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16],
+          GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18],
+          GENTZEN_BUTTONS[19], GENTZEN_BUTTONS[21]
         ];
         generateButtons(allButtons.length, getButtonsWithAx(allButtons));
       }
@@ -524,57 +518,59 @@ export function processExpression(expression, countRules) {
 
     case "forall":
       const forallButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[15],
-        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
-        GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[20]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+        GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16],
+        GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18],
+        GENTZEN_BUTTONS[19], GENTZEN_BUTTONS[21]
       ];
       generateButtons(forallButtons.length, getButtonsWithAx(forallButtons));
       break;
 
     case "exists":
       const existsButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[13], GENTZEN_BUTTONS[15],
-        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
-        GENTZEN_BUTTONS[18]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+        GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+        GENTZEN_BUTTONS[14], GENTZEN_BUTTONS[16],
+        GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18],
+        GENTZEN_BUTTONS[19]
       ];
       generateButtons(existsButtons.length, getButtonsWithAx(existsButtons));
       break;
 
     case "predicate":
       const predButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+        GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+        GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[19]
       ];
       generateButtons(predButtons.length, getButtonsWithAx(predButtons));
       break;
 
     case "relation":
       const relButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+        GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17]
       ];
       generateButtons(relButtons.length, getButtonsWithAx(relButtons));
       break;
 
     case "equality":
       const eqButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+        GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+        GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[19]
       ];
       if (!expr.operator || expr.operator === '=' || expr.operator === 'EQUAL') {
-        eqButtons.push(GENTZEN_BUTTONS[19]);
+        eqButtons.push(GENTZEN_BUTTONS[20]);
       }
       generateButtons(eqButtons.length, getButtonsWithAx(eqButtons));
       break;
@@ -585,10 +581,11 @@ export function processExpression(expression, countRules) {
     case "function":
       // Arithmetic and function expressions
       const arithButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12],
-        GENTZEN_BUTTONS[15], GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17], GENTZEN_BUTTONS[18]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+        GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13],
+        GENTZEN_BUTTONS[16], GENTZEN_BUTTONS[17],
+        GENTZEN_BUTTONS[18], GENTZEN_BUTTONS[19]
       ];
       generateButtons(arithButtons.length, getButtonsWithAx(arithButtons));
       break;
@@ -596,9 +593,9 @@ export function processExpression(expression, countRules) {
     case "sequent":
       // Handle sequent notation
       const sequentButtons = [
-        GENTZEN_BUTTONS[1],
-        GENTZEN_BUTTONS[6], GENTZEN_BUTTONS[7],
-        GENTZEN_BUTTONS[10], GENTZEN_BUTTONS[12]
+        GENTZEN_BUTTONS[1], GENTZEN_BUTTONS[2],
+        GENTZEN_BUTTONS[7], GENTZEN_BUTTONS[8],
+        GENTZEN_BUTTONS[11], GENTZEN_BUTTONS[13]
       ];
       generateButtons(sequentButtons.length, getButtonsWithAx(sequentButtons));
       break;
@@ -710,7 +707,7 @@ function generateButtons(buttonCount, buttonTexts) {
     const text = buttonTexts[i];
 
     if (isIntuitionistic()) {
-        if (text === GENTZEN_BUTTONS[1]) {
+        if (text === GENTZEN_BUTTONS[2]) {
             continue; // Hide RAA (\bot E2) in Intuitionistic Logic
         }
     }
@@ -945,31 +942,33 @@ function closeSide(container) {
 
   // 1. Шукаємо елемент gamma
   const existingElement = container.querySelector('.gamma-context');
+  const proofText = container.querySelector('#proofText');
 
-  if (!existingElement) {
-    console.warn("Could not find gamma-context in element to close", container);
+  if (!existingElement || !proofText) {
+    console.warn("Could not find gamma-context or proofText in element to close", container);
     return;
   }
 
-  let gammaHtml = existingElement.outerHTML;
-  let rawText = container.querySelector('#proofText')?.textContent.trim() || "";
+  let rawText = proofText.textContent.trim() || "";
   // Якщо ми закриваємо гілку, яка вже була закрита в системі (наприклад, аксіому),
   // то вона вже має квадратні дужки. Видаляємо їх для коректного форматування.
   if (rawText.startsWith('[') && rawText.endsWith(']')) {
     rawText = rawText.substring(1, rawText.length - 1);
   }
 
-  // Видаляємо всі span-елементи з оригіналу (вони будуть замінені новою структувою)
-  container.querySelectorAll('span').forEach(span => span.remove());
-
   // Позначаємо гілку як закриту
-  container.className = 'closed';
+  container.classList.add('closed');
 
   let labelText = `[${rawText}]`;
-  labelText = labelText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-  // 4. Вставляємо нову структуру
-  container.innerHTML = `<div class="proof-content">${gammaHtml}<label class="previous" id="proofText">${labelText}</label></div>`;
+  
+  // 4. Оновлюємо тільки текстовий контент та додаємо класи
+  proofText.textContent = labelText;
+  proofText.classList.add('previous');
+  
+  const proofContent = container.querySelector('.proof-content');
+  if (proofContent) {
+    proofContent.classList.add('previous');
+  }
 
   controlState.saveState();
 }
@@ -1252,9 +1251,12 @@ export function createProofTree(conclusions, container, hyp = null) {
   let nodesContainer = levelDiv;
 
   if (conclusions.level !== 0) {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const lineColor = isDarkMode ? '#ffffff' : '#000000';
+
     let lvl = document.querySelector(`.proof-element_level-${conclusions.level - 1}`);
     if (lvl && lvl.childElementCount === 0) {
-      lvl.style.borderTop = '2px solid #000000';
+      lvl.style.borderTop = `2px solid ${lineColor}`;
     }
 
     // Create Flex Structure for Rule Name and Line (same as Sequent)
@@ -1280,7 +1282,7 @@ export function createProofTree(conclusions, container, hyp = null) {
     nodesContainer.style.gap = '80px';
     nodesContainer.style.justifyContent = 'center';
     nodesContainer.style.alignItems = 'flex-end';
-    nodesContainer.style.borderBottom = '2px solid black';
+    nodesContainer.style.borderBottom = `2px solid ${lineColor}`;
     nodesContainer.style.paddingBottom = '3px';
     nodesContainer.style.marginBottom = '0px';
 
@@ -1383,9 +1385,28 @@ export function createProofTree(conclusions, container, hyp = null) {
       } else {
         proofDiv.innerHTML = '<label class="previous" id="proofText">' + text + '</label>';
       }
-      proofDiv.style.paddingTop = "25px";
-      proofDiv.className = 'closed';
-      closeSide(side);
+      proofDiv.style.paddingTop = "0px";
+      proofDiv.style.height = "5px"; 
+      proofDiv.style.minWidth = "80px";
+      
+      // Manual "lite" close for axiomatic rules to avoid green highlight and keep the line visible
+      const proofText = container.querySelector('#proofText');
+      if (proofText) {
+          let raw = proofText.textContent.trim();
+          if (!raw.startsWith('[')) {
+              proofText.textContent = `[${raw}]`;
+          }
+          proofText.classList.add('previous');
+      }
+      
+      const proofContent = container.querySelector('.proof-content');
+      if (proofContent) {
+          proofContent.classList.add('previous');
+      }
+      
+      disableAllButtons();
+      side = null;
+      clearLabelHighlights();
     }
     proofDiv.style.fontFamily = "'Times New Roman', sans-serif";
     // addUserHyp(conclusions, proofDiv);

@@ -150,7 +150,7 @@ export const AXIOM_HANDLERS = {
         if (result) {
           console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
           // Створюємо вузол дерева з текстом аксіоми
-          createAxiomConclusion(ROBINSON_AXIOMS[5], 26);
+          createAxiomConclusion(ROBINSON_AXIOMS[5], 27);
           return result;
         } else {
           shakeButton(button);
@@ -170,7 +170,7 @@ export const AXIOM_HANDLERS = {
         if (result) {
           console.log(`✅ Формула відповідає аксіомі ${result.code}: ${result.desc}`);
           // Створюємо вузол дерева з текстом аксіоми
-          createAxiomConclusion(ROBINSON_AXIOMS[6], 27);
+          createAxiomConclusion(ROBINSON_AXIOMS[6], 28);
           return result;
         } else {
           shakeButton(button);
@@ -188,7 +188,7 @@ export const AXIOM_HANDLERS = {
       if (formula) {
         const result = validateOrderAxiom1(formula);
         if (result) {
-          createAxiomConclusion(ORDER_AXIOMS[0], 28);
+          createAxiomConclusion(ORDER_AXIOMS[0], 29);
           return result;
         } else {
           shakeButton(button);
@@ -206,7 +206,7 @@ export const AXIOM_HANDLERS = {
       if (formula) {
         const result = validateOrderAxiom2(formula);
         if (result) {
-          createAxiomConclusion(ORDER_AXIOMS[1], 29);
+          createAxiomConclusion(ORDER_AXIOMS[1], 30);
           return result;
         } else {
           shakeButton(button);
@@ -224,7 +224,7 @@ export const AXIOM_HANDLERS = {
       if (formula) {
         const result = validateOrderAxiom3(formula);
         if (result) {
-          createAxiomConclusion(ORDER_AXIOMS[2], 30);
+          createAxiomConclusion(ORDER_AXIOMS[2], 31);
           return result;
         } else {
           shakeButton(button);
@@ -242,7 +242,7 @@ export const AXIOM_HANDLERS = {
       if (formula) {
         const result = validateOrderAxiom4(formula);
         if (result) {
-          createAxiomConclusion(ORDER_AXIOMS[3], 31);
+          createAxiomConclusion(ORDER_AXIOMS[3], 32);
           return result;
         } else {
           shakeButton(button);
