@@ -169,7 +169,10 @@ export const translations = {
     "start-dont-show": "Túto obrazovku už nezobrazovať",
     "nav-show-start": "Úvodná stránka",
     "modal-btn-yes": "Vymazať a vrátiť sa",
-    "modal-btn-edit-intro": "Upraviť vloženie"
+    "modal-btn-edit-intro": "Upraviť vloženie",
+    "ex-category-propositional": "Výroková logika",
+    "ex-category-predicate": "Predikátová logika",
+    "ex-category-theories": "Teórie"
   },
   EN: {
     "nav-system": "System",
@@ -341,7 +344,10 @@ export const translations = {
     "start-dont-show": "Don't show this screen again",
     "nav-show-start": "Welcome Screen",
     "modal-btn-yes": "Clear and Return",
-    "modal-btn-edit-intro": "Edit Introduction"
+    "modal-btn-edit-intro": "Edit Introduction",
+    "ex-category-propositional": "Propositional Logic",
+    "ex-category-predicate": "Predicate Logic",
+    "ex-category-theories": "Theories"
   },
   UA: {
     "nav-system": "Система",
@@ -513,7 +519,10 @@ export const translations = {
     "start-dont-show": "Більше не показувати це вікно",
     "nav-show-start": "Вітальна сторінка",
     "modal-btn-yes": "Очистити та повернутися",
-    "modal-btn-edit-intro": "Редагувати вступ"
+    "modal-btn-edit-intro": "Редагувати вступ",
+    "ex-category-propositional": "Логіка висловлювань",
+    "ex-category-predicate": "Логіка предикатів",
+    "ex-category-theories": "Теорії"
   }
 };
 
