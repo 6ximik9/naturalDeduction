@@ -15,6 +15,7 @@ import {createModalForReturn} from "../../ui/modals/quantifierReturn";
 import {createAdvancedModal} from "../../ui/modals/existentialIntro";
 import {createModalForLeibniz} from "../../ui/modals/leibniz";
 import {createInputModal} from "../../ui/modals/input";
+import {showToast} from "../../ui/notifications";
 
 function getCleanFormula(element) {
   const clone = element.cloneNode(true);
@@ -22,6 +23,27 @@ function getCleanFormula(element) {
   if (span) span.remove();
   return clone.textContent.replaceAll(" ", "");
 }
+
+export const FITCH_EXPLANATIONS = {
+  "\\land I, m, n": "Conjunction Introduction (∧I): Requires exactly two selected formulas.",
+  "\\land E, n": "Conjunction Elimination (∧E): Requires one selected conjunction.",
+  "\\lor I, n": "Disjunction Introduction (∨I): Requires one selected formula.",
+  "\\lor E, m, n, p": "Disjunction Elimination (∨E): Requires one selected disjunction and two selected sub-proofs corresponding to its cases.",
+  "\\Rightarrow I, n, m": "Implication Introduction (⇒I): Requires one selected sub-proof (starting with the hypothesis and ending with the conclusion).",
+  "\\Rightarrow E,m,n": "Implication Elimination (⇒E): Requires one selected implication and its antecedent.",
+  "\\neg I, m, n": "Negation Introduction (¬I): Requires one selected sub-proof starting with φ and ending with absurdity (⊥).",
+  "\\neg E, n, m": "Negation Elimination (¬E): Requires one selected formula and its negation to derive absurdity (⊥).",
+  "\\perp E,n": "Absurdity Elimination (⊥E): Requires one selected absurdity (⊥) to derive any formula.",
+  "C, m-n": "Proof by Contradiction (C): Requires one selected sub-proof starting with ¬φ and ending with absurdity (⊥) to prove φ.",
+  "\\neg\\neg E,n": "Double Negation Elimination (¬¬E): Requires one selected formula with double negation (¬¬φ).",
+  "R,n": "Reiteration (R): Requires one selected formula from an accessible scope.",
+  "\\forall E, n": "Universal Elimination (∀E): Requires one selected universal quantifier (∀x φ).",
+  "\\forall I, n": "Universal Introduction (∀I): Requires one selected sub-proof using a fresh constant.",
+  "\\exists I, n": "Existential Introduction (∃I): Requires one selected formula φ(t) to derive ∃x φ(x).",
+  "\\exists E, m, n": "Existential Elimination (∃E): Requires one selected existential formula (∃x φ) and a sub-proof deriving ψ from φ(t) with a fresh constant.",
+  "= I": "Identity Introduction (=I): Can introduce an identity c = c for any term c.",
+  "= E, n, m": "Identity Elimination (=E): Requires one selected identity (a = b) and a formula containing one of the terms."
+};
 
 export function firstRule(proofs, branches) {
   if (proofs.length !== 2 || branches.length > 0) {
@@ -57,7 +79,7 @@ export async function secondRule(proofs, branches) {
   let parsedRule = checkWithAntlr(rule);
 
   if (parsedRule.type !== "conjunction") {
-    alert(t("alert-missing-conjunction"));
+    showToast(t("alert-missing-conjunction"));
     return -1;
   }
 
@@ -78,7 +100,7 @@ export async function secondRule(proofs, branches) {
       fitchMain.addRowToBranch(inputText, "∧E, " + (proofs[0].index + 1));
       return 0;
     } else {
-      alert(t("alert-correct-input"));
+      showToast(t("alert-correct-input"));
       return -1;
     }
   } catch (error) {
@@ -101,7 +123,7 @@ export async function thirdRule(proofs, branches) {
     let lastRule = getProof(checkWithAntlr(rule));
 
     if (ruleUser.type !== "disjunction") {
-      alert(t("alert-missing-disjunction"));
+      showToast(t("alert-missing-disjunction"));
       return -1;
     }
 
@@ -112,7 +134,7 @@ export async function thirdRule(proofs, branches) {
       fitchMain.addRowToBranch(inputText, "∨I, " + (proofs[0].index + 1));
       return 0;
     } else {
-      alert(t("alert-correct-input"));
+      showToast(t("alert-correct-input"));
       return -1;
     }
   } catch (error) {
@@ -128,7 +150,7 @@ export function fourthRule(proofs, branches) {
   }
 
   if (checkWithAntlr(getCleanFormula(proofs[0].element)).type !== "disjunction") {
-    alert(t("alert-missing-disjunction"));
+    showToast(t("alert-missing-disjunction"));
     return -1;
   }
 
@@ -225,7 +247,7 @@ export function sixthRule(proofs, branches) {
 
 
   if (getProof(checkWithAntlr(firstPart)).type !== "implication" && getProof(checkWithAntlr(secondPart)).type !== "implication") {
-    alert(t("alert-missing-implication"));
+    showToast(t("alert-missing-implication"));
     return -1;
   }
 
@@ -254,7 +276,7 @@ export function seventhRule(rules, branches) {
   let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
 
   if (getCleanFormula(allFormula[allFormula.length - 1]) !== "⊥") {
-    alert(t("alert-missing-absurdum"));
+    showToast(t("alert-missing-absurdum"));
     return -1;
   }
 
@@ -287,7 +309,7 @@ export function eighthRule(proofs, branches) {
   let secondPart = getCleanFormula(proofs[1].element);
 
   if (getProof(checkWithAntlr(firstPart)).type !== "negation" && getProof(checkWithAntlr(secondPart)).type !== "negation") {
-    alert(t("alert-missing-negation"));
+    showToast(t("alert-missing-negation"));
     return -1;
   }
 
@@ -316,7 +338,7 @@ export async function ninthRule(proofs, branches) {
 
   let rule = getCleanFormula(proofs[0].element);
   if (rule !== "⊥") {
-    alert(t("alert-missing-absurdum"));
+    showToast(t("alert-missing-absurdum"));
     return -1;
   }
 
@@ -346,13 +368,13 @@ export function tenthRule(rules, branches) {
   let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
 
   if (getCleanFormula(allFormula[allFormula.length - 1]) !== "⊥") {
-    alert(t("alert-missing-absurdum"));
+    showToast(t("alert-missing-absurdum"));
     return -1;
   }
 
   let check = getProof(checkWithAntlr(getCleanFormula(allFormula[0])));
   if (check.type !== "negation") {
-    alert(t("alert-missing-negation"));
+    showToast(t("alert-missing-negation"));
     return -1;
   }
 
@@ -417,7 +439,7 @@ export async function thirteenthRule(proofs, branches) {
   let parsed = getProof(checkWithAntlr(rule));
 
   if (parsed.type !== "forall") {
-    alert(t("alert-forall-required"));
+    showToast(t("alert-forall-required"));
     return -1;
   }
 
@@ -508,7 +530,7 @@ export function sixteenthRule(proofs, branches) {
   let parsedExist = getProof(checkWithAntlr(existFormula));
 
   if (parsedExist.type !== "exists") {
-    alert(t("alert-exists-required"));
+    showToast(t("alert-exists-required"));
     return -1;
   }
 
@@ -576,7 +598,7 @@ export async function eighteenthRule(proofs, branches) {
     eqIndex = proofs[1].index;
     targetIndex = proofs[0].index;
   } else {
-    alert(t("alert-equality-required"));
+    showToast(t("alert-equality-required"));
     return -1;
   }
 

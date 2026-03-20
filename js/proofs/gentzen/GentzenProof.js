@@ -17,6 +17,7 @@ import {addProofTextHoverEffects, initializeProofTextHover} from '../../ui/proof
 import {validateRobinsonAxioms} from "../../core/robinsonAxiomValidator.js";
 import {parseProofFromLastSide} from "./rulesGentzen";
 import { getActiveAxioms, logicSettings, isVL, isIntuitionistic } from '../../state/logicSettings';
+import {showToast} from "../../ui/notifications";
 
 export let deductionContext = {
   hypotheses: [], // Список гіпотез
@@ -1063,6 +1064,8 @@ async function buttonClicked(buttonText) {
 
     if (targetButton) {
       shakeButton(targetButton);
+      const explanation = handler.explanation || t('alert-not-applicable');
+      showToast(explanation);
     } else {
       console.warn("Could not find button for rule:", ruleName);
     }
@@ -1725,7 +1728,7 @@ function addClickSwitchNotation() {
       side.querySelector('#proofText').textContent = convertedExpr;
     } catch (e) {
       console.error('Conversion error:', e);
-      alert(t('alert-error-conversion'));
+      showToast(t('alert-error-conversion'));
     }
   });
 }

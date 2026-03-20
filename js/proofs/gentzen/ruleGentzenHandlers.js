@@ -340,112 +340,134 @@ export const ruleGentzenHandlers = {
       return isOrderAxiom;
     },
     action: () => rules.axRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Axiom (Ax): The formula must be present in the local hypotheses (Γ) or be a known arithmetic/order axiom."
   },
   "\\bot E1": {
     condition: (expr) => isRegularExpression(expr),
     action: () => rules.firstRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Bottom Elimination 1 (⊥E1): From absurdity, any formula φ can be derived."
   },
   "\\bot E2": {
     condition: (expr) => isRegularExpression(expr),
     action: () => rules.secondRule(deductionContext),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Bottom Elimination 2 (⊥E2): Proof by contradiction. To prove φ, assume ¬φ and derive absurdity (⊥)."
   },
   "\\top I": {
     condition: (expr) => getValue(expr) === '⊤',
     action: () => rules.thirdRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Top Introduction (⊤I): The Truth (⊤) constant can always be introduced without any premises."
   },
   "\\neg I": {
     condition: (expr) => expr.type === 'negation',
     action: () => rules.fourthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Negation Introduction (¬I): To prove ¬φ, assume φ and derive absurdity (⊥)."
   },
   "\\neg E": {
     condition: (expr) => getValue(expr) === '⊥',
     action: async () => await rules.fifthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Negation Elimination (¬E): If you have both φ and ¬φ, you can derive absurdity (⊥)."
   },
   "\\wedge I": {
     condition: (expr) => expr.type === 'conjunction',
     action: () => rules.sixthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Conjunction Introduction (∧I): To prove φ ∧ ψ, you must prove both φ and ψ independently."
   },
   "\\wedge E1": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.seventhRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Conjunction Elimination 1 (∧E1): If you have φ, you can derive it from any conjunction φ ∧ ψ."
   },
   "\\wedge E2": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.eighthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Conjunction Elimination 2 (∧E2): If you have ψ, you can derive it from any conjunction φ ∧ ψ."
   },
   "\\vee I1": {
     condition: (expr) => expr.type === 'disjunction',
     action: () => rules.ninthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Disjunction Introduction 1 (∨I1): To prove φ ∨ ψ, it is sufficient to prove the left part φ."
   },
   "\\vee I2": {
     condition: (expr) => expr.type === 'disjunction',
     action: () => rules.tenthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Disjunction Introduction 2 (∨I2): To prove φ ∨ ψ, it is sufficient to prove the right part ψ."
   },
   "\\vee E": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.eleventhRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Disjunction Elimination (∨E): To use φ ∨ ψ to prove θ, you must prove θ from φ and also prove θ from ψ."
   },
   "\\Rightarrow I": {
     condition: (expr) => expr.type === 'implication',
     action: () => rules.twelfthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Implication Introduction (⇒I): To prove φ ⇒ ψ, assume φ as a hypothesis and derive ψ."
   },
   "\\Rightarrow E": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.thirteenthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Implication Elimination (⇒E): To prove ψ, you need both φ and the implication φ ⇒ ψ."
   },
   "\\exists I": {
     condition: (expr) => (expr.type === 'quantifier' && expr.quantifier === '∃') || expr.type === 'exists',
     action: async () => await rules.fourteenthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Existential Introduction (∃I): To prove ∃x φ(x), it is sufficient to prove φ(t) for some term t."
   },
   "\\forall I": {
     condition: (expr) => (expr.type === 'quantifier' && expr.quantifier === '∀') || expr.type === 'forall',
     action: async () => await rules.fifteenthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Universal Introduction (∀I): To prove ∀x φ(x), prove φ(t) for a fresh constant t that does not appear in the hypotheses."
   },
   "\\forall E": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.sixteenthRule(),
-    requiresTree: true
+    requiresTree: true,
+    explanation: "Universal Elimination (∀E): If you have ∀x φ(x), you can derive φ(t) for any term t."
   },
   "\\exists E": {
     condition: (expr) => true,
     action: async () => await rules.seventeenthRule(),
     requiresTree: true,
-    returnsResult: true
+    returnsResult: true,
+    explanation: "Existential Elimination (∃E): To use ∃x φ(x) to prove ψ, assume φ(t) for a fresh constant t and derive ψ."
   },
   "\\text{=E}_1": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.eighteenthRule(),
     requiresTree: true,
+    explanation: "Equality Elimination 1 (=E1): If P(a) is true and a = b, then P(b) is also true (Leibniz's Law)."
   },
   "\\text{=E}_2": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => rules.nineteenthRule(),
     requiresTree: true,
+    explanation: "Equality Elimination 2 (=E2): If P(b) is true and a = b, then P(a) is also true."
   },
   "\\text{=I}": {
     condition: (expr) => expr.type === 'equality' && (!expr.operator || expr.operator === '=' || expr.operator === 'EQUAL'),
     action: () => rules.twentiethRule(),
     requiresTree: true,
+    explanation: "Equality Introduction (=I): An identity a = b can be proven if P(a) and P(b) are equivalent for all properties P."
   },
   "Ind": {
     condition: (expr) => (expr.type === 'forall'),
     action: () => rules.induction(),
     requiresTree: true,
+    explanation: "Mathematical Induction (Ind): To prove ∀x φ(x), prove the base case φ(0) and the inductive step φ(x) ⇒ φ(s(x))."
   }
 };

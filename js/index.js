@@ -16,7 +16,8 @@ import {initStartScreen} from './ui/modals/startScreen';
 import {isVL} from './state/logicSettings';
 import { initLayoutSettings } from './ui/modals/layout';
 import { initExamplesModal } from './ui/modals/examples';
-import { createReturnConfirmModal } from './ui/modals/returnConfirm';
+import {createReturnConfirmModal} from './ui/modals/returnConfirm';
+import {showToast} from './ui/notifications';
 
 let hasError = false;
 let inputText = "";
@@ -508,7 +509,7 @@ function validateInputForLogic(input) {
     }
 
     if (invalidFound) {
-      alert(t("alert-invalid-vl-element"));
+      showToast(t("alert-invalid-vl-element"));
       return false;
     }
 
@@ -535,11 +536,11 @@ function validateInputForStyle(input, style) {
         // In our modified listener, conclusion is an array of formulas
         if (Array.isArray(ast.conclusion)) {
           if (ast.conclusion.length > 1) {
-            alert(t("alert-single-formula"));
+            showToast(t("alert-single-formula"));
             return false;
           }
           if (ast.conclusion.length === 0) {
-            alert(t("alert-missing-conclusion"));
+            showToast(t("alert-missing-conclusion"));
             return false;
           }
         } else {
@@ -551,7 +552,7 @@ function validateInputForStyle(input, style) {
         // Gentzen/Fitch treat non-sequent input as the goal formula.
         // It should be a single formula.
         if (ast.length > 1) {
-          alert(t("alert-invalid-input"));
+          showToast(t("alert-invalid-input"));
           return false;
         }
       }

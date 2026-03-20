@@ -10,7 +10,7 @@ import * as rulesFitch from "./rulesFitch";
 import * as controlState from "../../state/stateManager";
 import {createTreeD3} from "../../ui/tree";
 import {checkRule, shakeElement} from "../../index";
-import {ninthRule, seventhRule} from "./rulesFitch";
+import {seventhRule} from "./rulesFitch";
 import {addNextLastButtonClickFitch, saveStateFitch} from "../../state/stateManager";
 import {latexFitch} from "../../ui/latexGen";
 import {formulaToString} from "../../core/formatter";
@@ -18,6 +18,8 @@ import {ROBINSON_AXIOMS} from "../../core/robinsonAxiomValidator";
 import {ORDER_AXIOMS} from "../../core/orderAxiomValidator";
 import {t} from "../../core/i18n";
 import { getActiveAxioms, logicSettings, isVL, isIntuitionistic } from '../../state/logicSettings';
+import {showToast} from "../../ui/notifications";
+import {FITCH_EXPLANATIONS} from "./rulesFitch";
 
 
 let fitchProof = [];
@@ -416,10 +418,16 @@ async function buttonClicked(buttonText, button) {
 
   const lastParentheses = deductive.extractTextBetweenParentheses(buttonText.toString());
   // console.log(lastParentheses);
+  const showFitchError = () => {
+    shakeButton(button);
+    const explanation = FITCH_EXPLANATIONS[lastParentheses] || t('alert-not-applicable');
+    showToast(explanation);
+  };
+
   switch (lastParentheses) {
     case "\\land I, m, n":
       if (await rulesFitch.firstRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -427,7 +435,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\land E, n":
       if (await rulesFitch.secondRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       document.getElementById('proof-menu').className = 'proof-menu hidden';
@@ -435,7 +443,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\lor I, n":
       if (await rulesFitch.thirdRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -443,7 +451,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\lor E, m, n, p":
       if (await rulesFitch.fourthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -451,7 +459,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\Rightarrow I, n, m":
       if (await rulesFitch.fifthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -459,7 +467,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\Rightarrow E,m,n":
       if (await rulesFitch.sixthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -467,7 +475,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\neg I, m, n":
       if (await rulesFitch.seventhRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -475,7 +483,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\neg E, n, m":
       if (await rulesFitch.eighthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -483,7 +491,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\perp E,n":
       if (await rulesFitch.ninthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -491,7 +499,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "C, m-n":
       if (await rulesFitch.tenthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -499,15 +507,15 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\neg\\neg E,n":
       if (await rulesFitch.eleventhRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
-      saveStateFitch();
+      saveStateStateFitch();
       break;
     case "R,n":
       if (await rulesFitch.twelfthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -515,7 +523,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\forall E, n":
       if (await rulesFitch.thirteenthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -523,7 +531,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\forall I, n":
       if (await rulesFitch.fourteenthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -531,7 +539,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\exists I, n":
       if (await rulesFitch.fifteenthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -539,7 +547,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\exists E, m, n":
       if (await rulesFitch.sixteenthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -547,7 +555,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "= I":
       if (await rulesFitch.seventeenthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();
@@ -555,7 +563,7 @@ async function buttonClicked(buttonText, button) {
       break;
     case "= E, n, m":
       if (await rulesFitch.eighteenthRule(clickedProofs, clickedBranch) === -1) {
-        shakeButton(button);
+        showFitchError();
         return;
       }
       clearItems();

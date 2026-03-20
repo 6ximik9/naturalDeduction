@@ -11,6 +11,7 @@ import {createAdvancedModal} from "../../ui/modals/existentialIntro";
 import {createModalForReturn} from "../../ui/modals/quantifierReturn";
 import { createModalForLeibniz } from '../../ui/modals/leibniz.js';
 import { createInputModal } from '../../ui/modals/input.js';
+import { showToast } from '../../ui/notifications.js';
 
 // Утиліти
 function createConclusion(proof) {
@@ -127,7 +128,7 @@ export async function seventhRule() {
     
     const parsed = deductive.checkWithAntlr(inputText);
     if (parsed.type !== 'conjunction') {
-      alert("The formula must be a conjunction.");
+      showToast(t("alert-not-conjunction"));
       index.setCurrentLevel(previousLevel);
       return;
     }
@@ -155,7 +156,7 @@ export async function eighthRule() {
     
     const parsed = deductive.checkWithAntlr(inputText);
     if (parsed.type !== 'conjunction') {
-      alert("The formula must be a conjunction.");
+      showToast(t("alert-not-conjunction"));
       index.setCurrentLevel(previousLevel);
       return;
     }
@@ -211,7 +212,7 @@ export async function eleventhRule() {
     
     const parsedInput = deductive.checkWithAntlr(inputText);
     if (parsedInput.type !== 'disjunction') {
-      alert("The formula must be a disjunction.");
+      showToast(t("alert-not-disjunction"));
       index.setCurrentLevel(previousLevel);
       return;
     }
@@ -265,7 +266,7 @@ export async function thirteenthRule() {
     
     const parsedInput = deductive.checkWithAntlr(inputText);
     if (parsedInput.type !== 'implication') {
-      alert("The formula must be an implication.");
+      showToast(t("alert-not-implication"));
       index.setCurrentLevel(previousLevel);
       return;
     }

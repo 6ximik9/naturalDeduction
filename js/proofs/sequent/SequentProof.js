@@ -7,11 +7,12 @@ import * as deductive from '../../core/deductiveEngine.js';
 import {formulaToString} from "../../core/formatter.js";
 import {shakeElement, typeProof} from "../../index.js";
 import {SEQUENT_CALCULUS_RULES, getRuleName, ruleSequentHandlers} from "./ruleSequentHandlers.js";
-import {RULE_CHECKS} from "./rulesSequent.js";
+import {RULE_CHECKS, RULE_EXPLANATIONS} from "./rulesSequent.js";
 import {latexSequent} from "../../ui/latexGen.js";
 import {saveStateSequent, addNextLastButtonClickSequent, clearStateHistory} from "../../state/stateManager.js";
 import {createTreeD3} from "../../ui/tree.js";
 import {t} from '../../core/i18n.js';
+import {showToast} from "../../ui/notifications.js";
 
 let hintToggleState = false;
 
@@ -747,6 +748,8 @@ function generateSequentButtons() {
 
             if (check && !check(currentSeq, selectedFormulaIndex)) {
                 shakeButton(btn);
+                const explanation = RULE_EXPLANATIONS[ruleName] || t('alert-not-applicable');
+                showToast(explanation);
                 return;
             }
 

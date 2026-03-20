@@ -5,6 +5,7 @@ import * as deductive from '../../core/deductiveEngine.js';
 import { t } from '../../core/i18n.js';
 import { createInputModal } from '../../ui/modals/input.js';
 import { createExchangeModal } from '../../ui/modals/exchange.js';
+import { showToast } from "../../ui/notifications";
 import { isIntuitionistic } from '../../state/logicSettings.js';
 
 // --- Logic Helpers ---
@@ -69,7 +70,7 @@ export const RULES = {
                     // Handle array result (if user entered "A, B" or similar)
                     if (Array.isArray(parsed)) {
                         if (parsed.length !== 1) {
-                            alert(t("alert-cut-one-formula"));
+                            showToast(t("alert-cut-one-formula"));
                             return;
                         }
                         parsed = parsed[0];
@@ -79,7 +80,7 @@ export const RULES = {
                     const formula = deductive.getProof(parsed);
 
                     if (!formula) {
-                        alert(t("alert-invalid-formula"));
+                        showToast(t("alert-invalid-formula"));
                         return;
                     }
 
@@ -99,7 +100,7 @@ export const RULES = {
 
                 } catch (e) {
                     console.error("Error applying cut rule:", e);
-                    alert(t("alert-parse-error"));
+                    showToast(t("alert-parse-error"));
                 }
             })
             .catch((err) => {
@@ -138,12 +139,12 @@ export const RULES = {
         if (idx === -1) {
             idx = currentSeq.succedent.findIndex(f => unwrap(f).type === 'conjunction');
             if (idx === -1) {
-                alert(t("alert-not-conjunction"));
+                showToast(t("alert-not-conjunction"));
                 return;
             }
         } else {
             if (selectedFormulaIndex.side !== 'right') {
-                alert(t("alert-select-right"));
+                showToast(t("alert-select-right"));
                 return;
             }
         }
@@ -151,7 +152,7 @@ export const RULES = {
         const targetFormula = unwrap(currentSeq.succedent[idx]);
 
         if (targetFormula.type !== 'conjunction') {
-            alert(t("alert-not-conjunction"));
+            showToast(t("alert-not-conjunction"));
             return;
         }
 
@@ -177,12 +178,12 @@ export const RULES = {
         if (idx === -1) {
             idx = currentSeq.antecedent.findIndex(f => unwrap(f).type === 'disjunction');
             if (idx === -1) {
-                alert(t("alert-not-disjunction"));
+                showToast(t("alert-not-disjunction"));
                 return;
             }
         } else {
             if (selectedFormulaIndex.side !== 'left') {
-                alert(t("alert-select-left"));
+                showToast(t("alert-select-left"));
                 return;
             }
         }
@@ -190,7 +191,7 @@ export const RULES = {
         const targetFormula = unwrap(currentSeq.antecedent[idx]);
 
         if (targetFormula.type !== 'disjunction') {
-            alert(t("alert-not-disjunction"));
+            showToast(t("alert-not-disjunction"));
             return;
         }
 
@@ -323,7 +324,7 @@ export const RULES = {
 
         const newSuc = [...suc, B];
         if (isIntuitionistic() && newSuc.length > 1) {
-            alert(t("alert-intuitionistic-succedent"));
+            showToast(t("alert-intuitionistic-succedent"));
             return;
         }
 
@@ -440,6 +441,53 @@ export const RULES = {
     topRight: () => { closeBranch(getActiveSequent(), "⊤r"); },
     botLeft: () => { closeBranch(getActiveSequent(), "⊥l"); },
     botRight: () => {},
+};
+
+// --- Rule Explanations (for Toasts) ---
+export const RULE_EXPLANATIONS = {
+    "id": "Axiom (id): Requires the same formula to appear in both the antecedent (left) and succedent (right).",
+    "cut": "Cut: Introduces a formula φ by splitting the proof into two branches: proving φ and using φ as a hypothesis.",
+    
+    "negl": "Negation Left (¬l): Moves a negated formula from the antecedent to the succedent without the negation.",
+    "lnotl": "Negation Left (¬l): Moves a negated formula from the antecedent to the succedent without the negation.",
+    "negr": "Negation Right (¬r): Moves a negated formula from the succedent to the antecedent without the negation.",
+    "lnotr": "Negation Right (¬r): Moves a negated formula from the succedent to the antecedent without the negation.",
+    
+    "landl1": "Conjunction Left 1 (∧l1): Replaces A ∧ B in the antecedent with its left component A.",
+    "wedgel1": "Conjunction Left 1 (∧l1): Replaces A ∧ B in the antecedent with its left component A.",
+    "landl2": "Conjunction Left 2 (∧l2): Replaces A ∧ B in the antecedent with its right component B.",
+    "wedgel2": "Conjunction Left 2 (∧l2): Replaces A ∧ B in the antecedent with its right component B.",
+    "landr": "Conjunction Right (∧r): Splits a conjunction A ∧ B in the succedent into two branches for A and B.",
+    "wedger": "Conjunction Right (∧r): Splits a conjunction A ∧ B in the succedent into two branches for A and B.",
+    
+    "lorl": "Disjunction Left (∨l): Splits a disjunction A ∨ B in the antecedent into two branches for A and B.",
+    "veel": "Disjunction Left (∨l): Splits a disjunction A ∨ B in the antecedent into two branches for A and B.",
+    "lorr1": "Disjunction Right 1 (∨r1): Replaces A ∨ B in the succedent with its left component A.",
+    "veer1": "Disjunction Right 1 (∨r1): Replaces A ∨ B in the succedent with its left component A.",
+    "lorr2": "Disjunction Right 2 (∨r2): Replaces A ∨ B in the succedent with its right component B.",
+    "veer2": "Disjunction Right 2 (∨r2): Replaces A ∨ B in the succedent with its right component B.",
+    
+    "Rightarrowl": "Implication Left (⇒l): Splits A ⇒ B in the antecedent into two branches: Γ ⊢ A, Δ and B, Γ ⊢ Δ.",
+    "to_l": "Implication Left (⇒l): Splits A ⇒ B in the antecedent into two branches: Γ ⊢ A, Δ and B, Γ ⊢ Δ.",
+    "Rightarrowr": "Implication Right (⇒r): Moves the antecedent of an implication A ⇒ B to the left side of the turnstile.",
+    "to_r": "Implication Right (⇒r): Moves the antecedent of an implication A ⇒ B to the left side of the turnstile.",
+    
+    "topl": "Top Left (⊤l): Simplifies the antecedent by removing the Truth (⊤) constant.",
+    "topr": "Top Right (⊤r): Axiom. Closes the branch if Truth (⊤) is present in the succedent.",
+    "botl": "Bottom Left (⊥l): Axiom. Closes the branch if Falsity (⊥) is present in the antecedent.",
+    "botr": "Bottom Right (⊥r): Simplifies the succedent by removing the Falsity (⊥) constant.",
+    
+    "wl": "Weakening Left (wl): Allows adding an arbitrary formula to the antecedent (bottom-up: removes formula).",
+    "wr": "Weakening Right (wr): Allows adding an arbitrary formula to the succedent (bottom-up: removes formula).",
+    "cl": "Contraction Left (cl): Duplicates a formula in the antecedent.",
+    "cr": "Contraction Right (cr): Duplicates a formula in the succedent.",
+    "exl": "Exchange Left (exl): Reorders formulas in the antecedent.",
+    "exr": "Exchange Right (exr): Reorders formulas in the succedent.",
+    
+    "foralll": "Universal Left (∀l): Replaces ∀x φ in the antecedent with φ[t/x] for any term t.",
+    "forallr": "Universal Right (∀r): Replaces ∀x φ in the succedent with φ[y/x] for a fresh variable y.",
+    "existsl": "Existential Left (∃l): Replaces ∃x φ in the antecedent with φ[y/x] for a fresh variable y.",
+    "existsr": "Existential Right (∃r): Replaces ∃x φ in the succedent with φ[t/x] for any term t."
 };
 
 // --- Rule Applicability Checks (for Hints) ---
@@ -725,7 +773,7 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
     if (idx === -1) {
         idx = formulas.findIndex(f => checkType(unwrap(f)));
         if (idx === -1) {
-            alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
+            showToast(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
             return;
         }
     } else {
@@ -739,7 +787,7 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
 
     // Check type (redundant for auto-detect but safe for manual)
     if (!checkType(targetFormula)) {
-        alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
+        showToast(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
         return;
     }
 
@@ -758,7 +806,7 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
                 const term = deductive.getProof(parsedTerm);
 
                 if (!term) {
-                    alert(t("alert-invalid-term"));
+                    showToast(t("alert-invalid-term"));
                     return;
                 }
 
@@ -775,7 +823,7 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
                 } else {
                     suc.splice(idx, 1, newFormula);
                     if (isIntuitionistic() && suc.length > 1) {
-                        alert(t("alert-intuitionistic-succedent"));
+                        showToast(t("alert-intuitionistic-succedent"));
                         return;
                     }
                 }
@@ -783,7 +831,7 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
                 addChildrenToTree(currentSeq, [new Sequent(ant, suc)], ruleName);
             } catch (e) {
                 console.error("Substitution error:", e);
-                alert(t("alert-error-parse-term"));
+                showToast(t("alert-error-parse-term"));
             }
         })
         .catch(err => console.log("Substitution cancelled"));
@@ -814,7 +862,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
     if (idx === -1) {
         idx = formulas.findIndex(f => checkType(unwrap(f)));
         if (idx === -1) {
-            alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
+            showToast(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
             return;
         }
     } else {
@@ -828,7 +876,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
 
     // Check type
     if (!checkType(targetFormula)) {
-        alert(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
+        showToast(quantType === 'forall' ? t("alert-forall-required") : t("alert-exists-required"));
         return;
     }
 
@@ -844,7 +892,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
                 const newVarTerm = deductive.getProof(parsedVar);
                 
                 if (!newVarTerm) {
-                    alert(t("alert-invalid-input-generic"));
+                    showToast(t("alert-invalid-input-generic"));
                     return;
                 }
 
@@ -864,7 +912,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
                 }
                 
                 if (!isFresh) {
-                    alert(t("alert-var-not-fresh"));
+                    showToast(t("alert-var-not-fresh"));
                     // Re-open the modal so user can try again immediately
                     applyQuantifierEigenvariableRule(side, quantType, ruleName);
                     return;
@@ -881,7 +929,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
                 } else {
                     suc.splice(idx, 1, newFormula);
                     if (isIntuitionistic() && suc.length > 1) {
-                        alert(t("alert-intuitionistic-succedent"));
+                        showToast(t("alert-intuitionistic-succedent"));
                         return;
                     }
                 }
@@ -889,7 +937,7 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
                 addChildrenToTree(currentSeq, [new Sequent(ant, suc)], ruleName);
             } catch (e) {
                 console.error("Eigenvariable error:", e);
-                alert(t("alert-parse-error"));
+                showToast(t("alert-parse-error"));
             }
         })
         .catch(err => console.log("Eigenvariable rule cancelled"));
@@ -937,12 +985,12 @@ function applyLeftRule(transformFn, ruleName) {
     if (idx === -1) {
         idx = currentSeq.antecedent.findIndex(f => transformFn(unwrap(f)) !== null);
         if (idx === -1) {
-            alert(t("alert-not-applicable"));
+            showToast(t("alert-not-applicable"));
             return;
         }
     } else {
         if (selectedFormulaIndex.side !== 'left') {
-            alert(t("alert-select-left"));
+            showToast(t("alert-select-left"));
             return;
         }
     }
@@ -951,7 +999,7 @@ function applyLeftRule(transformFn, ruleName) {
 
     const newFormulas = transformFn(targetFormula);
     if (!newFormulas) {
-        alert(t("alert-not-applicable"));
+        showToast(t("alert-not-applicable"));
         return;
     }
 
@@ -972,12 +1020,12 @@ function applyRightRule(transformFn, ruleName) {
     if (idx === -1) {
         idx = currentSeq.succedent.findIndex(f => transformFn(unwrap(f)) !== null);
         if (idx === -1) {
-            alert(t("alert-not-applicable"));
+            showToast(t("alert-not-applicable"));
             return;
         }
     } else {
         if (selectedFormulaIndex.side !== 'right') {
-            alert(t("alert-select-right"));
+            showToast(t("alert-select-right"));
             return;
         }
     }
@@ -986,7 +1034,7 @@ function applyRightRule(transformFn, ruleName) {
 
     const newFormulas = transformFn(targetFormula);
     if (!newFormulas) {
-        alert(t("alert-not-applicable"));
+        showToast(t("alert-not-applicable"));
         return;
     }
 
@@ -994,7 +1042,7 @@ function applyRightRule(transformFn, ruleName) {
     suc.splice(idx, 1, ...newFormulas);
 
     if (isIntuitionistic() && suc.length > 1) {
-        alert(t("alert-intuitionistic-succedent"));
+        showToast(t("alert-intuitionistic-succedent"));
         return;
     }
 
