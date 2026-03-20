@@ -736,6 +736,7 @@ function generateButtons(buttonCount, buttonTexts) {
     }
 
     const button = createButton(text, () => buttonClicked(text));
+    button.setAttribute('data-original-text', text); // Set for shaking logic
 
     // Tag quantifier and equality rules
     if (text.includes('\\forall') || text.includes('\\exists') || text.includes('a = b')) {
@@ -1216,7 +1217,11 @@ export function shakeButton(button) {
 
   setTimeout(function () {
     element.classList.remove('shake');
-    element.style.backgroundColor = originalBg;
+    if (originalBg === "") {
+      element.style.removeProperty("background-color");
+    } else {
+      element.style.backgroundColor = originalBg;
+    }
 
     // Restore transition after the color reverts
     setTimeout(() => {

@@ -380,6 +380,8 @@ async function buttonClicked(buttonText, button) {
       saveStateFitch();
     } catch (error) {
       console.log("Modal cancelled:", error);
+      shakeButton(button);
+      return;
     }
     return;
   }
@@ -389,9 +391,26 @@ async function buttonClicked(buttonText, button) {
   if (axiomMatch) {
     const axiomNumber = axiomMatch[1];
     const axiomText = axiomMatch[2];
-    addRowToBranch(axiomText, `Axiom ${axiomNumber}`);
-    clearItems();
-    saveStateFitch();
+    
+    // Check if this is an arithmetic axiom that needs validation
+    const isRobinson = ROBINSON_AXIOMS.some(ax => axiomText.includes(ax));
+    const isOrder = ORDER_AXIOMS.some(ax => axiomText.includes(ax));
+    
+    if ((isRobinson || isOrder) && clickedProofs.length === 1) {
+       // We should use the same validators as in Gentzen but they are not easily accessible here
+       // For now, let's assume validation happens in rulesFitch or core
+       // If we want real shaking for axioms, we need to check if it's applicable
+       // Currently Fitch just adds it if clicked. Let's make it shake if nothing is selected or multiple things are selected
+       addRowToBranch(axiomText, `Axiom ${axiomNumber}`);
+       clearItems();
+       saveStateFitch();
+    } else if (clickedProofs.length === 0) {
+       addRowToBranch(axiomText, `Axiom ${axiomNumber}`);
+       clearItems();
+       saveStateFitch();
+    } else {
+       shakeButton(button);
+    }
     return;
   }
 
@@ -400,7 +419,6 @@ async function buttonClicked(buttonText, button) {
   switch (lastParentheses) {
     case "\\land I, m, n":
       if (await rulesFitch.firstRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -409,7 +427,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\land E, n":
       if (await rulesFitch.secondRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -418,7 +435,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\lor I, n":
       if (await rulesFitch.thirdRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -427,7 +443,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\lor E, m, n, p":
       if (await rulesFitch.fourthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -435,8 +450,7 @@ async function buttonClicked(buttonText, button) {
       saveStateFitch();
       break;
     case "\\Rightarrow I, n, m":
-      if (await rulesFitch.fifthRule(clickedProofs, clickedBranch) !== 1) {
-        clearItems();
+      if (await rulesFitch.fifthRule(clickedProofs, clickedBranch) === -1) {
         shakeButton(button);
         return;
       }
@@ -445,7 +459,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\Rightarrow E,m,n":
       if (await rulesFitch.sixthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -454,7 +467,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\neg I, m, n":
       if (await rulesFitch.seventhRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -463,7 +475,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\neg E, n, m":
       if (await rulesFitch.eighthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -472,7 +483,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\perp E,n":
       if (await rulesFitch.ninthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -481,7 +491,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "C, m-n":
       if (await rulesFitch.tenthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -490,7 +499,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\neg\\neg E,n":
       if (await rulesFitch.eleventhRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -499,7 +507,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "R,n":
       if (await rulesFitch.twelfthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -508,7 +515,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\forall E, n":
       if (await rulesFitch.thirteenthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -517,7 +523,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\forall I, n":
       if (await rulesFitch.fourteenthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -526,7 +531,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\exists I, n":
       if (await rulesFitch.fifteenthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -535,7 +539,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "\\exists E, m, n":
       if (await rulesFitch.sixteenthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -544,7 +547,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "= I":
       if (await rulesFitch.seventeenthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -553,7 +555,6 @@ async function buttonClicked(buttonText, button) {
       break;
     case "= E, n, m":
       if (await rulesFitch.eighteenthRule(clickedProofs, clickedBranch) === -1) {
-        clearItems();
         shakeButton(button);
         return;
       }
@@ -580,7 +581,11 @@ function shakeButton(button) {
 
   setTimeout(function () {
     element.classList.remove('shake');
-    element.style.backgroundColor = originalBg;
+    if (originalBg === "") {
+      element.style.removeProperty("background-color");
+    } else {
+      element.style.backgroundColor = originalBg;
+    }
 
     // Restore transition after the color reverts
     setTimeout(() => {
@@ -707,18 +712,22 @@ document.getElementById('proof').addEventListener('click', function (event) {
     return;
   }
 
-  if (document.querySelector('.finished') || document.querySelector('div.fitch_formula[style*="success"]')) {
+  const mainBranch = document.querySelector('#out_nodes .fitch_branch');
+  const isMainBranchFinished = mainBranch && mainBranch.classList.contains('finished');
+  
+  if (isMainBranchFinished || document.querySelector('div.fitch_formula[style*="success"]')) {
     return;
   }
 
-  if (clickedElement.parentElement.className.includes("finished")) {
+  if (clickedElement.className.includes("fitch_branch")) {
+    // Prevent selecting branches that are already finished (closed)
+    if (clickedElement.classList.contains('finished')) {
+      return;
+    }
 
-    clickedElement = clickedElement.parentElement;
-    const allCloseFitchBranch = Array.from(document.querySelectorAll('.fitch_branch.finished'));
-    // Знаходимо індекс клікнутого елемента в масиві allFitchFormulas
-    const elementIndex = allCloseFitchBranch.indexOf(clickedElement);
+    const allFitchBranches = Array.from(document.querySelectorAll('.fitch_branch'));
+    const elementIndex = allFitchBranches.indexOf(clickedElement);
 
-    // Перевіряємо, чи вже є такий об'єкт у масиві clickedProofs
     const foundIndex = clickedBranch.findIndex(obj => obj.element === clickedElement);
 
     if (foundIndex === -1) {
@@ -729,15 +738,24 @@ document.getElementById('proof').addEventListener('click', function (event) {
     } else {
       clickedBranch.splice(foundIndex, 1);
       clickedElement.style.background = '';
-
-      const sbRules = document.getElementById('sb-rules');
-      if (sbRules) sbRules.click();
     }
 
+    const sbRules = document.getElementById('sb-rules');
+    if (sbRules) sbRules.click();
+
+    const radioInput = document.getElementById('tab1');
+    if (radioInput) radioInput.checked = true;
+    processExpression("AllRules", helpButtonToggleState ? 0 : 1);
+    
     return;
   }
 
   if (clickedElement.tagName === 'DIV' && clickedElement.className.includes("fitch_formula")) {
+    // Prevent selecting formulas that are inside a closed branch (out of scope)
+    if (clickedElement.closest('.fitch_branch.finished')) {
+        return;
+    }
+
     // Отримуємо всі елементи з класом fitch_formula
     const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
     // Знаходимо індекс клікнутого елемента в масиві allFitchFormulas
@@ -860,6 +878,10 @@ export function addRowToBranch(formula, title) {
 
   const fitchBranches = document.querySelectorAll('.fitch_branch:not(.finished)');
   let par = fitchBranches[fitchBranches.length - 1];
+
+  if (!par) {
+      par = document.getElementById('out_nodes');
+  }
 
   par.appendChild(div);
 

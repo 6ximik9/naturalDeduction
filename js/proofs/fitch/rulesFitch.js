@@ -16,18 +16,20 @@ import {createAdvancedModal} from "../../ui/modals/existentialIntro";
 import {createModalForLeibniz} from "../../ui/modals/leibniz";
 import {createInputModal} from "../../ui/modals/input";
 
+function getCleanFormula(element) {
+  const clone = element.cloneNode(true);
+  const span = clone.querySelector('.indexC');
+  if (span) span.remove();
+  return clone.textContent.replaceAll(" ", "");
+}
 
 export function firstRule(proofs, branches) {
   if (proofs.length !== 2 || branches.length > 0) {
     return -1;
   }
-  console.log(proofs);
-  console.log(branches);
-  proofs[0].element.querySelector('span.indexC').remove();
-  proofs[1].element.querySelector('span.indexC').remove();
-
-  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
-  let secondPart = proofs[1].element.textContent.replaceAll(" ", "");
+  
+  let firstPart = getCleanFormula(proofs[0].element);
+  let secondPart = getCleanFormula(proofs[1].element);
 
 
   let nameRule = '∧I ' + (proofs[0].index + 1) + ',' + (proofs[1].index + 1);
@@ -51,14 +53,11 @@ export async function secondRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-
-  let rule = proofs[0].element.textContent.replaceAll(" ", "");
+  let rule = getCleanFormula(proofs[0].element);
   let parsedRule = checkWithAntlr(rule);
 
   if (parsedRule.type !== "conjunction") {
     alert(t("alert-missing-conjunction"));
-    clearItems();
     return -1;
   }
 
@@ -90,12 +89,10 @@ export async function secondRule(proofs, branches) {
 
 export async function thirdRule(proofs, branches) {
   if (proofs.length !== 1 || branches.length > 0) {
-    clearItems();
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-  let rule = proofs[0].element.textContent.replaceAll(" ", "");
+  let rule = getCleanFormula(proofs[0].element);
 
   try {
     const inputText = await createInputModal("Disjunction Introduction (∨I)", "Enter the disjunction formula:", "(" + rule + ")∨");
@@ -130,16 +127,13 @@ export function fourthRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-
-  if (checkWithAntlr(proofs[0].element.textContent.replaceAll(" ", "")).type !== "disjunction") {
+  if (checkWithAntlr(getCleanFormula(proofs[0].element)).type !== "disjunction") {
     alert(t("alert-missing-disjunction"));
-    clearItems();
     return -1;
   }
 
 
-  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
+  let firstPart = getCleanFormula(proofs[0].element);
 
   let branch1 = branches[0].element.querySelectorAll('.fitch_formula');
   let branch2 = branches[1].element.querySelectorAll('.fitch_formula');
@@ -150,7 +144,7 @@ export function fourthRule(proofs, branches) {
   let lastBranch1 = formulaToString(getProof(checkWithAntlr(branch1[branch1.length - 1].textContent)), 0);
 
   let firstBranch2 = formulaToString(getProof(checkWithAntlr(branch2[0].textContent)), 0);
-  let lastBranch2 = formulaToString(getProof(checkWithAntlr(branch2[branch1.length - 1].textContent)), 0);
+  let lastBranch2 = formulaToString(getProof(checkWithAntlr(branch2[branch2.length - 1].textContent)), 0);
 
 
   if ((firstPartLeft === firstBranch1 && firstPartRight === firstBranch2) ||
@@ -158,7 +152,7 @@ export function fourthRule(proofs, branches) {
 
 
     if (lastBranch1 !== lastBranch2) {
-      return;
+      return -1;
     }
 
     const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
@@ -178,15 +172,20 @@ export function fourthRule(proofs, branches) {
     indexStart2 = tempStartMax;
     indexFinish2 = tempFinishMax;
 
+    branches[0].element.classList.add('finished');
+    branches[0].element.style.paddingBottom = '0px';
+    branches[1].element.classList.add('finished');
+    branches[1].element.style.paddingBottom = '0px';
+    fitchMain.setBranchIndex(fitchMain.branchIndex - 2);
+
     fitchMain.addRowToBranch(lastBranch1,
       "∨E " + (proofs[0].index + 1) + ", " + (indexStart1) + "-" + (indexFinish1)
       + ", " + (indexStart2) + "-" + (indexFinish2));
 
+    return 0;
   }
 
-  return 0;
-
-
+  return -1;
 }
 
 export function fifthRule(rules, branches) {
@@ -206,6 +205,10 @@ export function fifthRule(rules, branches) {
   const indexFinish = allFitchFormulas.indexOf(allFormula[allFormula.length - 1]);
 
 
+  branches[0].element.classList.add('finished');
+  branches[0].element.style.paddingBottom = '0px';
+  fitchMain.setBranchIndex(fitchMain.branchIndex - 1);
+
   fitchMain.addRowToBranch(newRule, "⇒I " + (indexStart + 1) + "-" + (indexFinish + 1));
 
   return 0;
@@ -216,16 +219,13 @@ export function sixthRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-  proofs[1].element.querySelector('span.indexC').remove();
-  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
-  let secondPart = proofs[1].element.textContent.replaceAll(" ", "");
+  let firstPart = getCleanFormula(proofs[0].element);
+  let secondPart = getCleanFormula(proofs[1].element);
   let nameRule = '⇒E ' + (proofs[0].index + 1) + ',' + (proofs[1].index + 1);
 
 
   if (getProof(checkWithAntlr(firstPart)).type !== "implication" && getProof(checkWithAntlr(secondPart)).type !== "implication") {
     alert(t("alert-missing-implication"));
-    clearItems();
     return -1;
   }
 
@@ -253,12 +253,12 @@ export function seventhRule(rules, branches) {
 
   let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
 
-  if (allFormula[allFormula.length - 1].textContent !== "⊥") {
+  if (getCleanFormula(allFormula[allFormula.length - 1]) !== "⊥") {
     alert(t("alert-missing-absurdum"));
     return -1;
   }
 
-  let newRule = "~" + "(" + allFormula[0].textContent + ")";
+  let newRule = "~" + "(" + getCleanFormula(allFormula[0]) + ")";
 
   newRule = formulaToString(checkWithAntlr(newRule), 1);
 
@@ -267,6 +267,10 @@ export function seventhRule(rules, branches) {
   const indexStart = allFitchFormulas.indexOf(allFormula[0]);
   const indexFinish = allFitchFormulas.indexOf(allFormula[allFormula.length - 1]);
 
+
+  branches[0].element.classList.add('finished');
+  branches[0].element.style.paddingBottom = '0px';
+  fitchMain.setBranchIndex(fitchMain.branchIndex - 1);
 
   fitchMain.addRowToBranch(newRule, "¬I " + (indexStart + 1) + "-" + (indexFinish + 1));
 
@@ -279,11 +283,8 @@ export function eighthRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-  proofs[1].element.querySelector('span.indexC').remove();
-
-  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
-  let secondPart = proofs[1].element.textContent.replaceAll(" ", "");
+  let firstPart = getCleanFormula(proofs[0].element);
+  let secondPart = getCleanFormula(proofs[1].element);
 
   if (getProof(checkWithAntlr(firstPart)).type !== "negation" && getProof(checkWithAntlr(secondPart)).type !== "negation") {
     alert(t("alert-missing-negation"));
@@ -313,8 +314,7 @@ export async function ninthRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-  let rule = proofs[0].element.textContent.replaceAll(" ", "");
+  let rule = getCleanFormula(proofs[0].element);
   if (rule !== "⊥") {
     alert(t("alert-missing-absurdum"));
     return -1;
@@ -345,12 +345,12 @@ export function tenthRule(rules, branches) {
 
   let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
 
-  if (allFormula[allFormula.length - 1].textContent !== "⊥") {
+  if (getCleanFormula(allFormula[allFormula.length - 1]) !== "⊥") {
     alert(t("alert-missing-absurdum"));
     return -1;
   }
 
-  let check = getProof(checkWithAntlr(allFormula[0].textContent));
+  let check = getProof(checkWithAntlr(getCleanFormula(allFormula[0])));
   if (check.type !== "negation") {
     alert(t("alert-missing-negation"));
     return -1;
@@ -366,6 +366,10 @@ export function tenthRule(rules, branches) {
   const indexFinish = allFitchFormulas.indexOf(allFormula[allFormula.length - 1]);
 
 
+  branches[0].element.classList.add('finished');
+  branches[0].element.style.paddingBottom = '0px';
+  fitchMain.setBranchIndex(fitchMain.branchIndex - 1);
+
   fitchMain.addRowToBranch(newRule, "C " + (indexStart + 1) + "-" + (indexFinish + 1));
   return 0;
 }
@@ -376,8 +380,7 @@ export function eleventhRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-  let rule = proofs[0].element.textContent.replaceAll(" ", "");
+  let rule = getCleanFormula(proofs[0].element);
 
   let check = checkWithAntlr(rule);
   // console.log(check);
@@ -397,11 +400,10 @@ export function twelfthRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-
-  let firstPart = proofs[0].element.textContent.replaceAll(" ", "");
+  let firstPart = getCleanFormula(proofs[0].element);
 
   fitchMain.addRowToBranch(firstPart, 'R ' + (proofs[0].index + 1));
+  return 0;
 }
 
 // Rule 13: Universal Elimination (\forall E)
@@ -410,8 +412,7 @@ export async function thirteenthRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-  let rule = proofs[0].element.textContent.replaceAll(" ", "");
+  let rule = getCleanFormula(proofs[0].element);
 
   let parsed = getProof(checkWithAntlr(rule));
 
@@ -439,8 +440,8 @@ export async function fourteenthRule(proofs, branches) {
   }
 
   let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
-  let firstLine = allFormula[0].textContent;
-  let lastLine = allFormula[allFormula.length - 1].textContent;
+  let firstLine = getCleanFormula(allFormula[0]);
+  let lastLine = getCleanFormula(allFormula[allFormula.length - 1]);
 
   try {
     const variable = await createInputModal(t('rule-universal-quantifier'), t('modal-enter-variable'));
@@ -455,6 +456,10 @@ export async function fourteenthRule(proofs, branches) {
       const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
       const indexStart = allFitchFormulas.indexOf(allFormula[0]);
       const indexFinish = allFitchFormulas.indexOf(allFormula[allFormula.length - 1]);
+
+      branches[0].element.classList.add('finished');
+      branches[0].element.style.paddingBottom = '0px';
+      fitchMain.setBranchIndex(fitchMain.branchIndex - 1);
 
       fitchMain.addRowToBranch(newFormula, "∀I " + (indexStart + 1) + "-" + (indexFinish + 1));
       return 0;
@@ -471,8 +476,7 @@ export async function fifteenthRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-  let rule = proofs[0].element.textContent.replaceAll(" ", "");
+  let rule = getCleanFormula(proofs[0].element);
 
   try {
     const result = await createAdvancedModal([rule]);
@@ -500,9 +504,7 @@ export function sixteenthRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-
-  let existFormula = proofs[0].element.textContent.replaceAll(" ", "");
+  let existFormula = getCleanFormula(proofs[0].element);
   let parsedExist = getProof(checkWithAntlr(existFormula));
 
   if (parsedExist.type !== "exists") {
@@ -511,11 +513,15 @@ export function sixteenthRule(proofs, branches) {
   }
 
   let allFormula = branches[0].element.querySelectorAll('.fitch_formula');
-  let conclusion = allFormula[allFormula.length - 1].textContent;
+  let conclusion = getCleanFormula(allFormula[allFormula.length - 1]);
 
   const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
   const indexStart = allFitchFormulas.indexOf(allFormula[0]);
   const indexFinish = allFitchFormulas.indexOf(allFormula[allFormula.length - 1]);
+
+  branches[0].element.classList.add('finished');
+  branches[0].element.style.paddingBottom = '0px';
+  fitchMain.setBranchIndex(fitchMain.branchIndex - 1);
 
   fitchMain.addRowToBranch(conclusion, "∃E " + (proofs[0].index + 1) + ", " + (indexStart + 1) + "-" + (indexFinish + 1));
   return 0;
@@ -523,9 +529,7 @@ export function sixteenthRule(proofs, branches) {
 
 // Rule 17: Identity Introduction (= I)
 export async function seventeenthRule(proofs, branches) {
-  if (proofs.length > 0) {
-     proofs.forEach(p => p.element.querySelector('span.indexC')?.remove());
-  }
+  // No need to remove indices here as we're using a modal for a new term
 
   try {
     const term = await createInputModal(t('rule-identity-intro'), t('modal-enter-term'));
@@ -547,11 +551,8 @@ export async function eighteenthRule(proofs, branches) {
     return -1;
   }
 
-  proofs[0].element.querySelector('span.indexC').remove();
-  proofs[1].element.querySelector('span.indexC').remove();
-
-  let f1 = proofs[0].element.textContent.replaceAll(" ", "");
-  let f2 = proofs[1].element.textContent.replaceAll(" ", "");
+  let f1 = getCleanFormula(proofs[0].element);
+  let f2 = getCleanFormula(proofs[1].element);
 
   let parsed1 = getProof(checkWithAntlr(f1));
   let parsed2 = getProof(checkWithAntlr(f2));
@@ -591,3 +592,4 @@ export async function eighteenthRule(proofs, branches) {
   }
   return -1;
 }
+

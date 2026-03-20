@@ -1550,6 +1550,8 @@ span.choose {
   margin-left: 1em;
   width: fit-content;
   padding-bottom: 0px;
+  cursor: pointer;
+  padding-left: 5px;
 }
 
 .fitch_formula {

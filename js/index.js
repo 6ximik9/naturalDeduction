@@ -668,7 +668,12 @@ export function shakeElement(elementId, times) {
 
   element.classList.add('shake'); // Додаємо клас, який запускає анімацію
   element.style.transition = 'background-color 0.3s ease';
-  element.style.backgroundColor = '#ef4444'; // Приємний червоний колір (Tailwind red-500)
+  
+  // Вибираємо колір залежно від теми
+  const isDark = document.body.classList.contains('dark-mode');
+  const errorColor = isDark ? 'rgba(248, 113, 113, 0.3)' : '#fecaca'; // М'яке червоне світіння для темної теми, пастельний для світлої
+  
+  element.style.setProperty('background-color', errorColor, 'important');
 
   setTimeout(function () {
     element.classList.remove('shake'); // Видаляємо клас після завершення анімації
