@@ -50,6 +50,9 @@ export let currentLevel = 0; // Global level counter (similar to Gentzen)
 
 export function setSide(val) {
     side = val;
+    if (window.updateSequentParenthesesButtons) {
+        window.updateSequentParenthesesButtons();
+    }
 }
 
 export function setCurrentLevel(val) {
@@ -140,7 +143,7 @@ export function rebuildTree(rootNode, selectRoot = true) {
         selectSequent(rootNode.domElement, rootNode);
     } else {
         // Clear selection variables just in case
-        side = null;
+        setSide(null);
         selectedFormulaIndex = { side: null, index: -1 };
         disableAllButtons();
     }
@@ -383,7 +386,7 @@ export function addChildrenToTree(parentSequent, newSequents, ruleName) {
             label.style.background = '';
         }
         
-        side = null;
+        setSide(null);
         selectedFormulaIndex = { side: null, index: -1 };
         
         // Hide menu as nothing is selected - NOT ANYMORE, show disabled
@@ -420,7 +423,7 @@ export function closeBranch(sequentNode, ruleName) {
     
     // Clear global side selection if it was the closed node
     if (side === sequentNode.domElement) {
-        side = null;
+        setSide(null);
         // Keep menu visible but disabled
         document.getElementById('proof-menu').className = 'proof-menu';
         disableAllButtons();
@@ -490,7 +493,7 @@ function selectSequent(domElement, sequentNode) {
             el.style.background = '';
         });
         
-        side = null;
+        setSide(null);
         selectedFormulaIndex = { side: null, index: -1 };
         disableAllButtons();
         
@@ -500,7 +503,7 @@ function selectSequent(domElement, sequentNode) {
         return;
     }
 
-    side = domElement;
+    setSide(domElement);
 
     // Clear all highlights (both formulas and whole labels)
     document.querySelectorAll('.sequent-formula').forEach(el => {

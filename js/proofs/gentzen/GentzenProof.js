@@ -126,6 +126,9 @@ export function setUserHypotheses(newUserHypotheses) {
 // Сетер для side
 export function setSide(newSide) {
   side = newSide;
+  if (window.updateGentzenParenthesesButtons) {
+    window.updateGentzenParenthesesButtons();
+  }
 }
 
 // Сетер для lastSide
@@ -184,9 +187,8 @@ document.getElementById('proof').addEventListener('click', function (event) {
   // Якщо клікнули по вже активному елементу - знімаємо виділення
   if (side && potentialSide === side) {
       clearLabelHighlights();
-      side = null;
+      setSide(null);
       disableAllButtons();
-      if (window.updateGentzenParenthesesButtons) window.updateGentzenParenthesesButtons();
 
       const sbRules = document.getElementById('sb-rules');
       if (sbRules) sbRules.click();
@@ -197,14 +199,14 @@ document.getElementById('proof').addEventListener('click', function (event) {
   clearLabelHighlights();
 
   if (clickedElement.tagName === 'DIV') {
-    side = clickedElement;
+    setSide(clickedElement);
     try {
       side.querySelector('label').style.background = 'var(--col-highlight-main)';
     } catch (error) {
       console.error('Monaco editor clicked');
     }
   } else if (clickedElement.tagName === 'LABEL') {
-    side = clickedElement.parentNode;
+    setSide(clickedElement.parentNode);
     clickedElement.style.background = 'var(--col-highlight-main)';
   }
 
@@ -358,7 +360,7 @@ export function parseExpression(text) {
     createProofTree(conclusion, document.getElementById('proof'));
 
     // Встановлюємо активну сторону
-    side = document.querySelector('.proof-element_level-0').children[0];
+    setSide(document.querySelector('.proof-element_level-0').children[0]);
     oldUserInput = side.querySelector('#proofText').textContent;
 
     setTimeout(() => {
@@ -373,10 +375,6 @@ export function parseExpression(text) {
     // Зберігаємо стан і показуємо кнопки
     controlState.saveState();
     processExpression(parsedProof, 1);
-
-    if (window.updateGentzenParenthesesButtons) {
-        window.updateGentzenParenthesesButtons();
-    }
 
     document.getElementById('undo_redo').style.display = 'flex';
   } catch (error) {
@@ -937,7 +935,7 @@ function closeSide(container) {
   }
 
   disableAllButtons();
-  side = null;
+  setSide(null);
   clearLabelHighlights();
 
   // 1. Шукаємо елемент gamma
@@ -1103,7 +1101,7 @@ async function buttonClicked(buttonText) {
   // Очистка старого виділення
   clearLabelHighlights();
 
-  side = null;
+  setSide(null);
   disableAllButtons();
 }
 
@@ -1405,7 +1403,7 @@ export function createProofTree(conclusions, container, hyp = null) {
       }
       
       disableAllButtons();
-      side = null;
+      setSide(null);
       clearLabelHighlights();
     }
     proofDiv.style.fontFamily = "'Times New Roman', sans-serif";

@@ -41,6 +41,9 @@ export let branchIndex = 0;
 
 export function setClickedProofs(newProof) {
   clickedProofs = newProof;
+  if (window.updateFitchParenthesesButtons) {
+    window.updateFitchParenthesesButtons();
+  }
 }
 
 export function setClickedBranch(newProof) {
