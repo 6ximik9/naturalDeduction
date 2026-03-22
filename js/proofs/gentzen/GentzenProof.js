@@ -1101,8 +1101,38 @@ async function buttonClicked(buttonText) {
   // Очистка старого виділення
   clearLabelHighlights();
 
-  setSide(null);
-  disableAllButtons();
+  // Спробуємо знайти новостворений елемент для виділення (ліва гілка)
+  let nextToSelect = null;
+  const newSize = deductionContext.conclusions.length - 1;
+  const newConclusion = deductionContext.conclusions[newSize];
+  
+  if (newConclusion) {
+      const newLevelDiv = document.querySelector(`.proof-element_level-${newConclusion.level}`);
+      if (newLevelDiv) {
+          // Шукаємо перший елемент proof-content в новому рівні
+          const firstNewBranch = newLevelDiv.querySelector('.premises-container > div') || 
+                                newLevelDiv.querySelector(':scope > div');
+          if (firstNewBranch && !firstNewBranch.classList.contains('closed') && !firstNewBranch.classList.contains('previous')) {
+              nextToSelect = firstNewBranch;
+          }
+      }
+  }
+
+  if (nextToSelect) {
+      setSide(nextToSelect);
+      // Підсвічуємо новий елемент
+      const label = nextToSelect.querySelector('label');
+      if (label) {
+          label.style.background = 'var(--col-highlight-main)';
+      }
+      
+      // Оновлюємо кнопки для нового виділення (беремо першу формулу, якщо це масив)
+      const exprToShow = Array.isArray(newConclusion.proof) ? newConclusion.proof[0] : newConclusion.proof;
+      processExpression(exprToShow, helpButtonToggleState.allRules ? 0 : 1);
+  } else {
+      setSide(null);
+      disableAllButtons();
+  }
 }
 
 export function disableAllButtons() {
@@ -1339,7 +1369,7 @@ export function createProofTree(conclusions, container, hyp = null) {
       console.log(conclusions.proof);
       console.log(result);
       if (level !== 1) {
-        const result = formulaToString(getProof(conclusions.proof), 0);
+        result = formulaToString(getProof(conclusions.proof), 0);
       }
       text = `${deductive.convertToLogicalExpression(deductive.checkWithAntlr(result))}`;
       // text = text.replace(/s0/g, 's(0)');

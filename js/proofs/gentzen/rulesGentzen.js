@@ -12,6 +12,7 @@ import {createModalForReturn} from "../../ui/modals/quantifierReturn";
 import { createModalForLeibniz } from '../../ui/modals/leibniz.js';
 import { createInputModal } from '../../ui/modals/input.js';
 import { showToast } from '../../ui/notifications.js';
+import { t } from '../../core/i18n.js';
 
 // Утиліти
 function createConclusion(proof) {

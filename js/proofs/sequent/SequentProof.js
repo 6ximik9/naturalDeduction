@@ -373,24 +373,24 @@ export function addChildrenToTree(parentSequent, newSequents, ruleName) {
 
     currentLevel++;
 
-    // Clear selection after rule application
-    if (side) {
-        // Remove highlight from formulas
+    // Select the first created element if available (auto-activation)
+    if (newSequents && newSequents.length > 0) {
+        const firstSeq = newSequents[0];
+        if (firstSeq && firstSeq.domElement) {
+            selectSequent(firstSeq.domElement, firstSeq);
+        }
+    } else if (side) {
+        // Clear selection only if no new children were created
         document.querySelectorAll('.sequent-formula').forEach(el => {
             el.classList.remove('selected');
             el.style.backgroundColor = '';
         });
-        // Remove highlight from sequent label
         const label = side.querySelector('#proofText');
         if (label) {
             label.style.background = '';
         }
-        
         setSide(null);
         selectedFormulaIndex = { side: null, index: -1 };
-        
-        // Hide menu as nothing is selected - NOT ANYMORE, show disabled
-        document.getElementById('proof-menu').className = 'proof-menu';
         disableAllButtons();
     }
 
