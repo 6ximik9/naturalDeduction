@@ -18,6 +18,7 @@ import {
   validateOrderAxiom3,
   validateOrderAxiom4
 } from "../../core/orderAxiomValidator";
+import {t} from "../../core/i18n";
 
 // Robinson Arithmetic Axioms
 export const ROBINSON_AXIOMS = [
@@ -40,8 +41,8 @@ export const ORDER_AXIOMS = [
 // Axiom click handlers
 export const AXIOM_HANDLERS = {
   1: {
-    name: "Successor Injectivity",
-    description: "The successor function is injective - if s(x) = s(y), then x = y",
+    name: t("ax-robinson-1-name"),
+    description: t("ax-robinson-1-desc"),
     formula: "∀x ∀y (s(x) = s(y) ⇒ x = y)",
     requiresTree: true,
     action: (formula, button) => {
@@ -60,8 +61,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   2: {
-    name: "Zero is not a successor",
-    description: "Zero is not the successor of any natural number",
+    name: t("ax-robinson-2-name"),
+    description: t("ax-robinson-2-desc"),
     formula: "∀x (0 ≠ s(x))",
     requiresTree: true,
     action: (formula, button) => {
@@ -80,8 +81,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   3: {
-    name: "Predecessor existence",
-    description: "Every non-zero number has a predecessor",
+    name: t("ax-robinson-3-name"),
+    description: t("ax-robinson-3-desc"),
     formula: "∀x (x ≠ 0 ⇒ ∃y (x = s(y)))",
     requiresTree: true,
     action: (formula, button) => {
@@ -100,8 +101,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   4: {
-    name: "Addition identity",
-    description: "Adding zero to any number gives the same number",
+    name: t("ax-robinson-4-name"),
+    description: t("ax-robinson-4-desc"),
     formula: "∀x (x + 0 = x)",
     requiresTree: true,
     action: (formula, button) => {
@@ -120,8 +121,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   5: {
-    name: "Addition recursion",
-    description: "Defines addition for successor numbers",
+    name: t("ax-robinson-5-name"),
+    description: t("ax-robinson-5-desc"),
     formula: "∀x ∀y (x + s(y) = s(x + y))",
     requiresTree: true,
     action: (formula, button) => {
@@ -140,8 +141,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   6: {
-    name: "Multiplication by zero",
-    description: "Multiplying any number by zero gives zero",
+    name: t("ax-robinson-6-name"),
+    description: t("ax-robinson-6-desc"),
     formula: "∀x (x * 0 = 0)",
     requiresTree: true,
     action: (formula, button) => {
@@ -160,8 +161,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   7: {
-    name: "Multiplication recursion",
-    description: "Defines multiplication for successor numbers",
+    name: t("ax-robinson-7-name"),
+    description: t("ax-robinson-7-desc"),
     formula: "∀x ∀y (x * s(y) = (x * y) + x)",
     requiresTree: true,
     action: (formula, button) => {
@@ -180,8 +181,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   8: {
-    name: "Irreflexivity",
-    description: "Irreflexivity of strict order: ¬(x < x)",
+    name: t("ax-order-1-name"),
+    description: t("ax-order-1-desc"),
     formula: ORDER_AXIOMS[0],
     requiresTree: true,
     action: (formula, button) => {
@@ -198,8 +199,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   9: {
-    name: "Transitivity",
-    description: "Transitivity of strict order",
+    name: t("ax-order-2-name"),
+    description: t("ax-order-2-desc"),
     formula: ORDER_AXIOMS[1],
     requiresTree: true,
     action: (formula, button) => {
@@ -216,8 +217,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   10: {
-    name: "Trichotomy",
-    description: "Trichotomy of strict order",
+    name: t("ax-order-3-name"),
+    description: t("ax-order-3-desc"),
     formula: ORDER_AXIOMS[2],
     requiresTree: true,
     action: (formula, button) => {
@@ -234,8 +235,8 @@ export const AXIOM_HANDLERS = {
     }
   },
   11: {
-    name: "Compatibility with Addition",
-    description: "Order is preserved under addition",
+    name: t("ax-order-4-name"),
+    description: t("ax-order-4-desc"),
     formula: ORDER_AXIOMS[3],
     requiresTree: true,
     action: (formula, button) => {
@@ -341,133 +342,133 @@ export const ruleGentzenHandlers = {
     },
     action: () => rules.axRule(),
     requiresTree: true,
-    explanation: "Axiom (Ax): The formula must be present in the local hypotheses (Γ) or be a known arithmetic/order axiom."
+    explanation: t("expl-ax")
   },
   "\\bot E1": {
     condition: (expr) => isRegularExpression(expr),
     action: () => rules.firstRule(),
     requiresTree: true,
-    explanation: "Bottom Elimination 1 (⊥E1): From absurdity, any formula φ can be derived."
+    explanation: t("expl-bot-e")
   },
   "\\bot E2": {
     condition: (expr) => isRegularExpression(expr),
     action: () => rules.secondRule(deductionContext),
     requiresTree: true,
-    explanation: "Bottom Elimination 2 (⊥E2): Proof by contradiction. To prove φ, assume ¬φ and derive absurdity (⊥)."
+    explanation: t("expl-raa")
   },
   "\\top I": {
     condition: (expr) => getValue(expr) === '⊤',
     action: () => rules.thirdRule(),
     requiresTree: true,
-    explanation: "Top Introduction (⊤I): The Truth (⊤) constant can always be introduced without any premises."
+    explanation: t("expl-top-i")
   },
   "\\neg I": {
     condition: (expr) => expr.type === 'negation',
     action: () => rules.fourthRule(),
     requiresTree: true,
-    explanation: "Negation Introduction (¬I): To prove ¬φ, assume φ and derive absurdity (⊥)."
+    explanation: t("expl-neg-i")
   },
   "\\neg E": {
     condition: (expr) => getValue(expr) === '⊥',
     action: async () => await rules.fifthRule(),
     requiresTree: true,
-    explanation: "Negation Elimination (¬E): If you have both φ and ¬φ, you can derive absurdity (⊥)."
+    explanation: t("expl-neg-e")
   },
   "\\wedge I": {
     condition: (expr) => expr.type === 'conjunction',
     action: () => rules.sixthRule(),
     requiresTree: true,
-    explanation: "Conjunction Introduction (∧I): To prove φ ∧ ψ, you must prove both φ and ψ independently."
+    explanation: t("expl-and-i")
   },
   "\\wedge E1": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.seventhRule(),
     requiresTree: true,
-    explanation: "Conjunction Elimination 1 (∧E1): If you have φ, you can derive it from any conjunction φ ∧ ψ."
+    explanation: t("expl-and-e")
   },
   "\\wedge E2": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.eighthRule(),
     requiresTree: true,
-    explanation: "Conjunction Elimination 2 (∧E2): If you have ψ, you can derive it from any conjunction φ ∧ ψ."
+    explanation: t("expl-and-e")
   },
   "\\vee I1": {
     condition: (expr) => expr.type === 'disjunction',
     action: () => rules.ninthRule(),
     requiresTree: true,
-    explanation: "Disjunction Introduction 1 (∨I1): To prove φ ∨ ψ, it is sufficient to prove the left part φ."
+    explanation: t("expl-or-i")
   },
   "\\vee I2": {
     condition: (expr) => expr.type === 'disjunction',
     action: () => rules.tenthRule(),
     requiresTree: true,
-    explanation: "Disjunction Introduction 2 (∨I2): To prove φ ∨ ψ, it is sufficient to prove the right part ψ."
+    explanation: t("expl-or-i")
   },
   "\\vee E": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.eleventhRule(),
     requiresTree: true,
-    explanation: "Disjunction Elimination (∨E): To use φ ∨ ψ to prove θ, you must prove θ from φ and also prove θ from ψ."
+    explanation: t("expl-or-e")
   },
   "\\Rightarrow I": {
     condition: (expr) => expr.type === 'implication',
     action: () => rules.twelfthRule(),
     requiresTree: true,
-    explanation: "Implication Introduction (⇒I): To prove φ ⇒ ψ, assume φ as a hypothesis and derive ψ."
+    explanation: t("expl-imp-i")
   },
   "\\Rightarrow E": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.thirteenthRule(),
     requiresTree: true,
-    explanation: "Implication Elimination (⇒E): To prove ψ, you need both φ and the implication φ ⇒ ψ."
+    explanation: t("expl-imp-e")
   },
   "\\exists I": {
     condition: (expr) => (expr.type === 'quantifier' && expr.quantifier === '∃') || expr.type === 'exists',
     action: async () => await rules.fourteenthRule(),
     requiresTree: true,
-    explanation: "Existential Introduction (∃I): To prove ∃x φ(x), it is sufficient to prove φ(t) for some term t."
+    explanation: t("expl-exists-i")
   },
   "\\forall I": {
     condition: (expr) => (expr.type === 'quantifier' && expr.quantifier === '∀') || expr.type === 'forall',
     action: async () => await rules.fifteenthRule(),
     requiresTree: true,
-    explanation: "Universal Introduction (∀I): To prove ∀x φ(x), prove φ(t) for a fresh constant t that does not appear in the hypotheses."
+    explanation: t("expl-forall-i")
   },
   "\\forall E": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.sixteenthRule(),
     requiresTree: true,
-    explanation: "Universal Elimination (∀E): If you have ∀x φ(x), you can derive φ(t) for any term t."
+    explanation: t("expl-forall-e")
   },
   "\\exists E": {
     condition: (expr) => true,
     action: async () => await rules.seventeenthRule(),
     requiresTree: true,
     returnsResult: true,
-    explanation: "Existential Elimination (∃E): To use ∃x φ(x) to prove ψ, assume φ(t) for a fresh constant t and derive ψ."
+    explanation: t("expl-exists-e")
   },
   "\\text{=E}_1": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => await rules.eighteenthRule(),
     requiresTree: true,
-    explanation: "Equality Elimination 1 (=E1): If P(a) is true and a = b, then P(b) is also true (Leibniz's Law)."
+    explanation: t("expl-eq-e")
   },
   "\\text{=E}_2": {
     condition: (expr) => isRegularExpression(expr),
     action: async () => rules.nineteenthRule(),
     requiresTree: true,
-    explanation: "Equality Elimination 2 (=E2): If P(b) is true and a = b, then P(a) is also true."
+    explanation: t("expl-eq-e")
   },
   "\\text{=I}": {
     condition: (expr) => expr.type === 'equality' && (!expr.operator || expr.operator === '=' || expr.operator === 'EQUAL'),
     action: () => rules.twentiethRule(),
     requiresTree: true,
-    explanation: "Equality Introduction (=I): An identity a = b can be proven if P(a) and P(b) are equivalent for all properties P."
+    explanation: t("expl-eq-i")
   },
   "Ind": {
     condition: (expr) => (expr.type === 'forall'),
     action: () => rules.induction(),
     requiresTree: true,
-    explanation: "Mathematical Induction (Ind): To prove ∀x φ(x), prove the base case φ(0) and the inductive step φ(x) ⇒ φ(s(x))."
+    explanation: t("expl-ind")
   }
 };

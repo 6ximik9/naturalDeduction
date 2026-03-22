@@ -86,7 +86,7 @@ export async function fifthRule() {
   index.setCurrentLevel(5);
   
   try {
-    const inputText = await createInputModal("Elimination of Negation (¬E)", "Enter formula φ:", "φ");
+    const inputText = await createInputModal(t("rule-neg-e"), t("modal-enter-phi"), "φ");
     
     const parsedPhi = deductive.checkWithAntlr(inputText);
     const parsedNotPhi = deductive.checkWithAntlr(`!(${inputText})`);
@@ -125,7 +125,7 @@ export async function seventhRule() {
     const innerText = index.lastSide.querySelector('#proofText')?.textContent;
     const initialText = `(${innerText}) ∧ ()`;
     
-    const inputText = await createInputModal("Elimination of Conjunction 1 (∧E1)", "Enter the full conjunction formula:", initialText);
+    const inputText = await createInputModal(t("rule-and-e1"), t("modal-enter-full-conj"), initialText);
     
     const parsed = deductive.checkWithAntlr(inputText);
     if (parsed.type !== 'conjunction') {
@@ -153,7 +153,7 @@ export async function eighthRule() {
     const innerText = index.lastSide.querySelector('#proofText')?.textContent;
     const initialText = `() ∧ (${innerText})`;
     
-    const inputText = await createInputModal("Elimination of Conjunction 2 (∧E2)", "Enter the full conjunction formula:", initialText);
+    const inputText = await createInputModal(t("rule-and-e2"), t("modal-enter-full-conj"), initialText);
     
     const parsed = deductive.checkWithAntlr(inputText);
     if (parsed.type !== 'conjunction') {
@@ -209,7 +209,7 @@ export async function eleventhRule() {
   index.setCurrentLevel(11);
   
   try {
-    const inputText = await createInputModal("Elimination of Disjunction (∨E)", "Enter the disjunction formula φ∨ψ:", "φ∨ψ");
+    const inputText = await createInputModal(t("rule-or-e"), t("modal-enter-full-disj"), "φ∨ψ");
     
     const parsedInput = deductive.checkWithAntlr(inputText);
     if (parsedInput.type !== 'disjunction') {
@@ -263,7 +263,7 @@ export async function thirteenthRule() {
     const innerText = index.lastSide.querySelector('#proofText')?.textContent;
     const initialText = "()⇒(" + innerText + ")";
     
-    const inputText = await createInputModal("Elimination of Implication (⇒E)", "Enter the implication formula:", initialText);
+    const inputText = await createInputModal(t("rule-imp-e"), t("modal-enter-full-imp"), initialText);
     
     const parsedInput = deductive.checkWithAntlr(inputText);
     if (parsedInput.type !== 'implication') {

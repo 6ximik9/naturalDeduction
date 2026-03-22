@@ -25,24 +25,24 @@ function getCleanFormula(element) {
 }
 
 export const FITCH_EXPLANATIONS = {
-  "\\land I, m, n": "Conjunction Introduction (∧I): Requires exactly two selected formulas.",
-  "\\land E, n": "Conjunction Elimination (∧E): Requires one selected conjunction.",
-  "\\lor I, n": "Disjunction Introduction (∨I): Requires one selected formula.",
-  "\\lor E, m, n, p": "Disjunction Elimination (∨E): Requires one selected disjunction and two selected sub-proofs corresponding to its cases.",
-  "\\Rightarrow I, n, m": "Implication Introduction (⇒I): Requires one selected sub-proof (starting with the hypothesis and ending with the conclusion).",
-  "\\Rightarrow E,m,n": "Implication Elimination (⇒E): Requires one selected implication and its antecedent.",
-  "\\neg I, m, n": "Negation Introduction (¬I): Requires one selected sub-proof starting with φ and ending with absurdity (⊥).",
-  "\\neg E, n, m": "Negation Elimination (¬E): Requires one selected formula and its negation to derive absurdity (⊥).",
-  "\\perp E,n": "Absurdity Elimination (⊥E): Requires one selected absurdity (⊥) to derive any formula.",
-  "C, m-n": "Proof by Contradiction (C): Requires one selected sub-proof starting with ¬φ and ending with absurdity (⊥) to prove φ.",
-  "\\neg\\neg E,n": "Double Negation Elimination (¬¬E): Requires one selected formula with double negation (¬¬φ).",
-  "R,n": "Reiteration (R): Requires one selected formula from an accessible scope.",
-  "\\forall E, n": "Universal Elimination (∀E): Requires one selected universal quantifier (∀x φ).",
-  "\\forall I, n": "Universal Introduction (∀I): Requires one selected sub-proof using a fresh constant.",
-  "\\exists I, n": "Existential Introduction (∃I): Requires one selected formula φ(t) to derive ∃x φ(x).",
-  "\\exists E, m, n": "Existential Elimination (∃E): Requires one selected existential formula (∃x φ) and a sub-proof deriving ψ from φ(t) with a fresh constant.",
-  "= I": "Identity Introduction (=I): Can introduce an identity c = c for any term c.",
-  "= E, n, m": "Identity Elimination (=E): Requires one selected identity (a = b) and a formula containing one of the terms."
+  "\\land I, m, n": t("expl-and-i"),
+  "\\land E, n": t("expl-and-e"),
+  "\\lor I, n": t("expl-or-i"),
+  "\\lor E, m, n, p": t("expl-or-e"),
+  "\\Rightarrow I, n, m": t("expl-imp-i"),
+  "\\Rightarrow E,m,n": t("expl-imp-e"),
+  "\\neg I, m, n": t("expl-neg-i"),
+  "\\neg E, n, m": t("expl-neg-e"),
+  "\\perp E,n": t("expl-bot-e"),
+  "C, m-n": t("expl-raa"),
+  "\\neg\\neg E,n": t("expl-notnot-e"),
+  "R,n": t("expl-reit"),
+  "\\forall E, n": t("expl-forall-e"),
+  "\\forall I, n": t("expl-forall-i"),
+  "\\exists I, n": t("expl-exists-i"),
+  "\\exists E, m, n": t("expl-exists-e"),
+  "= I": t("expl-eq-i"),
+  "= E, n, m": t("expl-eq-e")
 };
 
 export function firstRule(proofs, branches) {
@@ -84,7 +84,7 @@ export async function secondRule(proofs, branches) {
   }
 
   try {
-    const inputText = await createInputModal("Conjunction Elimination (∧E)", "Enter the formula:");
+    const inputText = await createInputModal(t("rule-and-e"), t("modal-enter-formula"));
     const parsedInput = checkWithAntlr(inputText);
     
     // Check if the input is valid syntactically
@@ -117,7 +117,7 @@ export async function thirdRule(proofs, branches) {
   let rule = getCleanFormula(proofs[0].element);
 
   try {
-    const inputText = await createInputModal("Disjunction Introduction (∨I)", "Enter the disjunction formula:", "(" + rule + ")∨");
+    const inputText = await createInputModal(t("rule-or-i"), t("modal-enter-full-disj"), "(" + rule + ")∨");
     
     let ruleUser = getProof(checkWithAntlr(inputText));
     let lastRule = getProof(checkWithAntlr(rule));
@@ -343,7 +343,7 @@ export async function ninthRule(proofs, branches) {
   }
 
   try {
-    const inputText = await createInputModal("Elimination of Absurdum (⊥E)", "Enter the formula:");
+    const inputText = await createInputModal(t("rule-bot-e"), t("modal-enter-formula"));
     
     // Add validation using the grammar checker
     if (checkRule(0, inputText) === 1) {

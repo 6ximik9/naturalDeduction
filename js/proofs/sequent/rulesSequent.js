@@ -385,7 +385,7 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        createExchangeModal("Exchange Left (Antecedent)", currentSeq.antecedent)
+        createExchangeModal(t("modal-exchange-left"), currentSeq.antecedent)
             .then(newAntecedent => {
                 // Check if anything actually changed to avoid cluttering history
                 const isChanged = JSON.stringify(newAntecedent) !== JSON.stringify(currentSeq.antecedent);
@@ -402,7 +402,7 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        createExchangeModal("Exchange Right (Succedent)", currentSeq.succedent)
+        createExchangeModal(t("modal-exchange-right"), currentSeq.succedent)
             .then(newSuccedent => {
                 const isChanged = JSON.stringify(newSuccedent) !== JSON.stringify(currentSeq.succedent);
                 if (isChanged) {
@@ -445,49 +445,49 @@ export const RULES = {
 
 // --- Rule Explanations (for Toasts) ---
 export const RULE_EXPLANATIONS = {
-    "id": "Axiom (id): Requires the same formula to appear in both the antecedent (left) and succedent (right).",
-    "cut": "Cut: Introduces a formula φ by splitting the proof into two branches: proving φ and using φ as a hypothesis.",
+    "id": t("expl-id"),
+    "cut": t("expl-cut"),
     
-    "negl": "Negation Left (¬l): Moves a negated formula from the antecedent to the succedent without the negation.",
-    "lnotl": "Negation Left (¬l): Moves a negated formula from the antecedent to the succedent without the negation.",
-    "negr": "Negation Right (¬r): Moves a negated formula from the succedent to the antecedent without the negation.",
-    "lnotr": "Negation Right (¬r): Moves a negated formula from the succedent to the antecedent without the negation.",
+    "negl": t("expl-neg-l"),
+    "lnotl": t("expl-neg-l"),
+    "negr": t("expl-neg-r"),
+    "lnotr": t("expl-neg-r"),
     
-    "landl1": "Conjunction Left 1 (∧l1): Replaces A ∧ B in the antecedent with its left component A.",
-    "wedgel1": "Conjunction Left 1 (∧l1): Replaces A ∧ B in the antecedent with its left component A.",
-    "landl2": "Conjunction Left 2 (∧l2): Replaces A ∧ B in the antecedent with its right component B.",
-    "wedgel2": "Conjunction Left 2 (∧l2): Replaces A ∧ B in the antecedent with its right component B.",
-    "landr": "Conjunction Right (∧r): Splits a conjunction A ∧ B in the succedent into two branches for A and B.",
-    "wedger": "Conjunction Right (∧r): Splits a conjunction A ∧ B in the succedent into two branches for A and B.",
+    "landl1": t("expl-and-l"),
+    "wedgel1": t("expl-and-l"),
+    "landl2": t("expl-and-l"),
+    "wedgel2": t("expl-and-l"),
+    "landr": t("expl-and-r"),
+    "wedger": t("expl-and-r"),
     
-    "lorl": "Disjunction Left (∨l): Splits a disjunction A ∨ B in the antecedent into two branches for A and B.",
-    "veel": "Disjunction Left (∨l): Splits a disjunction A ∨ B in the antecedent into two branches for A and B.",
-    "lorr1": "Disjunction Right 1 (∨r1): Replaces A ∨ B in the succedent with its left component A.",
-    "veer1": "Disjunction Right 1 (∨r1): Replaces A ∨ B in the succedent with its left component A.",
-    "lorr2": "Disjunction Right 2 (∨r2): Replaces A ∨ B in the succedent with its right component B.",
-    "veer2": "Disjunction Right 2 (∨r2): Replaces A ∨ B in the succedent with its right component B.",
+    "lorl": t("expl-or-l"),
+    "veel": t("expl-or-l"),
+    "lorr1": t("expl-or-r"),
+    "veer1": t("expl-or-r"),
+    "lorr2": t("expl-or-r"),
+    "veer2": t("expl-or-r"),
     
-    "Rightarrowl": "Implication Left (⇒l): Splits A ⇒ B in the antecedent into two branches: Γ ⊢ A, Δ and B, Γ ⊢ Δ.",
-    "to_l": "Implication Left (⇒l): Splits A ⇒ B in the antecedent into two branches: Γ ⊢ A, Δ and B, Γ ⊢ Δ.",
-    "Rightarrowr": "Implication Right (⇒r): Moves the antecedent of an implication A ⇒ B to the left side of the turnstile.",
-    "to_r": "Implication Right (⇒r): Moves the antecedent of an implication A ⇒ B to the left side of the turnstile.",
+    "Rightarrowl": t("expl-imp-l"),
+    "to_l": t("expl-imp-l"),
+    "Rightarrowr": t("expl-imp-r"),
+    "to_r": t("expl-imp-r"),
     
-    "topl": "Top Left (⊤l): Simplifies the antecedent by removing the Truth (⊤) constant.",
-    "topr": "Top Right (⊤r): Axiom. Closes the branch if Truth (⊤) is present in the succedent.",
-    "botl": "Bottom Left (⊥l): Axiom. Closes the branch if Falsity (⊥) is present in the antecedent.",
-    "botr": "Bottom Right (⊥r): Simplifies the succedent by removing the Falsity (⊥) constant.",
+    "topl": t("expl-top-l"),
+    "topr": t("expl-top-r"),
+    "botl": t("expl-bot-l"),
+    "botr": t("expl-bot-r"),
     
-    "wl": "Weakening Left (wl): Allows adding an arbitrary formula to the antecedent (bottom-up: removes formula).",
-    "wr": "Weakening Right (wr): Allows adding an arbitrary formula to the succedent (bottom-up: removes formula).",
-    "cl": "Contraction Left (cl): Duplicates a formula in the antecedent.",
-    "cr": "Contraction Right (cr): Duplicates a formula in the succedent.",
-    "exl": "Exchange Left (exl): Reorders formulas in the antecedent.",
-    "exr": "Exchange Right (exr): Reorders formulas in the succedent.",
+    "wl": t("expl-wl"),
+    "wr": t("expl-wr"),
+    "cl": t("expl-cl"),
+    "cr": t("expl-cr"),
+    "exl": t("expl-exl"),
+    "exr": t("expl-exr"),
     
-    "foralll": "Universal Left (∀l): Replaces ∀x φ in the antecedent with φ[t/x] for any term t.",
-    "forallr": "Universal Right (∀r): Replaces ∀x φ in the succedent with φ[y/x] for a fresh variable y.",
-    "existsl": "Existential Left (∃l): Replaces ∃x φ in the antecedent with φ[y/x] for a fresh variable y.",
-    "existsr": "Existential Right (∃r): Replaces ∃x φ in the succedent with φ[t/x] for any term t."
+    "foralll": t("expl-forall-e"),
+    "forallr": t("expl-forall-i"),
+    "existsl": t("expl-exists-e"),
+    "existsr": t("expl-exists-i")
 };
 
 // --- Rule Applicability Checks (for Hints) ---
