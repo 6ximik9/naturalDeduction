@@ -117,7 +117,8 @@ function suggestions(position, range) {
     {label: '\\exists', insertText: '∃', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\EXISTS', insertText: '∃', range: range, kind: monaco.languages.CompletionItemKind.Text},
     {label: '\\EQ', insertText: '=', range: range, kind: monaco.languages.CompletionItemKind.Text},
-    {label: '\\eq', insertText: '=', range: range, kind: monaco.languages.CompletionItemKind.Text}
+    {label: '\\eq', insertText: '=', range: range, kind: monaco.languages.CompletionItemKind.Text},
+    {label: '\\neq', insertText: '≠', range: range, kind: monaco.languages.CompletionItemKind.Text}
   ];
 
   return {suggestions: greekAlphabet};
