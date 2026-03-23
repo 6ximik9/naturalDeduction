@@ -705,18 +705,62 @@ export function createAdvancedModal(formulas) {
           return;
         }
 
-        // Enhanced freshness check for rule 17 (∃-introduction)
+        // Enhanced freshness check for rule 17 (∃-elimination backwards / ∃-introduction backwards)
         if (currentLevel === 17) {
           const checkFresh = deductive.checkWithAntlr(termValue);
-          const hypothesesAll = deductive.getAllHypotheses(side);
-          const isElementInArray = hypothesesAll.find(item => {
-            const itemProof = deductive.getProof(item);
-            const checkFreshProof = deductive.getProof(checkFresh);
-            return deductive.compareExpressions(itemProof, checkFreshProof);
-          });
+          const hypothesesAll = deductive.getAllHypotheses(side, side);
+          
+          // Get all constants/variables from the replacement term
+          const freshTerms = deductive.extractConstantsOrVariables(checkFresh);
+          
+          let isFresh = true;
+          let conflictingTerm = "";
 
-          if (isElementInArray) {
-            showNotification(t('notify-term-not-fresh'), 'error');
+          // 1. Check if any term from replacement appears in hypotheses (Γ)
+          for (const hyp of hypothesesAll) {
+            // hyp is already a parsed object from getAllHypotheses
+            const hypTerms = deductive.extractFreeVariables(hyp);
+            for (const term of freshTerms) {
+              if (hypTerms.includes(term)) {
+                isFresh = false;
+                conflictingTerm = term;
+                break;
+              }
+            }
+            if (!isFresh) break;
+          }
+
+          // 2. Check if any term from replacement appears in the current goal formula (ψ)
+          if (isFresh && side) {
+            const goalText = side.querySelector('#proofText')?.textContent;
+            const goalParsed = deductive.checkWithAntlr(goalText);
+            const goalTerms = deductive.extractFreeVariables(goalParsed);
+            for (const term of freshTerms) {
+              if (goalTerms.includes(term)) {
+                isFresh = false;
+                conflictingTerm = term;
+                break;
+              }
+            }
+          }
+          
+          // 3. Check if any term from replacement appears in the existential formula (∃x φ)
+          if (isFresh) {
+             const existsParsed = deductive.checkWithAntlr(formulaValue);
+             const existsTerms = deductive.extractFreeVariables(existsParsed);
+             for (const term of freshTerms) {
+               if (existsTerms.includes(term)) {
+                 isFresh = false;
+                 conflictingTerm = term;
+                 break;
+               }
+             }
+          }
+
+          if (!isFresh) {
+            showNotification(t('notify-term-not-fresh').includes('{term}') 
+              ? t('notify-term-not-fresh').replace('{term}', conflictingTerm)
+              : `${t('notify-term-not-fresh')} (${conflictingTerm})`, 'error');
             termEditorContainer.classList.add('editor-error');
             return;
           }

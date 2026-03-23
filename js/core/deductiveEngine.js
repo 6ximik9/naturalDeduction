@@ -345,24 +345,49 @@ export function createLineLevel(text) {
 }
 
 
-export function getAllHypotheses(container) {
-  let hypothesesAll = container.id
-    .replaceAll('divId-', ' ')
-    .split(' ')
-    .filter(word => word !== 'proof' && Boolean(word));
+export function getAllHypotheses(container, side = null) {
+  let hypothesesStrings = [];
 
+  // Try to find hypotheses in data-hypotheses attribute (modern Gentzen system)
+  // If container is the whole proof, we might need to find the specific side/context
+  const target = side || container;
+  const gammaSpan = target.querySelector('.gamma-context');
+  if (gammaSpan && gammaSpan.dataset.hypotheses) {
+    try {
+      hypothesesStrings = JSON.parse(gammaSpan.dataset.hypotheses);
+    } catch (e) {
+      console.warn('Failed to parse data-hypotheses JSON:', e);
+    }
+  }
 
-  for (var x = 0; x < hypothesesAll.length; x++) {
-    let chars = CharStreams.fromString(hypothesesAll[x].toString());
-    let lexer = new GrammarLexer(chars);
-    let tokens = new CommonTokenStream(lexer);
-    let parser = new GrammarParser(tokens);
-    let tree = parser.formula();
+  // Fallback to legacy ID-based extraction if no data-hypotheses found
+  if (hypothesesStrings.length === 0) {
+    hypothesesStrings = container.id
+      .replaceAll('divId-', ' ')
+      .split(' ')
+      .filter(word => word !== 'proof' && Boolean(word));
+  }
 
-    const listener = new MyGrammarListener(); // Викликати конструктор вашого Лісенера
-    ParseTreeWalker.DEFAULT.walk(listener, tree);
+  let hypothesesAll = [];
 
-    hypothesesAll[x] = listener.stack.pop();
+  for (var x = 0; x < hypothesesStrings.length; x++) {
+    try {
+      let chars = CharStreams.fromString(hypothesesStrings[x].toString());
+      let lexer = new GrammarLexer(chars);
+      let tokens = new CommonTokenStream(lexer);
+      let parser = new GrammarParser(tokens);
+      let tree = parser.formula();
+
+      const listener = new MyGrammarListener();
+      ParseTreeWalker.DEFAULT.walk(listener, tree);
+
+      const parsedHyp = listener.stack.pop();
+      if (parsedHyp) {
+        hypothesesAll.push(parsedHyp);
+      }
+    } catch (e) {
+      console.warn(`Failed to parse hypothesis string: ${hypothesesStrings[x]}`, e);
+    }
   }
 
   return hypothesesAll;
@@ -877,6 +902,76 @@ export function handleModalCancellation(ruleName, error) {
 }
 
 /**
+ * Extracts only free variables and constants from a formula object.
+ * This is crucial for checking the freshness condition of quantifier rules.
+ * @param {Object} node - The formula AST node
+ * @param {Set} boundVars - Internal set for tracking bound variables during recursion
+ * @returns {Array<string>} Array of free variables and constants
+ */
+export function extractFreeVariables(node, boundVars = new Set()) {
+  let result = [];
+
+  function traverse(n, currentBound) {
+    if (!n || typeof n !== 'object') return;
+
+    // Use getProof helper to handle standard structure
+    const proofNode = getProof(n);
+
+    // Handle variables - only if not bound by a quantifier
+    if (proofNode.type === 'variable') {
+      const name = proofNode.name || proofNode.value;
+      if (name && !currentBound.has(name)) {
+        result.push(name);
+      }
+    }
+
+    // Handle constants - always include
+    if (proofNode.type === 'constant') {
+      const value = proofNode.value !== undefined ? String(proofNode.value) : proofNode.name;
+      if (value) result.push(value);
+    }
+
+    // Handle numbers
+    if (proofNode.type === 'number') {
+      if (proofNode.value !== undefined) result.push(String(proofNode.value));
+    }
+
+    // Handle quantifiers - add variable to bound set for the operand
+    if (proofNode.type === 'forall' || proofNode.type === 'exists') {
+      const newBound = new Set(currentBound);
+      if (proofNode.variable) newBound.add(proofNode.variable);
+      traverse(proofNode.operand, newBound);
+      return; // Handled operand
+    }
+
+    // Legacy quantifier support
+    if (proofNode.type === 'quantifier') {
+      const newBound = new Set(currentBound);
+      const varName = proofNode.variable && (proofNode.variable.value || proofNode.variable.name || proofNode.variable);
+      if (varName) newBound.add(varName);
+      traverse(proofNode.expression, newBound);
+      return;
+    }
+
+    // Recursively traverse all other properties
+    for (let key in proofNode) {
+      if (proofNode.hasOwnProperty(key) && proofNode[key] && typeof proofNode[key] === 'object') {
+        if (Array.isArray(proofNode[key])) {
+          proofNode[key].forEach(item => traverse(item, currentBound));
+        } else {
+          traverse(proofNode[key], currentBound);
+        }
+      }
+    }
+  }
+
+  traverse(node, boundVars);
+  const uniqueResult = [...new Set(result)].filter(item => item && item.trim() !== '');
+  console.log('Extracted free variables/constants:', uniqueResult);
+  return uniqueResult;
+}
+
+/**
  * Extracts constants, variables, and function terms from a logical expression
  * Updated to work with the new grammar structure and left/right format
  * @param {Object} proof - The parsed logical expression
@@ -913,22 +1008,6 @@ export function extractConstantsOrVariables(proof) {
     if (node.type === 'number') {
       if (node.value !== undefined) {
         result.push(node.value.toString());
-      }
-    }
-
-    // Handle atoms (TRUE/FALSE and relation symbols like P, Q, R)
-    if (node.type === 'atom') {
-      if (node.value && node.value !== '⊤' && node.value !== '⊥') {
-        result.push(node.value);
-      }
-    }
-
-    // Handle relation symbols (uppercase letters like P, Q, R)
-    if (node.type === 'relation') {
-      if (node.name) {
-        result.push(node.name);
-      } else if (node.value) {
-        result.push(node.value);
       }
     }
 
@@ -1026,17 +1105,11 @@ export function extractConstantsOrVariables(proof) {
     if (node.type === 'predicate') {
       if (node.symbol && node.terms && Array.isArray(node.terms)) {
         // New grammar format: predicate has symbol (relation) and terms (array of arguments)
-        // Structure: { type: 'predicate', symbol: {type: 'relation', name: 'P'}, terms: [{type: 'variable', name: 'x'}, ...] }
-        const symbolName = node.symbol.name || node.symbol.value;
-        const args = node.terms.map(arg => extractExpression(arg)).join(", ");
-        result.push(`${symbolName}(${args})`);
         // Traverse the symbol and terms to extract individual variables/constants
         traverse(node.symbol);
         node.terms.forEach(traverse);
       } else if (node.name && node.terms && Array.isArray(node.terms)) {
         // Legacy format support
-        const args = node.terms.map(arg => extractExpression(arg)).join(", ");
-        result.push(`${node.name}(${args})`);
         node.terms.forEach(traverse);
       }
     }

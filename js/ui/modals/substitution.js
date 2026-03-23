@@ -511,19 +511,50 @@ export function createModal(constants) {
       const editorValue = modalEditor.getValue().trim();
 
       try {
-        // Enhanced freshness check for rule 15 (∀-elimination)
+        // Enhanced freshness check for rule 15 (∀-introduction backwards)
+        // Rule 15 in Gentzen is ∀-introduction which requires a fresh term.
         if (currentLevel === 15) {
           const checkFresh = deductive.checkWithAntlr(editorValue);
-          const hypothesesAll = deductive.getAllHypotheses(side);
+          const hypothesesAll = deductive.getAllHypotheses(side, side);
+          
+          // Get all constants/variables from the replacement term
+          const freshTerms = deductive.extractConstantsOrVariables(checkFresh);
+          
+          let isFresh = true;
+          let conflictingTerm = "";
 
-          const isElementInArray = hypothesesAll.find(function (item) {
-            const itemProof = deductive.getProof(item);
-            const checkFreshProof = deductive.getProof(checkFresh);
-            return deductive.compareExpressions(itemProof, checkFreshProof);
-          });
+          // 1. Check if any term from replacement appears in hypotheses (Γ)
+          for (const hyp of hypothesesAll) {
+            // hyp is already a parsed object from getAllHypotheses
+            const hypTerms = deductive.extractFreeVariables(hyp);
+            for (const term of freshTerms) {
+              if (hypTerms.includes(term)) {
+                isFresh = false;
+                conflictingTerm = term;
+                break;
+              }
+            }
+            if (!isFresh) break;
+          }
 
-          if (isElementInArray) {
-            showNotification(t('notify-term-not-fresh'), 'error');
+          // 2. Check if any term from replacement appears in the current goal formula (∀x φ)
+          if (isFresh && side) {
+            const goalText = side.querySelector('#proofText')?.textContent;
+            const goalParsed = deductive.checkWithAntlr(goalText);
+            const goalTerms = deductive.extractFreeVariables(goalParsed);
+            for (const term of freshTerms) {
+              if (goalTerms.includes(term)) {
+                isFresh = false;
+                conflictingTerm = term;
+                break;
+              }
+            }
+          }
+
+          if (!isFresh) {
+            showNotification(t('notify-term-not-fresh').includes('{term}') 
+              ? t('notify-term-not-fresh').replace('{term}', conflictingTerm)
+              : `${t('notify-term-not-fresh')} (${conflictingTerm})`, 'error');
             editorContainer.classList.add('editor-error');
             return;
           }
@@ -1035,6 +1066,55 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
       const replacementTerm = monacoEditor.getValue().trim();
 
       try {
+        // Enhanced freshness check for rule 15 (∀-introduction backwards)
+        // Rule 15 in Gentzen is ∀-introduction which requires a fresh term.
+        if (currentLevel === 15) {
+          const checkFresh = deductive.checkWithAntlr(replacementTerm);
+          const hypothesesAll = deductive.getAllHypotheses(side, side);
+          
+          // Get all constants/variables from the replacement term
+          const freshTerms = deductive.extractConstantsOrVariables(checkFresh);
+          
+          let isFresh = true;
+          let conflictingTerm = "";
+
+          // 1. Check if any term from replacement appears in hypotheses (Γ)
+          for (const hyp of hypothesesAll) {
+            // hyp is already a parsed object from getAllHypotheses
+            const hypTerms = deductive.extractFreeVariables(hyp);
+            for (const term of freshTerms) {
+              if (hypTerms.includes(term)) {
+                isFresh = false;
+                conflictingTerm = term;
+                break;
+              }
+            }
+            if (!isFresh) break;
+          }
+
+          // 2. Check if any term from replacement appears in the current goal formula (∀x φ)
+          if (isFresh && side) {
+            const goalText = side.querySelector('#proofText')?.textContent;
+            const goalParsed = deductive.checkWithAntlr(goalText);
+            const goalTerms = deductive.extractFreeVariables(goalParsed);
+            for (const term of freshTerms) {
+              if (goalTerms.includes(term)) {
+                isFresh = false;
+                conflictingTerm = term;
+                break;
+              }
+            }
+          }
+
+          if (!isFresh) {
+            showNotification(t('notify-term-not-fresh').includes('{term}') 
+              ? t('notify-term-not-fresh').replace('{term}', conflictingTerm)
+              : `${t('notify-term-not-fresh')} (${conflictingTerm})`, 'error');
+            editorContainer.classList.add('editor-error');
+            return;
+          }
+        }
+
         // Additional syntax validation
         try {
           deductive.checkWithAntlr(replacementTerm);
