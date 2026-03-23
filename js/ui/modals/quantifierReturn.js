@@ -265,6 +265,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
     // Element click handler for formula interface
     function handleElementClick(element, path, text) {
+      console.log("handleElementClick", text, path);
       // In combined interface, clicking formula elements does NOT deselect buttons
       // We want to keep both the button selection and formula element selection
       // Only in formula-only mode should we clear button state
@@ -274,10 +275,13 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         selectedConstant = null;
       }
 
+      const pathStr = JSON.stringify(path);
+
       // If clicking the same element, deselect it (check this first)
-      if (selectedElements.has(JSON.stringify(path))) {
+      if (selectedElements.has(pathStr)) {
+        console.log("Deselecting element", text);
         element.classList.remove('selected');
-        selectedElements.delete(JSON.stringify(path));
+        selectedElements.delete(pathStr);
 
         if (selectedElements.size === 0) {
           selectedElement = null;
@@ -285,6 +289,9 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           selectedTextDisplay.textContent = 'No element selected';
           disableEditor();
         } else {
+          // Set primary selection to the last selected element
+          const lastPathStr = Array.from(selectedElements).pop();
+          selectedPath = JSON.parse(lastPathStr);
           // Update display with remaining selections
           updateSelectedDisplay();
         }
@@ -296,11 +303,12 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
       // Check if this element can be selected based on current selections
       if (!canSelectElement(path)) {
+        console.log("Cannot select element due to conflict", text);
         return; // Cannot select this element
       }
 
       // Add to selection
-      selectedElements.add(JSON.stringify(path));
+      selectedElements.add(pathStr);
       element.classList.add('selected');
 
       // Set primary selection (for editor purposes)
@@ -1240,6 +1248,7 @@ function createClickableElement(node, path, onElementClick) {
 
   // Add click handler
   element.addEventListener('click', (e) => {
+    e.preventDefault();
     e.stopPropagation();
     const nodeText = getNodeText(node);
     // Debug logging for number clicks

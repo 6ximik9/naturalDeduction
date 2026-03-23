@@ -785,16 +785,28 @@ export function createAdvancedModal(formulas) {
     // Enhanced formula selection event handler
     formulaSelect.addEventListener('change', () => {
       const selectedValue = formulaSelect.value;
-      selectedFormula = selectedValue;
 
       if (selectedValue === 'My formula') {
+        selectedFormula = customEditor ? customEditor.getValue().trim() : '';
         customEditorContainer.style.display = 'block';
         // Custom editor is already created during initialization
         if (customEditor) {
+          // Trigger manual update of buttons if the editor has value
+          const value = customEditor.getValue().trim();
+          if (value) {
+            try {
+              const parsed = deductive.checkWithAntlr(value);
+              const extracted = deductive.extractConstantsOrVariables(parsed);
+              renderButtons(extracted);
+            } catch (e) {
+              renderButtons([]);
+            }
+          }
           // Focus the custom editor
           setTimeout(() => customEditor.focus(), 100);
         }
       } else if (selectedValue) {
+        selectedFormula = selectedValue;
         customEditorContainer.style.display = 'none';
 
         const hasSyntaxError = checkRule(1, selectedValue) !== 0;
@@ -838,7 +850,28 @@ export function createAdvancedModal(formulas) {
 
     try {
       customEditor = editorMonaco.createEditor(newEditor);
-      customEditor.setValue('');
+      
+      // Get initial value: 
+      // 1. If in Gentzen mode and a side is selected, use its text (cleaned)
+      // 2. Otherwise, use the first formula from the formulas array (passed from the rule)
+      // 3. Fallback to empty string
+      let initialValue = '';
+      
+      if (side) {
+        const sideText = side.querySelector('#proofText')?.textContent;
+        if (sideText) {
+          initialValue = sideText.trim();
+          // Remove square brackets if it's a closed branch
+          if (initialValue.startsWith('[') && initialValue.endsWith(']')) {
+            initialValue = initialValue.substring(1, initialValue.length - 1).trim();
+          }
+        }
+      }
+      
+      if (!initialValue && formulas && formulas.length > 0) {
+        initialValue = formulas[0];
+      }
+
       customEditor.updateOptions({
         fontSize: 20,
         lineHeight: 1.4,
@@ -876,6 +909,9 @@ export function createAdvancedModal(formulas) {
 
         validateForm();
       });
+
+      // Set initial value after listener is attached
+      customEditor.setValue(initialValue);
     } catch (error) {
       console.error('Failed to create custom editor:', error);
     }
