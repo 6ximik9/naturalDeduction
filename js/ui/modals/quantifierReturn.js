@@ -101,27 +101,40 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         }
         .formula-element.selected {
           background-color: #2196f3;
-          color: white;
-          transform: scale(1.1);
+          color: white !important;
+          transform: scale(1.02);
+          box-shadow: 0 4px 12px rgba(33, 150, 243, 0.5);
+          position: relative;
+          z-index: 10;
         }
         .formula-element.disabled {
-          opacity: 0.3;
-          pointer-events: none;
+          color: #888;
+          /* Remove pointer-events: none to allow switching selection */
+          pointer-events: auto; 
+          cursor: pointer;
+        }
+        body.dark-mode .formula-element.disabled {
+          color: #666;
         }
         .formula-container {
-          font-size: 28px;
-          font-family: 'Times New Roman', serif;
+          font-size: 32px;
+          font-weight: 500;
+          font-family: 'Cambria', 'Georgia', 'Times New Roman', serif;
           text-align: center;
-          padding: 20px;
+          padding: 30px;
           border: 2px solid var(--col-border);
-          border-radius: 8px;
-          background-color: var(--col-bg-main);
-          line-height: 1.5;
+          border-radius: 12px;
+          background-color: var(--col-bg-white);
+          color: var(--col-text-main);
+          line-height: 1.6;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          user-select: none;
         }
         .editor-container {
           border: 2px solid var(--col-border);
           border-radius: 8px;
           transition: border-color 0.2s ease;
+          background-color: var(--col-bg-white);
         }
         .editor-container:focus-within {
           border-color: #007bff;
@@ -266,18 +279,10 @@ export function createModalForReturn(constants, formula = null, formulaString = 
     // Element click handler for formula interface
     function handleElementClick(element, path, text) {
       console.log("handleElementClick", text, path);
-      // In combined interface, clicking formula elements does NOT deselect buttons
-      // We want to keep both the button selection and formula element selection
-      // Only in formula-only mode should we clear button state
-      if (activeButton) {
-        updateButtonState(activeButton, false);
-        activeButton = null;
-        selectedConstant = null;
-      }
-
+      
       const pathStr = JSON.stringify(path);
 
-      // If clicking the same element, deselect it (check this first)
+      // If clicking the same element, deselect it
       if (selectedElements.has(pathStr)) {
         console.log("Deselecting element", text);
         element.classList.remove('selected');
@@ -289,10 +294,8 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           selectedTextDisplay.textContent = 'No element selected';
           disableEditor();
         } else {
-          // Set primary selection to the last selected element
           const lastPathStr = Array.from(selectedElements).pop();
           selectedPath = JSON.parse(lastPathStr);
-          // Update display with remaining selections
           updateSelectedDisplay();
         }
 
@@ -301,17 +304,30 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         return;
       }
 
-      // Check if this element can be selected based on current selections
-      if (!canSelectElement(path)) {
-        console.log("Cannot select element due to conflict", text);
-        return; // Cannot select this element
+      // Check for conflicts with existing selections
+      const currentPaths = Array.from(selectedElements).map(p => JSON.parse(p));
+      const conflictingPathStrs = [];
+      
+      for (const existingPath of currentPaths) {
+        if (isPathConflict(path, existingPath)) {
+          conflictingPathStrs.push(JSON.stringify(existingPath));
+        }
+      }
+
+      // If there are conflicts, deselect the old ones and select the new one
+      if (conflictingPathStrs.length > 0) {
+        conflictingPathStrs.forEach(pStr => {
+          const el = formulaContainer.querySelector(`[data-path='${pStr}']`);
+          if (el) el.classList.remove('selected');
+          selectedElements.delete(pStr);
+        });
       }
 
       // Add to selection
       selectedElements.add(pathStr);
       element.classList.add('selected');
 
-      // Set primary selection (for editor purposes)
+      // Set primary selection
       selectedElement = element;
       selectedPath = path;
 
