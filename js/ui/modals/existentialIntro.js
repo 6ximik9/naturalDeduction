@@ -851,26 +851,8 @@ export function createAdvancedModal(formulas) {
     try {
       customEditor = editorMonaco.createEditor(newEditor);
       
-      // Get initial value: 
-      // 1. If in Gentzen mode and a side is selected, use its text (cleaned)
-      // 2. Otherwise, use the first formula from the formulas array (passed from the rule)
-      // 3. Fallback to empty string
-      let initialValue = '';
-      
-      if (side) {
-        const sideText = side.querySelector('#proofText')?.textContent;
-        if (sideText) {
-          initialValue = sideText.trim();
-          // Remove square brackets if it's a closed branch
-          if (initialValue.startsWith('[') && initialValue.endsWith(']')) {
-            initialValue = initialValue.substring(1, initialValue.length - 1).trim();
-          }
-        }
-      }
-      
-      if (!initialValue && formulas && formulas.length > 0) {
-        initialValue = formulas[0];
-      }
+      // Use (∃x)P(x) as the default value as requested
+      let initialValue = '(∃x)P(x)';
 
       customEditor.updateOptions({
         fontSize: 20,
