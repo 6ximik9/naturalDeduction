@@ -2290,6 +2290,15 @@
 
     /* --- Mobile Responsive (768px) --- */
     @media (max-width: 768px) {
+      /* Mobile Content Area fix */
+      .content-area {
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        padding: 16px !important; /* Slightly more compact for mobile */
+      }
+
       .mobile-menu-btn {
         display: flex !important;
       }
@@ -2391,17 +2400,38 @@
       /* Proof Layout Mobile Fix (Tree on top, Tools below) */
       #proof-split-layout {
         flex-direction: column-reverse !important;
-        overflow-y: auto !important;
-        gap: 20px;
-        height: auto !important;
+        overflow: hidden !important; /* Hide overall scroll */
+        gap: 15px;
+        flex: 1 !important; /* Take remaining space */
+        height: 100% !important;
       }
 
-      #proof-tools, #proof-container {
+      #proof-tools {
         width: 100% !important;
-        flex-basis: auto !important;
-        flex-shrink: 0 !important;
-        min-height: 350px !important;
-        max-height: 500px !important;
+        flex: 1 !important; /* Take half or remaining space */
+        min-height: 250px !important;
+        max-height: none !important;
+        overflow-y: auto !important; /* Scroll only rules if they don't fit */
+        overflow-x: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      #proof-container {
+        width: 100% !important;
+        flex: 1 !important;
+        min-height: 300px !important;
+        max-height: none !important;
+        overflow: hidden !important;
+      }
+
+      .button-container button {
+        min-width: 0 !important; /* Override global max-content to allow shrinking on small screens */
+      }
+
+      #button-container {
+        width: 100% !important;
+        overflow-x: hidden !important;
       }
 
       #proof-layout-divider {
