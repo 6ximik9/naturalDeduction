@@ -6,6 +6,24 @@ monaco.languages.register({
   id: 'proofLanguage'
 });
 
+monaco.languages.setLanguageConfiguration('proofLanguage', {
+  brackets: [
+    ['(', ')'],
+    ['[', ']'],
+    ['{', '}']
+  ],
+  autoClosingPairs: [
+    { open: '(', close: ')' },
+    { open: '[', close: ']' },
+    { open: '{', close: '}' }
+  ],
+  surroundingPairs: [
+    { open: '(', close: ')' },
+    { open: '[', close: ']' },
+    { open: '{', close: '}' }
+  ]
+});
+
 monaco.languages.registerCompletionItemProvider('proofLanguage', {
   triggerCharacters: ['\\'],
   provideCompletionItems: function (model, position) {
@@ -131,6 +149,7 @@ export let editor = monaco.editor.create(document.getElementById('editor'), {
   language: 'proofLanguage',
   fontSize: 26, // Більший розмір шрифту
   automaticLayout: true, // <<== the important part
+  autoClosingBrackets: 'always',
   scrollbar: {
     vertical: 'auto', // Спочатку ховаємо вертикальний скролбар
     useShadows: true,
@@ -359,6 +378,7 @@ export function createEditor(container) {
     language: 'proofLanguage',
     fontSize: 28,
     automaticLayout: true,
+    autoClosingBrackets: 'always',
     scrollbar: {
       vertical: 'auto',
       useShadows: true,

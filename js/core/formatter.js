@@ -2,7 +2,7 @@ const operatorPriority = {
   implication: 1,
   disjunction: 2,
   conjunction: 3,
-  negation: 4,
+  negation: 5,
   forall: 5,
   exists: 5,
   quantifier: 5,
@@ -84,13 +84,14 @@ export function formulaToString(node, useParens = 1) {
       const variable = node.variable;
       const operand = node.operand;
       const body = formulaToString(operand, useParens);
-      return `${quantSymbol}${variable} ` + maybeWrap(operand, body, node.type, useParens, 'right');
+      return `(${quantSymbol}${variable})` + maybeWrap(operand, body, node.type, useParens, 'right');
     }
 
     case 'quantifier': {
       // Legacy support
       const body = formulaToString(node.expression, useParens);
-      return `${node.quantifier}${node.variable.value || node.variable} ` + maybeWrap(node.expression, body, 'quantifier', useParens, 'right');
+      const varStr = node.variable.value || node.variable;
+      return `(${node.quantifier}${varStr})` + maybeWrap(node.expression, body, 'quantifier', useParens, 'right');
     }
 
     case 'equality': {
