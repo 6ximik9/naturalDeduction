@@ -110,7 +110,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         .formula-element.disabled {
           color: #888;
           /* Remove pointer-events: none to allow switching selection */
-          pointer-events: auto; 
+          pointer-events: auto;
           cursor: pointer;
         }
         body.dark-mode .formula-element.disabled {
@@ -142,7 +142,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         .editor-error {
           border-color: #dc3545 !important;
         }
-        
+
         body.dark-mode .modal-button {
           background-color: var(--col-bg-white) !important;
           color: var(--col-text-main) !important;
@@ -158,15 +158,16 @@ export function createModalForReturn(constants, formula = null, formulaString = 
     // Create modal title with improved typography
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
-    let titleText = 'Selection Modal';
+    let titleKey = 'modal-selection-title';
     if (useCombinedInterface) {
-      titleText = 'Formula and Constant Selection';
+      titleKey = 'modal-selection-combined-title';
     } else if (useFormulaOnly) {
-      titleText = 'Formula Element Selection';
+      titleKey = 'modal-selection-formula-only-title';
     } else if (useConstantsOnly) {
-      titleText = 'Universal Quantifier Elimination (∀E)';
+      titleKey = 'modal-subst-forall-elim-title';
     }
-    modalTitle.textContent = titleText;
+    modalTitle.textContent = t(titleKey);
+    modalTitle.setAttribute('data-i18n', titleKey);
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -178,15 +179,16 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
     // Add description
     const description = document.createElement('p');
-    let descriptionText = '';
+    let descriptionKey = '';
     if (useCombinedInterface) {
-      descriptionText = 'Select constants and click on formula elements for replacement:';
+      descriptionKey = 'modal-selection-combined-desc';
     } else if (useFormulaOnly) {
-      descriptionText = 'Click on any part of the formula below to select it for replacement:';
+      descriptionKey = 'modal-selection-formula-only-desc';
     } else if (useConstantsOnly) {
-      descriptionText = 'Select a constant to replace the bound variable in the universal quantifier:';
+      descriptionKey = 'modal-selection-constants-only-desc';
     }
-    description.textContent = descriptionText;
+    description.textContent = t(descriptionKey);
+    description.setAttribute('data-i18n', descriptionKey);
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -234,7 +236,8 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
       // Create selected text display
       selectedTextDisplay = document.createElement('div');
-      selectedTextDisplay.textContent = 'No element selected';
+      selectedTextDisplay.textContent = t('modal-no-element-selected');
+      selectedTextDisplay.setAttribute('data-i18n', 'modal-no-element-selected');
       Object.assign(selectedTextDisplay.style, {
         fontSize: '24px',
         color: 'var(--col-text-muted)',
@@ -279,7 +282,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
     // Element click handler for formula interface
     function handleElementClick(element, path, text) {
       console.log("handleElementClick", text, path);
-      
+
       const pathStr = JSON.stringify(path);
 
       // If clicking the same element, deselect it
@@ -291,7 +294,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         if (selectedElements.size === 0) {
           selectedElement = null;
           selectedPath = null;
-          selectedTextDisplay.textContent = 'No element selected';
+          selectedTextDisplay.textContent = t('modal-no-element-selected');
           disableEditor();
         } else {
           const lastPathStr = Array.from(selectedElements).pop();
@@ -307,7 +310,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       // Check for conflicts with existing selections
       const currentPaths = Array.from(selectedElements).map(p => JSON.parse(p));
       const conflictingPathStrs = [];
-      
+
       for (const existingPath of currentPaths) {
         if (isPathConflict(path, existingPath)) {
           conflictingPathStrs.push(JSON.stringify(existingPath));
@@ -379,7 +382,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
     // Update the display of selected elements
     function updateSelectedDisplay() {
       if (selectedElements.size === 0) {
-        selectedTextDisplay.textContent = 'No element selected';
+        selectedTextDisplay.textContent = t('modal-no-element-selected');
         return;
       }
 
@@ -389,7 +392,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         return getNodeText(node);
       });
 
-      selectedTextDisplay.textContent = `Selected: ${selectedTexts.join(', ')}`;
+      selectedTextDisplay.textContent = `${t('modal-element-selected')} ${selectedTexts.join(', ')}`;
     }
 
     // Update element states (enable/disable based on selection rules)
@@ -503,7 +506,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         el.classList.remove('selected', 'disabled');
       });
 
-      selectedTextDisplay.textContent = 'No element selected';
+      selectedTextDisplay.textContent = t('modal-no-element-selected');
       disableEditor();
     }
 
@@ -514,7 +517,8 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
     if (hasFormula) {
       editorLabel = document.createElement('label');
-      editorLabel.textContent = 'Enter replacement (select a formula element first):';
+      editorLabel.textContent = t('modal-enter-replacement-label');
+      editorLabel.setAttribute('data-i18n', 'modal-enter-replacement-label');
       Object.assign(editorLabel.style, {
         fontSize: '16px',
         fontWeight: '600',
@@ -632,7 +636,8 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       monacoEditor.updateOptions({ readOnly: false });
       editorContainer.style.opacity = '1';
       editorContainer.style.pointerEvents = 'auto';
-      editorLabel.textContent = 'Enter replacement:';
+      editorLabel.textContent = t('modal-enter-replacement-active');
+      editorLabel.setAttribute('data-i18n', 'modal-enter-replacement-active');
       editorLabel.style.color = '#2c3e50';
 
       // Focus the editor
@@ -649,7 +654,8 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       monacoEditor.setValue('');
       editorContainer.style.opacity = '0.6';
       editorContainer.style.pointerEvents = 'none';
-      editorLabel.textContent = 'Enter replacement (select a formula element first):';
+      editorLabel.textContent = t('modal-enter-replacement-label');
+      editorLabel.setAttribute('data-i18n', 'modal-enter-replacement-label');
       editorLabel.style.color = '#6c757d';
     }
 
@@ -734,7 +740,8 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
     // Create save button with improved styling and validation
     const saveButton = document.createElement('button');
-    saveButton.textContent = 'Apply Selection';
+    saveButton.textContent = t('modal-btn-apply-selection');
+    saveButton.setAttribute('data-i18n', 'modal-btn-apply-selection');
     saveButton.disabled = true;
     Object.assign(saveButton.style, {
       flex: '1',
@@ -752,7 +759,8 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
     // Create cancel button
     const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = t('modal-btn-cancel');
+    cancelButton.setAttribute('data-i18n', 'modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       fontSize: '16px',
@@ -793,7 +801,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
     // Save button click handler with validation
     saveButton.addEventListener('click', () => {
       if (!validateForm()) {
-        showNotification('Please complete all required fields with valid input.', 'warning');
+        showNotification(t('notify-complete-fields'), 'warning');
         return;
       }
 
@@ -824,7 +832,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
               const value = getNodeText(modifiedFormula);
               deductive.checkWithAntlr(value);
             } catch (parseError) {
-              showNotification('Invalid syntax in the replacement term. Please check your input.', 'error');
+              showNotification(t('notify-invalid-syntax-term'), 'error');
               editorContainer.classList.add('editor-error');
               return;
             }
@@ -878,7 +886,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
             deductive.checkWithAntlr(value);
             // deductive.checkWithAntlr(replacement);
           } catch (parseError) {
-            showNotification('Invalid syntax in the replacement term. Please check your input.', 'error');
+            showNotification(t('notify-invalid-syntax-term'), 'error');
             editorContainer.classList.add('editor-error');
             return;
           }
@@ -921,7 +929,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         originalResolve(result);
       } catch (error) {
         console.error('Error in modal save:', error);
-        showNotification('An error occurred. Please try again.', 'error');
+        showNotification(t('notify-unexpected-error'), 'error');
       }
     });
 

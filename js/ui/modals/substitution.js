@@ -111,7 +111,9 @@ export function createModal(constants) {
     // Create modal title
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
-    modalTitle.textContent = currentLevel === 14 ? t('modal-subst-exists-elim-title') : t('modal-subst-forall-elim-title');
+    const titleKey = currentLevel === 14 ? 'modal-subst-exists-elim-title' : 'modal-subst-forall-elim-title';
+    modalTitle.textContent = t(titleKey);
+    modalTitle.setAttribute('data-i18n', titleKey);
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -124,6 +126,7 @@ export function createModal(constants) {
     // Add description
     const description = document.createElement('p');
     description.textContent = t('modal-subst-desc');
+    description.setAttribute('data-i18n', 'modal-subst-desc');
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -140,6 +143,7 @@ export function createModal(constants) {
 
     const variableLabel = document.createElement('label');
     variableLabel.textContent = t('modal-select-var-subst');
+    variableLabel.setAttribute('data-i18n', 'modal-select-var-subst');
     Object.assign(variableLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -263,6 +267,7 @@ export function createModal(constants) {
 
     const termLabel = document.createElement('label');
     termLabel.textContent = t('modal-enter-replacement-term');
+    termLabel.setAttribute('data-i18n', 'modal-enter-replacement-term');
     Object.assign(termLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -446,6 +451,7 @@ export function createModal(constants) {
     // Create save button with improved styling and validation
     const saveButton = document.createElement('button');
     saveButton.textContent = t('modal-btn-apply-subst');
+    saveButton.setAttribute('data-i18n', 'modal-btn-apply-subst');
     saveButton.disabled = true;
     Object.assign(saveButton.style, {
       flex: '1',
@@ -464,6 +470,7 @@ export function createModal(constants) {
     // Create cancel button
     const cancelButton = document.createElement('button');
     cancelButton.textContent = t('modal-btn-cancel');
+    cancelButton.setAttribute('data-i18n', 'modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       fontSize: '16px',
@@ -838,7 +845,9 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     // Create modal title
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
-    modalTitle.textContent = quantifierType === 'forall' ? t('modal-subst-forall-title') : t('modal-subst-exists-title');
+    const titleModalKey = quantifierType === 'forall' ? 'modal-subst-forall-title' : 'modal-subst-exists-title';
+    modalTitle.textContent = t(titleModalKey);
+    modalTitle.setAttribute('data-i18n', titleModalKey);
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -851,6 +860,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     // Add description
     const description = document.createElement('p');
     description.textContent = t('modal-subst-var-desc').replace('{var}', variable);
+    // No data-i18n for simple replace templates yet, but they are localized on open
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -1001,6 +1011,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     // Create apply button
     const applyButton = document.createElement('button');
     applyButton.textContent = t('modal-btn-apply-subst');
+    applyButton.setAttribute('data-i18n', 'modal-btn-apply-subst');
     applyButton.disabled = true;
     Object.assign(applyButton.style, {
       flex: '1',
@@ -1019,6 +1030,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     // Create cancel button
     const cancelButton = document.createElement('button');
     cancelButton.textContent = t('modal-btn-cancel');
+    cancelButton.setAttribute('data-i18n', 'modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       fontSize: '16px',

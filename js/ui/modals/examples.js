@@ -6,85 +6,85 @@ import { logicSettings, isVL, isPL } from '../../state/logicSettings';
 const EXAMPLES_DATA = {
   gentzen: {
     "ex-category-propositional": [
-      { label: "Identity", value: "φ⇒φ" },
-      { label: "Double Negation", value: "φ⇒¬¬φ" },
-      { label: "Transitivity (Syllogism)", value: "(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)" },
-      { label: "Excluded Middle", value: "φ∨¬φ" },
-      { label: "Pierce's Law", value: "((φ⇒ψ)⇒φ)⇒φ" },
-      { label: "De Morgan (1)", value: "¬(φ∨ψ)⇒¬φ∧¬ψ" },
-      { label: "Distributivity", value: "φ∧(ψ∨θ)⇒(φ∧ψ)∨(φ∧θ)" },
-      { label: "Contraposition", value: "(φ⇒ψ)⇒(¬ψ⇒¬φ)" },
-      { label: "Explosion Principle", value: "φ∧¬φ⇒ψ" },
-      { label: "Modus Ponens (Classic)", value: "φ\nφ⇒ψ\n————————————————\nψ" }
+      { label: "ex-label-identity", value: "φ⇒φ" },
+      { label: "ex-label-double-negation", value: "φ⇒¬¬φ" },
+      { label: "ex-label-transitivity", value: "(φ⇒ψ)∧(ψ⇒θ)⇒(φ⇒θ)" },
+      { label: "ex-label-excluded-middle", value: "φ∨¬φ" },
+      { label: "ex-label-pierce", value: "((φ⇒ψ)⇒φ)⇒φ" },
+      { label: "ex-label-demorgan-1", value: "¬(φ∨ψ)⇒¬φ∧¬ψ" },
+      { label: "ex-label-distributivity", value: "φ∧(ψ∨θ)⇒(φ∧ψ)∨(φ∧θ)" },
+      { label: "ex-label-contraposition", value: "(φ⇒ψ)⇒(¬ψ⇒¬φ)" },
+      { label: "ex-label-explosion", value: "φ∧¬φ⇒ψ" },
+      { label: "ex-label-mp-classic", value: "φ\nφ⇒ψ\n————————————————\nψ" }
     ],
     "ex-category-predicate": [
-      { label: "Universal Elimination", value: "∀x P(x) ⊢ P(a)" },
-      { label: "Existential Introduction", value: "P(a) ⊢ ∃x P(x)" },
-      { label: "Quantifier Exchange", value: "¬∀x P(x) ⊢ ∃x ¬P(x)" },
-      { label: "Distributivity of ∀", value: "∀x (P(x) ∧ Q(x)) ⊢ ∀x P(x) ∧ ∀x Q(x)" },
-      { label: "Syllogism (Barbara)", value: "∀x (P(x) ⇒ Q(x)), ∀x (Q(x) ⇒ R(x)) ⊢ ∀x (P(x) ⇒ R(x))" },
-      { label: "Existence from Universality", value: "∀x P(x) ⊢ ∃x P(x)" }
+      { label: "ex-label-univ-elim", value: "∀x P(x) ⊢ P(a)" },
+      { label: "ex-label-exis-intro", value: "P(a) ⊢ ∃x P(x)" },
+      { label: "ex-label-quant-exch", value: "¬∀x P(x) ⊢ ∃x ¬P(x)" },
+      { label: "ex-label-dist-forall", value: "∀x (P(x) ∧ Q(x)) ⊢ ∀x P(x) ∧ ∀x Q(x)" },
+      { label: "ex-label-syllogism-barbara", value: "∀x (P(x) ⇒ Q(x)), ∀x (Q(x) ⇒ R(x)) ⊢ ∀x (P(x) ⇒ R(x))" },
+      { label: "ex-label-exis-from-univ", value: "∀x P(x) ⊢ ∃x P(x)" }
     ],
     "ex-category-theories": [
-      { label: "Addition Identity", value: "x + 0 = x" },
-      { label: "Addition Recursion", value: "x + s(y) = s(x + y)" },
-      { label: "Multiplication by Zero", value: "x * 0 = 0" },
-      { label: "Order Transitivity", value: "x < y ∧ y < z ⇒ x < z" },
-      { label: "Order Trichotomy", value: "x < y ∨ x = y ∨ y < x" },
-      { label: "Successor Not Zero", value: "¬(s(x) = 0)" }
+      { label: "ex-label-add-ident", value: "x + 0 = x" },
+      { label: "ex-label-add-recur", value: "x + s(y) = s(x + y)" },
+      { label: "ex-label-mult-zero", value: "x * 0 = 0" },
+      { label: "ex-label-ord-trans", value: "x < y ∧ y < z ⇒ x < z" },
+      { label: "ex-label-ord-trich", value: "x < y ∨ x = y ∨ y < x" },
+      { label: "ex-label-succ-not-zero", value: "¬(s(x) = 0)" }
     ]
   },
   fitch: {
     "ex-category-propositional": [
-      { label: "Identity", value: "φ⇒φ" },
-      { label: "Modus Tollens", value: "φ⇒ψ, ¬ψ ⊢ ¬φ" },
-      { label: "Double Negation Intro", value: "φ ⊢ ¬¬φ" },
-      { label: "Double Negation Elim", value: "¬¬φ ⊢ φ" },
-      { label: "Conjunction Intro", value: "φ, ψ ⊢ φ∧ψ" },
-      { label: "Conjunction Elim", value: "φ∧ψ ⊢ φ" },
-      { label: "Disjunction Intro", value: "φ ⊢ φ∨ψ" },
-      { label: "Hypothetical Syllogism", value: "φ⇒ψ, ψ⇒θ ⊢ φ⇒θ" },
-      { label: "Explosion (ECQ)", value: "φ, ¬φ ⊢ ψ" },
-      { label: "Modus Ponens (Step)", value: "φ\nφ⇒ψ\n————————————————\nψ" }
+      { label: "ex-label-identity", value: "φ⇒φ" },
+      { label: "ex-label-modus-tollens", value: "φ⇒ψ, ¬ψ ⊢ ¬φ" },
+      { label: "ex-label-dn-intro", value: "φ ⊢ ¬¬φ" },
+      { label: "ex-label-dn-elim", value: "¬¬φ ⊢ φ" },
+      { label: "ex-label-conj-intro", value: "φ, ψ ⊢ φ∧ψ" },
+      { label: "ex-label-conj-elim", value: "φ∧ψ ⊢ φ" },
+      { label: "ex-label-disj-intro", value: "φ ⊢ φ∨ψ" },
+      { label: "ex-label-hyp-syll", value: "φ⇒ψ, ψ⇒θ ⊢ φ⇒θ" },
+      { label: "ex-label-explosion-ecq", value: "φ, ¬φ ⊢ ψ" },
+      { label: "ex-label-mp-step", value: "φ\nφ⇒ψ\n————————————————\nψ" }
     ],
     "ex-category-predicate": [
-      { label: "Universal Elimination", value: "∀x P(x) ⊢ P(a)" },
-      { label: "Existential Introduction", value: "P(a) ⊢ ∃x P(x)" },
-      { label: "Quantifier Exchange", value: "¬∀x P(x) ⊢ ∃x ¬P(x)" },
-      { label: "Universal Introduction", value: "P(a) ⊢ ∀x P(x)" },
-      { label: "Barcan Formula (one-way)", value: "∀x □P(x) ⊢ □∀x P(x)" }
+      { label: "ex-label-univ-elim", value: "∀x P(x) ⊢ P(a)" },
+      { label: "ex-label-exis-intro", value: "P(a) ⊢ ∃x P(x)" },
+      { label: "ex-label-quant-exch", value: "¬∀x P(x) ⊢ ∃x ¬P(x)" },
+      { label: "ex-label-univ-intro", value: "P(a) ⊢ ∀x P(x)" },
+      { label: "ex-label-barcan", value: "∀x □P(x) ⊢ □∀x P(x)" }
     ],
     "ex-category-theories": [
-      { label: "Addition Identity", value: "x + 0 = x" },
-      { label: "Successor Injectivity", value: "s(x) = s(y) ⇒ x = y" },
-      { label: "Order Irreflexivity", value: "¬(x < x)" },
-      { label: "Addition Compatibility", value: "x < y ⇒ x + z < y + z" }
+      { label: "ex-label-add-ident", value: "x + 0 = x" },
+      { label: "ex-label-succ-inj", value: "s(x) = s(y) ⇒ x = y" },
+      { label: "ex-label-ord-irref", value: "¬(x < x)" },
+      { label: "ex-label-add-comp", value: "x < y ⇒ x + z < y + z" }
     ]
   },
   sequent: {
     "ex-category-propositional": [
-      { label: "Basic Identity", value: "φ ⊢ φ" },
-      { label: "Double Negation", value: "⊢ φ⇒¬¬φ" },
-      { label: "Modus Ponens", value: "φ, φ⇒ψ ⊢ ψ" },
-      { label: "De Morgan", value: "¬(φ∧ψ) ⊢ ¬φ, ¬ψ" },
-      { label: "Excluded Middle", value: "⊢ φ∨¬φ" },
-      { label: "Distributivity", value: "φ∧(ψ∨θ) ⊢ (φ∧ψ)∨(φ∧θ)" },
-      { label: "Empty Conclusion", value: "φ, ¬φ ⊢ " },
-      { label: "Complex Chain", value: "φ⇒ψ, ψ⇒θ ⊢ φ⇒θ" },
-      { label: "Multi-formula Sequent", value: "ψ,φ ⊢ (φ⇒ψ)∧(ψ⇒θ)" },
-      { label: "Derivation Example", value: "φ\nφ⇒ψ\n————————————————\nψ" }
+      { label: "ex-label-basic-id", value: "φ ⊢ φ" },
+      { label: "ex-label-double-negation", value: "⊢ φ⇒¬¬φ" },
+      { label: "ex-label-mp", value: "φ, φ⇒ψ ⊢ ψ" },
+      { label: "ex-label-demorgan", value: "¬(φ∧ψ) ⊢ ¬φ, ¬ψ" },
+      { label: "ex-label-excluded-middle", value: "⊢ φ∨¬φ" },
+      { label: "ex-label-distributivity", value: "φ∧(ψ∨θ) ⊢ (φ∧ψ)∨(φ∧θ)" },
+      { label: "ex-label-empty-concl", value: "φ, ¬φ ⊢ " },
+      { label: "ex-label-complex-chain", value: "φ⇒ψ, ψ⇒θ ⊢ φ⇒θ" },
+      { label: "ex-label-multi-formula", value: "ψ,φ ⊢ (φ⇒ψ)∧(ψ⇒θ)" },
+      { label: "ex-label-deriv-ex", value: "φ\nφ⇒ψ\n————————————————\nψ" }
     ],
     "ex-category-predicate": [
-      { label: "Universal Left", value: "∀x P(x) ⊢ P(a)" },
-      { label: "Existential Right", value: "P(a) ⊢ ∃x P(x)" },
-      { label: "Quantifier Exchange", value: "¬∀x P(x) ⊢ ∃x ¬P(x)" },
-      { label: "Predicate Distributivity", value: "∀x (P(x) ∧ Q(x)) ⊢ ∀x P(x), ∀x Q(x)" }
+      { label: "ex-label-univ-left", value: "∀x P(x) ⊢ P(a)" },
+      { label: "ex-label-exis-right", value: "P(a) ⊢ ∃x P(x)" },
+      { label: "ex-label-quant-exch", value: "¬∀x P(x) ⊢ ∃x ¬P(x)" },
+      { label: "ex-label-pred-dist", value: "∀x (P(x) ∧ Q(x)) ⊢ ∀x P(x), ∀x Q(x)" }
     ],
     "ex-category-theories": [
-      { label: "Arithmetic Ax1", value: "s(x) = s(y) ⊢ x = y" },
-      { label: "Arithmetic Ax4", value: " ⊢ x + 0 = x" },
-      { label: "Order Ax2", value: "x < y, y < z ⊢ x < z" },
-      { label: "Order Ax4", value: "x < y ⊢ x + z < y + z" }
+      { label: "ex-label-arith-ax1", value: "s(x) = s(y) ⊢ x = y" },
+      { label: "ex-label-arith-ax4", value: " ⊢ x + 0 = x" },
+      { label: "ex-label-ord-ax2", value: "x < y, y < z ⊢ x < z" },
+      { label: "ex-label-ord-ax4", value: "x < y ⊢ x + z < y + z" }
     ]
   }
 };
@@ -163,6 +163,7 @@ export function initExamplesModal() {
       if (catKey === currentCategory) chip.classList.add('active');
       
       chip.textContent = t(catKey);
+      chip.setAttribute('data-i18n', catKey);
       
       chip.onclick = () => {
         currentCategory = catKey;
@@ -181,7 +182,8 @@ export function initExamplesModal() {
     if (examples.length === 0) {
       const emptyMsg = document.createElement('div');
       emptyMsg.className = 'empty-examples-msg';
-      emptyMsg.textContent = "No examples for this category.";
+      emptyMsg.textContent = t("modal-no-examples");
+      emptyMsg.setAttribute('data-i18n', "modal-no-examples");
       contentArea.appendChild(emptyMsg);
       return;
     }
@@ -192,7 +194,8 @@ export function initExamplesModal() {
 
       const label = document.createElement('div');
       label.className = 'example-label';
-      label.textContent = ex.label;
+      label.textContent = t(ex.label);
+      label.setAttribute('data-i18n', ex.label);
 
       const value = document.createElement('div');
       value.className = 'example-value';

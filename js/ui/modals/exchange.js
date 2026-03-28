@@ -4,11 +4,11 @@ import {t} from '../../core/i18n.js';
 /**
  * Creates a modal for reordering formulas (Exchange rule)
  * Allows users to drag and drop formulas horizontally to reorder them
- * @param {string} title - Modal title (e.g., "Exchange Left")
+ * @param {string} titleKey - Modal title key
  * @param {Array<Object>} formulas - Array of formula objects to reorder
  * @returns {Promise<Array<Object>>} Promise that resolves with the reordered array of formulas
  */
-export function createExchangeModal(title, formulas) {
+export function createExchangeModal(titleKey, formulas) {
     return new Promise((resolve, reject) => {
         // Clone formulas to work with a local copy
         let currentFormulas = [...formulas];
@@ -108,7 +108,8 @@ export function createExchangeModal(title, formulas) {
 
         // Modal Title
         const modalTitle = document.createElement('h2');
-        modalTitle.textContent = title;
+        modalTitle.textContent = t(titleKey);
+        modalTitle.setAttribute('data-i18n', titleKey);
         Object.assign(modalTitle.style, {
             margin: '0',
             fontSize: '28px',
@@ -120,6 +121,7 @@ export function createExchangeModal(title, formulas) {
         // Description
         const description = document.createElement('p');
         description.textContent = t('modal-exchange-desc');
+        description.setAttribute('data-i18n', 'modal-exchange-desc');
         Object.assign(description.style, {
             margin: '0',
             fontSize: '16px',
@@ -200,6 +202,7 @@ export function createExchangeModal(title, formulas) {
 
         const saveButton = document.createElement('button');
         saveButton.textContent = t('modal-btn-apply-order');
+        saveButton.setAttribute('data-i18n', 'modal-btn-apply-order');
         Object.assign(saveButton.style, {
             flex: '1',
             padding: '16px',
@@ -215,6 +218,7 @@ export function createExchangeModal(title, formulas) {
 
         const cancelButton = document.createElement('button');
         cancelButton.textContent = t('modal-btn-cancel');
+        cancelButton.setAttribute('data-i18n', 'modal-btn-cancel');
         Object.assign(cancelButton.style, {
             padding: '16px 24px',
             backgroundColor: '#6c757d',

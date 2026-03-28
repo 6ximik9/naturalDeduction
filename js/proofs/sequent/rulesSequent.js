@@ -385,7 +385,7 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        createExchangeModal(t("modal-exchange-left"), currentSeq.antecedent)
+        createExchangeModal("modal-exchange-left", currentSeq.antecedent)
             .then(newAntecedent => {
                 // Check if anything actually changed to avoid cluttering history
                 const isChanged = JSON.stringify(newAntecedent) !== JSON.stringify(currentSeq.antecedent);
@@ -402,7 +402,7 @@ export const RULES = {
         const currentSeq = getActiveSequent();
         if (!currentSeq || currentSeq.isClosed) return;
 
-        createExchangeModal(t("modal-exchange-right"), currentSeq.succedent)
+        createExchangeModal("modal-exchange-right", currentSeq.succedent)
             .then(newSuccedent => {
                 const isChanged = JSON.stringify(newSuccedent) !== JSON.stringify(currentSeq.succedent);
                 if (isChanged) {

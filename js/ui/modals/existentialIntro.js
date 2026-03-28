@@ -1,4 +1,3 @@
-
 import * as monaco from 'monaco-editor';
 import * as editorMonaco from '../monacoEditor';
 import { checkRule } from "../../index";
@@ -113,6 +112,7 @@ export function createAdvancedModal(formulas) {
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
     modalTitle.textContent = t('modal-exists-intro-title');
+    modalTitle.setAttribute('data-i18n', 'modal-exists-intro-title');
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -123,6 +123,7 @@ export function createAdvancedModal(formulas) {
 
     const description = document.createElement('p');
     description.textContent = t('modal-exists-intro-desc');
+    description.setAttribute('data-i18n', 'modal-exists-intro-desc');
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -191,6 +192,7 @@ export function createAdvancedModal(formulas) {
 
     const formulaLabel = document.createElement('label');
     formulaLabel.textContent = t('modal-select-hyp-formula');
+    formulaLabel.setAttribute('data-i18n', 'modal-select-hyp-formula');
     Object.assign(formulaLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -217,6 +219,7 @@ export function createAdvancedModal(formulas) {
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
     defaultOption.textContent = t('modal-choose-formula');
+    defaultOption.setAttribute('data-i18n', 'modal-choose-formula');
     defaultOption.disabled = true;
     defaultOption.selected = true;
     formulaSelect.appendChild(defaultOption);
@@ -233,6 +236,7 @@ export function createAdvancedModal(formulas) {
 
     const customLabel = document.createElement('label');
     customLabel.textContent = t('modal-enter-custom-formula');
+    customLabel.setAttribute('data-i18n', 'modal-enter-custom-formula');
     Object.assign(customLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -275,6 +279,7 @@ export function createAdvancedModal(formulas) {
 
     const variableLabel = document.createElement('label');
     variableLabel.textContent = t('modal-select-var-subst');
+    variableLabel.setAttribute('data-i18n', 'modal-select-var-subst');
     Object.assign(variableLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -296,6 +301,7 @@ export function createAdvancedModal(formulas) {
 
     const termLabel = document.createElement('label');
     termLabel.textContent = t('modal-enter-replacement-term');
+    termLabel.setAttribute('data-i18n', 'modal-enter-replacement-term');
     Object.assign(termLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -316,6 +322,7 @@ export function createAdvancedModal(formulas) {
       if (!buttonValues || buttonValues.length === 0) {
         const noVarsMessage = document.createElement('div');
         noVarsMessage.textContent = t('modal-no-vars-available');
+        noVarsMessage.setAttribute('data-i18n', 'modal-no-vars-available');
         Object.assign(noVarsMessage.style, {
           padding: '16px',
           textAlign: 'center',
@@ -600,6 +607,7 @@ export function createAdvancedModal(formulas) {
     // Create save button with improved styling and validation
     const saveButton = document.createElement('button');
     saveButton.textContent = t('modal-btn-apply-subst');
+    saveButton.setAttribute('data-i18n', 'modal-btn-apply-subst');
     saveButton.disabled = true;
     Object.assign(saveButton.style, {
       flex: '1',
@@ -618,6 +626,7 @@ export function createAdvancedModal(formulas) {
     // Create cancel button
     const cancelButton = document.createElement('button');
     cancelButton.textContent = t('modal-btn-cancel');
+    cancelButton.setAttribute('data-i18n', 'modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       fontSize: '16px',
@@ -835,6 +844,7 @@ export function createAdvancedModal(formulas) {
     const myFormulaOption = document.createElement('option');
     myFormulaOption.value = 'My formula';
     myFormulaOption.textContent = t('modal-my-formula');
+    myFormulaOption.setAttribute('data-i18n', 'modal-my-formula');
     formulaSelect.appendChild(myFormulaOption);
 
 

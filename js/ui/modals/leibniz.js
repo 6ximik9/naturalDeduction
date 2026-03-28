@@ -133,6 +133,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
     modalTitle.textContent = t('modal-leibniz-title');
+    modalTitle.setAttribute('data-i18n', 'modal-leibniz-title');
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -145,6 +146,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     // Add description
     const description = document.createElement('p');
     description.textContent = t('modal-leibniz-desc');
+    description.setAttribute('data-i18n', 'modal-leibniz-desc');
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -169,6 +171,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
         selectedElement = null;
         selectedPath = null;
         selectedTextDisplay.textContent = t('modal-no-element-selected');
+        selectedTextDisplay.setAttribute('data-i18n', 'modal-no-element-selected');
 
         // Disable Monaco editor
         disableEditor();
@@ -190,6 +193,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
 
       // Update selected text display
       selectedTextDisplay.textContent = `${t('modal-element-selected')} ${text}`;
+      selectedTextDisplay.removeAttribute('data-i18n'); // Complex dynamic text
 
       // Enable Monaco editor
       enableEditor();
@@ -203,6 +207,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     // Create selected text display
     const selectedTextDisplay = document.createElement('div');
     selectedTextDisplay.textContent = t('modal-no-element-selected');
+    selectedTextDisplay.setAttribute('data-i18n', 'modal-no-element-selected');
     Object.assign(selectedTextDisplay.style, {
       fontSize: '24px',
       color: 'var(--col-text-muted)',
@@ -216,6 +221,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     // Create Monaco editor container
     const editorLabel = document.createElement('label');
     editorLabel.textContent = t('modal-enter-replacement-label');
+    editorLabel.setAttribute('data-i18n', 'modal-enter-replacement-label');
     Object.assign(editorLabel.style, {
       fontSize: '16px',
       fontWeight: '600',
@@ -329,6 +335,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       editorContainer.style.opacity = '1';
       editorContainer.style.pointerEvents = 'auto';
       editorLabel.textContent = t('modal-enter-replacement-active');
+      editorLabel.setAttribute('data-i18n', 'modal-enter-replacement-active');
       editorLabel.style.color = 'var(--col-text-main)';
 
       // Focus the editor
@@ -344,6 +351,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       editorContainer.style.opacity = '0.6';
       editorContainer.style.pointerEvents = 'none';
       editorLabel.textContent = t('modal-enter-replacement-label');
+      editorLabel.setAttribute('data-i18n', 'modal-enter-replacement-label');
       editorLabel.style.color = 'var(--col-text-muted)';
     }
 
@@ -386,6 +394,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     // Create apply button
     const applyButton = document.createElement('button');
     applyButton.textContent = t('modal-btn-apply-replacement');
+    applyButton.setAttribute('data-i18n', 'modal-btn-apply-replacement');
     applyButton.disabled = true;
     Object.assign(applyButton.style, {
       flex: '1',
@@ -404,6 +413,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     // Create cancel button
     const cancelButton = document.createElement('button');
     cancelButton.textContent = t('modal-btn-cancel');
+    cancelButton.setAttribute('data-i18n', 'modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       fontSize: '16px',

@@ -75,9 +75,6 @@ export function createReturnConfirmModal(currentFormula) {
           transform: translateY(-2px);
           filter: brightness(1.05);
         }
-        .modal-btn:active {
-          transform: translateY(0);
-        }
         .modal-btn i {
           font-size: 20px;
         }
@@ -88,6 +85,7 @@ export function createReturnConfirmModal(currentFormula) {
     // Modal Title/Message
     const modalMessage = document.createElement('div');
     modalMessage.textContent = t('confirm-return-main');
+    modalMessage.setAttribute('data-i18n', 'confirm-return-main');
     Object.assign(modalMessage.style, {
       fontSize: '20px',
       fontWeight: '600',
@@ -106,10 +104,14 @@ export function createReturnConfirmModal(currentFormula) {
       marginTop: '8px' 
     });
 
-    const createButton = (text, iconClass, isSecondary = false) => {
+    const createButton = (text, iconClass, isSecondary = false, i18nKey = null) => {
       const btn = document.createElement('button');
       btn.className = 'modal-btn';
       btn.innerHTML = `<i class="${iconClass}"></i> <span>${text}</span>`;
+      if (i18nKey) {
+          const span = btn.querySelector('span');
+          if (span) span.setAttribute('data-i18n', i18nKey);
+      }
       
       if (isSecondary) {
         Object.assign(btn.style, {
@@ -148,10 +150,10 @@ export function createReturnConfirmModal(currentFormula) {
       return btn;
     };
 
-    const editButton = createButton(t('modal-btn-edit-intro'), 'ri-edit-box-line');
-    const yesButton = createButton(t('modal-btn-yes'), 'ri-eraser-line');
-    const startButton = createButton(t('nav-show-start'), 'ri-home-4-line');
-    const cancelButton = createButton(t('modal-btn-cancel'), 'ri-close-line', true);
+    const editButton = createButton(t('modal-btn-edit-intro'), 'ri-edit-box-line', false, 'modal-btn-edit-intro');
+    const yesButton = createButton(t('modal-btn-yes'), 'ri-eraser-line', false, 'modal-btn-yes');
+    const startButton = createButton(t('nav-show-start'), 'ri-home-4-line', false, 'nav-show-start');
+    const cancelButton = createButton(t('modal-btn-cancel'), 'ri-close-line', true, 'modal-btn-cancel');
 
     const closeModal = () => {
       modalOverlay.style.animation = 'modalSlideOut 0.2s ease-in forwards';

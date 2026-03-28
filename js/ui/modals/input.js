@@ -7,12 +7,18 @@ import {t} from "../../core/i18n";
 /**
  * Creates a simple modal for inputting a term
  * Used for rules like Identity Introduction (= I)
- * @param {string} title - Modal title
- * @param {string} label - Input label
+ * @param {string} title - Modal title (or key)
+ * @param {string} label - Input label (or key)
  * @returns {Promise<string>} Promise that resolves with the entered term
  */
-export function createInputModal(title = t('modal-input-title-default'), label = t('modal-input-label-default'), initialValue = '') {
+export function createInputModal(title = 'modal-input-title-default', label = 'modal-input-label-default', initialValue = '') {
   return new Promise((resolve, reject) => {
+    // Determine if arguments are keys or already translated
+    const titleText = title.includes('-') ? t(title) : title;
+    const titleKey = title.includes('-') ? title : null;
+    const labelText = label.includes('-') ? t(label) : label;
+    const labelKey = label.includes('-') ? label : null;
+
     // Create modal overlay
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'modal-overlay';
@@ -71,7 +77,8 @@ export function createInputModal(title = t('modal-input-title-default'), label =
 
     // Modal Title
     const modalTitle = document.createElement('h2');
-    modalTitle.textContent = title;
+    modalTitle.textContent = titleText;
+    if (titleKey) modalTitle.setAttribute('data-i18n', titleKey);
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -82,7 +89,8 @@ export function createInputModal(title = t('modal-input-title-default'), label =
 
     // Input Label
     const inputLabel = document.createElement('label');
-    inputLabel.textContent = label;
+    inputLabel.textContent = labelText;
+    if (labelKey) inputLabel.setAttribute('data-i18n', labelKey);
     Object.assign(inputLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -150,6 +158,7 @@ export function createInputModal(title = t('modal-input-title-default'), label =
           isValid = false;
           editorContainer.classList.add('editor-error');
           errorDisplay.textContent = t('modal-invalid-syntax');
+          errorDisplay.setAttribute('data-i18n', 'modal-invalid-syntax');
           errorDisplay.style.display = 'block';
         } else {
           editorContainer.classList.remove('editor-error');
@@ -174,6 +183,7 @@ export function createInputModal(title = t('modal-input-title-default'), label =
 
     const saveButton = document.createElement('button');
     saveButton.textContent = t('modal-btn-apply');
+    saveButton.setAttribute('data-i18n', 'modal-btn-apply');
     saveButton.disabled = true;
     Object.assign(saveButton.style, {
       flex: '1',
@@ -191,6 +201,7 @@ export function createInputModal(title = t('modal-input-title-default'), label =
 
     const cancelButton = document.createElement('button');
     cancelButton.textContent = t('modal-btn-cancel');
+    cancelButton.setAttribute('data-i18n', 'modal-btn-cancel');
     Object.assign(cancelButton.style, {
       padding: '16px 24px',
       backgroundColor: '#6c757d',
