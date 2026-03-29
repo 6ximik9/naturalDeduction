@@ -3,6 +3,7 @@ import {side} from '../index';
 import {processExpression} from '../index';
 import {checkWithAntlr} from '../core/deductiveEngine';
 import {translations} from '../core/i18n';
+import {startTour} from './tour';
 
 // Helper to get current language
 function getLang() {
@@ -151,6 +152,20 @@ function createCard(title, subtitle, description, iconClass) {
 function setGeneral() {
     const lang = getLang();
     const t = translations[lang];
+
+    const tourCard = createCard(
+        t['tour-start-title'] || 'Start Tour',
+        'Interactive Guide',
+        t['tour-start-desc'] || 'Click here to start an interactive guide through the application.',
+        'ri-guide-line'
+    );
+    tourCard.style.cursor = 'pointer';
+    tourCard.classList.add('tour-start-card');
+    tourCard.addEventListener('click', () => {
+        helpModal.style.display = 'none';
+        startTour();
+    });
+    info.appendChild(tourCard);
 
     const cards = [
         {

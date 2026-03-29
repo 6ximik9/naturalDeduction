@@ -238,4 +238,17 @@ export function startTour() {
   }
 
   driverObj.drive();
+
+  // If start screen is hidden, jump to sidebar step
+  const startScreen = document.getElementById('start-screen');
+  if (startScreen && startScreen.classList.contains('hidden')) {
+    // Always provide a formula for the tour to ensure the walkthrough makes sense
+    if (editor) {
+      editor.setValue('A ∧ B → A');
+    }
+    // Skip to sidebar step (index 7)
+    setTimeout(() => {
+        driverObj.moveTo(7);
+    }, 100);
+  }
 }
