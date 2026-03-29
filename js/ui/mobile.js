@@ -1,29 +1,42 @@
+export function getActiveSidebar() {
+  const homeSidebar = document.getElementById('sidebar-home');
+  const proofSidebar = document.getElementById('sidebar-proof');
+  if (homeSidebar && homeSidebar.style.display !== 'none') return homeSidebar;
+  if (proofSidebar && proofSidebar.style.display !== 'none') return proofSidebar;
+  return null;
+}
+
+export function openSidebar() {
+  const activeSidebar = getActiveSidebar();
+  const overlay = document.getElementById('mobile-overlay');
+  if (activeSidebar) {
+    activeSidebar.classList.add('open');
+    if (overlay) overlay.classList.add('active');
+  }
+}
+
+export function closeSidebar() {
+  const sidebars = document.querySelectorAll('.sidebar');
+  const overlay = document.getElementById('mobile-overlay');
+  sidebars.forEach(sidebar => sidebar.classList.remove('open'));
+  if (overlay) overlay.classList.remove('active');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const menuBtn = document.getElementById('mobile-menu-btn');
   const overlay = document.getElementById('mobile-overlay');
 
   if (!menuBtn || !overlay) return;
 
-  function getActiveSidebar() {
-    const homeSidebar = document.getElementById('sidebar-home');
-    const proofSidebar = document.getElementById('sidebar-proof');
-    if (homeSidebar && homeSidebar.style.display !== 'none') return homeSidebar;
-    if (proofSidebar && proofSidebar.style.display !== 'none') return proofSidebar;
-    return null;
-  }
-
   function toggleSidebar() {
     const activeSidebar = getActiveSidebar();
     if (activeSidebar) {
-      activeSidebar.classList.toggle('open');
-      overlay.classList.toggle('active');
+      if (activeSidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
     }
-  }
-
-  function closeSidebar() {
-    const sidebars = document.querySelectorAll('.sidebar');
-    sidebars.forEach(sidebar => sidebar.classList.remove('open'));
-    overlay.classList.remove('active');
   }
 
   menuBtn.addEventListener('click', toggleSidebar);

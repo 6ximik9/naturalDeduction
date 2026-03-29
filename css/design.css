@@ -2490,4 +2490,31 @@
       #proof-layout-divider {
         display: none !important;
       }
+
+      .start-footer {
+        flex-direction: column !important;
+        gap: 12px !important;
+        height: auto !important;
+        padding-bottom: 20px !important;
+      }
+
+      .start-footer > div:first-child {
+        display: none !important; /* Hide the empty left spacer */
+      }
+
+      .start-footer > div:last-child {
+        width: 100% !important;
+        text-align: center !important;
+        flex: none !important;
+      }
+
+      .start-btn {
+        width: 100% !important;
+        margin: 0 !important;
+      }
+
+      .tour-btn {
+        width: 100% !important;
+        display: block !important;
+      }
     }

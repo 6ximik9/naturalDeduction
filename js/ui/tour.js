@@ -2,11 +2,14 @@ import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import { t } from '../core/i18n';
 import { editor } from './monacoEditor';
+import { openSidebar, closeSidebar } from './mobile';
 
 /**
  * Starts the application tour using driver.js
  */
 export function startTour() {
+  const isMobile = () => window.innerWidth <= 768;
+
   const driverObj = driver({
     showProgress: true,
     animate: true,
@@ -14,6 +17,61 @@ export function startTour() {
     prevBtnText: t('tour-prev'),
     doneBtnText: t('tour-done'),
     allowClose: true,
+    onHighlightStarted: (element) => {
+      // Use instant scroll to ensure the element is in its final position 
+      // BEFORE driver.js calculates the highlight overlay position.
+      // This prevents the "jumping" effect where the highlight is in the wrong place.
+      if (element) {
+        element.scrollIntoView({
+          behavior: "auto",
+          block: "center",
+          inline: "nearest"
+        });
+      }
+
+      if (!isMobile()) return;
+      
+      const sidebarSteps = [
+        '#sidebar-home', 
+        '#tour-font-selector', 
+        '#tour-editor-data', 
+        '#tour-editor-support',
+        '#sidebar-proof',
+        '#tour-proof-data',
+        '#tour-proof-live-control'
+      ];
+      
+      const isSidebarElement = element && sidebarSteps.some(selector => 
+        element.id === selector.replace('#', '') || element.closest(selector)
+      );
+
+      if (isSidebarElement) {
+        openSidebar();
+      } else {
+        closeSidebar();
+      }
+    },
+    onHighlighted: (element) => {
+      // After highlight is active, if it's a sidebar element on mobile, 
+      // we might need a tiny second scroll adjustment because the sidebar 
+      // opening animation (300ms) can shift the element.
+      if (isMobile() && element && element.closest('.sidebar')) {
+        setTimeout(() => {
+          element.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+        }, 300);
+      }
+    },
+    onDeselected: () => {
+       // Optional: additional cleanup if needed
+    },
+    onDestroyed: () => {
+      if (isMobile()) {
+        closeSidebar();
+      }
+    },
     steps: [
       { 
         element: '#start-screen .start-container', 
@@ -30,7 +88,7 @@ export function startTour() {
           title: t('tour-lang-theme-title'), 
           description: t('tour-lang-theme-desc'), 
           side: "bottom", 
-          align: 'end' 
+          align: isMobile() ? 'center' : 'end' 
         } 
       },
       { 
@@ -39,7 +97,7 @@ export function startTour() {
           title: t('tour-system-title'), 
           description: t('tour-system-desc'), 
           side: "bottom", 
-          align: 'start' 
+          align: isMobile() ? 'center' : 'start' 
         } 
       },
       { 
@@ -48,7 +106,7 @@ export function startTour() {
           title: t('tour-logic-title'), 
           description: t('tour-logic-desc'), 
           side: "bottom", 
-          align: 'start' 
+          align: isMobile() ? 'center' : 'start' 
         } 
       },
       { 
@@ -57,7 +115,7 @@ export function startTour() {
           title: t('tour-theories-title'), 
           description: t('tour-theories-desc'), 
           side: "bottom", 
-          align: 'start' 
+          align: isMobile() ? 'center' : 'start' 
         } 
       },
       { 
@@ -66,7 +124,7 @@ export function startTour() {
           title: t('tour-settings-title'), 
           description: t('tour-settings-desc'), 
           side: "bottom", 
-          align: 'start' 
+          align: isMobile() ? 'center' : 'start' 
         } 
       },
       { 
@@ -83,7 +141,7 @@ export function startTour() {
         popover: { 
           title: t('tour-sidebar-title'), 
           description: t('tour-sidebar-desc'), 
-          side: "right", 
+          side: isMobile() ? "bottom" : "right", 
           align: 'start' 
         }
       },
@@ -92,7 +150,7 @@ export function startTour() {
         popover: { 
           title: t('tour-font-title'), 
           description: t('tour-font-desc'), 
-          side: "right", 
+          side: isMobile() ? "bottom" : "right", 
           align: 'start' 
         }
       },
@@ -101,7 +159,7 @@ export function startTour() {
         popover: { 
           title: t('tour-editor-data-title'), 
           description: t('tour-editor-data-desc'), 
-          side: "right", 
+          side: isMobile() ? "bottom" : "right", 
           align: 'start' 
         }
       },
@@ -110,7 +168,7 @@ export function startTour() {
         popover: { 
           title: t('tour-editor-support-title'), 
           description: t('tour-editor-support-desc'), 
-          side: "right", 
+          side: isMobile() ? "bottom" : "right", 
           align: 'start' 
         }
       },
@@ -137,7 +195,7 @@ export function startTour() {
         popover: { 
           title: t('tour-tools-title'), 
           description: t('tour-tools-desc'), 
-          side: "right", 
+          side: isMobile() ? "bottom" : "right", 
           align: 'start' 
         }
       },
@@ -173,7 +231,7 @@ export function startTour() {
         popover: { 
           title: t('tour-data-title'), 
           description: t('tour-data-desc'), 
-          side: "right", 
+          side: isMobile() ? "bottom" : "right", 
           align: 'start' 
         }
       },
@@ -182,7 +240,7 @@ export function startTour() {
         popover: { 
           title: t('tour-live-control-title'), 
           description: t('tour-live-control-desc'), 
-          side: "right", 
+          side: isMobile() ? "bottom" : "right", 
           align: 'start' 
         }
       }
