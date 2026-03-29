@@ -138,6 +138,7 @@ export function startTour() {
       },
       {
         element: '#sidebar-home',
+        disablePrev: true,
         popover: { 
           title: t('tour-sidebar-title'), 
           description: t('tour-sidebar-desc'), 
@@ -192,6 +193,7 @@ export function startTour() {
       },
       {
         element: '#proof-tools',
+        disablePrev: true,
         popover: { 
           title: t('tour-tools-title'), 
           description: t('tour-tools-desc'), 
@@ -262,6 +264,14 @@ export function startTour() {
       } else {
         driverObj.moveNext();
       }
+    },
+    onPrevClick: () => {
+      const step = driverObj.getActiveStep();
+      // Prevent going back if the current step is marked with disablePrev
+      if (step && step.disablePrev) {
+        return;
+      }
+      driverObj.movePrevious();
     }
   });
 
@@ -297,16 +307,27 @@ export function startTour() {
 
   driverObj.drive();
 
-  // If start screen is hidden, jump to sidebar step
+  // If start screen is hidden, jump to relevant step
   const startScreen = document.getElementById('start-screen');
-  if (startScreen && startScreen.classList.contains('hidden')) {
-    // Always provide a formula for the tour to ensure the walkthrough makes sense
+  const proofTools = document.getElementById('proof-tools');
+  const isProofActive = proofTools && (proofTools.style.display !== 'none' && proofTools.offsetParent !== null);
+
+  const findStepIndex = (selector) => {
+    return driverObj.getConfig().steps.findIndex(s => s.element === selector);
+  };
+
+  if (isProofActive) {
+    const proofIndex = findStepIndex('#proof-tools');
+    if (proofIndex !== -1) {
+      setTimeout(() => driverObj.moveTo(proofIndex), 100);
+    }
+  } else if (startScreen && startScreen.classList.contains('hidden')) {
     if (editor) {
       editor.setValue('A ∧ B → A');
     }
-    // Skip to sidebar step (index 7)
-    setTimeout(() => {
-        driverObj.moveTo(7);
-    }, 100);
+    const sidebarIndex = findStepIndex('#sidebar-home');
+    if (sidebarIndex !== -1) {
+      setTimeout(() => driverObj.moveTo(sidebarIndex), 100);
+    }
   }
 }
