@@ -3,9 +3,18 @@ import { setLogicMode, setLogicParadigm, setTheory, LOGIC_MODES, LOGIC_PARADIGMS
 export function initStartScreen() {
   const startScreen = document.getElementById('start-screen');
   const startBtn = document.getElementById('start-btn');
+  const tourBtn = document.getElementById('tour-btn');
   const skipCheckbox = document.getElementById('skip-start-screen');
   
   if (!startScreen || !startBtn) return;
+
+  if (tourBtn) {
+    tourBtn.addEventListener('click', () => {
+      import('../tour').then(module => {
+        module.startTour();
+      });
+    });
+  }
 
   const logicModeRadios = document.querySelectorAll('input[name="logic-mode"]');
   const logicParadigmRadios = document.querySelectorAll('input[name="logic-paradigm"]');

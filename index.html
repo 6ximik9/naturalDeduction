@@ -51,7 +51,7 @@
 
     <div class="start-sections">
       <!-- Column 1: System -->
-      <div class="start-section">
+      <div class="start-section" id="tour-system-section">
         <h3 data-i18n="start-system">Proof System</h3>
 
         <label class="radio-card">
@@ -80,7 +80,7 @@
       </div>
 
       <!-- Column 2: Logic & Paradigm -->
-      <div class="start-section">
+      <div class="start-section" id="tour-logic-section">
         <h3 data-i18n="start-logic">Logic Level</h3>
 
         <label class="radio-card">
@@ -118,19 +118,21 @@
 
       <!-- Column 3: Theories & Settings -->
       <div class="start-section">
-        <h3 data-i18n="start-theories">Theories</h3>
-        <div class="checkbox-group">
-          <label class="checkbox-item" id="theory-robinson-container">
-            <input type="checkbox" id="theory-robinson" checked>
-            <span data-i18n="start-theory-robinson">Robinson Arithmetic</span>
-          </label>
-          <label class="checkbox-item" id="theory-order-container">
-            <input type="checkbox" id="theory-order" checked>
-            <span data-i18n="start-theory-order">Order Axioms</span>
-          </label>
+        <div id="tour-theories-part">
+          <h3 data-i18n="start-theories">Theories</h3>
+          <div class="checkbox-group">
+            <label class="checkbox-item" id="theory-robinson-container">
+              <input type="checkbox" id="theory-robinson" checked>
+              <span data-i18n="start-theory-robinson">Robinson Arithmetic</span>
+            </label>
+            <label class="checkbox-item" id="theory-order-container">
+              <input type="checkbox" id="theory-order" checked>
+              <span data-i18n="start-theory-order">Order Axioms</span>
+            </label>
+          </div>
         </div>
 
-        <div style="margin-top: auto; padding-bottom: 5px;">
+        <div id="tour-settings-part" style="margin-top: auto; padding-bottom: 5px;">
           <h3 data-i18n="start-settings" style="border: none; color: var(--col-text-muted); font-size: 11px;">Settings</h3>
           <label class="checkbox-item" style="border: none;">
             <input type="checkbox" id="skip-start-screen">
@@ -144,7 +146,17 @@
       <div style="flex: 1;"></div>
       <button class="start-btn" id="start-btn" data-i18n="start-button">Start Work</button>
       <div style="flex: 1; text-align: right;">
-        <!-- Placeholder for potential future icons/links -->
+        <button id="tour-btn" class="tour-btn" data-i18n="tour-button" style="
+          background: transparent;
+          color: var(--col-accent);
+          border: 1px solid var(--col-accent);
+          padding: 12px 30px;
+          border-radius: 8px;
+          font-weight: 500;
+          font-size: 15px;
+          cursor: pointer;
+          transition: all 0.2s;
+        ">Learning / Tour</button>
       </div>
     </div>
   </div>
@@ -182,10 +194,10 @@
       </div>
     </div>
 
-    <div class="menu-group editor-settings-group">
+    <div class="menu-group editor-settings-group" id="tour-editor-settings">
       <div class="menu-title" data-i18n="sidebar-editor-settings">Editor Settings</div>
       <div class="sidebar-settings-group">
-        <div class="custom-select" style="position: relative; padding: 0; display: block; width: 100%;">
+        <div class="custom-select" id="tour-font-selector" style="position: relative; padding: 0; display: block; width: 100%;">
           <i class="ri-text"
              style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;"></i>
           <select class="font-size-select" style="
@@ -305,7 +317,7 @@
     </div>
   </div>
 
-  <div class="menu-group">
+  <div class="menu-group" id="tour-editor-data">
     <div class="menu-title" data-i18n="nav-data">Data</div>
     <a href="#" class="nav-link" id="uploadBtn" data-i18n="nav-upload">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -326,7 +338,7 @@
     </a>
   </div>
 
-  <div class="menu-group" style="margin-top: auto;">
+  <div class="menu-group" id="tour-editor-support" style="margin-top: auto;">
     <div class="menu-title" data-i18n="nav-support">Support</div>
 
     <div class="support-links-grid">
@@ -415,7 +427,7 @@
     </a>
   </div>
 
-  <div class="menu-group">
+  <div class="menu-group" id="tour-proof-data">
     <div class="menu-title" data-i18n="nav-data">Data</div>
 
     <a href="#" id="sb-smart-mode" class="nav-link">
@@ -456,7 +468,7 @@
     </a>
   </div>
 
-  <div class="menu-group">
+  <div class="menu-group" id="tour-proof-live-control">
     <div class="menu-title" data-i18n="nav-live-control">Live Control</div>
     <div class="live-control-grid">
       <!-- Row 1: View -->
