@@ -16,6 +16,7 @@ import {createAdvancedModal} from "../../ui/modals/existentialIntro";
 import {createModalForLeibniz} from "../../ui/modals/leibniz";
 import {createInputModal} from "../../ui/modals/input";
 import {showToast} from "../../ui/notifications";
+import {performSubstitution} from "../../ui/modals/substitution";
 
 function getCleanFormula(element) {
   const clone = element.cloneNode(true);
@@ -470,9 +471,12 @@ export async function fourteenthRule(proofs, branches) {
 
     if (variable) {
       let constant = firstLine.trim();
-      let newBody = lastLine.split(constant).join(variable);
-      let newFormula = "∀" + variable + " (" + newBody + ")";
 
+      // Use safer AST-based substitution
+      const lastLineNode = getProof(checkWithAntlr(lastLine));
+      const substitutedBody = performSubstitution(lastLineNode, constant, variable);
+
+      let newFormula = "∀" + variable + " (" + substitutedBody + ")";
       newFormula = formulaToString(checkWithAntlr(newFormula), 0);
 
       const allFitchFormulas = Array.from(document.querySelectorAll('.fitch_formula'));
@@ -486,40 +490,49 @@ export async function fourteenthRule(proofs, branches) {
       fitchMain.addRowToBranch(newFormula, "∀I " + (indexStart + 1) + "-" + (indexFinish + 1));
       return 0;
     }
-  } catch (error) {
-    console.log("Modal cancelled:", error);
-  }
-  return -1;
-}
-
-// Rule 15: Existential Introduction (\exists I)
-export async function fifteenthRule(proofs, branches) {
-  if (proofs.length !== 1 || branches.length > 0) {
+    } catch (error) {
+    if (error.message.includes("Variable capture detected")) {
+      showToast(error.message);
+    } else {
+      console.log("Modal cancelled or error:", error);
+    }
+    }
     return -1;
-  }
+    }
 
-  let rule = getCleanFormula(proofs[0].element);
+    // Rule 15: Existential Introduction (\exists I)
+    export async function fifteenthRule(proofs, branches) {
+    if (proofs.length !== 1 || branches.length > 0) {
+    return -1;
+    }
 
-  try {
+    let rule = getCleanFormula(proofs[0].element);
+
+    try {
     const result = await createAdvancedModal([rule]);
 
     if (result && result.length >= 3) {
-      const [formulaValue, selectedConstant, termValue] = result;
+    const [formulaValue, selectedConstant, termValue] = result;
 
-      // Perform substitution: replace constant with variable
-      let newBody = formulaValue.split(selectedConstant).join(termValue);
-      let newFormula = "∃" + termValue + " (" + newBody + ")";
+    // Use safer AST-based substitution instead of split().join()
+    const formulaNode = getProof(checkWithAntlr(formulaValue));
+    const substitutedBody = performSubstitution(formulaNode, selectedConstant, termValue);
 
-      newFormula = formulaToString(checkWithAntlr(newFormula), 0);
-      fitchMain.addRowToBranch(newFormula, "∃I " + (proofs[0].index + 1));
-      return 0;
+    let newFormula = "∃" + termValue + " (" + substitutedBody + ")";
+
+    newFormula = formulaToString(checkWithAntlr(newFormula), 0);
+    fitchMain.addRowToBranch(newFormula, "∃I " + (proofs[0].index + 1));
+    return 0;
     }
-  } catch (error) {
-    console.log("Modal cancelled:", error);
-  }
-  return -1;
-}
-
+    } catch (error) {
+    if (error.message.includes("Variable capture detected")) {
+    showToast(error.message);
+    } else {
+    console.log("Modal cancelled or error:", error);
+    }
+    }
+    return -1;
+    }
 // Rule 16: Existential Elimination (\exists E)
 export function sixteenthRule(proofs, branches) {
   if (proofs.length !== 1 || branches.length !== 1) {

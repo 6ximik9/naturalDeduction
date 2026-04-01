@@ -810,11 +810,14 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
                     return;
                 }
 
+                // Get all free variables in the replacement term to check for capture
+                const replacementFreeVars = deductive.extractFreeVariables(term);
+
                 // Deep copy operand
                 const newFormula = JSON.parse(JSON.stringify(operand));
                 
-                // Perform substitution
-                substituteVariable(newFormula, variableName, term);
+                // Perform substitution with capture check
+                substituteVariable(newFormula, variableName, term, replacementFreeVars, new Set());
 
                 const { ant, suc } = cloneSequentData(currentSeq);
 
@@ -830,8 +833,13 @@ function applyQuantifierSubstitutionRule(side, quantType, ruleName) {
 
                 addChildrenToTree(currentSeq, [new Sequent(ant, suc)], ruleName);
             } catch (e) {
-                console.error("Substitution error:", e);
-                showToast(t("alert-error-parse-term"));
+                if (e.message.startsWith("CAPTURE_ERROR:")) {
+                    const capturedVar = e.message.split(":")[1];
+                    showToast(t("alert-variable-captured").replace("{var}", capturedVar));
+                } else {
+                    console.error("Substitution error:", e);
+                    showToast(t("alert-error-parse-term"));
+                }
             }
         })
         .catch(err => console.log("Substitution cancelled"));
@@ -920,7 +928,8 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
 
                 // Substitution
                 const newFormula = JSON.parse(JSON.stringify(operand));
-                substituteVariable(newFormula, variableName, newVarTerm);
+                const replacementFreeVars = deductive.extractFreeVariables(newVarTerm);
+                substituteVariable(newFormula, variableName, newVarTerm, replacementFreeVars, new Set());
 
                 const { ant, suc } = cloneSequentData(currentSeq);
 
@@ -936,8 +945,13 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
 
                 addChildrenToTree(currentSeq, [new Sequent(ant, suc)], ruleName);
             } catch (e) {
-                console.error("Eigenvariable error:", e);
-                showToast(t("alert-parse-error"));
+                if (e.message.startsWith("CAPTURE_ERROR:")) {
+                    const capturedVar = e.message.split(":")[1];
+                    showToast(t("alert-variable-captured").replace("{var}", capturedVar));
+                } else {
+                    console.error("Eigenvariable error:", e);
+                    showToast(t("alert-parse-error"));
+                }
             }
         })
         .catch(err => console.log("Eigenvariable rule cancelled"));
@@ -946,15 +960,53 @@ function applyQuantifierEigenvariableRule(side, quantType, ruleName) {
 /**
  * Recursively substitutes a variable with a replacement node in a formula.
  * Modifies the 'node' object in place.
+ * @param {Object} node - The formula node to process
+ * @param {string} variable - The variable to replace
+ * @param {Object} replacementNode - The replacement node
+ * @param {Array<string>} replacementFreeVars - Free variables in the replacement term
+ * @param {Set<string>} boundVarsInContext - Variables bound by quantifiers above this node
  */
-function substituteVariable(node, variable, replacementNode) {
+function substituteVariable(node, variable, replacementNode, replacementFreeVars, boundVarsInContext) {
     if (!node || typeof node !== 'object') return;
 
+    // 1. SHADOWING PROTECTION
+    if (node.type === 'forall' || node.type === 'exists' || node.type === 'quantifier') {
+        const quantVar = node.variable && (node.variable.name || node.variable.value || node.variable);
+        if (quantVar === variable) {
+            return; // Variable is shadowed here
+        }
+
+        // 2. CONTEXT TRACKING
+        const newBoundVars = new Set(boundVarsInContext);
+        if (quantVar) newBoundVars.add(quantVar);
+
+        // Recurse into children
+        for (const key in node) {
+            if (Object.prototype.hasOwnProperty.call(node, key)) {
+                const child = node[key];
+                if (Array.isArray(child)) {
+                    child.forEach(item => substituteVariable(item, variable, replacementNode, replacementFreeVars, newBoundVars));
+                } else if (typeof child === 'object' && child !== null) {
+                    substituteVariable(child, variable, replacementNode, replacementFreeVars, newBoundVars);
+                }
+            }
+        }
+        return;
+    }
+
+    // 3. VARIABLE REPLACEMENT & CAPTURE CHECK
     // Check if this node IS the variable
     // Variables can be type 'variable' or sometimes 'atom'/'basicTerm' depending on parser
     if (node.type === 'variable' || (node.type === 'atom' && /^[a-z]/.test(node.value))) {
         const name = node.name || node.value;
         if (name === variable) {
+            // Check for capture: are any free variables in the replacement term already bound here?
+            for (const rv of replacementFreeVars) {
+                if (boundVarsInContext.has(rv)) {
+                    throw new Error(`CAPTURE_ERROR:${rv}`);
+                }
+            }
+
             // Replace content of this node with replacementNode
             Object.keys(node).forEach(key => delete node[key]);
             Object.assign(node, JSON.parse(JSON.stringify(replacementNode)));
@@ -967,9 +1019,9 @@ function substituteVariable(node, variable, replacementNode) {
         if (Object.prototype.hasOwnProperty.call(node, key)) {
             const child = node[key];
             if (Array.isArray(child)) {
-                child.forEach(item => substituteVariable(item, variable, replacementNode));
+                child.forEach(item => substituteVariable(item, variable, replacementNode, replacementFreeVars, boundVarsInContext));
             } else if (typeof child === 'object' && child !== null) {
-                substituteVariable(child, variable, replacementNode);
+                substituteVariable(child, variable, replacementNode, replacementFreeVars, boundVarsInContext);
             }
         }
     }

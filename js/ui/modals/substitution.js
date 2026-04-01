@@ -1154,8 +1154,14 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
         }, 200);
         originalResolve(result);
       } catch (error) {
-        console.error('Error in quantifier substitution modal:', error);
-        showNotification(t('notify-unexpected-error'), 'error');
+        if (error.message.includes("Variable capture detected")) {
+          const match = error.message.match(/'([^']+)'/);
+          const capturedVar = match ? match[1] : '?';
+          showNotification(t('alert-variable-captured').replace('{var}', capturedVar), 'warning');
+        } else {
+          console.error('Error in quantifier substitution modal:', error);
+          showNotification(t('notify-unexpected-error'), 'error');
+        }
       }
     });
 
@@ -1507,8 +1513,19 @@ export function performSubstitution(operand, variable, replacementTerm) {
   // Parse the replacement term into a node structure
   const replacementNode = parseReplacementTerm(replacementTerm);
 
-  // Perform the substitution
-  substituteVariable(operandCopy, variable, replacementNode);
+  // Get all free variables in the replacement term to check for capture
+  const replacementFreeVars = deductive.extractFreeVariables(replacementNode);
+
+  try {
+    // Perform the substitution with capture check
+    substituteVariable(operandCopy, variable, replacementNode, replacementFreeVars, new Set());
+  } catch (e) {
+    if (e.message.startsWith("CAPTURE_ERROR:")) {
+      const capturedVar = e.message.split(":")[1];
+      throw new Error(`Variable capture detected: '${capturedVar}' would become bound. Use a different variable name or perform alpha-conversion.`);
+    }
+    throw e;
+  }
 
   // Convert back to string
   return getNodeText(operandCopy);
@@ -1519,14 +1536,52 @@ export function performSubstitution(operand, variable, replacementTerm) {
  * @param {Object} node - The formula node to process
  * @param {string} variable - The variable to replace
  * @param {Object} replacementNode - The replacement node
+ * @param {Array<string>} replacementFreeVars - Free variables in the replacement term
+ * @param {Set<string>} boundVarsInContext - Variables bound by quantifiers above this node
  */
-function substituteVariable(node, variable, replacementNode) {
+function substituteVariable(node, variable, replacementNode, replacementFreeVars, boundVarsInContext) {
   if (!node || typeof node !== 'object') return;
 
-  // If this is a variable node that matches our target, replace it
+  // 1. SHADOWING PROTECTION
+  // If this is a quantifier that binds our target variable, stop recursing here.
+  // The inner 'variable' is a different entity.
+  const nodeType = node.type;
+  if (nodeType === 'forall' || nodeType === 'exists' || nodeType === 'quantifier') {
+    const quantVar = node.variable && (node.variable.name || node.variable.value || node.variable);
+    if (quantVar === variable) {
+      return;
+    }
+    
+    // 2. CONTEXT TRACKING
+    // Add this quantifier's variable to the set of bound variables for the children
+    const newBoundVars = new Set(boundVarsInContext);
+    if (quantVar) newBoundVars.add(quantVar);
+    
+    // Recurse into children with updated context
+    for (let key in node) {
+        if (node.hasOwnProperty(key)) {
+            const child = node[key];
+            if (Array.isArray(child)) {
+                child.forEach(item => substituteVariable(item, variable, replacementNode, replacementFreeVars, newBoundVars));
+            } else if (typeof child === 'object' && child !== null) {
+                substituteVariable(child, variable, replacementNode, replacementFreeVars, newBoundVars);
+            }
+        }
+    }
+    return;
+  }
+
+  // 3. VARIABLE REPLACEMENT & CAPTURE CHECK
   if (node.type === 'variable') {
     const nodeVariable = node.value || node.name;
     if (nodeVariable === variable) {
+      // Check for capture: are any free variables in the replacement term already bound here?
+      for (const rv of replacementFreeVars) {
+        if (boundVarsInContext.has(rv)) {
+          throw new Error(`CAPTURE_ERROR:${rv}`);
+        }
+      }
+
       // Replace the properties of this node with the replacement node
       Object.keys(node).forEach(key => delete node[key]);
       Object.assign(node, JSON.parse(JSON.stringify(replacementNode)));
@@ -1534,14 +1589,13 @@ function substituteVariable(node, variable, replacementNode) {
     }
   }
 
-  // Recursively process all properties
+  // General recursion for other nodes (conjunction, disjunction, etc.)
   for (let key in node) {
     if (node.hasOwnProperty(key)) {
       if (Array.isArray(node[key])) {
-        // Handle arrays (like terms, operands)
-        node[key].forEach(item => substituteVariable(item, variable, replacementNode));
+        node[key].forEach(item => substituteVariable(item, variable, replacementNode, replacementFreeVars, boundVarsInContext));
       } else if (typeof node[key] === 'object' && node[key] !== null) {
-        substituteVariable(node[key], variable, replacementNode);
+        substituteVariable(node[key], variable, replacementNode, replacementFreeVars, boundVarsInContext);
       }
     }
   }
