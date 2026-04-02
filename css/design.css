@@ -1819,6 +1819,18 @@
         stroke: #64748b !important; /* Slate 500 */
     }
 
+    /* Tour Interaction Blocking */
+    body.tour-active {
+        pointer-events: none !important;
+        cursor: default !important;
+    }
+    
+    .driver-popover, 
+    .driver-overlay,
+    .driver-popover * {
+        pointer-events: auto !important;
+    }
+
     /* Driver.js Dark Mode Overrides */
     body.dark-mode .driver-popover {
         background-color: #1e293b !important;

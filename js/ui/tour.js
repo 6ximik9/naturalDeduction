@@ -13,11 +13,13 @@ export function startTour() {
   const driverObj = driver({
     showProgress: true,
     animate: true,
+    disableActiveInteraction: true,
     nextBtnText: t('tour-next'),
     prevBtnText: t('tour-prev'),
     doneBtnText: t('tour-done'),
     allowClose: true,
     onHighlightStarted: (element) => {
+      document.body.classList.add('tour-active');
       // Use instant scroll to ensure the element is in its final position 
       // BEFORE driver.js calculates the highlight overlay position.
       // This prevents the "jumping" effect where the highlight is in the wrong place.
@@ -36,6 +38,8 @@ export function startTour() {
         '#tour-font-selector', 
         '#tour-editor-data', 
         '#tour-editor-support',
+        '#helpBtn',
+        '#sb-help',
         '#sidebar-proof',
         '#tour-proof-data',
         '#tour-proof-live-control'
@@ -68,6 +72,7 @@ export function startTour() {
        // Optional: additional cleanup if needed
     },
     onDestroyed: () => {
+      document.body.classList.remove('tour-active');
       if (isMobile()) {
         closeSidebar();
       }
@@ -179,6 +184,15 @@ export function startTour() {
           title: t('tour-editor-title'), 
           description: t('tour-editor-desc'), 
           side: "top", 
+          align: 'start' 
+        }
+      },
+      {
+        element: '#helpBtn',
+        popover: { 
+          title: t('tour-help-title'), 
+          description: t('tour-help-desc'), 
+          side: isMobile() ? "bottom" : "right", 
           align: 'start' 
         }
       },
