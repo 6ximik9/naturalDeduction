@@ -1176,7 +1176,7 @@ span.choose {
 
 .link {
   fill: none;
-  stroke: #262626;
+  stroke: var(--col-text-main);
   stroke-width: 2px;
 }
 
@@ -1188,7 +1188,7 @@ span.choose {
 .node text {
   font-family: 'Times New Roman', sans-serif;
   font-size: 30px;
-  fill: #262626;
+  fill: var(--col-text-main);
   pointer-events: none; /* Забезпечує, що текст не впливає на взаємодію з курсором */
 }
 

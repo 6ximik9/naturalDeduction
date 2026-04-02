@@ -1279,8 +1279,7 @@ export function createProofTree(conclusions, container, hyp = null) {
   let nodesContainer = levelDiv;
 
   if (conclusions.level !== 0) {
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const lineColor = isDarkMode ? '#ffffff' : '#000000';
+    const lineColor = 'var(--col-text-main)';
 
     let lvl = document.querySelector(`.proof-element_level-${conclusions.level - 1}`);
     if (lvl && lvl.childElementCount === 0) {
