@@ -460,6 +460,42 @@ export function checkWithAntlr(text, er) {
   return listener.stack.pop();
 }
 
+/**
+ * Specifically parses a term (variable, constant, function, arithmetic)
+ * Uses the 'term' rule from the grammar for strict validation.
+ */
+export function parseTerm(text) {
+  if (!text) return null;
+  
+  // Basic normalization
+  text = text.replace(/s0/g, 's(0)');
+  
+  let chars = CharStreams.fromString(text);
+  let lexer = new GrammarLexer(chars);
+  let tokens = new CommonTokenStream(lexer);
+  let parser = new GrammarParser(tokens);
+  
+  // Use a simple error listener that throws to catch invalid terms
+  let hasError = false;
+  parser.removeErrorListeners();
+  parser.addErrorListener({
+    syntaxError: (rec, sym, line, col, msg, e) => { hasError = true; }
+  });
+
+  // Try to parse using the term rule
+  let tree = parser.term();
+  
+  // Check if we consumed the whole input and had no syntax errors
+  if (hasError || tokens.LA(1) !== -1) {
+    throw new Error('Invalid term syntax');
+  }
+
+  const listener = new MyGrammarListener();
+  ParseTreeWalker.DEFAULT.walk(listener, tree);
+
+  return listener.stack.pop();
+}
+
 
 export function checkCorrect(data, er) {
   data = getProof(data);

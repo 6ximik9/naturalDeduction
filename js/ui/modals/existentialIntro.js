@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor';
 import * as editorMonaco from '../monacoEditor';
-import { checkRule } from "../../index";
+import { checkRule, checkTerm } from "../../index";
 import { hasEditorErrors } from "../monacoEditor";
 import { currentLevel, side } from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
@@ -515,8 +515,8 @@ export function createAdvancedModal(formulas) {
         // Clear any existing errors first
         editorMonaco.clearEditorErrors(modalTermEditor);
 
-        // Run the grammar check
-        const checkResult = checkRule(1, termValue, modalTermEditor);
+        // Run the term check
+        const checkResult = checkTerm(1, termValue, modalTermEditor);
         hasValidTerm = checkResult === 0;
 
         // Also check Monaco editor markers if using main editor
@@ -552,8 +552,8 @@ export function createAdvancedModal(formulas) {
           // Clear any existing errors first
           editorMonaco.clearEditorErrors(modalTermEditor);
 
-          // Run the grammar check which will set specific error markers
-          const checkResult = checkRule(1, value, modalTermEditor);
+          // Run the term check which will set specific error markers
+          const checkResult = checkTerm(1, value, modalTermEditor);
 
           if (checkResult !== 0) {
             hasErrors = true;
@@ -711,7 +711,7 @@ export function createAdvancedModal(formulas) {
 
         // Additional syntax validation for the replacement term
         try {
-          deductive.checkWithAntlr(termValue);
+          deductive.parseTerm(termValue);
         } catch (parseError) {
           showNotification(t('notify-invalid-syntax-term'), 'error');
           termEditorContainer.classList.add('editor-error');
@@ -720,7 +720,7 @@ export function createAdvancedModal(formulas) {
 
         // Enhanced freshness check for rule 17 (∃-elimination backwards / ∃-introduction backwards)
         if (currentLevel === 17) {
-          const checkFresh = deductive.checkWithAntlr(termValue);
+          const checkFresh = deductive.parseTerm(termValue);
           const hypothesesAll = deductive.getAllHypotheses(side, side);
           
           // Get all constants/variables from the replacement term

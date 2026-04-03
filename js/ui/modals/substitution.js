@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor';
 import * as editorMonaco from '../monacoEditor';
-import {checkRule} from "../../index";
+import {checkRule, checkTerm} from "../../index";
 import {hasEditorErrors} from "../monacoEditor";
 import {currentLevel, side} from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
@@ -357,8 +357,8 @@ export function createModal(constants) {
           // Clear any existing errors first
           editorMonaco.clearEditorErrors(modalEditor);
 
-          // Run the grammar check which will set specific error markers
-          const checkResult = checkRule(1, value, modalEditor);
+          // Run the term check which will set specific error markers
+          const checkResult = checkTerm(1, value, modalEditor);
 
           if (checkResult !== 0) {
             hasErrors = true;
@@ -421,8 +421,8 @@ export function createModal(constants) {
         // Clear any existing errors first
         editorMonaco.clearEditorErrors(modalEditor);
 
-        // Run the grammar check
-        const checkResult = checkRule(1, value, modalEditor);
+        // Run the term check
+        const checkResult = checkTerm(1, value, modalEditor);
         hasValidInput = checkResult === 0;
 
         // Also check Monaco editor markers if using main editor
@@ -945,8 +945,8 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
           // Clear any existing errors first
           editorMonaco.clearEditorErrors(monacoEditor);
 
-          // Run the grammar check which will set specific error markers
-          const checkResult = checkRule(1, replacementTerm, monacoEditor);
+          // Run the term check which will set specific error markers
+          const checkResult = checkTerm(1, replacementTerm, monacoEditor);
 
           if (checkResult !== 0) {
             hasErrors = true;
@@ -992,8 +992,8 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
         // Clear any existing errors first
         editorMonaco.clearEditorErrors(monacoEditor);
 
-        // Run the grammar check
-        const checkResult = checkRule(1, replacementTerm, monacoEditor);
+        // Run the term check
+        const checkResult = checkTerm(1, replacementTerm, monacoEditor);
         hasValidInput = checkResult === 0;
       } else {
         editorMonaco.clearEditorErrors(monacoEditor);
@@ -1518,8 +1518,11 @@ export function performSubstitution(operand, variable, replacementTerm) {
   // Create a deep copy of the operand to avoid modifying the original
   const operandCopy = JSON.parse(JSON.stringify(operand));
 
-  // Parse the replacement term into a node structure
-  const replacementNode = parseReplacementTerm(replacementTerm);
+  // Parse the replacement term into a proper node structure using ANTLR
+  const replacementNode = deductive.parseTerm(replacementTerm);
+  if (!replacementNode) {
+    throw new Error('Invalid replacement term');
+  }
 
   // Get all free variables in the replacement term to check for capture
   const replacementFreeVars = deductive.extractFreeVariables(replacementNode);
@@ -1607,46 +1610,6 @@ function substituteVariable(node, variable, replacementNode, replacementFreeVars
       }
     }
   }
-}
-
-/**
- * Parses a replacement term string into a node structure
- * @param {string} replacementTerm - The replacement term string
- * @returns {Object} A node representing the replacement term
- */
-function parseReplacementTerm(replacementTerm) {
-  const trimmed = replacementTerm.trim();
-
-  // Check if it's a successor function like s(0), s(s(0)), etc.
-  if (trimmed.startsWith('s(') && trimmed.endsWith(')')) {
-    const inner = trimmed.slice(2, -1);
-    return {
-      type: 'successor',
-      term: parseReplacementTerm(inner)
-    };
-  }
-
-  // Check if it's a simple constant/variable/number
-  if (/^[a-zA-Z0-9]+$/.test(trimmed)) {
-    // Determine if it's a number or constant/variable
-    if (/^\d+$/.test(trimmed)) {
-      return {
-        type: 'number',
-        value: trimmed
-      };
-    } else {
-      return {
-        type: 'constant',
-        value: trimmed
-      };
-    }
-  }
-
-  // For more complex expressions, create a generic constant node
-  return {
-    type: 'constant',
-    value: trimmed
-  };
 }
 
 /**

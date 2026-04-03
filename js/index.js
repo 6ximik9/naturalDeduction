@@ -394,6 +394,48 @@ export function checkRule(index, text, editorInstance = editorMonaco.editor) {
   return 1;
 }
 
+/**
+ * Specifically validates a term (variable, constant, function)
+ * using the 'term' rule from the grammar.
+ */
+export function checkTerm(index, text, editorInstance = editorMonaco.editor) {
+  editorMonaco.clearEditorErrors(editorInstance);
+  hasError = false;
+  
+  let chars = CharStreams.fromString(text);
+  let lexer = new GrammarLexer(chars);
+  lexer.removeErrorListeners();
+  lexer.addErrorListener({
+    syntaxError: function (recognizer, offendingSymbol, line, column, msg, e) {
+      hasError = true;
+      setEditorError(editorInstance, index, column + 2, `${t('label-line')} ${index}, ${t('label-col')} ${column + 1}: ${msg}`);
+    }
+  });
+
+  if (hasError) return 1;
+
+  let tokens = new CommonTokenStream(lexer);
+  let parser = new GrammarParser(tokens);
+  parser.removeErrorListeners();
+  parser.addErrorListener({
+    syntaxError: function (recognizer, offendingSymbol, line, column, msg, e) {
+      hasError = true;
+      setEditorError(editorInstance, index, column + 2, `${t('label-line')} ${index}, ${t('label-col')} ${column + 1}: ${msg}`);
+    }
+  });
+
+  // Parse specifically using the term rule
+  let tree = parser.term();
+  
+  // Also check if we consumed the whole input
+  if (!hasError && tokens.LA(1) !== -1) {
+    hasError = true;
+    setEditorError(editorInstance, index, text.length + 1, `${t('label-line')} ${index}: Extra characters after term`);
+  }
+
+  return hasError ? 1 : 0;
+}
+
 
 const enterButton = document.getElementById('enter');
 

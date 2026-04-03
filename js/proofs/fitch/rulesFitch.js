@@ -12,6 +12,7 @@ import {
 import {saveStateFitch} from "../../state/stateManager";
 import {formulaToString} from "../../core/formatter";
 import {createModalForReturn} from "../../ui/modals/quantifierReturn";
+import {createModalForQuantifierSubstitution} from "../../ui/modals/substitution";
 import {createAdvancedModal} from "../../ui/modals/existentialIntro";
 import {createModalForLeibniz} from "../../ui/modals/leibniz";
 import {createInputModal} from "../../ui/modals/input";
@@ -445,9 +446,9 @@ export async function thirteenthRule(proofs, branches) {
   }
 
   try {
-    const result = await createModalForReturn([], parsed, rule);
-    if (result && result.modifiedFormula) {
-      fitchMain.addRowToBranch(result.modifiedFormula, "∀E " + (proofs[0].index + 1));
+    const result = await createModalForQuantifierSubstitution(parsed, rule);
+    if (result && result.formula) {
+      fitchMain.addRowToBranch(result.formula, "∀E " + (proofs[0].index + 1));
       return 0;
     }
   } catch (error) {

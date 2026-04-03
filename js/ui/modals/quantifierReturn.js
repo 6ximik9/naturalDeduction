@@ -61,7 +61,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       background: 'var(--col-bg-white)',
       borderRadius: '16px',
       width: '90%',
-      maxWidth: '600px',
+      maxWidth: '800px',
       padding: '32px',
       boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
       border: '1px solid var(--col-border)',
@@ -117,18 +117,14 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           color: #666;
         }
         .formula-container {
-          font-size: 32px;
-          font-weight: 500;
-          font-family: 'Cambria', 'Georgia', 'Times New Roman', serif;
+          font-size: 28px;
+          font-family: 'Times New Roman', serif;
           text-align: center;
-          padding: 30px;
+          padding: 20px;
           border: 2px solid var(--col-border);
-          border-radius: 12px;
-          background-color: var(--col-bg-white);
-          color: var(--col-text-main);
-          line-height: 1.6;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-          user-select: none;
+          border-radius: 8px;
+          background-color: var(--col-bg-main);
+          line-height: 1.5;
         }
         .editor-container {
           border: 2px solid var(--col-border);
@@ -820,18 +816,9 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           const hasSelectedConstant = selectedConstant !== null;
 
           if (hasSelectedConstant && !hasSelectedElement) {
-            // Get the operand (body) of the quantifier if present
+            // Use the whole formula
             let targetFormula = formula;
             let targetFormulaString = formulaString;
-            
-            if (formula.type === 'forall' || formula.type === 'exists') {
-              targetFormula = formula.operand;
-              targetFormulaString = getNodeText(formula.operand);
-            } else if (formula.type === 'quantifier') {
-              targetFormula = formula.expression;
-              targetFormulaString = getNodeText(formula.expression);
-            }
-
             // Only constant selected - apply constant replacement to the body
             let modifiedFormula = applyConstantReplacement(targetFormula, targetFormulaString, selectedConstant);
             
@@ -844,18 +831,9 @@ export function createModalForReturn(constants, formula = null, formulaString = 
             // Formula elements selected (with or without constant) - apply both replacements
             const replacement = monacoEditor.getValue().trim();
 
-            // Apply both constant replacement and element replacement
-            // Use the operand if the formula has a quantifier
+            // Use the whole formula
             let workingFormula = formula;
             let workingFormulaString = formulaString;
-
-            if (formula.type === 'forall' || formula.type === 'exists') {
-              workingFormula = formula.operand;
-              workingFormulaString = getNodeText(formula.operand);
-            } else if (formula.type === 'quantifier') {
-              workingFormula = formula.expression;
-              workingFormulaString = getNodeText(formula.expression);
-            }
 
             // Additional syntax validation
             try {
@@ -909,17 +887,9 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           // Formula only interface - apply replacements and return modified formula
           const replacement = monacoEditor.getValue().trim();
 
-          // Use the operand if the formula has a quantifier
+          // Use the whole formula
           let workingFormula = formula;
           let workingFormulaString = formulaString;
-
-          if (formula.type === 'forall' || formula.type === 'exists') {
-            workingFormula = formula.operand;
-            workingFormulaString = getNodeText(formula.operand);
-          } else if (formula.type === 'quantifier') {
-            workingFormula = formula.expression;
-            workingFormulaString = getNodeText(formula.expression);
-          }
 
           // Additional syntax validation
           try {
@@ -949,17 +919,9 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         } else if (useConstantsOnly) {
           // Constants only interface - apply constant replacement if formula is available
           if (formula && formulaString) {
-            // Use the operand if the formula has a quantifier
+            // Use the whole formula
             let workingFormula = formula;
             let workingFormulaString = formulaString;
-
-            if (formula.type === 'forall' || formula.type === 'exists') {
-              workingFormula = formula.operand;
-              workingFormulaString = getNodeText(formula.operand);
-            } else if (formula.type === 'quantifier') {
-              workingFormula = formula.expression;
-              workingFormulaString = getNodeText(formula.expression);
-            }
 
             let modifiedFormula = applyConstantReplacement(workingFormula, workingFormulaString, selectedConstant);
             
