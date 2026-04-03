@@ -358,20 +358,27 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     // Form validation function
     function validateForm() {
       const hasSelectedElement = selectedPath !== null;
-      const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
-      const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
-      const value = getNodeText(modifiedFormula);
-      if(!value) return;
-      let hasValidInput = value.length > 0;
+      const editorValue = monacoEditor.getValue().trim();
+      let hasValidInput = false;
 
-      // Check for syntax errors
-      if (hasValidInput) {
-        // Clear any existing errors first
+      if (editorValue.length > 0) {
+        try {
+          const replacementNode = parseReplacementText(editorValue);
+          const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+          const value = getNodeText(modifiedFormula);
+          
+          if (value && value.length > 0) {
+            clearEditorErrors(monacoEditor);
+            const checkResult = checkRule(1, value, monacoEditor);
+            hasValidInput = checkResult === 0;
+          }
+        } catch (e) {
+          hasValidInput = false;
+        }
+      } else {
         clearEditorErrors(monacoEditor);
-
-        // Run the grammar check
-        const checkResult = checkRule(1, value, monacoEditor);
-        hasValidInput = checkResult === 0;
+        editorContainer.classList.remove('editor-error');
+        errorDisplay.style.display = 'none';
       }
 
       const isValid = hasSelectedElement && hasValidInput;

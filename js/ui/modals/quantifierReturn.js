@@ -676,21 +676,24 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           isValid = true;
         } else if (hasSelectedElement) {
           // Formula elements selected (with or without constant) - need valid replacement input
-          let hasValidInput = true;
+          let hasValidInput = false;
 
           if (monacoEditor) {
-            const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
-            const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
-            const value = getNodeText(modifiedFormula);
-            // if(!value) return;
-            // const value = monacoEditor.getValue().trim();
-            hasValidInput = value.length > 0;
-
-            // Check for syntax errors
-            if (hasValidInput) {
-              clearEditorErrors(monacoEditor);
-              const checkResult = checkRule(1, value, monacoEditor);
-              hasValidInput = checkResult === 0;
+            const editorValue = monacoEditor.getValue().trim();
+            if (editorValue.length > 0) {
+              try {
+                const replacementNode = parseReplacementText(editorValue);
+                const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+                const value = getNodeText(modifiedFormula);
+                
+                if (value && value.length > 0) {
+                  clearEditorErrors(monacoEditor);
+                  const checkResult = checkRule(1, value, monacoEditor);
+                  hasValidInput = checkResult === 0;
+                }
+              } catch (e) {
+                hasValidInput = false;
+              }
             }
           }
 
@@ -699,21 +702,24 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       } else if (useFormulaOnly) {
         // Formula only interface - need formula selection with valid input
         const hasSelectedElement = selectedElements.size > 0;
-        let hasValidInput = true;
+        let hasValidInput = false;
 
         if (hasSelectedElement && monacoEditor) {
-          const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
-          const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
-          const value = getNodeText(modifiedFormula);
-          if(!value) return;
-          // const value = monacoEditor.getValue().trim();
-          hasValidInput = value.length > 0;
-
-          // Check for syntax errors
-          if (hasValidInput) {
-            clearEditorErrors(monacoEditor);
-            const checkResult = checkRule(1, value, monacoEditor);
-            hasValidInput = checkResult === 0;
+          const editorValue = monacoEditor.getValue().trim();
+          if (editorValue.length > 0) {
+            try {
+              const replacementNode = parseReplacementText(editorValue);
+              const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+              const value = getNodeText(modifiedFormula);
+              
+              if (value && value.length > 0) {
+                clearEditorErrors(monacoEditor);
+                const checkResult = checkRule(1, value, monacoEditor);
+                hasValidInput = checkResult === 0;
+              }
+            } catch (e) {
+              hasValidInput = false;
+            }
           }
         }
 
@@ -815,7 +821,12 @@ export function createModalForReturn(constants, formula = null, formulaString = 
 
           if (hasSelectedConstant && !hasSelectedElement) {
             // Only constant selected - apply constant replacement to entire formula
-            const modifiedFormula = applyConstantReplacement(formula, formulaString, selectedConstant);
+            let modifiedFormula = applyConstantReplacement(formula, formulaString, selectedConstant);
+            
+            // Automatically add the quantifier based on the selected variable
+            const varName = selectedConstant.split('/')[0];
+            modifiedFormula = '∀' + varName + (modifiedFormula.startsWith('(') ? '' : ' ') + modifiedFormula;
+            
             result = {
               selectedConstant: selectedConstant,
               modifiedFormula: modifiedFormula,
@@ -853,7 +864,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
               workingFormula = JSON.parse(JSON.stringify(formula));
               const parts = selectedConstant.split('/');
               if (parts.length === 2) {
-                const [oldConstant, newConstant] = parts;
+                const [newConstant, oldConstant] = parts;
                 const replacementNode = { type: 'constant', value: newConstant };
                 replaceAllConstantOccurrences(workingFormula, oldConstant, replacementNode);
               }
@@ -907,7 +918,12 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         } else if (useConstantsOnly) {
           // Constants only interface - apply constant replacement if formula is available
           if (formula && formulaString) {
-            const modifiedFormula = applyConstantReplacement(formula, formulaString, selectedConstant);
+            let modifiedFormula = applyConstantReplacement(formula, formulaString, selectedConstant);
+            
+            // Automatically add the quantifier based on the selected variable
+            const varName = selectedConstant.split('/')[0];
+            modifiedFormula = '∀' + varName + (modifiedFormula.startsWith('(') ? '' : ' ') + modifiedFormula;
+
             result = {
               selectedConstant: selectedConstant,
               modifiedFormula: modifiedFormula,

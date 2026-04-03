@@ -337,9 +337,18 @@ export async function sixteenthRule() {
   try {
     const innerText = index.lastSide.querySelector('#proofText')?.textContent;
 
-    const replElements = index.lastSide.querySelectorAll('#repl');
+    // Шукаємо елементи замін у поточному вузлі або його батьках
+    let replElements = index.lastSide.querySelectorAll('#repl');
+    if (replElements.length === 0) {
+        // Якщо не знайдено прямо в вузлі, спробуємо знайти в найближчому контейнері вузла
+        const nodeContainer = index.lastSide.closest('[id^="divId-"]');
+        if (nodeContainer) {
+            replElements = nodeContainer.querySelectorAll('#repl');
+        }
+    }
+    
     const replValues = Array.from(replElements).map(el => el.textContent);
-    console.log(replValues);
+    console.log("Found replacements:", replValues);
 
     const formulaString = index.lastSide.querySelector('#proofText')?.textContent;
     const formula = deductive.checkWithAntlr(formulaString);

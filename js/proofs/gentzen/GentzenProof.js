@@ -170,21 +170,34 @@ document.getElementById('proof').addEventListener('click', function (event) {
     return; // Виходимо, щоб не виконувати звичайну обробку кліку
   }
 
-  let potentialSide = null;
-  if (clickedElement.tagName === 'DIV') {
-    // Елемент є валідним, якщо він має клас proof-content або містить його безпосередньо
-    if (clickedElement.classList.contains('proof-content') || clickedElement.querySelector(':scope > .proof-content')) {
-      potentialSide = clickedElement;
+  // Знаходимо найближчий контейнер вузла (divId-...)
+  const nodeContainer = clickedElement.closest('[id^="divId-"]');
+  
+  if (!nodeContainer) {
+    // Fallback для елементів без divId (якщо такі є)
+    let potentialSide = null;
+    if (clickedElement.tagName === 'DIV') {
+      if (clickedElement.classList.contains('proof-content') || clickedElement.querySelector(':scope > .proof-content')) {
+        potentialSide = clickedElement;
+      } else {
+        return;
+      }
+    } else if (clickedElement.tagName === 'LABEL') {
+      potentialSide = clickedElement.parentNode;
     } else {
       return;
     }
-  } else if (clickedElement.tagName === 'LABEL') {
-    potentialSide = clickedElement.parentNode;
+    
+    handleSideSelection(potentialSide);
   } else {
-    return;
+    handleSideSelection(nodeContainer);
   }
+});
 
-  // Якщо клікнули по вже активному елементу - знімаємо виділення
+/**
+ * Допоміжна функція для обробки вибору сторони
+ */
+function handleSideSelection(potentialSide) {
   if (side && potentialSide === side) {
       clearLabelHighlights();
       setSide(null);
@@ -197,26 +210,19 @@ document.getElementById('proof').addEventListener('click', function (event) {
   }
 
   clearLabelHighlights();
-
-  if (clickedElement.tagName === 'DIV') {
-    setSide(clickedElement);
-    try {
-      side.querySelector('label').style.background = 'var(--col-highlight-main)';
-    } catch (error) {
-      console.error('Monaco editor clicked');
-    }
-  } else if (clickedElement.tagName === 'LABEL') {
-    setSide(clickedElement.parentNode);
-    clickedElement.style.background = 'var(--col-highlight-main)';
+  setSide(potentialSide);
+  
+  const label = side.querySelector('label');
+  if (label) {
+    label.style.background = 'var(--col-highlight-main)';
   }
 
   if (window.updateGentzenParenthesesButtons) window.updateGentzenParenthesesButtons();
 
-  // Якщо немає попереднього перегляду — обробити клік
   if (document.getElementsByClassName("preview").length === 0) {
     setTimeout(handleClick, 100);
   }
-});
+}
 
 /**
  * Скидає підсвічування всіх label-елементів у дереві доказу.
@@ -376,7 +382,11 @@ export function parseExpression(text) {
     controlState.saveState();
     processExpression(parsedProof, 1);
 
-    document.getElementById('undo_redo').style.display = 'flex';
+    // document.getElementById('undo_redo').style.display = 'flex';
+    const undoRedo = document.getElementById('undo_redo');
+    if (undoRedo) {
+      undoRedo.style.display = 'flex';
+    }
   } catch (error) {
     console.error("Помилка при парсингу виразу:", error);
     shakeElement('enter', 5);
@@ -958,11 +968,11 @@ function closeSide(container) {
   container.classList.add('closed');
 
   let labelText = `[${rawText}]`;
-  
+
   // 4. Оновлюємо тільки текстовий контент та додаємо класи
   proofText.textContent = labelText;
   proofText.classList.add('previous');
-  
+
   const proofContent = container.querySelector('.proof-content');
   if (proofContent) {
     proofContent.classList.add('previous');
@@ -1105,12 +1115,12 @@ async function buttonClicked(buttonText) {
   let nextToSelect = null;
   const newSize = deductionContext.conclusions.length - 1;
   const newConclusion = deductionContext.conclusions[newSize];
-  
+
   if (newConclusion) {
       const newLevelDiv = document.querySelector(`.proof-element_level-${newConclusion.level}`);
       if (newLevelDiv) {
           // Шукаємо перший елемент proof-content в новому рівні
-          const firstNewBranch = newLevelDiv.querySelector('.premises-container > div') || 
+          const firstNewBranch = newLevelDiv.querySelector('.premises-container > div') ||
                                 newLevelDiv.querySelector(':scope > div');
           if (firstNewBranch && !firstNewBranch.classList.contains('closed') && !firstNewBranch.classList.contains('previous')) {
               nextToSelect = firstNewBranch;
@@ -1125,7 +1135,7 @@ async function buttonClicked(buttonText) {
       if (label) {
           label.style.background = 'var(--col-highlight-main)';
       }
-      
+
       // Оновлюємо кнопки для нового виділення (беремо першу формулу, якщо це масив)
       const exprToShow = Array.isArray(newConclusion.proof) ? newConclusion.proof[0] : newConclusion.proof;
       processExpression(exprToShow, helpButtonToggleState.allRules ? 0 : 1);
@@ -1413,9 +1423,9 @@ export function createProofTree(conclusions, container, hyp = null) {
         proofDiv.innerHTML = '<label class="previous" id="proofText">' + text + '</label>';
       }
       proofDiv.style.paddingTop = "0px";
-      proofDiv.style.height = "5px"; 
+      proofDiv.style.height = "5px";
       proofDiv.style.minWidth = "80px";
-      
+
       // Manual "lite" close for axiomatic rules to avoid green highlight and keep the line visible
       const proofText = container.querySelector('#proofText');
       if (proofText) {
@@ -1425,12 +1435,12 @@ export function createProofTree(conclusions, container, hyp = null) {
           }
           proofText.classList.add('previous');
       }
-      
+
       const proofContent = container.querySelector('.proof-content');
       if (proofContent) {
           proofContent.classList.add('previous');
       }
-      
+
       disableAllButtons();
       setSide(null);
       clearLabelHighlights();

@@ -429,6 +429,10 @@ export function createModal(constants) {
         if (modalEditor === editorMonaco.editor && editorMonaco.hasEditorErrors()) {
           hasValidInput = false;
         }
+      } else {
+        editorMonaco.clearEditorErrors(modalEditor);
+        editorContainer.classList.remove('editor-error');
+        errorDisplay.style.display = 'none';
       }
 
       const isValid = hasSelectedConstant && hasValidInput;
@@ -991,6 +995,10 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
         // Run the grammar check
         const checkResult = checkRule(1, replacementTerm, monacoEditor);
         hasValidInput = checkResult === 0;
+      } else {
+        editorMonaco.clearEditorErrors(monacoEditor);
+        editorContainer.classList.remove('editor-error');
+        errorDisplay.style.display = 'none';
       }
 
       applyButton.disabled = !hasValidInput;

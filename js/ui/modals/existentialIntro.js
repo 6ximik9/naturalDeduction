@@ -523,6 +523,10 @@ export function createAdvancedModal(formulas) {
         if (modalTermEditor === editorMonaco.editor && editorMonaco.hasEditorErrors()) {
           hasValidTerm = false;
         }
+      } else {
+        editorMonaco.clearEditorErrors(modalTermEditor);
+        termEditorContainer.classList.remove('editor-error');
+        termErrorDisplay.style.display = 'none';
       }
 
       const isValid = hasSelectedFormula && hasSelectedConstant && hasValidTerm;

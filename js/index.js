@@ -567,6 +567,37 @@ function validateInputForStyle(input, style) {
   }
 }
 
+/**
+ * Розумне розбиття рядка за комами, яке ігнорує коми всередині дужок.
+ * @param {string} str - Рядок для розбиття.
+ * @returns {string[]} - Масив частин.
+ */
+function smartSplit(str) {
+  if (!str) return [];
+  const result = [];
+  let current = '';
+  let depth = 0;
+  
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    if (char === '(') depth++;
+    if (char === ')') depth--;
+    
+    if (char === ',' && depth === 0) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  
+  if (current.trim() || result.length > 0) {
+    result.push(current.trim());
+  }
+  
+  return result.filter(item => item !== '');
+}
+
 function fitchProof()
 {
   if (editorMonaco.editor.getValue().includes('————————————————')) {
@@ -578,9 +609,8 @@ function fitchProof()
   else if(editorMonaco.editor.getValue().includes('⊢'))
   {
     let userText = editorMonaco.editor.getValue();
-    userText = userText.replaceAll(" ", "");
     const lineArray = userText.split('⊢');
-    fitch.setUserHypothesesFitch(lineArray[0].split(","));
+    fitch.setUserHypothesesFitch(smartSplit(lineArray[0]));
     fitch.fitchStart(lineArray[1]);
   }
   else{
@@ -617,7 +647,7 @@ function sequentProof() {
     // Ми інтерпретуємо це як "Довести цю формулу" (⊢ A)
     // Тобто порожній антецедент і одна формула в сукцеденті
     gentzen.setUserHypotheses([]); // Clear Gentzen context just in case
-    sequent.parseExpression(inputText);
+    sequent.parseExpression(editorMonaco.editor.getValue());
   }
 }
 
@@ -643,8 +673,8 @@ function gentzenProof()
     let userText = editorMonaco.editor.getValue();
     const lineArray = userText.split('⊢');
     // gentzen.setUserHypotheses(deductive.getHypotheses(lineArray[0]));
-    gentzen.setUserHypotheses(lineArray[0].split(","));
-    let filteredArray = lineArray[0].split(",").filter(item => item.trim().length > 0);
+    gentzen.setUserHypotheses(smartSplit(lineArray[0]));
+    let filteredArray = smartSplit(lineArray[0]).filter(item => item.trim().length > 0);
     if(filteredArray.length===0)
     {
       return;
@@ -652,7 +682,7 @@ function gentzenProof()
     gentzen.parseExpression(lineArray[1]);
   }
   else {
-    gentzen.parseExpression(inputText);
+    gentzen.parseExpression(editorMonaco.editor.getValue());
   }
 }
 
