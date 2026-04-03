@@ -816,8 +816,17 @@ function createClickableElement(node, path, onElementClick) {
       }
       break;
 
+    case 'forall':
+    case 'exists':
+      const quantSymbol = node.type === 'forall' ? '∀' : '∃';
+      childElements.push(document.createTextNode('(' + quantSymbol + (node.variable || '') + ')'));
+      if (node.operand) {
+        childElements.push(createClickableElement(node.operand, [...path, 'operand'], onElementClick));
+      }
+      break;
+
     case 'quantifier':
-      childElements.push(document.createTextNode((node.quantifier || '') + (node.variable || '')));
+      childElements.push(document.createTextNode('(' + (node.quantifier || '') + (node.variable || '') + ')'));
       if (node.expression) {
         childElements.push(createClickableElement(node.expression, [...path, 'expression'], onElementClick));
       }
@@ -922,17 +931,13 @@ function getNodeText(node) {
       const quantSymbol = node.type === 'forall' ? '∀' : '∃';
       const variable = node.variable || '';
       const operand = getNodeText(node.operand);
-      // Add space between quantifier+variable and operand unless operand starts with parenthesis
-      const needsSpace = operand && !operand.startsWith('(');
-      return `${quantSymbol}${variable}${needsSpace ? ' ' : ''}${operand}`;
+      return `(${quantSymbol}${variable})${operand}`;
 
     case 'quantifier':
       const quantSymbol2 = node.quantifier || '';
       const variable2 = node.variable || '';
       const expression = getNodeText(node.expression);
-      // Add space between quantifier+variable and expression unless expression starts with parenthesis
-      const needsSpace2 = expression && !expression.startsWith('(');
-      return `${quantSymbol2}${variable2}${needsSpace2 ? ' ' : ''}${expression}`;
+      return `(${quantSymbol2}${variable2})${expression}`;
 
     default:
       return node.value || node.name || node.type || '?';
