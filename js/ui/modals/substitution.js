@@ -1685,19 +1685,22 @@ function getNodeText(node) {
     case 'exists':
       const quantSymbol = node.type === 'forall' ? '∀' : '∃';
       const variable = node.variable || '';
-      const operand = getNodeText(node.operand);
-      // Add space between quantifier+variable and operand unless operand starts with parenthesis
-      const needsSpace = operand && !operand.startsWith('(');
-      return `${quantSymbol}${variable}${needsSpace ? ' ' : ''}${operand}`;
+      const operandNode = node.operand;
+      const operand = getNodeText(operandNode);
+      
+      // Need parentheses if operand is an implication, disjunction, or conjunction
+      const needsParens = ['implication', 'disjunction', 'conjunction'].includes(operandNode.type);
+      return `${quantSymbol}${variable}${needsParens ? "(" + operand + ")" : (operand.startsWith('(') ? operand : " " + operand)}`;
 
     case 'quantifier':
       // Legacy quantifier format
       const quantSymbol2 = node.quantifier || '';
       const variable2 = node.variable || '';
-      const expression = getNodeText(node.expression);
-      // Add space between quantifier+variable and expression unless expression starts with parenthesis
-      const needsSpace2 = expression && !expression.startsWith('(');
-      return `${quantSymbol2}${variable2}${needsSpace2 ? ' ' : ''}${expression}`;
+      const expressionNode = node.expression;
+      const expression = getNodeText(expressionNode);
+      
+      const needsParens2 = ['implication', 'disjunction', 'conjunction'].includes(expressionNode.type);
+      return `${quantSymbol2}${variable2}${needsParens2 ? "(" + expression + ")" : (expression.startsWith('(') ? expression : " " + expression)}`;
 
     default:
       return node.value || node.name || node.type || '?';

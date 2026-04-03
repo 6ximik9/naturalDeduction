@@ -359,7 +359,13 @@ export async function sixteenthRule() {
     const repl = result.selectedConstant ? result.selectedConstant.split("/", 2)[0] : result.replacement;
     console.log(repl);
 
-    const rule = deductive.checkWithAntlr('(∀' + repl[0] + ')' + result.modifiedFormula);
+    // Create the forall node directly instead of constructing a string
+    const modifiedFormulaNode = deductive.checkWithAntlr(result.modifiedFormula);
+    const rule = {
+      type: 'forall',
+      variable: repl[0],
+      operand: modifiedFormulaNode
+    };
     createConclusion(rule);
 
     // const rule = deductive.checkWithAntlr('(∀' + repl[0] + ')';

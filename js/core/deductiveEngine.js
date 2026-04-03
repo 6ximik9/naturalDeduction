@@ -219,15 +219,21 @@ export function convertToLogicalExpression(conclusion) {
     case "exists": {
       const quantSymbol = conclusion.type === "forall" ? "∀" : "∃";
       const variable = conclusion.variable;
-      const expression = convertToLogicalExpression(conclusion.operand);
-      return `(${quantSymbol}${variable})${expression}`;
+      const operand = conclusion.operand;
+      const expression = convertToLogicalExpression(operand);
+      
+      // Need parentheses if operand is an implication, disjunction, or conjunction
+      const needsParens = ["implication", "disjunction", "conjunction"].includes(operand.type);
+      return `(${quantSymbol}${variable})${needsParens ? "(" + expression + ")" : expression}`;
     }
 
     case "quantifier": {
       // Legacy support
-      const expression = convertToLogicalExpression(conclusion.expression);
+      const expressionNode = conclusion.expression;
+      const expression = convertToLogicalExpression(expressionNode);
       const variable = conclusion.variable.value || conclusion.variable;
-      return `(${conclusion.quantifier}${variable})${expression}`;
+      const needsParens = ["implication", "disjunction", "conjunction"].includes(expressionNode.type);
+      return `(${conclusion.quantifier}${variable})${needsParens ? "(" + expression + ")" : expression}`;
     }
 
     case "equality": {

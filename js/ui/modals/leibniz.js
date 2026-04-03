@@ -930,14 +930,18 @@ function getNodeText(node) {
     case 'exists':
       const quantSymbol = node.type === 'forall' ? '∀' : '∃';
       const variable = node.variable || '';
-      const operand = getNodeText(node.operand);
-      return `(${quantSymbol}${variable})${operand}`;
+      const operandNode = node.operand;
+      const operand = getNodeText(operandNode);
+      const needsParens = ['implication', 'disjunction', 'conjunction'].includes(operandNode.type);
+      return `(${quantSymbol}${variable})${needsParens ? "(" + operand + ")" : operand}`;
 
     case 'quantifier':
       const quantSymbol2 = node.quantifier || '';
       const variable2 = node.variable || '';
-      const expression = getNodeText(node.expression);
-      return `(${quantSymbol2}${variable2})${expression}`;
+      const expressionNode = node.expression;
+      const expression = getNodeText(expressionNode);
+      const needsParens2 = ['implication', 'disjunction', 'conjunction'].includes(expressionNode.type);
+      return `(${quantSymbol2}${variable2})${needsParens2 ? "(" + expression + ")" : expression}`;
 
     default:
       return node.value || node.name || node.type || '?';
