@@ -820,12 +820,20 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           const hasSelectedConstant = selectedConstant !== null;
 
           if (hasSelectedConstant && !hasSelectedElement) {
-            // Only constant selected - apply constant replacement to entire formula
-            let modifiedFormula = applyConstantReplacement(formula, formulaString, selectedConstant);
+            // Get the operand (body) of the quantifier if present
+            let targetFormula = formula;
+            let targetFormulaString = formulaString;
             
-            // Automatically add the quantifier based on the selected variable
-            const varName = selectedConstant.split('/')[0];
-            modifiedFormula = '∀' + varName + (modifiedFormula.startsWith('(') ? '' : ' ') + modifiedFormula;
+            if (formula.type === 'forall' || formula.type === 'exists') {
+              targetFormula = formula.operand;
+              targetFormulaString = getNodeText(formula.operand);
+            } else if (formula.type === 'quantifier') {
+              targetFormula = formula.expression;
+              targetFormulaString = getNodeText(formula.expression);
+            }
+
+            // Only constant selected - apply constant replacement to the body
+            let modifiedFormula = applyConstantReplacement(targetFormula, targetFormulaString, selectedConstant);
             
             result = {
               selectedConstant: selectedConstant,
@@ -836,10 +844,23 @@ export function createModalForReturn(constants, formula = null, formulaString = 
             // Formula elements selected (with or without constant) - apply both replacements
             const replacement = monacoEditor.getValue().trim();
 
+            // Apply both constant replacement and element replacement
+            // Use the operand if the formula has a quantifier
+            let workingFormula = formula;
+            let workingFormulaString = formulaString;
+
+            if (formula.type === 'forall' || formula.type === 'exists') {
+              workingFormula = formula.operand;
+              workingFormulaString = getNodeText(formula.operand);
+            } else if (formula.type === 'quantifier') {
+              workingFormula = formula.expression;
+              workingFormulaString = getNodeText(formula.expression);
+            }
+
             // Additional syntax validation
             try {
               const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
-              const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+              const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(workingFormula)), selectedPath, replacementNode);
               const value = getNodeText(modifiedFormula);
               deductive.checkWithAntlr(value);
             } catch (parseError) {
@@ -848,34 +869,33 @@ export function createModalForReturn(constants, formula = null, formulaString = 
               return;
             }
 
-            // Apply both constant replacement and element replacement
-            let modifiedFormula = formulaString;
+            let modifiedFormulaStr = workingFormulaString;
 
             // First apply constant replacement if a constant is selected
             if (selectedConstant) {
-              modifiedFormula = applyConstantReplacement(formula, formulaString, selectedConstant);
+              modifiedFormulaStr = applyConstantReplacement(workingFormula, workingFormulaString, selectedConstant);
             }
 
             // Then apply element replacements on top of the constant-replaced formula
             // We need to re-parse the formula after constant replacement
-            let workingFormula = formula;
+            let currentWorkingFormula = workingFormula;
             if (selectedConstant) {
               // Create a formula with constant replacements applied
-              workingFormula = JSON.parse(JSON.stringify(formula));
+              currentWorkingFormula = JSON.parse(JSON.stringify(workingFormula));
               const parts = selectedConstant.split('/');
               if (parts.length === 2) {
                 const [newConstant, oldConstant] = parts;
                 const replacementNode = { type: 'constant', value: newConstant };
-                replaceAllConstantOccurrences(workingFormula, oldConstant, replacementNode);
+                replaceAllConstantOccurrences(currentWorkingFormula, oldConstant, replacementNode);
               }
             }
 
             // Apply element replacements
-            modifiedFormula = applyReplacements(workingFormula, modifiedFormula, selectedElements, replacement);
+            modifiedFormulaStr = applyReplacements(currentWorkingFormula, modifiedFormulaStr, selectedElements, replacement);
 
             result = {
               selectedConstant: selectedConstant, // Always include, even if null
-              modifiedFormula: modifiedFormula,
+              modifiedFormula: modifiedFormulaStr,
               originalFormula: formulaString,
               replacement: replacement,
               selectedElements: Array.from(selectedElements).map(pathStr => {
@@ -889,13 +909,24 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           // Formula only interface - apply replacements and return modified formula
           const replacement = monacoEditor.getValue().trim();
 
+          // Use the operand if the formula has a quantifier
+          let workingFormula = formula;
+          let workingFormulaString = formulaString;
+
+          if (formula.type === 'forall' || formula.type === 'exists') {
+            workingFormula = formula.operand;
+            workingFormulaString = getNodeText(formula.operand);
+          } else if (formula.type === 'quantifier') {
+            workingFormula = formula.expression;
+            workingFormulaString = getNodeText(formula.expression);
+          }
+
           // Additional syntax validation
           try {
             const replacementNode = parseReplacementText(monacoEditor.getValue().trim());
-            const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(formula)), selectedPath, replacementNode);
+            const modifiedFormula = replaceNodeAtPath(JSON.parse(JSON.stringify(workingFormula)), selectedPath, replacementNode);
             const value = getNodeText(modifiedFormula);
             deductive.checkWithAntlr(value);
-            // deductive.checkWithAntlr(replacement);
           } catch (parseError) {
             showNotification(t('notify-invalid-syntax-term'), 'error');
             editorContainer.classList.add('editor-error');
@@ -903,10 +934,10 @@ export function createModalForReturn(constants, formula = null, formulaString = 
           }
 
           // Apply replacements to create modified formula
-          const modifiedFormula = applyReplacements(formula, formulaString, selectedElements, replacement);
+          const modifiedFormulaStr = applyReplacements(workingFormula, workingFormulaString, selectedElements, replacement);
 
           result = {
-            modifiedFormula: modifiedFormula,
+            modifiedFormula: modifiedFormulaStr,
             originalFormula: formulaString,
             replacement: replacement,
             selectedElements: Array.from(selectedElements).map(pathStr => {
@@ -918,12 +949,20 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         } else if (useConstantsOnly) {
           // Constants only interface - apply constant replacement if formula is available
           if (formula && formulaString) {
-            let modifiedFormula = applyConstantReplacement(formula, formulaString, selectedConstant);
-            
-            // Automatically add the quantifier based on the selected variable
-            const varName = selectedConstant.split('/')[0];
-            modifiedFormula = '∀' + varName + (modifiedFormula.startsWith('(') ? '' : ' ') + modifiedFormula;
+            // Use the operand if the formula has a quantifier
+            let workingFormula = formula;
+            let workingFormulaString = formulaString;
 
+            if (formula.type === 'forall' || formula.type === 'exists') {
+              workingFormula = formula.operand;
+              workingFormulaString = getNodeText(formula.operand);
+            } else if (formula.type === 'quantifier') {
+              workingFormula = formula.expression;
+              workingFormulaString = getNodeText(formula.expression);
+            }
+
+            let modifiedFormula = applyConstantReplacement(workingFormula, workingFormulaString, selectedConstant);
+            
             result = {
               selectedConstant: selectedConstant,
               modifiedFormula: modifiedFormula,
