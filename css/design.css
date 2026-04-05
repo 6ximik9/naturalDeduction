@@ -497,6 +497,7 @@
         line-height: 1.7;
         white-space: pre-wrap;
         color: var(--col-text-main);
+        min-height: 300px;
     }
 
     /* Footer */
