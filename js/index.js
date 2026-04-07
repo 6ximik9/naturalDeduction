@@ -11,6 +11,7 @@ import * as help from './ui/help';
 import {setEditorError, initFontSelectors} from "./ui/monacoEditor";
 import {initProofView} from "./ui/proofView";
 import {updateLanguage, t} from "./core/i18n";
+import "./ui/mobile";
 
 import {initStartScreen} from './ui/modals/startScreen';
 import {isVL} from './state/logicSettings';
