@@ -13,9 +13,10 @@ let customEditor = null;
  * Creates an advanced modal for existential quantifier introduction (∃I)
  * Used in rule 17 for selecting formulas and performing substitutions
  * @param {Array<string>} formulas - Array of available formulas from hypotheses
+ * @param {string} titleKey - Optional key for the modal title (defaults to exists-intro)
  * @returns {Promise<Array<string>>} Promise that resolves with [selectedFormula, selectedConstant, substitutionTerm]
  */
-export function createAdvancedModal(formulas) {
+export function createAdvancedModal(formulas, titleKey = 'modal-exists-intro-title') {
   return new Promise((resolve, reject) => {
     // Validate input
     // if (!formulas || !Array.isArray(formulas) || formulas.length === 0) {
@@ -83,6 +84,13 @@ export function createAdvancedModal(formulas) {
         .editor-section:focus-within { border-color: #007bff; }
         .editor-error { border-color: #dc3545 !important; }
         
+        .advanced-button.static-button {
+          cursor: default !important;
+          pointer-events: none !important;
+          transform: none !important;
+          box-shadow: none !important;
+        }
+
         body.dark-mode .formula-select {
           background-color: var(--col-bg-white);
           color: var(--col-text-main);
@@ -92,7 +100,7 @@ export function createAdvancedModal(formulas) {
           color: var(--col-text-main) !important;
           border-color: var(--col-border) !important;
         }
-        body.dark-mode .advanced-button:hover {
+        body.dark-mode .advanced-button:not(.static-button):hover {
           background-color: #334155 !important;
         }
         body.dark-mode .editor-section {
@@ -111,8 +119,8 @@ export function createAdvancedModal(formulas) {
 
     const modalTitle = document.createElement('h2');
     modalTitle.id = 'modal-title';
-    modalTitle.textContent = t('modal-exists-intro-title');
-    modalTitle.setAttribute('data-i18n', 'modal-exists-intro-title');
+    modalTitle.textContent = t(titleKey);
+    modalTitle.setAttribute('data-i18n', titleKey);
     Object.assign(modalTitle.style, {
       margin: '0',
       fontSize: '28px',
@@ -122,8 +130,10 @@ export function createAdvancedModal(formulas) {
     });
 
     const description = document.createElement('p');
-    description.textContent = t('modal-exists-intro-desc');
-    description.setAttribute('data-i18n', 'modal-exists-intro-desc');
+    // Determine description key based on titleKey if possible, otherwise use default
+    const descKey = titleKey === 'modal-exists-elim-title' ? 'modal-exists-elim-desc' : 'modal-exists-intro-desc';
+    description.textContent = t(descKey);
+    description.setAttribute('data-i18n', descKey);
     Object.assign(description.style, {
       margin: '0',
       fontSize: '16px',
@@ -278,8 +288,9 @@ export function createAdvancedModal(formulas) {
     const variableSection = document.createElement('div');
 
     const variableLabel = document.createElement('label');
-    variableLabel.textContent = t('modal-select-var-subst');
-    variableLabel.setAttribute('data-i18n', 'modal-select-var-subst');
+    const variableLabelKey = titleKey === 'modal-exists-elim-title' ? 'modal-variable-subst' : 'modal-select-var-subst';
+    variableLabel.textContent = t(variableLabelKey);
+    variableLabel.setAttribute('data-i18n', variableLabelKey);
     Object.assign(variableLabel.style, {
       display: 'block',
       fontSize: '16px',
@@ -363,13 +374,16 @@ export function createAdvancedModal(formulas) {
         // Enhanced button state management
         const updateButtonState = (targetButton, isActive, isHovered = false) => {
           const isDark = document.body.classList.contains('dark-mode');
+          // Skip hover effects if there's only one button
+          if (buttonValues.length === 1 && isHovered) return;
+
           if (isActive) {
             Object.assign(targetButton.style, {
               backgroundColor: '#007bff',
               borderColor: '#007bff',
               color: '#fff',
-              transform: 'translateY(-1px)',
-              boxShadow: '0 2px 8px rgba(0, 123, 255, 0.3)'
+              transform: buttonValues.length > 1 ? 'translateY(-1px)' : 'none',
+              boxShadow: buttonValues.length > 1 ? '0 2px 8px rgba(0, 123, 255, 0.3)' : 'none'
             });
           } else if (isHovered) {
             Object.assign(targetButton.style, {
@@ -389,10 +403,16 @@ export function createAdvancedModal(formulas) {
           }
         };
 
-        button.addEventListener('mouseenter', () => updateButtonState(button, button === activeButton, true));
-        button.addEventListener('mouseleave', () => updateButtonState(button, button === activeButton, false));
+        // Only add hover listeners if there are multiple buttons
+        if (buttonValues.length > 1) {
+          button.addEventListener('mouseenter', () => updateButtonState(button, button === activeButton, true));
+          button.addEventListener('mouseleave', () => updateButtonState(button, button === activeButton, false));
+        }
 
         button.addEventListener('click', () => {
+          // If there's only one button, don't allow deselecting it
+          if (buttonValues.length === 1) return;
+
           // If clicking the same button, deselect it
           if (activeButton === button) {
             updateButtonState(button, false);
@@ -416,18 +436,64 @@ export function createAdvancedModal(formulas) {
           validateForm();
         });
 
+        // If there's only one button, make it look static
+        if (buttonValues.length === 1) {
+          button.style.cursor = 'default';
+          button.style.transition = 'none';
+        }
+
         // Keyboard navigation
         button.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            button.click();
+            if (buttonValues.length > 1) {
+              e.preventDefault();
+              button.click();
+            }
           }
         });
 
         buttonContainer.appendChild(button);
       });
 
+      // Auto-select the variable if there's only one choice
+      if (buttonValues.length === 1) {
+        const onlyButton = buttonContainer.firstChild;
+        onlyButton.classList.add('static-button');
+        activeButton = onlyButton;
+        selectedConstant = buttonValues[0];
+        // Apply static active style immediately
+        Object.assign(onlyButton.style, {
+          backgroundColor: '#007bff',
+          borderColor: '#007bff',
+          color: '#fff',
+          transform: 'none',
+          boxShadow: 'none',
+          cursor: 'default',
+          pointerEvents: 'none'
+        });
+      }
+
       validateForm();
+    }
+
+    /**
+     * Extracts appropriate terms (variables or constants) based on modal type
+     * @param {Object} parsed - Parsed formula AST
+     * @returns {Array<string>} Array of terms
+     */
+    function extractAppropriateTerms(parsed) {
+      if (titleKey === 'modal-exists-elim-title') {
+        // For Elimination (∃E), we ONLY want the variable being eliminated
+        const proofNode = getProof(parsed);
+        if (proofNode.type === 'exists' && proofNode.variable) {
+          return [proofNode.variable];
+        } else {
+          return [];
+        }
+      } else {
+        // For Introduction (∃I), we want free variables and constants that can be generalized
+        return deductive.extractFreeVariables(parsed);
+      }
     }
 
     // Setup main editor for term input
@@ -695,11 +761,11 @@ export function createAdvancedModal(formulas) {
           }
         }
 
-        // Validate the formula structure for existential quantifier
+        // Validate the formula structure for existential quantifier (only for Elimination)
         try {
           const parsedValue = getProof(deductive.checkWithAntlr(formulaValue));
           console.log(parsedValue);
-          if (parsedValue.type !== 'exists') {
+          if (titleKey === 'modal-exists-elim-title' && parsedValue.type !== 'exists') {
             showNotification(t('notify-must-be-exists'), 'error');
             return;
           }
@@ -809,7 +875,7 @@ export function createAdvancedModal(formulas) {
           if (value) {
             try {
               const parsed = deductive.checkWithAntlr(value);
-              const extracted = deductive.extractConstantsOrVariables(parsed);
+              const extracted = extractAppropriateTerms(parsed);
               renderButtons(extracted);
             } catch (e) {
               renderButtons([]);
@@ -831,10 +897,12 @@ export function createAdvancedModal(formulas) {
 
         try {
           const parsed = deductive.checkWithAntlr(selectedValue);
-          const extracted = deductive.extractConstantsOrVariables(parsed);
-          console.log("Extracted constants/variables:", extracted);
+          const extracted = extractAppropriateTerms(parsed);
+          
+          console.log("Extracted terms based on modal type:", extracted);
           if (extracted.length < 1) {
             buttonContainer.innerHTML = '';
+            validateForm();
             return;
           }
           renderButtons(extracted);
@@ -896,7 +964,7 @@ export function createAdvancedModal(formulas) {
 
         try {
           const parsed = deductive.checkWithAntlr(value);
-          const extracted = deductive.extractConstantsOrVariables(parsed);
+          const extracted = extractAppropriateTerms(parsed);
           renderButtons(extracted);
         } catch (e) {
           console.warn("Parsing error:", e);
@@ -911,6 +979,7 @@ export function createAdvancedModal(formulas) {
     } catch (error) {
       console.error('Failed to create custom editor:', error);
     }
+
 
     setTimeout(() => {
       formulaSelect.dispatchEvent(new Event('change'));

@@ -404,7 +404,7 @@ export async function seventeenthRule() {
     const allHypArray = allHyp.map(constant => deductive.convertToLogicalExpression(constant));
 
     console.log(allHypArray);
-    const result = await createAdvancedModal(allHypArray)
+    const result = await createAdvancedModal(allHypArray, 'modal-exists-elim-title')
     const leftSide = getProof(deductive.checkWithAntlr(result[0]));
 
     createConclusion([leftSide, rightSide]);
