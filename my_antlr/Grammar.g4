@@ -45,8 +45,9 @@ NUMBER: [1-9] [0-9]*;
 // Letters - ordered by specificity to avoid conflicts
 // Generic IDs must come AFTER specific keywords
 UPPERCASE_GREEK_LETTER: [Α-Ω] [Α-Ω0-9]*;
-LOWERCASE_GREEK_LETTER: [α-ω] [α-ω0-9]*;
+LOWERCASE_GREEK_LETTER: [α-ωϑϕϵϱϰϖ] [α-ω0-9]*;
 UPPERCASE_LETTER: [A-Z] [A-Z0-9]*;
+
 LOWERCASE_LETTER: [a-z] [a-z0-9]*;
 
 // Comments and whitespace
