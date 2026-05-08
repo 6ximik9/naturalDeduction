@@ -1,8 +1,9 @@
 import * as monaco from 'monaco-editor';
 import * as editorMonaco from '../monacoEditor';
-import {checkRule} from "../../index";
+import {checkRule, typeProof} from "../../index";
 import * as deductive from "../../core/deductiveEngine";
 import {t} from "../../core/i18n";
+import {attachContextPanel} from "./contextPanel";
 
 /**
  * Creates a simple modal for inputting a term
@@ -49,7 +50,7 @@ export function createInputModal(title = 'modal-input-title-default', label = 'm
       border: '1px solid var(--col-border)',
       display: 'flex',
       flexDirection: 'column',
-      gap: '24px',
+      gap: '20px',
       position: 'relative',
       animation: 'modalSlideIn 0.3s ease-out',
       color: 'var(--col-text-main)'
@@ -134,6 +135,21 @@ export function createInputModal(title = 'modal-input-title-default', label = 'm
     } catch (error) {
       console.warn('Fallback to main editor not supported for simple input modal', error);
     }
+
+    // Context Panel Container
+    const contextContainer = document.createElement('div');
+    Object.assign(contextContainer.style, {
+        display: 'flex',
+        flexDirection: 'column'
+    });
+
+    attachContextPanel(contextContainer, (text) => {
+        const selection = modalEditor.getSelection();
+        const op = { range: selection, text: text, forceMoveMarkers: true };
+        modalEditor.executeEdits("hypotheses-insert", [op]);
+        validate();
+        modalEditor.focus();
+    });
 
     // Error Display
     const errorDisplay = document.createElement('div');
@@ -241,6 +257,7 @@ export function createInputModal(title = 'modal-input-title-default', label = 'm
     // Assemble
     modal.appendChild(modalTitle);
     modal.appendChild(inputLabel);
+    modal.appendChild(contextContainer);
     modal.appendChild(editorContainer);
     modal.appendChild(errorDisplay);
     actionContainer.appendChild(cancelButton);

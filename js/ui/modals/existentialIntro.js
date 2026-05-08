@@ -6,6 +6,7 @@ import { currentLevel, side } from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
 import {getProof} from "../../core/deductiveEngine";
 import {t} from "../../core/i18n";
+import {attachContextPanel} from "./contextPanel";
 
 let customEditor = null;
 
@@ -319,6 +320,23 @@ export function createAdvancedModal(formulas, titleKey = 'modal-exists-intro-tit
       fontWeight: '600',
       color: 'var(--col-text-main)',
       marginBottom: '12px'
+    });
+
+    // Attach Context Panel
+    const contextContainer = document.createElement('div');
+    Object.assign(contextContainer.style, {
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: '8px'
+    });
+    
+    attachContextPanel(contextContainer, (text) => {
+        const targetEditor = modalTermEditor; // Default to term editor
+        const selection = targetEditor.getSelection();
+        const op = { range: selection, text: text, forceMoveMarkers: true };
+        targetEditor.executeEdits("hypotheses-insert", [op]);
+        validateForm();
+        targetEditor.focus();
     });
 
     let activeButton = null;
@@ -1064,6 +1082,13 @@ export function createAdvancedModal(formulas, titleKey = 'modal-exists-intro-tit
 
     // Assemble the right side
     rightSide.appendChild(variableSection);
+    
+    // Add Context Panel to term section so it aligns with its label
+    termSection.appendChild(termLabel);
+    termSection.appendChild(contextContainer);
+    termSection.appendChild(termEditorContainer);
+    termSection.appendChild(termErrorDisplay);
+    
     rightSide.appendChild(termSection);
 
     // Assemble the content area

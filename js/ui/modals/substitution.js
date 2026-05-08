@@ -5,6 +5,7 @@ import {hasEditorErrors} from "../monacoEditor";
 import {currentLevel, side} from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
 import {t} from "../../core/i18n";
+import {attachContextPanel} from "./contextPanel";
 
 /**
  * Creates an improved modal for term substitution in quantifier rules
@@ -276,6 +277,22 @@ export function createModal(constants) {
       marginBottom: '12px'
     });
 
+    // Attach Context Panel
+    const contextContainer = document.createElement('div');
+    Object.assign(contextContainer.style, {
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: '8px'
+    });
+    
+    attachContextPanel(contextContainer, (text) => {
+        const selection = modalEditor.getSelection();
+        const op = { range: selection, text: text, forceMoveMarkers: true };
+        modalEditor.executeEdits("hypotheses-insert", [op]);
+        validateForm();
+        modalEditor.focus();
+    });
+
     // Create editor container with improved styling
     const editorContainer = document.createElement('div');
     editorContainer.className = 'editor-container';
@@ -407,6 +424,7 @@ export function createModal(constants) {
     // Append the modal editor container
     editorContainer.appendChild(modalEditorContainer);
     termSection.appendChild(termLabel);
+    termSection.appendChild(contextContainer);
     termSection.appendChild(editorContainer);
     termSection.appendChild(errorDisplay);
 
@@ -890,6 +908,22 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
       color: 'var(--col-text-main)'
     });
 
+    // Attach Context Panel
+    const contextContainer = document.createElement('div');
+    Object.assign(contextContainer.style, {
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: '8px'
+    });
+    
+    attachContextPanel(contextContainer, (text) => {
+        const selection = monacoEditor.getSelection();
+        const op = { range: selection, text: text, forceMoveMarkers: true };
+        monacoEditor.executeEdits("hypotheses-insert", [op]);
+        validateForm();
+        monacoEditor.focus();
+    });
+
     const editorContainer = document.createElement('div');
     editorContainer.className = 'editor-container';
     Object.assign(editorContainer.style, {
@@ -1280,6 +1314,7 @@ export function createModalForQuantifierSubstitution(formula, formulaString) {
     modal.appendChild(description);
     modal.appendChild(formulaContainer);
     modal.appendChild(editorLabel);
+    modal.appendChild(contextContainer);
     modal.appendChild(editorContainer);
     modal.appendChild(errorDisplay);
     modal.appendChild(actionContainer);

@@ -3,6 +3,7 @@ import {checkRule} from "../../index";
 import {currentLevel, side} from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
 import {t} from "../../core/i18n";
+import {attachContextPanel} from "./contextPanel";
 import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../monacoEditor";
 import {convertToSuccessorNotation} from "./leibniz";
 import {checkWithAntlr} from "../../core/deductiveEngine";
@@ -510,6 +511,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
     let editorLabel = null;
     let editorContainer = null;
     let errorDisplay = null;
+    let contextContainer = null;
 
     if (hasFormula) {
       editorLabel = document.createElement('label');
@@ -520,6 +522,22 @@ export function createModalForReturn(constants, formula = null, formulaString = 
         fontWeight: '600',
         color: 'var(--col-text-muted)',  // Grayed out initially
         marginTop: '16px'
+      });
+
+      // Attach Context Panel
+      contextContainer = document.createElement('div');
+      Object.assign(contextContainer.style, {
+          display: 'flex',
+          flexDirection: 'column',
+          marginBottom: '8px'
+      });
+      
+      attachContextPanel(contextContainer, (text) => {
+          const selection = monacoEditor.getSelection();
+          const op = { range: selection, text: text, forceMoveMarkers: true };
+          monacoEditor.executeEdits("hypotheses-insert", [op]);
+          validateInput();
+          monacoEditor.focus();
       });
 
       editorContainer = document.createElement('div');
@@ -1112,6 +1130,7 @@ export function createModalForReturn(constants, formula = null, formulaString = 
       modal.appendChild(formulaContainer);
       modal.appendChild(selectedTextDisplay);
       modal.appendChild(editorLabel);
+      modal.appendChild(contextContainer);
       modal.appendChild(editorContainer);
       modal.appendChild(errorDisplay);
     }

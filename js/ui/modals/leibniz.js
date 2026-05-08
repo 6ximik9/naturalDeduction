@@ -4,6 +4,7 @@ import {currentLevel, side} from "../../proofs/gentzen/GentzenProof";
 import * as deductive from "../../core/deductiveEngine";
 import {createEditor, hasEditorErrors, clearEditorErrors, getEditorErrors} from "../monacoEditor";
 import {t} from "../../core/i18n";
+import {attachContextPanel} from "./contextPanel";
 import {has} from "mobx";
 import {checkWithAntlr} from "../../core/deductiveEngine";
 
@@ -226,6 +227,22 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
       fontSize: '16px',
       fontWeight: '600',
       color: 'var(--col-text-muted)'  // Grayed out initially
+    });
+
+    // Attach Context Panel
+    const contextContainer = document.createElement('div');
+    Object.assign(contextContainer.style, {
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: '8px'
+    });
+    
+    attachContextPanel(contextContainer, (text) => {
+        const selection = monacoEditor.getSelection();
+        const op = { range: selection, text: text, forceMoveMarkers: true };
+        monacoEditor.executeEdits("hypotheses-insert", [op]);
+        validateInput();
+        monacoEditor.focus();
     });
 
     const editorContainer = document.createElement('div');
@@ -655,6 +672,7 @@ export function createModalForLeibniz(formula, formulaString, direction = 'a=b')
     modal.appendChild(formulaContainer);
     modal.appendChild(selectedTextDisplay);
     modal.appendChild(editorLabel);
+    modal.appendChild(contextContainer);
     modal.appendChild(editorContainer);
     modal.appendChild(errorDisplay);
     modal.appendChild(actionContainer);
