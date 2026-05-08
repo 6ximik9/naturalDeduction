@@ -36,18 +36,42 @@ export function initContactModal() {
 
   // AJAX submission for better UX
   if (contactForm) {
+    // Helper to update custom validity messages
+    const updateValidity = () => {
+      const subjectField = contactForm.querySelector('input[name="subject"]');
+      const messageField = contactForm.querySelector('textarea[name="message"]');
+
+      if (subjectField.value.trim().length > 0 && subjectField.value.trim().length < 3) {
+        subjectField.setCustomValidity(t('contact-error-short-subject'));
+      } else {
+        subjectField.setCustomValidity('');
+      }
+
+      if (messageField.value.trim().length > 0 && messageField.value.trim().length < 10) {
+        messageField.setCustomValidity(t('contact-error-short'));
+      } else {
+        messageField.setCustomValidity('');
+      }
+    };
+
+    // Update on every input to clear errors as user types
+    contactForm.addEventListener('input', updateValidity);
+
     contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const messageField = contactForm.querySelector('textarea[name="message"]');
-      if (messageField.value.trim().length < 10) {
-        alert(t('contact-error-short'));
+      // Update one last time before checking
+      updateValidity();
+
+      if (!contactForm.checkValidity()) {
+        contactForm.reportValidity();
         return;
       }
-
-      const data = new FormData(contactForm);
+      
       const submitBtn = contactForm.querySelector('button[type="submit"]');
       const originalHTML = submitBtn.innerHTML;
+      
+      const data = new FormData(contactForm);
       
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
@@ -75,7 +99,8 @@ export function initContactModal() {
           alert('Error: ' + (errorData.errors ? errorData.errors.map(e => e.message).join(', ') : 'Unknown error'));
         }
       } catch (error) {
-        alert('Failed to send message. Please try again later.');
+        console.error('Detailed Contact Form Error:', error);
+        alert('Failed to send message. Error: ' + error.message);
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalHTML;
