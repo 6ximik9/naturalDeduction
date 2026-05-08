@@ -70,18 +70,133 @@ function setActiveTab(index) {
     if (index === 0) {
         setGeneral();
     } else if (index === 1) {
-        info.appendChild(createMathTable());
+        setAbstractSyntax();
     } else if (index === 2) {
-        helpInput();
+        info.appendChild(createMathTable());
     } else if (index === 3) {
-        setAxioms();
+        helpInput();
     } else if (index === 4) {
+        setAxioms();
+    } else if (index === 5) {
         setProofTree();
     }
 }
 
 
 // --- Content Generators ---
+
+function setAbstractSyntax() {
+    const lang = getLang();
+    const t = translations[lang];
+    const grammarTitle = t['help-tab-abstract-syntax-title'] || 'Abstract & Concrete Syntax Reference';
+
+    const renderBNF = (title, rules) => {
+        // Create plain text for clipboard
+        const rawText = rules.map(r => `${r[0].trim()}  (${r[1]})`).join('\n');
+
+        let html = `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--col-border); padding-bottom: 4px; margin-top: 16px; margin-bottom: 8px;">
+                        <span style="font-weight: 600; font-size: 17px; color: var(--col-text-main);">${title}</span>
+                        <button class="copy-bnf-btn" 
+                                data-content="${encodeURIComponent(rawText)}" 
+                                title="Copy section"
+                                style="background: none; border: none; cursor: pointer; color: var(--col-text-muted); padding: 4px; display: flex; align-items: center; transition: all 0.2s;">
+                            <i class="ri-file-copy-line" style="font-size: 18px;"></i>
+                        </button>
+                    </div>`;
+        html += `<div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; background: var(--col-bg-main); padding: 14px; border-radius: 8px; border: 1px solid var(--col-border);">`;
+        rules.forEach(rule => {
+            html += `<div style="display: flex; justify-content: space-between; gap: 15px; line-height: 1.8; margin-bottom: 4px;">
+                        <span style="color: var(--col-text-main); white-space: pre-wrap; word-break: break-all; flex: 1;">${rule[0]}</span>
+                        <span style="color: var(--col-text-muted); font-size: 13px; text-align: right; min-width: 140px;">(${rule[1]})</span>
+                     </div>`;
+        });
+        html += `</div>`;
+        return html;
+    };
+
+    // 1. Main Formulas
+    const mainRules = [
+        ['S ::= Γ ⊢ Δ', t['syntax-desc-sequent']],
+        ['    | Γ', t['syntax-desc-standalone']],
+        ['Γ, Δ ::= F (, F)*', t['syntax-desc-comma']]
+    ];
+
+    // 2. Logical Operations
+    const logicalRules = [
+        ['F ::= F (⇒ | -> | → | =>) F', t['syntax-desc-implication']],
+        ['    | F (∨ | OR | or | | | ||) F', t['syntax-desc-disjunction']],
+        ['    | F (∧ | AND | and | & | &&) F', t['syntax-desc-conjunction']],
+        ['    | (~ | ¬ | !) F', t['syntax-desc-negation']]
+    ];
+
+    // 3. Quantifiers
+    const quantifierRules = [
+        ['    | (∀ | forall | ALL) x F', t['syntax-desc-univ']],
+        ['    | (∃ | exists | EX) x F', t['syntax-desc-exis']],
+        ['    | ((∀ | forall | ALL) x) F', t['syntax-desc-paren-univ']],
+        ['    | ((∃ | exists | EX) x) F', t['syntax-desc-paren-exis']]
+    ];
+
+    // 4. Atomic Formulas & Relations
+    const atomicRules = [
+        ['    | t (< | > | <= | >= | = | ≠ | != | <> | /=) t', t['syntax-desc-rel-eq']],
+        ['    | P (t (, t)*)', t['syntax-desc-pred-app']],
+        ['    | P', t['syntax-desc-prop']],
+        ['    | ⊤ | TRUE', t['syntax-desc-truth']],
+        ['    | ⊥ | FALSE', t['syntax-desc-falsehood']],
+        ['    | ( F )', t['syntax-desc-paren-formula']]
+    ];
+
+    // 5. Terms & Arithmetic
+    const termRules = [
+        ['t ::= t (+ | add | sum) t', t['syntax-desc-add-infix']],
+        ['    | (+ | add | sum) (t, t)', t['syntax-desc-add-prefix']],
+        ['    | t (* | mult | prod) t', t['syntax-desc-mult-infix']],
+        ['    | (* | mult | prod) (t, t)', t['syntax-desc-mult-prefix']],
+        ['    | s (t)', t['syntax-desc-successor']],
+        ['    | f (t (, t)*)', t['syntax-desc-custom-func']],
+        ['    | c | x | n', t['syntax-desc-const-var-num']],
+        ['    | ( t )', t['syntax-desc-paren-term']]
+    ];
+
+    // 6. Identifiers & Lexical Rules
+    const lexicalRules = [
+        ['P ::= UPPERCASE | GREEK_UPPER', t['syntax-desc-pred-names']],
+        ['f ::= LOWERCASE | exp | pow...', t['syntax-desc-func-names']],
+        ['c ::= UPPERCASE | GREEK_UPPER', t['syntax-desc-const-names']],
+        ['x ::= LOWERCASE | GREEK_LOWER', t['syntax-desc-var-names']],
+        ['n ::= 0 | [1-9][0-9]*', t['syntax-desc-nat-nums']]
+    ];
+
+    const content = document.createElement('div');
+    content.innerHTML = 
+        renderBNF(t['syntax-section-main'], mainRules) +
+        renderBNF(t['syntax-section-logical'], logicalRules) +
+        renderBNF(t['syntax-section-quantifiers'], quantifierRules) +
+        renderBNF(t['syntax-section-atomic'], atomicRules) +
+        renderBNF(t['syntax-section-terms'], termRules) +
+        renderBNF(t['syntax-section-lexical'], lexicalRules);
+
+    info.appendChild(createCard(grammarTitle, null, content.innerHTML, 'ri-code-s-slash-line'));
+
+    // Attach copy listeners
+    info.querySelectorAll('.copy-bnf-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const text = decodeURIComponent(this.getAttribute('data-content'));
+            navigator.clipboard.writeText(text).then(() => {
+                const icon = this.querySelector('i');
+                const originalClass = icon.className;
+                icon.className = 'ri-check-line';
+                this.style.color = '#10b981'; // Success green
+                setTimeout(() => {
+                    icon.className = originalClass;
+                    this.style.color = '';
+                }, 2000);
+            });
+        });
+    });
+}
 
 function setProofTree() {
     const lang = getLang();
@@ -204,7 +319,7 @@ function setGeneral() {
             title: lang === 'UA' ? 'Розумний режим' : (lang === 'SK' ? 'Inteligentný režim' : 'Smart Mode'),
             subtitle: 'Smart Mode',
             desc: lang === 'UA' ? 'Активуйте цей режим для автоматичного підсвічування можливих кроків та спрощення процесу доведення.' : 
-                  (lang === 'SK' ? 'Aktivujte tento režim pre automatické zvýraznenie možných krokov a zjednodušenie procesu dokazovania.' : 
+                  (lang === 'SK' ? 'Aktivujte tento režim pre automatické zvýразненie možných kroков a zjednodušenie procesu доказування.' : 
                   'Activate this mode to automatically highlight possible steps and simplify the proof process.'),
             icon: 'ri-lightbulb-line'
         }
@@ -232,7 +347,7 @@ function setAxioms() {
             ['Аксіома 2', 's(x) = s(y) ⇒ x = y', 'Функція наступника є ін’єктивною.'],
             ['Аксіома 3', 'x + 0 = x', 'Нейтральний елемент для додавання.'],
             ['Аксіома 4', 'x + s(y) = s(x + y)', 'Рекурсивне визначення додавання.'],
-            ['Аксіома 5', 'x * 0 = 0', 'Множення на нуль.'],
+            ['Аксіома 5', 'x * 0 = 0', 'Множення na нуль.'],
             ['Аксіома 6', 'x * s(y) = (x * y) + x', 'Рекурсивне визначення множення.'],
             ['Аксіома 7', 'x = x', 'Рефлексивність рівності.']
         ],
@@ -326,14 +441,14 @@ function createMathTable() {
             <tr><th>Symbol</th><th>LaTeX</th><th>Symbol</th><th>LaTeX</th></tr>
         </thead>
         <tbody>
-            <tr><td>α Α</td><td><code>\\alpha \\Alpha</code></td><td>β Β</td><td><code>\\beta \\Beta</code></td></tr>
-            <tr><td>γ Γ</td><td><code>\\gamma \\Gamma</code></td><td>δ Δ</td><td><code>\\delta \\Delta</code></td></tr>
-            <tr><td>ε Ε</td><td><code>\\epsilon \\Epsilon</code></td><td>ζ Ζ</td><td><code>\\zeta \\Zeta</code></td></tr>
-            <tr><td>η Η</td><td><code>\\eta \\Eta</code></td><td>θ Θ</td><td><code>\\theta \\Theta</code></td></tr>
+            <tr><td>α А</td><td><code>\\alpha \\Alpha</code></td><td>β В</td><td><code>\\beta \\Beta</code></td></tr>
+            <tr><td>γ Г</td><td><code>\\gamma \\Gamma</code></td><td>δ Д</td><td><code>\\delta \\Delta</code></td></tr>
+            <tr><td>ε Е</td><td><code>\\epsilon \\Epsilon</code></td><td>ζ Ζ</td><td><code>\\zeta \\Zeta</code></td></tr>
+            <tr><td>η Н</td><td><code>\\eta \\Eta</code></td><td>θ Θ</td><td><code>\\theta \\Theta</code></td></tr>
             <tr><td>ι І</td><td><code>\\iota \\Iota</code></td><td>κ К</td><td><code>\\kappa \\Kappa</code></td></tr>
             <tr><td>λ Λ</td><td><code>\\lambda \\Lambda</code></td><td>μ М</td><td><code>\\mu \\Mu</code></td></tr>
-            <tr><td>ν Ν</td><td><code>\\nu \\Nu</code></td><td>ξ Ξ</td><td><code>\\xi \\Xi</code></td></tr>
-            <tr><td>ο Ο</td><td><code>\\omicron \\Omicron</code></td><td>π П</td><td><code>\\pi \\Pi</code></td></tr>
+            <tr><td>ν Н</td><td><code>\\nu \\Nu</code></td><td>ξ Ξ</td><td><code>\\xi \\Xi</code></td></tr>
+            <tr><td>ο О</td><td><code>\\omicron \\Omicron</code></td><td>π П</td><td><code>\\pi \\Pi</code></td></tr>
             <tr><td>ρ Р</td><td><code>\\rho \\Rho</code></td><td>σ Σ</td><td><code>\\sigma \\Sigma</code></td></tr>
             <tr><td>τ Т</td><td><code>\\tau \\Tau</code></td><td>υ Υ</td><td><code>\\upsilon \\Upsilon</code></td></tr>
             <tr><td>φ Φ</td><td><code>\\phi \\Phi</code></td><td>χ Х</td><td><code>\\chi \\Chi</code></td></tr>
@@ -395,7 +510,7 @@ if (latexCloseBtn && latexModal) {
     
     // Also close on background click
     latexModal.addEventListener('click', (e) => {
-        if (e.target === latexModal) {
+        if (event.target === latexModal) {
             latexModal.style.display = 'none';
         }
     });
