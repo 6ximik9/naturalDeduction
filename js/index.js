@@ -17,6 +17,7 @@ import {initStartScreen} from './ui/modals/startScreen';
 import {isVL} from './state/logicSettings';
 import { initLayoutSettings } from './ui/modals/layout';
 import { initExamplesModal } from './ui/modals/examples';
+import { initContactModal } from './ui/modals/contact';
 import {createReturnConfirmModal} from './ui/modals/returnConfirm';
 import {showToast} from './ui/notifications';
 
@@ -34,6 +35,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Initialize Examples Modal
   initExamplesModal();
+
+  // Initialize Contact Modal
+  initContactModal();
 
   // Initialize Language
   const savedLang = localStorage.getItem('selectedLang') || 'EN';
@@ -854,6 +858,7 @@ function setupSidebarProxy() {
   // proxy('sb-latex', 'latex');
   proxy('sb-help', 'helpBtn');
   proxy('sb-feedback', 'redirectButton');
+  proxy('sb-contact', 'contactButton');
 
   const uploadBtn = document.getElementById('uploadBtn');
   if (uploadBtn) {
