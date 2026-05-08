@@ -1,3 +1,5 @@
+import { t } from "../../core/i18n";
+
 export function initContactModal() {
   const contactBtns = [
     document.getElementById('contactButton'),
@@ -37,6 +39,12 @@ export function initContactModal() {
     contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
+      const messageField = contactForm.querySelector('textarea[name="message"]');
+      if (messageField.value.trim().length < 10) {
+        alert(t('contact-error-short'));
+        return;
+      }
+
       const data = new FormData(contactForm);
       const submitBtn = contactForm.querySelector('button[type="submit"]');
       const originalHTML = submitBtn.innerHTML;
