@@ -89,6 +89,7 @@ export const translations = {
     "alert-var-not-fresh": "Premenná už existuje v sekvente (nie je čerstvá).",
     "alert-invalid-term": "Neplatný term.",
     "alert-error-parse-term": "Chyba pri analýze termu.",
+    "alert-variable-captured": "Premenná \u0027{var}\u0027 by bola zachytená kvantifikátorom. Vyberte iný názov.",
     "alert-invalid-input-generic": "Neplatný vstup.",
     "alert-invalid-vl-element": "Neplatný prvok pre výrokovej logiky (napr. kvantifikátory, predikáty).",
     "alert-intuitionistic-succedent": "V intuicionistickej logike môže mať sukcedent najviac jednu formulu.",
